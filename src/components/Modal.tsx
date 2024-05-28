@@ -4,7 +4,7 @@ import { Theme } from "../common/styles/Theme";
 import media from "../common/styles/MediaScreens";
 import { emergeAnimation, disappearAnimation } from "../common/styles/Animations";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleXmark } from "../common/util/iconUtils";
+import { faCircleXmark } from "../common/util/imports/iconUtilsImports";
 
 interface IModalProps {
   $zindex: string;

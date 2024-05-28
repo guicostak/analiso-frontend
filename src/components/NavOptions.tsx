@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from '../common/util/routerUtils';
+import { Link } from '../common/util/imports/routerUtilsImports';
 import media from '../common/styles/MediaScreens';
 import { Theme } from '../common/styles/Theme';
 

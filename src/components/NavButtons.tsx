@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useNavigate } from '../common/util/routerUtils';
+import { useNavigate } from '../common/util/imports/routerUtilsImports';
 import { Theme } from '../common/styles/Theme';
 import { Button } from './Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRightToBracket, faUser } from '../common/util/iconUtils';
+import { faRightToBracket, faUser } from '../common/util/imports/iconUtilsImports';
 import media from '../common/styles/MediaScreens';
 
 const NavButtonsStyled = styled.div`

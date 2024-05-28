@@ -10,10 +10,11 @@ interface FoldProps {
 
 const FoldStyled = styled.div<FoldProps>`
     background-color: ${(props) => props.$backgroundcolor};
-    height: ${(props) => props.$height ?? '50rem'};
+    height: ${(props) => props.$height ?? '60rem'};
     padding-inline: 5rem;
     display: flex;
     align-items: center;
+    justify-content: center;
     width: fill;
     flex-direction: row;
 
@@ -23,7 +24,7 @@ const FoldStyled = styled.div<FoldProps>`
         padding-inline: 2rem; 
         padding-top: 3rem;
         flex-direction: column;
-        height: 36rem;
+        height: 40rem;
     }
 `;
 
