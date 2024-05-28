@@ -3,13 +3,12 @@ import styled from 'styled-components';
 import { View } from './View';
 import { NavButtons } from './NavButtons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from "../common/util/iconUtils";
+import { faBars } from "../common/util/imports/iconUtilsImports";
 import { Flex } from './Flex';
 import { Logo } from './Logo';
 import analisoLogo from '../assets/img/logos/analiso-logo-principal-secondary-color.webp'
 import { NavOptions } from './NavOptions';
 
-// Lazy load do Modal
 const Modal = lazy(() => import('./Modal'));
 
 const NavbarStyled = styled.nav`

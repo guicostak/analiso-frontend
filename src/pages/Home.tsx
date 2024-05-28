@@ -7,8 +7,8 @@ import { Theme } from '../common/styles/Theme';
 import { Titulo } from '../components/Titulo';
 import { Button } from '../components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '../common/util/iconUtils';
-import { useNavigate } from '../common/util/routerUtils';
+import { faUser, faArrowTrendUp } from '../common/util/imports/iconUtilsImports';
+import { useNavigate } from '../common/util/imports/routerUtilsImports';
 import { Flex } from '../components/Flex';
 import media from '../common/styles/MediaScreens';
 import telefones from '../assets/img/home/telefonesAcessando.png'
@@ -19,13 +19,13 @@ import forecastIcon from '../assets/img/home/carousel/icons/magnifying-glass-dol
 import forecast from '../assets/img/home/carousel/forecast.png';
 import { Photo, Carousel } from '../components/Carousel';
 
+
 const HomeContainer = styled.main`
-  p {
+   .subtitle {
     font-size: 1.2rem;
     color: ${Theme.secondaryColor};
-    margin-bottom: 2rem;
     font-weight: 300; 
-    width: 32rem;
+    width: '32rem';
   }
 
   .imagens-dobras {
@@ -60,6 +60,7 @@ export const Home: React.FC = () => {
       alt: 'Description of Photo 1',
       title: 'Análise de dividendos',
       icon: dividendosIcon,
+      description: "A snapshot of critical red-flags and opportunities"
     },
     {
       id: '2',
@@ -67,6 +68,23 @@ export const Home: React.FC = () => {
       alt: 'Description of Photo 2',
       title: 'Previsão de ganhos',
       icon: forecastIcon,
+      description: "A snapshot of critical red-flags and opportunities"
+    },
+    {
+      id: '3',
+      url: dividendos,
+      alt: 'Description of Photo 2',
+      title: 'Previsão de ganhos',
+      icon: forecastIcon,
+      description: "A snapshot of critical red-flags and opportunities"
+    },
+    {
+      id: '4',
+      url: forecast,
+      alt: 'Description of Photo 2',
+      title: 'Previsão de ganhos',
+      icon: forecastIcon,
+      description: "A snapshot of critical red-flags and opportunities"
     },
   ];
 
@@ -80,7 +98,7 @@ export const Home: React.FC = () => {
         <Fold  $height='40rem' $backgroundcolor={Theme.mainBackground}>
           <Flex $direction={'column'} $align={'left'}>
             <Titulo $textcolor={Theme.primaryColor}>Uma nova forma <br/> de analisar seus ativos</Titulo>
-            <p>
+            <p className='subtitle' style={{marginBottom: '2rem'}}>
               Feito para você analisar da melhor forma sua carteira de investimentos
             </p>
             <Button
@@ -107,8 +125,12 @@ export const Home: React.FC = () => {
         </Fold>
         <Fold $backgroundcolor={Theme.secondaryColor}>
           <Flex $direction={'column'}>
+              <p className='subtitle' style={{color: 'white', marginBottom: '1rem'}}> 
+                <FontAwesomeIcon icon={faArrowTrendUp} style={{marginInline: '0.5rem'}}/>
+                Relatórios de ações
+              </p>
             <Titulo $textcolor={Theme.primaryColor}>Identifique boas oportunidades</Titulo>
-            <p style={{color: 'white', width: 'auto'}}>          
+            <p className='subtitle' style={{color: 'white'}}>          
               Uma análise abrangente da ação, fornecendo uma visão de todos os aspectos do negócio
             </p>
             <Carousel photos={photoData}/>

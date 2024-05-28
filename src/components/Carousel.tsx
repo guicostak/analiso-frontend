@@ -7,6 +7,7 @@ import 'swiper/css/effect-fade';
 import styled from 'styled-components';
 import { Theme } from '../common/styles/Theme';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import media from '../common/styles/MediaScreens';
 
 export interface Photo {
   id: string;
@@ -14,6 +15,7 @@ export interface Photo {
   alt: string;
   title?: string;
   icon?: string;
+  description?: string;
 }
 
 interface CarouselProps {
@@ -21,18 +23,17 @@ interface CarouselProps {
 }
 
 const StyledSwiperContainer = styled(Swiper)`
-  width: 90%;
-  height: 500px;
+  width: 80%;
+  height: 450px;
   position: relative;
-  margin-top: 2rem;
+  margin-top: 4rem;
 
   .customized-icon {
     height: 1rem;
     width: 1rem;
-    margin-right: 0.5rem;
+    margin-right: 1rem;
   }
 
-  /* Estilos para os slides do Swiper */
   .swiper-slide {
     text-align: center;
     font-size: 18px;
@@ -42,23 +43,9 @@ const StyledSwiperContainer = styled(Swiper)`
     height: 100%;
   }
 
-  /* Estilos para os botões de navegação */
-  .swiper-button-prev,
-  .swiper-button-next {
-    position: absolute;
-    top: 50%;
-    width: 30px;
-    height: 30px;
-    color: ${Theme.primaryColor};
-    transform: translateY(-50%);
-    cursor: pointer;
-  }
-
-  /* Estilos para a paginação */
   .swiper-pagination {
     position: absolute;
-    left: 10px;
-    top: 50%;
+    top: 33%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -66,19 +53,76 @@ const StyledSwiperContainer = styled(Swiper)`
   }
 
   .swiper-pagination-bullet {
-    width: auto;
-    max-width: 18rem;
+    width: 18rem;
     height: auto;
-    background-color: ${Theme.primaryColor};
-    border-radius: 10px;
+    background-color: ${Theme.secondaryColor};
+    border-bottom: 1px solid ${Theme.primaryColor};
+    color: white;
+    border-radius: 0px;
     cursor: pointer;
     z-index: 1000;
     font-size: 1.1rem;
     padding: 0.5rem 1rem;
+    display: flex;
+    align-items: start;
   }
 
   .swiper-pagination-bullet-active {
     opacity: 1;
+  }
+
+  .bullet {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+  }
+
+  .bullet-title {
+    display: flex;
+    flex-direction: row;  
+    align-items: center;
+  }
+
+
+  .bullet > p {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    text-align: left;
+  }
+
+  ${media.mobile} {
+    width: 100%;
+    height: 500px;
+    margin-top: 0rem;
+
+    .swiper-pagination {
+      position: absolute;
+      top: 80%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .swiper-pagination-bullet {
+      width: 10px;
+      height: 10px;
+      background-color: ${Theme.primaryColor};
+      border-radius: 100%;
+      border: none;
+      font-size: 0;
+      padding: 0;
+    }
+
+    .bullet > p {
+      font-size: 0rem;
+      margin-top: 0.5rem;
+    }
+
+    .customized-icon {
+      display: none;
+    }
   }
 `;
 
@@ -93,7 +137,7 @@ export const Carousel: React.FC<CarouselProps> = ({ photos }) => {
         clickable: true,
         renderBullet: (index, className) => {
           const title = photos[index].title ?? '';
-          return `<span class="${className}"><img class="customized-icon" src="${photos[index].icon}" alt="${title}" />${title}</span>`;
+          return `<div class="${className} bullet"><div class="bullet-title"><img class="customized-icon" src="${photos[index].icon}" alt="${title}" />${title}</div><p>${photos[index].description}</p></div>`;
         },
       }}
       modules={[Navigation, Pagination, Autoplay, EffectFade]}
