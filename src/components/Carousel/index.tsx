@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import {
   Navigation, Pagination, Autoplay, EffectFade,
 } from 'swiper/modules';
-import { Theme } from '../../common/styles/Theme';
+import Theme from '../../common/styles/Theme';
 import media from '../../common/styles/MediaScreens';
 
 export interface Item {

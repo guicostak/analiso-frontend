@@ -1,7 +1,7 @@
 import React from 'react';
 import { css, styled } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Theme } from '../../common/styles/Theme';
+import Theme from '../../common/styles/Theme';
 import media from '../../common/styles/MediaScreens';
 import { emergeAnimation, disappearAnimation } from '../../common/styles/Animations';
 import { faCircleXmark } from '../../common/util/imports/iconUtilsImports';

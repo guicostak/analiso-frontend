@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { NotFound } from '../pages/NotFound';
+import NotFound from '../pages/NotFound';
 import Home from '../pages/Home';
 
 function Router() {

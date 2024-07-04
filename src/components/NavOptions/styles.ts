@@ -1,6 +1,6 @@
-import styled from "styled-components";
-import { Theme } from "../../common/styles/Theme";
-import media from "../../common/styles/MediaScreens";
+import styled from 'styled-components';
+import Theme from '../../common/styles/Theme';
+import media from '../../common/styles/MediaScreens';
 
 export const Options = styled.ul`
     list-style: none;

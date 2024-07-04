@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Theme } from '../../common/styles/Theme';
+import Theme from '../../common/styles/Theme';
 import Logo from '../Logo';
 import Navbar from '../Navbar';
 import analisoLogo from '../../assets/img/logos/analiso-logo-principal-secondary-color.webp';
@@ -20,6 +20,7 @@ const HeaderStyled = styled.header`
     height: 10rem;
     padding-block: 1rem;
     padding-inline: 3rem;
+    gap: 2rem;
   }
 
   ${media.mobile} {

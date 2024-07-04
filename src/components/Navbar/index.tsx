@@ -9,6 +9,7 @@ import Logo from '../Logo';
 import analisoLogo from '../../assets/img/logos/analiso-logo-principal-secondary-color.webp';
 import NavOptions from '../NavOptions';
 import Modal from '../Modal';
+import { OpenModalBtn } from './styles';
 
 const NavbarStyled = styled.nav`
   display: flex;
@@ -18,12 +19,6 @@ const NavbarStyled = styled.nav`
   justify-content: space-between;
   flex-wrap: wrap;
   width: 100%;
-
-  .menu-button {
-    font-size: 1.8rem;
-    background: none;
-    border: none;
-  }
 `;
 
 const Navbar: React.FC = () => {
@@ -39,16 +34,16 @@ const Navbar: React.FC = () => {
   return (
     <NavbarStyled>
       <View $view="desktop tablet" $width="100%">
-        <Flex $direction="row" $justify="space-between" $wrap='wrap'>
+        <Flex $direction="row" $justify="space-between" $wrap="wrap">
           <NavOptions />
           <NavButtons />
         </Flex>
       </View>
       <View $view="mobile" $width="100%">
         <Flex $direction="column" $align="end">
-          <button onClick={openModal} type="button" className="menu-button">
+          <OpenModalBtn onClick={openModal} type="button" className="menu-button" aria-label="Open menu">
             <FontAwesomeIcon icon={faBars} />
-          </button>
+          </OpenModalBtn>
           <Modal
             $zindex="2"
             $closeactionprop={() => setIsOpenModal(false)}

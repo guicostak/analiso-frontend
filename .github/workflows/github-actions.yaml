@@ -1,0 +1,41 @@
+name: ESLint, Tests and SonarLint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  eslint-tests-sonarlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test  # Replace with your test command
+
+      # Add steps to run SonarLint here if you have the integration configured
+
+      # Example SonarLint step (replace placeholders with actual values):
+      # - name: Run SonarLint
+      #   env:
+      #     SONAR_HOST_URL: http://your-sonarqube-server:9000
+      #     SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
+      #   run: sonar-scanner
+

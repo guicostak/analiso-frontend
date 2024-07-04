@@ -1,5 +1,5 @@
-import media from "../../common/styles/MediaScreens";
-import styled from "styled-components";
+import styled from 'styled-components';
+import media from '../../common/styles/MediaScreens';
 
 const Logo = styled.img`
   width: 8rem;

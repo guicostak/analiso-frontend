@@ -1,10 +1,10 @@
-import { Item } from "../../components/Carousel";
+import { Item } from '../../components/Carousel';
 import dividendos from '../../assets/img/home/carousel/dividendos.png';
 import dividendosIcon from '../../assets/img/home/carousel/icons/hand-holding-dollar-solid.png';
 import forecastIcon from '../../assets/img/home/carousel/icons/magnifying-glass-dollar-solid.png';
 import forecast from '../../assets/img/home/carousel/forecast.png';
 
-export const carouselItems: Item[] = [
+const carouselItems: Item[] = [
   {
     id: '1',
     url: dividendos,
@@ -38,3 +38,5 @@ export const carouselItems: Item[] = [
     description: 'A snapshot of critical red-flags and opportunities',
   },
 ];
+
+export default carouselItems;

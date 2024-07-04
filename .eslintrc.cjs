@@ -1,4 +1,3 @@
-// .eslintrc.cjs
 module.exports = {
   env: {
     browser: true,
@@ -19,23 +18,21 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  plugins: [
-    'react',
-    '@typescript-eslint',
-  ],
+  plugins: ['react', '@typescript-eslint'],
   rules: {
-    'indent': ['error', 2],
+    indent: ['error', 2],
     'react/react-in-jsx-scope': 'off',
-    'react/jsx-filename-extension': [1, { 'extensions': ['.js', '.jsx', '.ts', '.tsx'] }],
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
+    'react/require-default-props': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
       {
-        'js': 'never',
-        'jsx': 'never',
-        'ts': 'never',
-        'tsx': 'never'
-      }
+        js: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
     ],
   },
   settings: {
@@ -48,4 +45,13 @@ module.exports = {
       version: 'detect',
     },
   },
+  overrides: [
+    {
+      files: ['**/Carousel/index.tsx'],
+      rules: {
+        'import/no-unresolved': 'off',
+        'react/function-component-definition': 'off',
+      },
+    },
+  ],
 };

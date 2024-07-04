@@ -1,11 +1,11 @@
-import { carouselItems } from "../common/mock-bff/carouselMock";
+import carouselItems from '../common/mock-bff/carouselMock';
 
-export const useCarousel = () => {
-  const getCarouselItems = () => {
-    return carouselItems;
-  };
+function useCarousel() {
+  const getCarouselItems = () => carouselItems;
 
   return {
-    getCarouselItems
+    getCarouselItems,
   };
-};
+}
+
+export default useCarousel;

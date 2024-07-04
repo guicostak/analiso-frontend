@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Header from '../../components/Header';
 import Fold from '../../components/Fold';
-import { Theme } from '../../common/styles/Theme';
+import Theme from '../../common/styles/Theme';
 import Button from '../../components/Button';
 import { faUser, faArrowTrendUp } from '../../common/util/imports/iconUtilsImports';
 import { useNavigate } from '../../common/util/imports/routerUtilsImports';
@@ -14,13 +14,13 @@ import View from '../../components/View';
 import {
   HomeContainer, PhoneImage, Subtitle, Title,
 } from './styles';
-import { useCarousel } from '../../hooks/useCarousel';
+import useCarousel from '../../hooks/useCarousel';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { getCarouselItems } = useCarousel();
   const items = getCarouselItems();
-  
+
   return (
     <HomeContainer>
       <Helmet>
@@ -40,12 +40,12 @@ const Home: React.FC = () => {
                 Feito para você analisar da melhor forma sua carteira de investimentos
               </Subtitle>
               <Button
-                height="2.7rem"
+                $height="2.7rem"
                 $border="none"
                 onClick={() => navigate('/dashboard')}
                 $textcolor="white"
                 $background={Theme.primaryColor}
-                width="25rem"
+                $width="25rem"
               >
                 <FontAwesomeIcon icon={faUser} style={{ marginRight: '0.5rem' }} />
                 Cadastre-se agora
@@ -54,10 +54,10 @@ const Home: React.FC = () => {
             <Flex $direction="row" $align="end" $justify="end" $width="100%">
               <PhoneImage src={telefones} alt="Telefone usando o sistema" />
             </Flex>
-          </View> 
+          </View>
 
           <View $view="mobile tablet">
-            <Flex $direction="column" $align="left">
+            <Flex $direction="column" $align="left" $justify="end">
               <Title>
                 Uma nova forma de analisar seus ativos
               </Title>
@@ -65,50 +65,49 @@ const Home: React.FC = () => {
                 Feito para você analisar da melhor forma sua carteira de investimentos
               </Subtitle>
               <Button
-                height="2.7rem"
+                $height="2.7rem"
                 $border="none"
                 onClick={() => navigate('/dashboard')}
                 $textcolor="white"
                 $background={Theme.primaryColor}
-                width="25rem"
+                $width="25rem"
               >
                 <FontAwesomeIcon icon={faUser} style={{ marginRight: '0.5rem' }} />
                 Cadastre-se agora
               </Button>
-              <Flex $height='60%' $direction="column" $align="center" $justify="end" $width="100%"  $wrap='wrap'>
+              <Flex $height="60%" $direction="column" $align="center" $justify="end" $width="100%" $wrap="wrap">
                 <PhoneImage src={telefones} alt="Telefone usando o sistema" />
               </Flex>
             </Flex>
           </View>
         </Fold>
-        
 
         <Fold $backgroundcolor={Theme.secondaryColor}>
-          <Flex $direction="column" $wrap='none'>
-            <Subtitle style={{ color: 'white', marginTop: '4rem'}}>
+          <Flex $direction="column" $wrap="none">
+            <Subtitle style={{ color: 'white', marginTop: '4rem' }}>
               <FontAwesomeIcon icon={faArrowTrendUp} style={{ marginInline: '0.7rem' }} />
               Relatórios de ações
             </Subtitle>
 
             <Title>Identifique boas oportunidades</Title>
-            <Subtitle style={{ color: 'white'}}>
+            <Subtitle style={{ color: 'white' }}>
               Uma análise abrangente da ação, fornecendo uma visão de todos os aspectos do negócio
             </Subtitle>
             <Carousel photos={items} />
 
-            <Flex $direction="row" $width='60%'>
+            <Flex $direction="row" $width="60%">
               <Flex $direction="column">
-                <h1 style={{color: 'white'}}>300</h1>
-                <p style={{color: 'white'}}>ações</p>
-              </Flex>  
+                <h1 style={{ color: 'white' }}>300</h1>
+                <p style={{ color: 'white' }}>ações</p>
+              </Flex>
               <Flex $direction="column">
-                <h1 style={{color: 'white'}}>300</h1>
-                <p style={{color: 'white'}}>ações</p>
-              </Flex> 
+                <h1 style={{ color: 'white' }}>300</h1>
+                <p style={{ color: 'white' }}>ações</p>
+              </Flex>
               <Flex $direction="column">
-                <h1 style={{color: 'white'}}>300</h1>
-                <p style={{color: 'white'}}>ações</p>
-              </Flex> 
+                <h1 style={{ color: 'white' }}>300</h1>
+                <p style={{ color: 'white' }}>ações</p>
+              </Flex>
             </Flex>
           </Flex>
         </Fold>

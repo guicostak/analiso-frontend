@@ -1,9 +1,12 @@
-import React from 'react';
 import Routes from './routes/router';
-import { ThemedProvider } from './common/styles/GlobalStyles';
+import ThemedProvider from './common/styles/GlobalStyles';
 
-export const App: React.FC = () => (
-  <ThemedProvider>
-    <Routes />
-  </ThemedProvider>
-);
+function App() {
+  return (
+    <ThemedProvider>
+      <Routes />
+    </ThemedProvider>
+  );
+}
+
+export default App;

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Theme } from '../../common/styles/Theme';
+import Theme from '../../common/styles/Theme';
 import media from '../../common/styles/MediaScreens';
 
 export const HomeContainer = styled.main`

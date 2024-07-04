@@ -1,6 +1,6 @@
 import React from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { Theme } from './Theme';
+import Theme from './Theme';
 import '@fontsource/poppins/300.css';
 import '@fontsource/poppins/400.css';
 import '@fontsource/poppins/500.css';
@@ -27,9 +27,13 @@ interface ThemedProviderProps {
   children: React.ReactNode;
 }
 
-export const ThemedProvider: React.FC<ThemedProviderProps> = ({ children }) => (
-  <ThemeProvider theme={Theme}>
-    <GlobalStyle />
-    {children}
-  </ThemeProvider>
-);
+function ThemedProvider({ children }: ThemedProviderProps) {
+  return (
+    <ThemeProvider theme={Theme}>
+      <GlobalStyle />
+      {children}
+    </ThemeProvider>
+  );
+}
+
+export default ThemedProvider;
