@@ -1,10 +1,10 @@
 import React from 'react';
-import { css, styled } from "styled-components";
-import { Theme } from "../common/styles/Theme";
-import media from "../common/styles/MediaScreens";
-import { emergeAnimation, disappearAnimation } from "../common/styles/Animations";
+import { css, styled } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleXmark } from "../common/util/imports/iconUtilsImports";
+import { Theme } from '../../common/styles/Theme';
+import media from '../../common/styles/MediaScreens';
+import { emergeAnimation, disappearAnimation } from '../../common/styles/Animations';
+import { faCircleXmark } from '../../common/util/imports/iconUtilsImports';
 
 interface IModalProps {
   $zindex: string;
@@ -31,7 +31,7 @@ export const ModalStyled = styled.div<IModalProps>`
   backdrop-filter: blur(2px);
   z-index: ${(props) => props.$zindex};
   overflow-y: hidden;
-  display: ${(props) => (props.$isopen ? "flex" : "none")};
+  display: ${(props) => (props.$isopen ? 'flex' : 'none')};
 
   .modal { 
     display: flex;
@@ -80,15 +80,13 @@ export const ModalStyled = styled.div<IModalProps>`
       left: 50%;
     }
 
-    ${(props) =>
-      props.$isopen &&
-      css`
+    ${(props) => props.$isopen
+      && css`
         animation: ${emergeAnimation} 0.4s ease;
       `}
 
-    ${(props) =>
-      !props.$animation &&
-      css`
+    ${(props) => !props.$animation
+      && css`
         animation: ${disappearAnimation} 0.4s ease;
       `}
   }
@@ -102,12 +100,12 @@ const Modal: React.FC<IModalProps> = ({
   $animation: animation,
   $animationactionprop: animationactionprop,
   $modalwidths: modalWidths,
-  $modalheight: modalHeight
+  $modalheight: modalHeight,
 }) => {
   const closeModalLocalMethod = () => {
     animationactionprop();
     setTimeout(() => {
-        closeActionProp();
+      closeActionProp();
     }, 300);
   };
 

@@ -1,6 +1,6 @@
-    import { keyframes } from 'styled-components';
+import { keyframes } from 'styled-components';
 
-    export const emergeAnimation = keyframes`
+export const emergeAnimation = keyframes`
     from {
         transform: translate(-0%, -50%); 
         opacity: 0;
@@ -11,7 +11,7 @@
     }
     `;
 
-    export const disappearAnimation = keyframes`
+export const disappearAnimation = keyframes`
     from {
         transform: translate(-50%, -50%);
         opacity: 1;

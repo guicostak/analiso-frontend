@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useNavigate } from '../common/util/imports/routerUtilsImports';
-import { Theme } from '../common/styles/Theme';
-import { Button } from './Button';
+import { useNavigate } from '../../common/util/imports/routerUtilsImports';
+import { Theme } from '../../common/styles/Theme';
+import Button from '../Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRightToBracket, faUser } from '../common/util/imports/iconUtilsImports';
-import media from '../common/styles/MediaScreens';
+import { faRightToBracket, faUser } from '../../common/util/imports/iconUtilsImports';
+import media from '../../common/styles/MediaScreens';
 
 const NavButtonsStyled = styled.div`
     display: flex;
@@ -18,11 +18,11 @@ const NavButtonsStyled = styled.div`
     }
 `; 
 
-export const NavButtons: React.FC = () => {
+const NavButtons: React.FC = () => {
   const navigate = useNavigate();
   
   return (
-    <NavButtonsStyled className='nav-buttons'>
+    <NavButtonsStyled>
       <Button
         $border={`1px solid ${Theme.secondaryColor}`}
         onClick={() => navigate("/dashboard")}
@@ -42,3 +42,5 @@ export const NavButtons: React.FC = () => {
     </NavButtonsStyled>
   );
 };
+
+export default NavButtons;

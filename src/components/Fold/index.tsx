@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import media from "../common/styles/MediaScreens";
+import React from 'react';
+import styled from 'styled-components';
+import media from '../../common/styles/MediaScreens';
 
 interface FoldProps {
-    children: any;
+    children: React.ReactNode;
     $backgroundcolor: string;
     $height?: string;
 }
@@ -24,14 +24,14 @@ const FoldStyled = styled.div<FoldProps>`
         padding-inline: 2rem; 
         padding-top: 3rem;
         flex-direction: column;
-        height: 40rem;
+        height: ${(props) => props.$height ?? '50rem'};
     }
 `;
 
-export const Fold: React.FC<FoldProps> = ({ children, $backgroundcolor, $height }) => {
-    return (
-        <FoldStyled $height={$height} $backgroundcolor={$backgroundcolor}>
-            {children}
-        </FoldStyled>
-    )
-}
+const Fold: React.FC<FoldProps> = ({ children, $backgroundcolor, $height }) => (
+  <FoldStyled $height={$height} $backgroundcolor={$backgroundcolor}>
+    {children}
+  </FoldStyled>
+);
+
+export default Fold;

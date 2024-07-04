@@ -14,11 +14,9 @@ const NotFoundMessage = styled.p`
   color: #333;
 `;
 
-export const NotFound: React.FC = () => {
-  return (
-    <NotFoundContainer>
-      <NotFoundHeading>404 - Not Found</NotFoundHeading>
-      <NotFoundMessage>Sorry, the page you are looking for does not exist.</NotFoundMessage>
-    </NotFoundContainer>
-  );
-};
+export const NotFound: React.FC = () => (
+  <NotFoundContainer>
+    <NotFoundHeading>404 - Not Found</NotFoundHeading>
+    <NotFoundMessage>Sorry, the page you are looking for does not exist.</NotFoundMessage>
+  </NotFoundContainer>
+);
