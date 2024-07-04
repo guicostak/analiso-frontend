@@ -1,4 +1,4 @@
-name: ESLint, Tests and SonarLint
+name: ESLint, Tests and SonarQube
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  eslint-tests-sonarlint:
+  eslint-tests-sonarqube:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,14 +28,12 @@ jobs:
         run: npm run lint
 
       - name: Run Tests
-        run: npm test  # Replace with your test command
+        run: npm test
 
-      # Add steps to run SonarLint here if you have the integration configured
-
-      # Example SonarLint step (replace placeholders with actual values):
-      # - name: Run SonarLint
-      #   env:
-      #     SONAR_HOST_URL: http://your-sonarqube-server:9000
-      #     SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-      #   run: sonar-scanner
-
+      - name: SonarQube Scan
+        env:
+          SONAR_HOST_URL: ${{ http://host.docker.internal:9000 }}
+          SONAR_LOGIN: ${{ sqp_aecc4cadc1cc52c081087ba5d1d4819a48ed698c }}
+        run: |
+          npm install -g sonarqube-scanner
+          sonar-scanner
