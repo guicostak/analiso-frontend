@@ -1,12 +1,14 @@
-import Routes from './routes/router';
-import ThemedProvider from './common/styles/GlobalStyles';
+﻿import { RouterProvider } from 'react-router-dom';
+import { router } from './routes';
+import { GlossaryProvider } from './components/glossary/glossary-context';
 
 function App() {
   return (
-    <ThemedProvider>
-      <Routes />
-    </ThemedProvider>
+    <GlossaryProvider>
+      <RouterProvider router={router} />
+    </GlossaryProvider>
   );
 }
 
 export default App;
+

@@ -1,0 +1,8 @@
+﻿model = "gpt-5.3-codex"
+
+[project]
+name = "analiso-frontend"
+
+[behavior]
+prefer_agents_md = true
+
