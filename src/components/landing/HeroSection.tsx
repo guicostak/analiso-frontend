@@ -63,11 +63,6 @@ export function HeroSection({ navLinks }: HeroSectionProps) {
               <br />
               não com{" "}
               <span className="-mx-6 inline-block" style={{ verticalAlign: "-0.48em" }}>
-                <img
-                  src={heroImage}
-                  alt="Hero"
-                  className="hero-image"
-                />
               </span>{" "}
               confusão.
             </h1>
