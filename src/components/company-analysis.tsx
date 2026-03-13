@@ -87,8 +87,8 @@ type PillarMetric = {
 
 type PillarEvidence = {
  id?: string;
- label: 'Ponto de atencao' | 'Ponto forte';
- intensity: 'Moderada' | 'Leve';
+ label: string;
+ intensity: string;
  title: string;
  value: string;
  metric: string;
@@ -96,8 +96,24 @@ type PillarEvidence = {
  source: Source;
 };
 
+type PillarPrimarySignal = {
+ title: string;
+ value: string;
+ metric: string;
+ why: string;
+ intensity: string;
+ label: string;
+};
+
+type PillarWatchItem = {
+ title: string;
+ why: string;
+ intensity: string;
+};
+
 type PillarData = {
  name: 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos';
+ displayName?: string;
  status: Status;
  score: number;
  trend: string;
@@ -106,8 +122,12 @@ type PillarData = {
  chart: { title: string; series5: number[]; series10: number[]; years5: string[]; years10: string[] };
  metrics: PillarMetric[];
  evidences: PillarEvidence[];
+ primarySignal?: PillarPrimarySignal;
+ watchItems?: PillarWatchItem[];
+ explainer?: { text: string };
+ cta?: { title: string; button: string };
+ meaningText?: string;
 };
-
 const queueItems: CompanyQueueItem[] = [
  { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposicao a minerio de ferro.' },
  { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
@@ -119,8 +139,7 @@ const queueItems: CompanyQueueItem[] = [
 ];
 
 const mainTabs: MainTab[] = ['Resumo', 'Pilares', 'Mudancas', 'Eventos', 'Preco', 'Fontes'];
-const radarScores: Record<PillarName, number> = { Divida: 58, Caixa: 72, Margens: 70, Retorno: 76, Proventos: 62 };
-const radarPreviousScores: Record<PillarName, number> = { Divida: 61, Caixa: 69, Margens: 69, Retorno: 75, Proventos: 64 };
+const EMPTY_RADAR_SCORES: Record<PillarName, number> = { Divida: 0, Caixa: 0, Margens: 0, Retorno: 0, Proventos: 0 };
 
 const pillars: PillarData[] = [
  {
@@ -447,7 +466,8 @@ type CompanyData = {
  updatedAt?: string;
  metricSeries?: Partial<Record<PriceMetric, { labels: string[]; values: number[]; currentMarker: number; medianMarker: number }>>;
  };
- sourceRows: Array<Contextual<(typeof sourceRows)[number]>>;
+ sourceRows: Array<Contextual<(typeof sourceRows)[number]> & { displaySource?: string; displayDoc?: string; displayStatus?: string }>;
+ sourceConfidence?: { title?: string; level?: string; summary?: string };
 };
 
 type TabPayload =
@@ -462,9 +482,8 @@ type CompanyPreferences = {
  lastOpenPillar: 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos' | null;
 };
 
-const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/$/, '');
-// Temporario: manter a tela desacoplada do backend durante iteracoes de UX/copy.
-const FORCE_COMPANY_ANALYSIS_MOCK = true;
+const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').trim();
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 function contextualize<T>(items: T[], companyId: string, ticker: string): Array<Contextual<T>> {
  return items.map((item) => ({ ...item, companyId, ticker }));
@@ -480,8 +499,30 @@ function companyContextFromTicker(tickerParam?: string): CompanyContext {
  };
 }
 
-function safeMeta(value?: string) {
- return value && value.trim().length > 0 ? value : '';
+function toDisplayText(value: unknown): string {
+ if (typeof value === 'string') return value;
+ if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+ if (value && typeof value === 'object') {
+  return asDisplayValue(value);
+ }
+ return '';
+}
+
+function normalizeMojibake(text: string) {
+ if (!/[\u00C2\u00C3]/.test(text)) return text;
+ try {
+  const bytes = Uint8Array.from(text, (char) => char.charCodeAt(0) & 0xFF);
+  const decoded = new TextDecoder('utf-8').decode(bytes);
+  return decoded && decoded !== text ? decoded : text;
+ } catch {
+  return text;
+ }
+}
+
+function safeMeta(value?: unknown) {
+ const text = toDisplayText(value).trim();
+ if (!text || text.toLowerCase() === '[object object]') return '';
+ return normalizeMojibake(text);
 }
 
 const changesFocusFilters: ChangesFocusFilter[] = ['Mais relevantes', 'Rotina', 'Estruturais'];
@@ -685,13 +726,19 @@ function timelineSourceUrl(source?: string) {
  return 'https://www.analiso.com.br/fontes';
 }
 
+function resolvePillarName(value?: string | null): PillarName | null {
+ const raw = (value ?? '').toLowerCase();
+ if (!raw.trim()) return null;
+ if (raw.includes('dvida') || raw.includes('divida') || raw.includes('debt')) return 'Divida';
+ if (raw.includes('caixa') || raw.includes('cash')) return 'Caixa';
+ if (raw.includes('marg') || raw.includes('margin')) return 'Margens';
+ if (raw.includes('retorno') || raw.includes('return')) return 'Retorno';
+ if (raw.includes('provent') || raw.includes('shareholder')) return 'Proventos';
+ return null;
+}
+
 function normalizePillarName(value?: string): 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos' {
- const raw = (value ?? 'Divida').toLowerCase();
- if (raw.includes('dvida') || raw.includes('divida')) return 'Divida';
- if (raw.includes('caixa')) return 'Caixa';
- if (raw.includes('marg')) return 'Margens';
- if (raw.includes('retorno')) return 'Retorno';
- return 'Proventos';
+ return resolvePillarName(value) ?? 'Proventos';
 }
 
 function normalizeEvidenceParam(value?: string | null) {
@@ -732,6 +779,30 @@ function sanitizePayloadText<T>(value: T): T {
  return out as T;
  }
  return value;
+}
+
+function normalizeStatusLabel(value?: string, fallback: Status = 'Atencao'): Status {
+ const raw = (value ?? '').trim().toLowerCase();
+ if (!raw) return fallback;
+ if (raw.includes('ris')) return 'Risco';
+ if (raw.includes('aten') || raw.includes('monitor')) return 'Atencao';
+ if (raw.includes('saud') || raw.includes('fort')) return 'Saudavel';
+ return fallback;
+}
+
+function normalizeRadarScores(
+ value: Record<string, number> | undefined,
+ fallback: Record<PillarName, number> = { Divida: 50, Caixa: 50, Margens: 50, Retorno: 50, Proventos: 50 }
+): Record<PillarName, number> {
+ const next = { ...fallback };
+ if (!value) return next;
+ Object.entries(value).forEach(([key, score]) => {
+  const pillar = resolvePillarName(key);
+  if (!pillar) return;
+  const numeric = Number(score);
+  if (Number.isFinite(numeric)) next[pillar] = numeric;
+ });
+ return next;
 }
 
 function normalizeMainTabParam(value?: string | null): MainTab | null {
@@ -784,8 +855,8 @@ const mockDataByCompany: Record<string, CompanyData> = {
  WEGE3: {
  companyId: 'WEGE3',
  ticker: 'WEGE3',
- radarScores,
- radarPreviousScores,
+ radarScores: EMPTY_RADAR_SCORES,
+ radarPreviousScores: EMPTY_RADAR_SCORES,
  diagnosisHeadline: 'WEG segue forte em caixa e retorno, mas a divida exige acompanhamento neste trimestre.',
  strongest: {
  title: 'Caixa',
@@ -938,7 +1009,368 @@ const mockDataByCompany: Record<string, CompanyData> = {
  },
 };
 
-function normalizeCompanyData(raw: unknown, companyId: string, ticker: string): CompanyData | null {
+function shortDateDisplay(value?: string | null) {
+ if (!value) return '';
+ const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if (iso) return `${iso[3]}/${iso[2]}`;
+ const br = value.match(/^(\d{2})\/(\d{2})\/\d{4}$/);
+ if (br) return `${br[1]}/${br[2]}`;
+ return value;
+}
+
+function asDisplayValue(value: unknown) {
+ if (!value || typeof value !== 'object') return '';
+ const raw = value as { display?: string; formatted?: string; raw?: string | number | null };
+ if (typeof raw.display === 'string' && raw.display.length > 0) return raw.display;
+ if (typeof raw.formatted === 'string' && raw.formatted.length > 0) return raw.formatted;
+ if (typeof raw.raw === 'string') return raw.raw;
+ if (typeof raw.raw === 'number') return String(raw.raw);
+ return '';
+}
+
+function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker: string): CompanyData | null {
+ const overview = (raw.overview as Record<string, unknown> | undefined) ?? {};
+ const radar = (raw.radar as Record<string, unknown> | undefined) ?? {};
+ const radarCurrent = (radar.current as Record<string, number | null> | undefined) ?? {};
+ const radarPrevious = (radar.previous as Record<string, number | null> | undefined) ?? {};
+ const pillarsMap = (raw.pillars as Record<string, Record<string, unknown>> | undefined) ?? {};
+ const changesBlock = (raw.changes as Record<string, unknown> | undefined) ?? {};
+ const agenda = (raw.agenda as Record<string, unknown> | undefined) ?? {};
+ const price = (raw.price as Record<string, unknown> | undefined) ?? {};
+ const sources = (raw.sources as Record<string, unknown> | undefined) ?? {};
+
+ const radarScores: Record<PillarName, number> = {
+ Divida: Number(radarCurrent.divida ?? 50),
+ Caixa: Number(radarCurrent.caixa ?? 50),
+ Margens: Number(radarCurrent.margens ?? 50),
+ Retorno: Number(radarCurrent.retorno ?? 50),
+ Proventos: Number(radarCurrent.proventos ?? 50),
+ };
+ const radarPreviousScores: Record<PillarName, number> = {
+ Divida: Number(radarPrevious.divida ?? radarScores.Divida),
+ Caixa: Number(radarPrevious.caixa ?? radarScores.Caixa),
+ Margens: Number(radarPrevious.margens ?? radarScores.Margens),
+ Retorno: Number(radarPrevious.retorno ?? radarScores.Retorno),
+ Proventos: Number(radarPrevious.proventos ?? radarScores.Proventos),
+ };
+
+ const pillarEntries = Object.values(pillarsMap).filter(Boolean);
+ const pillars = pillarEntries
+ .map((pillar) => {
+  const name = resolvePillarName(String(pillar.name ?? pillar.displayName ?? '')) ?? null;
+  if (!name || !pillarOrder.includes(name)) return null;
+  const primaryMetric = (pillar.primaryMetric as Record<string, unknown> | undefined) ?? {};
+  const currentMetric = (primaryMetric.current as Record<string, unknown> | undefined) ?? {};
+  const reference5y = (primaryMetric.reference5y as Record<string, unknown> | undefined) ?? {};
+  const primarySignal = (pillar.primarySignal as Record<string, unknown> | undefined) ?? {};
+  const signalLabel = (primarySignal.label as Record<string, unknown> | undefined) ?? {};
+  const signalIntensity = (primarySignal.intensity as Record<string, unknown> | undefined) ?? {};
+  const signalSource = (primarySignal.source as Record<string, unknown> | undefined) ?? {};
+  const watchItemsRaw = Array.isArray(pillar.watchItems) ? pillar.watchItems as Array<Record<string, unknown>> : [];
+  const chart = (pillar.chart as Record<string, unknown> | undefined) ?? {};
+  const chartSeries = (chart.series as Record<string, Record<string, unknown>> | undefined) ?? {};
+  const chart5y = (chartSeries['5y'] as Record<string, unknown> | undefined) ?? {};
+  const chart10y = (chartSeries['10y'] as Record<string, unknown> | undefined) ?? {};
+  const trust = (pillar.trust as Record<string, unknown> | undefined) ?? {};
+  const trustUpdated = (trust.updatedAt as Record<string, unknown> | undefined) ?? {};
+  const trustStatus = (trust.status as Record<string, unknown> | undefined) ?? {};
+  const meaning = (pillar.meaning as Record<string, unknown> | undefined) ?? {};
+  const explainer = (pillar.explainer as Record<string, unknown> | undefined) ?? {};
+  const ctaRaw = pillar.cta;
+  const ctaObj = (ctaRaw && typeof ctaRaw === 'object') ? (ctaRaw as Record<string, unknown>) : {};
+
+  const metricLabel = safeMeta(primaryMetric.displayLabel) || safeMeta(primaryMetric.label);
+  const currentFormatted = safeMeta(currentMetric.formatted);
+  const refFormatted = safeMeta(reference5y.formatted);
+  const metricDate = asDisplayValue(currentMetric.date) || shortDateDisplay(safeMeta(currentMetric.raw));
+
+  const evidences: PillarEvidence[] = [
+   {
+   id: safeMeta(pillar.key) || name,
+   label: safeMeta(signalLabel.display) || safeMeta(signalLabel.key),
+   intensity: safeMeta(signalIntensity.display) || safeMeta(signalIntensity.key),
+   title: safeMeta(primarySignal.title),
+   value: safeMeta(primarySignal.value) || currentFormatted,
+   metric: safeMeta(primarySignal.metric) || metricLabel,
+   why: safeMeta(primarySignal.why),
+   source: {
+    name: safeMeta(signalSource.displaySource),
+    docLabel: safeMeta(signalSource.displayDoc),
+    date: asDisplayValue(signalSource.date) || shortDateDisplay(safeMeta(signalSource.date)),
+    url: safeMeta(signalSource.url),
+   },
+   },
+   ...watchItemsRaw.map((item, index) => {
+   const itemIntensity = (item.intensity as Record<string, unknown> | undefined) ?? {};
+   const itemLabel = (item.label as Record<string, unknown> | undefined) ?? {};
+   return {
+    id: `${safeMeta(pillar.key) || name}-watch-${index + 1}`,
+    label: safeMeta(itemLabel.display) || safeMeta(itemLabel.key),
+    intensity: safeMeta(itemIntensity.display) || safeMeta(itemIntensity.key),
+    title: safeMeta(item.title),
+    value: '',
+    metric: metricLabel,
+    why: safeMeta(item.why),
+    source: { name: '', docLabel: '', date: '', url: '' },
+   } as PillarEvidence;
+   }),
+  ];
+
+  const watchItems = watchItemsRaw.map((item) => {
+   const intensity = (item.intensity as Record<string, unknown> | undefined) ?? {};
+   return {
+   title: safeMeta(item.title),
+   why: safeMeta(item.why),
+   intensity: safeMeta(intensity.key) || safeMeta(intensity.display),
+   };
+  });
+
+  const statusObj = (pillar.status as Record<string, unknown> | undefined) ?? {};
+  const trendObj = (pillar.trend as Record<string, unknown> | undefined) ?? {};
+  const scoreObj = (pillar.score as Record<string, unknown> | undefined) ?? {};
+
+  return {
+  companyId,
+  ticker,
+  name,
+  displayName: safeMeta(pillar.displayName),
+  status: normalizeStatusLabel(safeMeta(statusObj.display) || safeMeta(statusObj.key), statusFromScore(Number(scoreObj.raw ?? 50))),
+  score: Number(scoreObj.raw ?? 50),
+  trend: safeMeta(trendObj.display),
+  summary: safeMeta(pillar.summary) || safeMeta(meaning.text),
+  meaningText: safeMeta(meaning.text),
+  trust: {
+   source: safeMeta(trust.sourceDisplay),
+   updatedAt: asDisplayValue(trustUpdated) || shortDateDisplay(safeMeta(trustUpdated.raw)),
+   status: safeMeta(trustStatus.display).toLowerCase().includes('antig') ? 'Antigo' : 'Atualizado',
+  },
+  chart: {
+   title: safeMeta(chart.title),
+   years5: Array.isArray(chart5y.years) ? chart5y.years as string[] : [],
+   years10: Array.isArray(chart10y.years) ? chart10y.years as string[] : (Array.isArray(chart5y.years) ? chart5y.years as string[] : []),
+   series5: Array.isArray(chart5y.values) ? chart5y.values as number[] : [],
+   series10: Array.isArray(chart10y.values) ? chart10y.values as number[] : (Array.isArray(chart5y.values) ? chart5y.values as number[] : []),
+  },
+  metrics: [
+   { label: metricLabel, value: currentFormatted, period: '', source: { name: safeMeta(signalSource.displaySource), docLabel: safeMeta(signalSource.displayDoc), date: metricDate, url: safeMeta(signalSource.url) } },
+   { label: `${metricLabel} (ref. 5a)`, value: refFormatted, period: '', source: { name: safeMeta(signalSource.displaySource), docLabel: safeMeta(signalSource.displayDoc), date: metricDate, url: safeMeta(signalSource.url) } },
+  ],
+  evidences,
+  primarySignal: {
+   title: safeMeta(primarySignal.title),
+   value: safeMeta(primarySignal.value) || currentFormatted,
+   metric: safeMeta(primarySignal.metric) || metricLabel,
+   why: safeMeta(primarySignal.why),
+   intensity: safeMeta(signalIntensity.key) || safeMeta(signalIntensity.display),
+   label: safeMeta(signalLabel.display) || safeMeta(signalLabel.key),
+  },
+  watchItems,
+  explainer: { text: safeMeta(explainer.text) },
+  cta: {
+   title: safeMeta(ctaObj.title) || safeMeta(pillar.ctaTitle) || safeMeta(pillar.cta_title),
+   button: safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(pillar.ctaText) || safeMeta(pillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
+  },
+  } as Contextual<PillarData>;
+ })
+ .filter((pillar): pillar is Contextual<PillarData> => pillar !== null);
+
+ const changesItemsRaw = Array.isArray(changesBlock.items) ? changesBlock.items as Array<Record<string, unknown>> : [];
+ const changes = changesItemsRaw.map((item) => {
+  const date = (item.date as Record<string, unknown> | undefined) ?? {};
+  const type = (item.type as Record<string, unknown> | undefined) ?? {};
+  const severity = (item.severity as Record<string, unknown> | undefined) ?? {};
+  const impact = (item.impact as Record<string, unknown> | undefined) ?? {};
+  const source = (item.source as Record<string, unknown> | undefined) ?? {};
+  const beforeAfter = (item.beforeAfter as Record<string, unknown> | undefined) ?? {};
+  const shortDate = asDisplayValue(date) || shortDateDisplay(String(date.raw ?? ''));
+  const compactDate = shortDate.includes('/') ? shortDate.split('/').slice(0, 2).join('/') : shortDate;
+  return {
+  companyId: String(item.companyId ?? companyId),
+  ticker: String(item.ticker ?? ticker),
+  type: String(type.display ?? type.key ?? ''),
+  date: compactDate,
+  severity: String(severity.display ?? severity.key ?? ''),
+  impact: String(impact.display ?? impact.key ?? ''),
+  title: String(item.title ?? ''),
+  impactLine: String(item.impactLine ?? item.whyItMatters ?? ''),
+  unchangedLine: '',
+  beforeAfter: (String(beforeAfter.before ?? '') || String(beforeAfter.after ?? '')) ? `Antes: ${String(beforeAfter.before ?? '')} Depois: ${String(beforeAfter.after ?? '')}` : undefined,
+  source: {
+   docLabel: String(source.displaySource ?? ''),
+   url: String(source.url ?? ''),
+  },
+  };
+ });
+
+ const summaryByWindow = (changesBlock.summaryByWindow as Record<string, Record<string, unknown>> | undefined) ?? {};
+ const changesSummaryByWindow = Object.fromEntries(
+ Object.entries(summaryByWindow).map(([window, summary]) => {
+  const counts = (summary.counts as Record<string, unknown> | undefined) ?? {};
+  const principal = (summary.principalChange as Record<string, unknown> | undefined) ?? {};
+  const principalImpact = (principal.impact as Record<string, unknown> | undefined) ?? {};
+  return [window, {
+  windowDays: Number(summary.windowDays ?? Number(window)),
+  summaryText: String(summary.summaryText ?? ''),
+  mostAffectedPillar: String((summary.mostAffectedPillar as Record<string, unknown> | undefined)?.display ?? ''),
+  structuralCount: Number(counts.structural ?? 0),
+  relevantCount: Number(counts.relevant ?? 0),
+  routineCount: Number(counts.routine ?? 0),
+  isWindowFallback: Boolean(summary.isWindowFallback),
+  principalChange: {
+   title: String(principal.title ?? ''),
+   type: String((principal.type as Record<string, unknown> | undefined)?.display ?? ''),
+   impact: String(principalImpact.display ?? principalImpact.key ?? ''),
+   whyItMatters: String(principal.whyItMatters ?? ''),
+  },
+  }];
+ })
+ ) as CompanyData['changesSummaryByWindow'];
+
+ const agendaEvents = Array.isArray(agenda.events) ? agenda.events as Array<Record<string, unknown>> : [];
+ const timelineEvents = agendaEvents.map((item) => {
+  const date = (item.date as Record<string, unknown> | undefined) ?? {};
+  const expectedImpact = (item.expectedImpact as Record<string, unknown> | undefined) ?? {};
+  const pillarsRaw = Array.isArray(item.pillars) ? item.pillars as Array<Record<string, unknown>> : [];
+  const shortDate = asDisplayValue(date) || shortDateDisplay(String(date.raw ?? ''));
+  const compactDate = shortDate.includes('/') ? shortDate.split('/').slice(0, 2).join('/') : shortDate;
+  return {
+  companyId: String(item.companyId ?? companyId),
+  ticker: String(item.ticker ?? ticker),
+  date: compactDate,
+  title: String(item.title ?? ''),
+  source: safeMeta(item.sourceDisplay),
+  why: String(item.why ?? ''),
+  expectedImpact: String(expectedImpact.display ?? expectedImpact.key ?? ''),
+  pillars: pillarsRaw.map((pillar) => String(pillar.display ?? pillar.key ?? '')).filter(Boolean),
+  };
+ });
+
+ const distribution = (price.distributionByMetric as Record<string, Record<string, unknown>> | undefined) ?? {};
+ const priceRowsRaw = Array.isArray(price.rows) ? price.rows as Array<Record<string, unknown>> : [];
+ const priceRows = priceRowsRaw.map((row) => ({
+  companyId,
+  ticker,
+  metric: String(row.metric ?? ''),
+  current: String(row.current ?? ''),
+  sector: String(row.sector ?? ''),
+  historical: String(row.historical ?? ''),
+  insight: String(row.insight ?? ''),
+ }));
+
+ const sourceRowsRaw = Array.isArray(sources.rows) ? sources.rows as Array<Record<string, unknown>> : [];
+ const sourceRows = sourceRowsRaw.map((row) => {
+  const date = (row.date as Record<string, unknown> | undefined) ?? {};
+  const status = (row.status as Record<string, unknown> | undefined) ?? {};
+  const shortDate = asDisplayValue(date) || shortDateDisplay(String(date.raw ?? ''));
+  const compactDate = shortDate.includes('/') ? shortDate.split('/').slice(0, 2).join('/') : shortDate;
+  return {
+  companyId,
+  ticker,
+  category: String(row.category ?? ''),
+  source: String(row.displaySource ?? ''),
+  doc: String(row.displayDoc ?? ''),
+  date: compactDate,
+  status: String(status.display ?? status.key ?? ''),
+  link: String(row.link ?? ''),
+  displaySource: String(row.displaySource ?? ''),
+  displayDoc: String(row.displayDoc ?? ''),
+  displayStatus: String(status.display ?? status.key ?? ''),
+  };
+ });
+ const confidenceSummary = (sources.confidenceSummary as Record<string, unknown> | undefined) ?? {};
+ const confidenceLevel = (confidenceSummary.level as Record<string, unknown> | undefined) ?? {};
+
+ const strongest = (overview.strongest as Record<string, unknown> | undefined) ?? {};
+ const watchout = (overview.watchout as Record<string, unknown> | undefined) ?? {};
+ const monitor = (overview.monitor as Record<string, unknown> | undefined) ?? {};
+ const summaryScan = (overview.summaryScan as Record<string, unknown> | undefined) ?? {};
+ const summaryMeta = (overview.summaryMeta as Record<string, unknown> | undefined) ?? {};
+ const strongestBadge = (strongest.badge as Record<string, unknown> | undefined) ?? {};
+ const watchoutBadge = (watchout.badge as Record<string, unknown> | undefined) ?? {};
+ const strongestTrend = (strongest.trend as Record<string, unknown> | undefined) ?? {};
+ const watchoutTrend = (watchout.trend as Record<string, unknown> | undefined) ?? {};
+ const strongestScore = (strongest.score as Record<string, unknown> | undefined) ?? {};
+ const watchoutScore = (watchout.score as Record<string, unknown> | undefined) ?? {};
+
+ return {
+ companyId,
+ ticker,
+ radarScores,
+ radarPreviousScores,
+  diagnosisHeadline: safeMeta(overview.diagnosisHeadline),
+ strongest: {
+  title: resolvePillarName(String(strongest.title ?? strongest.pillarKey ?? '')) ?? String(strongest.title ?? ''),
+  score: safeMeta(strongestScore.display),
+  badge: normalizeStatusLabel(String(strongestBadge.display ?? strongestBadge.key ?? ''), 'Atencao'),
+  trend: safeMeta(strongestTrend.display) || safeMeta(strongestTrend.key),
+  summary: safeMeta(strongest.summary),
+ },
+ watchout: {
+  title: resolvePillarName(String(watchout.title ?? watchout.pillarKey ?? '')) ?? String(watchout.title ?? ''),
+  score: safeMeta(watchoutScore.display),
+  badge: normalizeStatusLabel(String(watchoutBadge.display ?? watchoutBadge.key ?? ''), 'Atencao'),
+  trend: safeMeta(watchoutTrend.display) || safeMeta(watchoutTrend.key),
+  summary: safeMeta(watchout.summary),
+ },
+ monitor: {
+  pillar: resolvePillarName(String(monitor.pillarDisplay ?? monitor.pillarKey ?? '')) ?? String(monitor.pillarDisplay ?? ''),
+  text: safeMeta(monitor.text),
+ },
+ summaryScan: {
+  motherLine: safeMeta(summaryScan.motherLine),
+  strength: {
+   pillar: resolvePillarName(String(((summaryScan.strength as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? '')) ?? String(((summaryScan.strength as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? ''),
+   text: safeMeta(((summaryScan.strength as Record<string, unknown> | undefined) ?? {}).text),
+  },
+  attention: {
+   pillar: resolvePillarName(String(((summaryScan.attention as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? '')) ?? String(((summaryScan.attention as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? ''),
+   text: safeMeta(((summaryScan.attention as Record<string, unknown> | undefined) ?? {}).text),
+  },
+  monitor: {
+   pillar: resolvePillarName(String(((summaryScan.monitor as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? '')) ?? String(((summaryScan.monitor as Record<string, unknown> | undefined) ?? {}).pillarDisplay ?? ''),
+   text: safeMeta(((summaryScan.monitor as Record<string, unknown> | undefined) ?? {}).text),
+  },
+ },
+ summaryText: safeMeta(overview.summaryText),
+ summaryMeta: {
+  updatedAt: asDisplayValue(summaryMeta.updatedAt),
+  source: safeMeta(summaryMeta.sourcesDisplay),
+ },
+ pillars: pillars as CompanyData['pillars'],
+ changes: changes as CompanyData['changes'],
+ timelineEvents: timelineEvents as CompanyData['timelineEvents'],
+ priceData: {
+  companyId,
+  ticker,
+  current: asDisplayValue(price.currentPrice),
+  summary: String(price.summary ?? ''),
+  labels: [],
+  values: [],
+  currentMarker: 0,
+  medianMarker: 0,
+  rows: priceRows as CompanyData['priceData']['rows'],
+  source: safeMeta(price.sourceDisplay),
+  updatedAt: asDisplayValue(price.updatedAt),
+  metricSeries: Object.fromEntries(Object.entries(distribution).map(([metric, dist]) => {
+   const labels = Array.isArray(dist.labels) ? dist.labels as string[] : [];
+   const values = Array.isArray(dist.values) ? dist.values as number[] : [];
+   const currentMarker = Number(dist.currentMarker ?? 0);
+   const medianMarker = Number(dist.medianMarker ?? 0);
+   return [metric, { labels, values, currentMarker, medianMarker }];
+  })) as CompanyData['priceData']['metricSeries'],
+ },
+ sourceRows: sourceRows as CompanyData['sourceRows'],
+ sourceConfidence: {
+  title: String(confidenceSummary.title ?? ''),
+  level: String(confidenceLevel.display ?? confidenceLevel.key ?? ''),
+  summary: String(confidenceSummary.summary ?? ''),
+ },
+ changesSummaryByWindow,
+ changesSummary: changesSummaryByWindow?.['90'],
+ };
+}
+
+function normalizeLegacyCompanyData(raw: unknown, companyId: string, ticker: string): CompanyData | null {
  if (!raw || typeof raw !== 'object') return null;
  const payload = sanitizePayloadText(raw as Partial<CompanyData>);
  if (!payload.radarScores || !payload.priceData) return null;
@@ -950,24 +1382,70 @@ function normalizeCompanyData(raw: unknown, companyId: string, ticker: string): 
  ticker: (item as { ticker?: string }).ticker ?? ticker,
  }));
 
+ const normalizedRadarScores = normalizeRadarScores(payload.radarScores as Record<string, number> | undefined, EMPTY_RADAR_SCORES);
+ const normalizedPreviousScores = normalizeRadarScores(payload.radarPreviousScores as Record<string, number> | undefined, normalizedRadarScores);
+ const normalizedPillars = applyContext(payload.pillars as CompanyData['pillars'] | undefined).map((pillar) => {
+ const parsedScore = Number((pillar as { score?: number }).score ?? 50);
+ const score = Number.isFinite(parsedScore) ? parsedScore : 50;
+ const pillarName = resolvePillarName((pillar as { name?: string }).name) ?? 'Divida';
+ const trust = (pillar as { trust?: { source?: string; updatedAt?: string; status?: string } }).trust;
+ const rawStatus = (pillar as { status?: string }).status;
+ return {
+  ...pillar,
+  name: pillarName,
+  score,
+  status: normalizeStatusLabel(rawStatus, statusFromScore(score)),
+  trust: {
+   source: trust?.source ?? '',
+   updatedAt: trust?.updatedAt ?? '',
+   status: (trust?.status ?? '').toLowerCase().includes('antig') ? 'Antigo' : 'Atualizado',
+  },
+ };
+ }) as CompanyData['pillars'];
+
  return {
  companyId,
  ticker,
- radarScores: payload.radarScores,
- radarPreviousScores: payload.radarPreviousScores,
+ radarScores: normalizedRadarScores,
+ radarPreviousScores: normalizedPreviousScores,
  diagnosisHeadline: payload.diagnosisHeadline ?? '',
- strongest: payload.strongest ?? { title: '', score: '', badge: '', trend: '', summary: '' },
- watchout: payload.watchout ?? { title: '', score: '', badge: '', trend: '', summary: '' },
- monitor: payload.monitor ?? { pillar: '', text: '' },
- summaryScan: payload.summaryScan ?? {
- motherLine: '',
- strength: { pillar: '', text: '' },
- attention: { pillar: '', text: '' },
- monitor: { pillar: '', text: '' },
+ strongest: {
+ ...(payload.strongest ?? { title: '', score: '', badge: '', trend: '', summary: '' }),
+ title: resolvePillarName(payload.strongest?.title) ?? (payload.strongest?.title ?? ''),
+ badge: normalizeStatusLabel(payload.strongest?.badge, 'Saudavel'),
+ },
+ watchout: {
+ ...(payload.watchout ?? { title: '', score: '', badge: '', trend: '', summary: '' }),
+ title: resolvePillarName(payload.watchout?.title) ?? (payload.watchout?.title ?? ''),
+ badge: normalizeStatusLabel(payload.watchout?.badge, 'Atencao'),
+ },
+ monitor: {
+ ...(payload.monitor ?? { pillar: '', text: '' }),
+ pillar: resolvePillarName(payload.monitor?.pillar) ?? (payload.monitor?.pillar ?? ''),
+ },
+ summaryScan: {
+ ...(payload.summaryScan ?? {
+  motherLine: '',
+  strength: { pillar: '', text: '' },
+  attention: { pillar: '', text: '' },
+  monitor: { pillar: '', text: '' },
+ }),
+ strength: {
+  ...(payload.summaryScan?.strength ?? { pillar: '', text: '' }),
+  pillar: resolvePillarName(payload.summaryScan?.strength?.pillar) ?? (payload.summaryScan?.strength?.pillar ?? ''),
+ },
+ attention: {
+  ...(payload.summaryScan?.attention ?? { pillar: '', text: '' }),
+  pillar: resolvePillarName(payload.summaryScan?.attention?.pillar) ?? (payload.summaryScan?.attention?.pillar ?? ''),
+ },
+ monitor: {
+  ...(payload.summaryScan?.monitor ?? { pillar: '', text: '' }),
+  pillar: resolvePillarName(payload.summaryScan?.monitor?.pillar) ?? (payload.summaryScan?.monitor?.pillar ?? ''),
+ },
  },
  summaryText: payload.summaryText ?? '',
  summaryMeta: payload.summaryMeta ?? {},
- pillars: applyContext(payload.pillars as CompanyData['pillars'] | undefined),
+ pillars: normalizedPillars,
  changes: applyContext(payload.changes as CompanyData['changes'] | undefined),
  timelineEvents: applyContext(payload.timelineEvents as CompanyData['timelineEvents'] | undefined),
  priceData: {
@@ -981,21 +1459,26 @@ function normalizeCompanyData(raw: unknown, companyId: string, ticker: string): 
  };
 }
 
-async function fetchCompanyData(companyId: string, ticker: string): Promise<CompanyData | null> {
- const mockSource = mockDataByCompany[companyId] ?? mockDataByCompany[ticker] ?? null;
- if (FORCE_COMPANY_ANALYSIS_MOCK) {
- return mockSource ? normalizeCompanyData(mockSource, companyId, ticker) : null;
+function normalizeCompanyData(raw: unknown, companyId: string, ticker: string): CompanyData | null {
+ if (!raw || typeof raw !== 'object') return null;
+ const payload = sanitizePayloadText(raw as Record<string, unknown>);
+ if (String(payload.version ?? '') === '1.0' && payload.overview && payload.radar && payload.pillars) {
+ return adaptV1Payload(payload, companyId, ticker);
  }
+ return normalizeLegacyCompanyData(payload, companyId, ticker);
+}
+
+async function fetchCompanyData(companyId: string, ticker: string): Promise<CompanyData | null> {
  try {
  const endpoint = `${API_BASE_URL}/api/company-analysis/${encodeURIComponent(ticker)}`;
  const response = await fetch(endpoint, {
  headers: { Accept: 'application/json' },
  });
- if (!response.ok) return mockSource ? normalizeCompanyData(mockSource, companyId, ticker) : null;
+ if (!response.ok) return null;
  const data = await response.json();
- return normalizeCompanyData(data, companyId, ticker) ?? (mockSource ? normalizeCompanyData(mockSource, companyId, ticker) : null);
+ return normalizeCompanyData(data, companyId, ticker);
  } catch {
- return mockSource ? normalizeCompanyData(mockSource, companyId, ticker) : null;
+ return null;
  }
 }
 
@@ -1008,7 +1491,7 @@ const statusTone = {
 const pillarOrder: PillarName[] = ['Divida', 'Caixa', 'Margens', 'Retorno', 'Proventos'];
 
 function pillarLabel(pillar: PillarName) {
- return pillar === 'Divida' ? 'Divida' : pillar;
+ return pillar === 'Divida' ? 'Dívida' : pillar;
 }
 
 function statusFromScore(score: number): Status {
@@ -1018,7 +1501,9 @@ function statusFromScore(score: number): Status {
 }
 
 function statusLabel(status: Status) {
- return status === 'Atencao' ? 'Atencao' : status;
+ if (status === 'Atencao') return 'Atenção';
+ if (status === 'Saudavel') return 'Saudável';
+ return status;
 }
 
 type PillarMapStatus = 'risco' | 'atencao' | 'saudavel';
@@ -1042,19 +1527,19 @@ const pillarMapStatusTone: Record<PillarMapStatus, { stroke: string; fill: strin
  atencao: {
  stroke: '#C78D21',
  fill: '#C78D21',
- label: 'Ateno',
+ label: 'Atenção',
  chip: 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]',
  },
  saudavel: {
  stroke: '#168E7D',
  fill: '#168E7D',
- label: 'Saudvel',
+ label: 'Saudável',
  chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0F6F61]',
  },
 };
 
 function pillarDisplayLabel(pillar: PillarName) {
- return pillar === 'Divida' ? 'Dvida' : pillar;
+ return pillar === 'Divida' ? 'Dívida' : pillar;
 }
 
 function mapStatusFromCompanyStatus(status: Status): PillarMapStatus {
@@ -1446,7 +1931,7 @@ function MiniLineChart({
  </svg>
  {isAboveReference !== null && (
  <p className={cx('text-[10px]', isAboveReference ? 'text-[#0F766E]' : 'text-[#9A3412]')}>
- {isAboveReference ? 'Acima da referencia historica' : 'Abaixo da referencia historica - monitorar tendencia'}
+ {isAboveReference ? 'Acima da refer\u00EAncia hist\u00F3rica' : 'Abaixo da refer\u00EAncia hist\u00F3rica, sob press\u00E3o'}
  </p>
  )}
  <div className="flex items-center justify-between text-[10px] text-[#9CA3AF]">
@@ -1459,6 +1944,16 @@ function MiniLineChart({
 }
 
 function toNumeric(value: string) {
+ const lower = value.toLowerCase();
+ let multiplier = 1;
+ if (/\bbi\b/.test(lower)) {
+  multiplier = 1_000_000_000;
+ } else if (/\bmi\b/.test(lower)) {
+  multiplier = 1_000_000;
+ } else if (/\bmil\b/.test(lower)) {
+  multiplier = 1_000;
+ }
+
  const raw = value.replace(/[^\d,.-]/g, '');
  if (!raw) return null;
  const lastComma = raw.lastIndexOf(',');
@@ -1475,7 +1970,7 @@ function toNumeric(value: string) {
  normalized = raw.replace(/,/g, '');
  }
  const parsed = Number.parseFloat(normalized);
- return Number.isFinite(parsed) ? parsed : null;
+ return Number.isFinite(parsed) ? parsed * multiplier : null;
 }
 
 function formatNumberBr(value: number, decimals = 2) {
@@ -1492,15 +1987,15 @@ function trimTrailingZerosBr(value: string) {
 function formatCompactCurrencyBr(value: number) {
  const abs = Math.abs(value);
  if (abs >= 1_000_000_000) {
- const scaled = trimTrailingZerosBr(formatNumberBr(value / 1_000_000_000, 2));
+ const scaled = formatNumberBr(value / 1_000_000_000, 2);
  return `R$ ${scaled} bi`;
  }
  if (abs >= 1_000_000) {
- const scaled = trimTrailingZerosBr(formatNumberBr(value / 1_000_000, 2));
+ const scaled = formatNumberBr(value / 1_000_000, 2);
  return `R$ ${scaled} mi`;
  }
  if (abs >= 1_000) {
- const scaled = trimTrailingZerosBr(formatNumberBr(value / 1_000, 1));
+ const scaled = formatNumberBr(value / 1_000, 2);
  return `R$ ${scaled} mil`;
  }
  return `R$ ${formatNumberBr(value, 2)}`;
@@ -1537,91 +2032,110 @@ function formatMetricValue(value: string, label?: string) {
  return formatted;
 }
 
-const monitorListByPillar: Record<PillarName, string[]> = {
- Divida: ['Perda da posicao de caixa liquido', 'Aumento da alavancagem', 'Queda da cobertura de juros'],
- Caixa: ['Conversao de caixa em queda', 'Pressao de capital de giro', 'Necessidade de capex acima do esperado'],
- Margens: ['Pressao de custos', 'Queda de repasse de precos', 'Perda de eficiencia operacional'],
- Retorno: ['Queda de ROIC/ROE', 'Aumento de capital sem retorno', 'Desaceleracao de produtividade'],
- Proventos: ['Aumento de volatilidade do payout', 'Queda de cobertura de proventos', 'Mudanca de politica de distribuicao'],
-};
-
 function baseIndicatorLabel(pillar: PillarData, metric?: PillarMetric, value?: number | null) {
- if (pillar.name === 'Divida') return 'Caixa liquido';
  return metric?.label ?? pillar.chart.title.replace('Evidencia: ', '');
 }
 
 function verdictSummary(pillar: PillarData, todayText: string, referenceText: string) {
- const comparison = (() => {
- if (pillar.name === 'Divida') return `acima da referencia historica de 5 anos de ${referenceText}`;
- if (pillar.name === 'Caixa') return `com referencia historica de 5 anos em ${referenceText}`;
- if (pillar.name === 'Margens') return `com referencia historica de 5 anos em ${referenceText}`;
- if (pillar.name === 'Retorno') return `com referencia historica de 5 anos em ${referenceText}`;
- return `com referencia historica de 5 anos em ${referenceText}`;
- })();
- return `A empresa encerrou o periodo com ${todayText}, ${comparison}.`;
+ if (pillar.summary && pillar.summary.trim().length > 0) return pillar.summary;
+ return `${todayText} frente à referência histórica de ${referenceText}.`;
 }
 
-function meaningCopy(pillar: PillarData, todayText: string) {
- if (pillar.name === 'Divida') {
- return 'A empresa mantem caixa liquido, o que reduz a pressao financeira e indica uma estrutura de capital mais confortavel no momento.';
+function _normalizeSemanticText(value?: string) {
+ return safeMeta(value)
+ .toLowerCase()
+ .normalize('NFD')
+ .replace(/[\u0300-\u036f]/g, '')
+ .replace(/[^\w\s]/g, ' ')
+ .replace(/\s+/g, ' ')
+ .trim();
+}
+
+function meaningCopy(pillar: PillarData, fallbackConsequence?: string) {
+ const meaning = safeMeta(pillar.meaningText);
+ const summary = safeMeta(pillar.summary);
+ if (meaning) return meaning;
+ if (summary) return summary;
+ const fallback = safeMeta(fallbackConsequence);
+ if (fallback) return fallback;
+ return '';
+}
+
+function monitorItemsFromPillar(pillar: PillarData) {
+ if (pillar.watchItems && pillar.watchItems.length > 0) {
+  return pillar.watchItems.map((item) => item.title).filter((item) => item && item.trim().length > 0);
  }
- if (pillar.name === 'Caixa') return 'A geracao de caixa sustenta execucao e reduz necessidade de financiamento externo.';
- if (pillar.name === 'Margens') return 'A eficiencia operacional segue como principal determinante da qualidade do resultado.';
- if (pillar.name === 'Retorno') return 'O retorno indica quao bem a empresa transforma capital em resultado.';
- return 'A consistencia de proventos ajuda a reduzir surpresa na remuneracao ao acionista.';
+ return pillar.evidences
+ .filter((item) => String(item.label).toLowerCase().includes('aten') || String(item.intensity).toLowerCase().includes('high') || String(item.intensity).toLowerCase().includes('moder'))
+ .map((item) => item.title)
+ .filter((item) => item && item.trim().length > 0)
+ .slice(0, 3);
 }
 
-function signalCardCopy(pillar: PillarData, indicatorLabel: string, todayText: string, referenceText: string, fallbackWhy: string) {
- if (pillar.name === 'Divida') {
- return {
- title: 'Caixa liquido',
- body: 'A empresa encerrou o periodo com caixa liquido acima da sua referencia historica.',
- why: 'isso reduz a pressao financeira e aumenta a margem de seguranca.',
- };
+function metricValueLabel(metric: string, value: string, pillarName?: PillarName) {
+ const normalizedMetric = metric.trim().toLowerCase();
+ if (!normalizedMetric || !value.trim()) return `${metric}: ${value}`;
+ if (normalizedMetric === 'roe' || (pillarName === 'Retorno' && normalizedMetric.includes('roe'))) {
+  return `${metric} de ${value}`;
  }
+ return `${metric}: ${value}`;
+}
+
+function signalCardCopy(pillar: PillarData, indicatorLabel: string, fallbackWhy: string) {
+ const signal = pillar.primarySignal;
+ const title = signal?.title?.trim() || indicatorLabel;
+ const body = signal?.value?.trim() && signal?.metric?.trim()
+ ? metricValueLabel(signal.metric, signal.value, pillar.name)
+ : signal?.value?.trim() || pillar.summary || '';
+ const why = signal?.why?.trim() || fallbackWhy || pillar.summary || '';
+ const badgeLabel = safeMeta(signal?.label);
+ const intensityRaw = safeMeta(signal?.intensity).toLowerCase();
+ const isAttention = intensityRaw.includes('high') || intensityRaw.includes('medium') || badgeLabel.toLowerCase().includes('aten') || badgeLabel.toLowerCase().includes('press');
  return {
- title: indicatorLabel,
- body: `A empresa encerrou o periodo com ${todayText}, frente a referencia historica de ${referenceText}.`,
- why: fallbackWhy,
+ title,
+ body,
+ why,
+ badgeLabel: badgeLabel || '',
+ badgeTone: isAttention ? 'attention' as const : 'positive' as const,
  };
 }
 
+function evidenceSourceText(evidence: PillarEvidence | undefined, pillar: PillarData) {
+ const doc = safeMeta(evidence?.source?.docLabel);
+ const date = safeMeta(evidence?.source?.date);
+ if (doc && date) return `${doc} · ${date}`;
+ if (doc) return doc;
+ const trustSource = safeMeta(pillar.trust.source);
+ const trustDate = safeMeta(pillar.trust.updatedAt);
+ if (trustSource && trustDate) return `${trustSource} · ${trustDate}`;
+ return trustSource || trustDate || 'dado não informado';
+}
 function ctaCopyByPillar(pillar: PillarData) {
- if (pillar.name === 'Divida') {
+ const rawPillar = pillar as unknown as Record<string, unknown>;
+ const ctaRaw = rawPillar.cta;
+ const ctaObj = (ctaRaw && typeof ctaRaw === 'object') ? (ctaRaw as Record<string, unknown>) : {};
  return {
- title: 'Quer acompanhar esse risco sem revisar balanco manualmente?',
- button: 'Me avise se a divida piorar',
- };
- }
- return {
- title: 'Quer ser avisado se este pilar sair da faixa saudavel?',
- button: `Criar alerta de deterioracao de ${pillarLabel(pillar.name)}`,
+ title: safeMeta(pillar.cta?.title) || safeMeta(ctaObj.title) || safeMeta(rawPillar.ctaTitle) || safeMeta(rawPillar.cta_title),
+ button: safeMeta(pillar.cta?.button) || safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(rawPillar.ctaText) || safeMeta(rawPillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
  };
 }
 
 function debtPrimaryNarrative(value: number | null, template: string, label?: string) {
- if (value === null || !Number.isFinite(value)) return 'caixa liquido sem dado atualizado';
+ if (value === null || !Number.isFinite(value)) return '';
  const hasCurrency = template.includes('R$') || (label ? isCurrencyMetricLabel(label) : false);
- if (hasCurrency) return `caixa liquido de ${formatCompactCurrencyBr(Math.abs(value))}`;
- return `caixa liquido em ${formatComparableValue(Math.abs(value), template, label)}`;
+ if (hasCurrency) return formatCompactCurrencyBr(value);
+ return formatComparableValue(value, template, label);
 }
 
 function formatDeltaForPillar(trend?: string) {
  const delta = parseTrendDelta(trend);
- if (typeof delta !== 'number' || !Number.isFinite(delta) || delta === 0) return 'Estavel vs periodo anterior';
+ if (typeof delta !== 'number' || !Number.isFinite(delta) || delta === 0) return 'Estável vs. período anterior';
  const sign = delta > 0 ? '+' : '-';
- return `${sign}${Math.abs(delta).toFixed(1).replace('.', ',')} vs periodo anterior`;
+ return `${sign}${Math.abs(delta).toFixed(1).replace('.', ',')} vs. período anterior`;
 }
 
 function baseMetricReadingHint(pillar: PillarData, metric?: PillarMetric) {
- const label = (metric?.label ?? '').toLowerCase();
- if (pillar.name === 'Divida') {
- return 'Caixa liquido tende a indicar uma estrutura financeira mais confortavel.';
- }
- if (pillar.name === 'Caixa') return 'Quanto maior e mais estavel, melhor.';
- if (pillar.name === 'Margens') return 'Quanto maior e mais consistente, melhor.';
- if (pillar.name === 'Retorno') return 'Quanto maior acima da referencia, melhor.';
- return 'Consistencia importa mais que picos isolados.';
+ return safeMeta(pillar.explainer?.text);
 }
 
 function formatComparableValue(value: number | null, template: string, label?: string) {
@@ -1793,8 +2307,8 @@ export function CompanyAnalysis() {
  ? Math.round((activeData.radarScores.Divida + activeData.radarScores.Caixa + activeData.radarScores.Margens + activeData.radarScores.Retorno + activeData.radarScores.Proventos) / 5)
  : 0;
  const companyStatus: Status = scoreAverage < 50 ? 'Risco' : scoreAverage < 70 ? 'Atencao' : 'Saudavel';
- const mapScores = activeData?.radarScores ?? radarScores;
- const mapPreviousScores = activeData?.radarPreviousScores ?? radarPreviousScores;
+ const mapScores = activeData?.radarScores ?? EMPTY_RADAR_SCORES;
+ const mapPreviousScores = activeData?.radarPreviousScores ?? EMPTY_RADAR_SCORES;
  const pillarDataByName = new Map((activeData?.pillars ?? []).map((pillar) => [pillar.name, pillar]));
  const mapPillarData: PillarMapDatum[] = pillarOrder.map((pillar) => {
  const score = mapScores[pillar];
@@ -1837,9 +2351,12 @@ const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).
  const premiumVsSector = currentMultipleValue != null && sectorMultipleValue != null && sectorMultipleValue > 0
  ? ((currentMultipleValue / sectorMultipleValue) - 1) * 100
  : null;
+ const priceSummaryLine = (activeData?.priceData.summary ?? '').trim();
  const priceContextPosition = (() => {
  if (premiumVsHistorical == null) return 'Sem base suficiente para classificar a faixa historica agora.';
- if (premiumVsHistorical <= 5) return 'Hoje o mercado esta pagando um premio leve sobre o historico recente.';
+ if (premiumVsHistorical <= -15) return 'Hoje o mercado esta negociando com desconto relevante versus o historico recente.';
+ if (premiumVsHistorical < -5) return 'Hoje o mercado esta negociando com desconto moderado versus o historico recente.';
+ if (premiumVsHistorical <= 5) return 'Hoje o mercado esta proximo da faixa historica recente.';
  if (premiumVsHistorical <= 15) return 'Hoje o mercado esta pagando um premio moderado sobre o historico recente.';
  return 'O multiplo esta acima do historico e ja exige continuidade de qualidade e crescimento para se sustentar.';
  })();
@@ -1854,25 +2371,35 @@ const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).
  const priceContextLine = (() => {
  if (!activePriceRow) return 'Sem comparativo historico e setorial para qualificar a leitura.';
  if (historicalMultipleValue == null || sectorMultipleValue == null) return `Hoje esta em ${activePriceRow.current} em ${selectedPriceMetric}.`;
- return `Hoje esta em ${activePriceRow.current}, acima da mediana de 5 anos (${activePriceRow.historical}) e tambem acima do setor (${activePriceRow.sector}). Isso sugere premio sobre o historico recente e exige continuidade de qualidade e crescimento para se sustentar, mas nao significa automaticamente que o ativo esteja caro.`;
+ const vsHistorical = currentMultipleValue != null && historicalMultipleValue != null
+ ? (currentMultipleValue >= historicalMultipleValue ? 'acima' : 'abaixo')
+ : 'proximo de';
+ const vsSector = currentMultipleValue != null && sectorMultipleValue != null
+ ? (currentMultipleValue >= sectorMultipleValue ? 'acima' : 'abaixo')
+ : 'proximo de';
+ return `Hoje esta em ${activePriceRow.current}, ${vsHistorical} da mediana de 5 anos (${activePriceRow.historical}) e tambem ${vsSector} do setor (${activePriceRow.sector}). Isso da contexto para a leitura atual, mas nao significa automaticamente que o ativo esteja caro ou barato.`;
  })();
  const pricePremiumProfile = (() => {
- const comparisons = [premiumVsHistorical, premiumVsSector].filter((value): value is number => value != null);
- if (comparisons.length === 0) return 'Sem base suficiente para classificar o premio.';
- return 'Negocia com premio sobre historico e setor.';
+ if (premiumVsHistorical == null && premiumVsSector == null) return 'Sem base suficiente para classificar premio ou desconto.';
+ if ((premiumVsHistorical ?? 0) >= 0 && (premiumVsSector ?? 0) >= 0) return 'Negocia com premio sobre historico e setor.';
+ if ((premiumVsHistorical ?? 0) <= 0 && (premiumVsSector ?? 0) <= 0) return 'Negocia com desconto versus historico e setor.';
+ return 'Leitura mista entre historico e setor.';
  })();
  const companySourceRows = (activeData?.sourceRows ?? []).filter((row) => row.companyId === companyContext.companyId);
  const sourceRowsWithRelevance = companySourceRows.map((row) => {
+ const displaySource = (row as { displaySource?: string }).displaySource ?? row.source;
+ const displayDoc = (row as { displayDoc?: string }).displayDoc ?? row.doc;
+ const displayStatus = (row as { displayStatus?: string }).displayStatus ?? row.status;
  const isPrimary = row.category === 'Financeiro' || row.category === 'Eventos' || row.category === 'Preco';
- const statusLabel = row.status === 'Atualizado' ? 'Atualizado' : isPrimary ? 'Desatualizada' : 'Mais antiga';
- const consequence = row.status === 'Atualizado'
+ const statusLabel = displayStatus === 'Atualizado' ? 'Atualizado' : isPrimary ? 'Desatualizada' : 'Mais antiga';
+ const consequence = displayStatus === 'Atualizado'
  ? isPrimary
   ? 'Sustenta a leitura atual.'
   : 'Complementar atualizada.'
  : isPrimary
  ? 'Desatualizada; leitura pede cautela.'
  : 'Complementar; nao altera a leitura principal.';
- return { ...row, isPrimary, consequence, statusLabel };
+ return { ...row, source: displaySource, doc: displayDoc, status: displayStatus, isPrimary, consequence, statusLabel };
  });
  const primarySourceRows = sourceRowsWithRelevance.filter((row) => row.isPrimary);
  const complementarySourceRows = sourceRowsWithRelevance.filter((row) => !row.isPrimary);
@@ -1895,6 +2422,8 @@ const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).
  const sourceConfidenceSummary = outdatedPrimarySources > 0
  ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnostico.`
  : `A leitura atual esta apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Ha ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Nao ha alerta de desatualizacao relevante no conjunto principal.'}`;
+ const resolvedSourceConfidenceLabel = (activeData?.sourceConfidence?.level ?? '').trim() || sourceConfidenceLabel;
+ const resolvedSourceConfidenceSummary = (activeData?.sourceConfidence?.summary ?? '').trim() || sourceConfidenceSummary;
 const allCompanyChanges = (activeData?.changes ?? []).filter((change) => change.companyId === companyContext.companyId);
 const eventsCount = (activeData?.timelineEvents ?? []).filter((event) => event.companyId === companyContext.companyId).length;
 const changesBySelectedWindow = allCompanyChanges.filter((change) => {
@@ -1907,22 +2436,13 @@ const changesBySelectedWindow = allCompanyChanges.filter((change) => {
 const changesCount = changesBySelectedWindow.length;
  const strongestHumanLine = (() => {
  const base = activeData?.strongest.summary?.trim();
- if (base && base.split(' ').length >= 10) return base;
- const pillar = (activeData?.strongest.title ?? '').toLowerCase();
- if (pillar.includes('divid') || pillar.includes('caixa')) {
- return 'A empresa mantem caixa liquido, o que reduz a pressao financeira e sustenta uma estrutura de capital mais confortavel no momento.';
- }
- return `A principal forca hoje esta em ${activeData?.strongest.title ?? 'este pilar'}, sustentando a leitura de curto prazo da empresa.`;
+ if (base) return base;
+ return 'Sem resumo de forca disponivel neste fechamento.';
  })();
  const watchoutHumanLine = (() => {
  const base = activeData?.watchout.summary?.trim();
- const fallback = 'As margens pedem acompanhamento nos proximos fechamentos para confirmar se a pressao e pontual ou persistente.';
- if (!base) return fallback;
- const normalized = base.toLowerCase();
- if (normalized.includes('forte') || normalized.includes('saudavel') || normalized.includes('muito bom')) {
- return fallback;
- }
- return base;
+ if (base) return base;
+ return 'Sem ponto de atencao detalhado neste fechamento.';
  })();
  const watchoutBadgeLabel = (() => {
  const raw = (activeData?.watchout.badge ?? '').toLowerCase();
@@ -1933,11 +2453,12 @@ const changesCount = changesBySelectedWindow.length;
  return activeData?.watchout.badge ?? 'Monitorar';
  })();
  const summaryNarrative = (() => {
- const base = activeData?.summaryScan.motherLine?.trim();
- if (base && base.length > 120) return base;
- const strength = activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Divida';
- const attention = activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens';
- return `${activeCompany.name} segue com estrutura financeira mais confortavel, com destaque em ${strength}. O principal ponto de atencao esta em ${attention}, que merece acompanhamento nos proximos fechamentos para confirmar se a pressao e pontual ou persistente.`;
+ const summary = activeData?.summaryText?.trim();
+ if (summary) return summary;
+ const motherLine = activeData?.summaryScan.motherLine?.trim();
+ if (motherLine) return motherLine;
+ const headline = activeData?.diagnosisHeadline?.trim();
+ return headline || 'Sem resumo narrativo disponivel neste fechamento.';
  })();
  const enrichedChanges = useMemo(() => {
  return changesBySelectedWindow
@@ -2037,9 +2558,19 @@ const changesCount = changesBySelectedWindow.length;
  const displayedRoutine = changesFocus === 'Estruturais' || changesFocus === 'Mais relevantes' ? [] : routineRenderItems;
 
  const hasVisibleChanges = displayedStructural.length > 0 || displayedRelevant.length > 0 || displayedRoutine.length > 0;
- const principalChange = structuralChanges[0] ?? null;
+ const backendWindowKey = String(periodToDays(changesWindow));
+ const backendChangesSummary = activeData?.changesSummaryByWindow?.[backendWindowKey] ?? activeData?.changesSummary;
+ const principalChange = backendChangesSummary?.principalChange
+ ? {
+ title: backendChangesSummary.principalChange.title ?? 'Mudanca relevante',
+ pillar: normalizeChangePillar(backendChangesSummary.principalChange.impact),
+ companyId: companyContext.companyId,
+ }
+ : (structuralChanges[0] ?? null);
 
- const periodMostAffected = (() => {
+ const periodMostAffected = backendChangesSummary?.mostAffectedPillar
+ ? normalizeChangePillar(backendChangesSummary.mostAffectedPillar)
+ : (() => {
  const counter = new Map<ChangePillarTag, number>();
  visibleChangesByPillar.forEach((change) => {
   counter.set(change.pillar, (counter.get(change.pillar) ?? 0) + 1);
@@ -2048,8 +2579,12 @@ const changesCount = changesBySelectedWindow.length;
  return [...counter.entries()].sort((a, b) => b[1] - a[1])[0][0];
  })();
 
- const routineCount = enrichedChanges.filter((change) => change.level === 'Rotina').length;
- const structuralCount = enrichedChanges.filter((change) => change.level === 'Estrutural').length;
+ const routineCount = backendChangesSummary?.routineCount ?? enrichedChanges.filter((change) => change.level === 'Rotina').length;
+ const structuralCount = backendChangesSummary?.structuralCount ?? enrichedChanges.filter((change) => change.level === 'Estrutural').length;
+ const changesSummaryText = backendChangesSummary?.summaryText
+ ?? (principalChange
+ ? `Nos ultimos ${changesWindow.replace(' dias', '')} dias, a principal mudanca identificada foi ${principalChange.title.toLowerCase()}, com possivel efeito no pilar de ${principalChange.pillar}. Fora isso, o periodo teve atualizacoes mais rotineiras, sem alteracao estrutural relevante na leitura geral da empresa.`
+ : `Nos ultimos ${changesWindow.replace(' dias', '')} dias, o periodo foi marcado por atualizacoes de acompanhamento, sem mudanca estrutural dominante na leitura geral da empresa.`);
  const availablePillarsForFilter = pillarFilterOptions;
  const allCompanyTimelineEvents = (activeData?.timelineEvents ?? []).filter((timelineEvent) => timelineEvent.companyId === companyContext.companyId);
  const timelineEventsBySelectedWindow = useMemo(() => {
@@ -2231,9 +2766,9 @@ const changesCount = changesBySelectedWindow.length;
  <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-xl border bg-white p-4', nested ? 'border-[#E5E7EB]' : 'border-[#DDE3EA]')}>
   <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#5B6472]">
   <span className="rounded-full border border-[#DDE3EA] bg-[#F8FAFC] px-2 py-0.5">{change.pillar}</span>
-  <span>·</span>
+  <span>|</span>
   <span>{change.date}</span>
-  <span>·</span>
+  <span>|</span>
   <span className={cx('rounded-full px-2 py-0.5', change.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : change.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
    {change.severityLabel}
   </span>
@@ -2243,7 +2778,7 @@ const changesCount = changesBySelectedWindow.length;
   <p className="mt-2 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Por que isso importa:</p>
   <p className="text-[13px] text-[#475569]">{change.whyItMatters}</p>
   <p className="mt-3 text-[11px] text-[#8B95A5]">
-   Fonte: {safeMeta(change.source.docLabel)} · Atualizado em {safeMeta(change.date)} · Status: Atualizado
+   Fonte: {safeMeta(change.source.docLabel)} | Atualizado em {safeMeta(change.date)} | Status: Atualizado
   </p>
   <div className="mt-3 flex flex-wrap items-center gap-2">
    <button
@@ -2276,9 +2811,9 @@ const changesCount = changesBySelectedWindow.length;
  <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-xl border bg-white p-4', nested ? 'border-[#E5E7EB]' : 'border-[#DDE3EA]')}>
   <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#5B6472]">
   <span className="rounded-full border border-[#DDE3EA] bg-[#F8FAFC] px-2 py-0.5">{timelineEvent.mainPillar}</span>
-  <span>·</span>
+  <span>|</span>
   <span>{timelineEvent.date}</span>
-  <span>·</span>
+  <span>|</span>
   <span className={cx('rounded-full px-2 py-0.5', timelineEvent.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : timelineEvent.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
    {timelineEvent.severityLabel}
   </span>
@@ -2288,7 +2823,7 @@ const changesCount = changesBySelectedWindow.length;
   <p className="mt-2 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Por que isso importa:</p>
   <p className="text-[13px] text-[#475569]">{timelineEvent.whyItMatters}</p>
   <p className="mt-3 text-[11px] text-[#8B95A5]">
-   Fonte: {safeMeta(timelineEvent.source)} · Atualizado em {safeMeta(timelineEvent.date)} · Status: Monitorado
+   Fonte: {safeMeta(timelineEvent.source)} | Atualizado em {safeMeta(timelineEvent.date)} | Status: Monitorado
   </p>
   <div className="mt-3 flex flex-wrap items-center gap-2">
    <button
@@ -2453,7 +2988,7 @@ const changesCount = changesBySelectedWindow.length;
  queueFilter === filter ? 'border border-[#E5E7EB] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
  )}
  >
- {filter === 'Atencao' ? 'Ateno' : filter}
+ {filter === 'Atencao' ? 'Atenção' : filter}
  </button>
  ))}
  </div>
@@ -2580,9 +3115,9 @@ const changesCount = changesBySelectedWindow.length;
  {tab === 'Mudancas'
  ? `O que mudou (90 dias) (${changesCount})`
  : tab === 'Eventos'
- ? `Agenda (prximos eventos) (${eventsCount})`
+ ? `Agenda (proximos eventos) (${eventsCount})`
  : tab === 'Preco'
- ? 'Preço'
+ ? 'Preco'
  : tab}
  </button>
  ))}
@@ -2601,7 +3136,7 @@ const changesCount = changesBySelectedWindow.length;
  <h3 className="text-[14px] font-semibold text-[#111827]">Como calculamos o placar</h3>
  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={() => setShowScoreInfo(false)}>Fechar</button>
  </div>
- <p className="mt-2 text-[12px] text-[#6B7280]">Pesos: Dvida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
+ <p className="mt-2 text-[12px] text-[#6B7280]">Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
  <p className="mt-1 text-[12px] text-[#6B7280]">Regra: score 0-100 por pilar com cortes em saudvel, ateno e risco.</p>
  <p className="mt-1 text-[12px] text-[#6B7280]">Fontes: CVM, B3 e RI da empresa.</p>
  </div>
@@ -2717,7 +3252,7 @@ const changesCount = changesBySelectedWindow.length;
  <article className="rounded-xl border border-[#E8EAED] border-l-[3px] border-l-[#F59E0B] bg-white p-4">
  <div className="flex items-center gap-2">
  <TriangleAlert className="h-4 w-4 text-[#D97706]" />
- <h3 className="text-[14px] font-semibold text-[#111827]">Principal Atencao</h3>
+ <h3 className="text-[14px] font-semibold text-[#111827]">Principal Atenção</h3>
  </div>
  <div className="mt-4">
  <p className="text-[24px] font-bold text-[#D97706]">{activeData?.watchout.title ?? 'Margens'}</p>
@@ -2758,7 +3293,7 @@ const changesCount = changesBySelectedWindow.length;
  />
  </div>
  <p className="mt-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-[12px] text-[#475467]">
- Atencao principal em {activeData?.watchout.title ?? 'Margens'}; forca relativa em {activeData?.strongest.title ?? 'Divida'}.
+ Atenção principal em {activeData?.watchout.title ?? 'Margens'}; força relativa em {activeData?.strongest.title ?? 'Dívida'}.
  </p>
  </article>
  </div>
@@ -2775,9 +3310,9 @@ const changesCount = changesBySelectedWindow.length;
  {summaryNarrative}
  </p>
  <div className="mt-3 space-y-1 text-[13px] text-[#374151]">
- <p><span className="font-semibold">Forca principal:</span> {activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Divida'}</p>
- <p><span className="font-semibold">Atencao principal:</span> {activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
- <p><span className="font-semibold">O que monitorar:</span> {activeData?.summaryScan.monitor.text ?? 'Evolucao das margens no proximo fechamento.'}</p>
+ <p><span className="font-semibold">Força principal:</span> {activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
+ <p><span className="font-semibold">Atenção principal:</span> {activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
+ <p><span className="font-semibold">O que monitorar:</span> {activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
  </div>
  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
@@ -2821,8 +3356,8 @@ const changesCount = changesBySelectedWindow.length;
  </article>
  {(activeData?.pillars ?? []).filter((p) => p.companyId === companyContext.companyId).length === 0 && (
  <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <p className="text-[14px] text-[#6B7280]">Ainda no temos dados suficientes para este indicador.</p>
- <p className="mt-1 text-[12px] text-[#9CA3AF]">ltima tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <p className="text-[14px] text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
+ <p className="mt-1 text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
  <p className="text-[12px] text-[#9CA3AF]">Fonte esperada: CVM/RI</p>
  </article>
  )}
@@ -2838,20 +3373,22 @@ const changesCount = changesBySelectedWindow.length;
  const baseMetric = pillar.metrics[0];
  const baseMetricValue = baseMetric ? toNumeric(baseMetric.value) : null;
  const baseMetricRef = median(pillar.chart.series5);
- const todayText = pillar.name === 'Divida'
- ? debtPrimaryNarrative(baseMetricValue, baseMetric?.value ?? '', baseMetric?.label)
- : formatComparableValue(baseMetricValue, baseMetric?.value ?? '', baseMetric?.label);
- const evidenceHeadline = pillar.name === 'Divida' ? todayText.replace(/^caixa liquido/, 'Caixa liquido') : todayText;
- const referenceText = pillar.name === 'Divida'
- ? formatComparableValue(Math.abs(baseMetricRef), baseMetric?.value ?? '', baseMetric?.label)
- : formatComparableValue(baseMetricRef, baseMetric?.value ?? '', baseMetric?.label);
+ const todayText = formatComparableValue(baseMetricValue, baseMetric?.value ?? '', baseMetric?.label);
+ const evidenceHeadline = metricValueLabel(baseIndicatorLabel(pillar, baseMetric, baseMetricValue), todayText, pillar.name);
+ const referenceText = formatComparableValue(baseMetricRef, baseMetric?.value ?? '', baseMetric?.label);
  const indicatorLabel = baseIndicatorLabel(pillar, baseMetric, baseMetricValue);
  const verdictLine = verdictSummary(pillar, todayText, referenceText);
- const monitorItems = monitorListByPillar[pillar.name];
- const whatItMeans = meaningCopy(pillar, todayText);
- const mainEvidence = pillar.evidences.find((item) => item.label === 'Ponto forte') ?? pillar.evidences[0];
+ const monitorItems = monitorItemsFromPillar(pillar);
+ const mainEvidence = pillar.evidences.find((item) => item.title === pillar.primarySignal?.title)
+  ?? pillar.evidences.find((item) => {
+   const label = String(item.label).toLowerCase();
+   return label.includes('suporte') || label.includes('forte') || label.includes('press');
+  })
+  ?? pillar.evidences[0];
  const ctaCopy = ctaCopyByPillar(pillar);
- const signalCopy = signalCardCopy(pillar, indicatorLabel, todayText, referenceText, mainEvidence?.why ?? '');
+ const signalCopy = signalCardCopy(pillar, indicatorLabel, mainEvidence?.why ?? '');
+ const whatItMeans = meaningCopy(pillar, mainEvidence?.why ?? signalCopy.why);
+ const mainEvidenceSource = evidenceSourceText(mainEvidence, pillar);
  const chartVariant: 'line' | 'bar' = pillar.name === 'Proventos' ? 'bar' : 'line';
 
  return (
@@ -2883,7 +3420,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="flex flex-wrap items-center gap-2">
  <h2 className="text-[17px] font-bold text-[#111827]">{pillarName}</h2>
  <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', statusTone[pillar.status].badge)}>{statusLabel(pillar.status)}</span>
- <span className="text-[12px] text-[#6B7280]">{pillar.name === 'Divida' ? 'Estavel vs periodo anterior' : deltaLabel}</span>
+ <span className="text-[12px] text-[#6B7280]">{deltaLabel}</span>
  <span className="text-[10px] font-normal tracking-tight text-[#E2E8F0]">Score {pillar.score}/100</span>
  </div>
  <p className="mt-2 text-[14px] text-[#374151]">{verdictLine}</p>
@@ -2900,20 +3437,14 @@ const changesCount = changesBySelectedWindow.length;
  <section className="rounded-lg border border-[#E8EAED] bg-[#FCFDFD] p-2.5">
  <div className="grid gap-2.5 lg:grid-cols-2">
  <div>
- <p className="text-[12px] font-semibold text-[#475569]">Evidencia principal</p>
+ <p className="text-[12px] font-semibold text-[#475569]">Evidência principal</p>
  <p className="mt-1 text-[13px] text-[#6B7280]">Indicador-base: {indicatorLabel}</p>
  <p className="mt-2 text-[28px] font-bold text-[#111827]">{evidenceHeadline}</p>
  <p className="text-[12px] text-[#6B7280]">Data: {baseMetric?.source.date ?? pillar.trust.updatedAt}</p>
- <p className="mt-2 text-[13px] text-[#1F2937]"><span className="font-semibold text-[#0F172A]">Referencia de 5 anos:</span> <span className="font-medium">{referenceText}</span></p>
- <p className="mt-1 text-[12px] text-[#6B7280]">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
- <details className="mt-1">
- <summary className="cursor-pointer text-[11px] text-[#94A3B8] hover:text-[#64748B]">Entender termo tecnico</summary>
- <p className="mt-1 text-[11px] text-[#94A3B8]">
- {pillar.name === 'Divida'
- ? 'Tecnicamente, isso representa uma posicao de divida liquida negativa.'
- : 'Leitura tecnica disponivel para quem quiser validar o calculo detalhado do indicador-base.'}
- </p>
- </details>
+ <p className="mt-2 text-[13px] text-[#1F2937]"><span className="font-semibold text-[#0F172A]">Referência de 5 anos:</span> <span className="font-medium">{referenceText}</span></p>
+ {baseMetricReadingHint(pillar, baseMetric) && (
+  <p className="mt-1 text-[12px] text-[#6B7280]">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
+ )}
  </div>
  <div>
  <div className="mb-2 flex justify-end">
@@ -2936,7 +3467,7 @@ const changesCount = changesBySelectedWindow.length;
  highlightIndex={values.length - 1}
  variant={chartVariant}
  referenceValue={baseMetricRef}
- referenceLabel="Ref. historica"
+ referenceLabel="Ref. histórica"
  />
  </div>
  </div>
@@ -2963,14 +3494,16 @@ const changesCount = changesBySelectedWindow.length;
  <section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
  <h3 className="text-[13px] font-semibold text-[#111827]">Sinal principal</h3>
  <div className="mt-2 rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-2.5">
- <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', mainEvidence.label === 'Ponto de atencao' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
- {mainEvidence.label === 'Ponto de atencao' ? 'Ponto de atencao' : 'Ponto forte'}
- </span>
+ {signalCopy.badgeLabel && (
+  <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+  {signalCopy.badgeLabel}
+  </span>
+ )}
  <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signalCopy.title}</p>
  <p className="mt-1 text-[13px] text-[#4B5563]">{signalCopy.body}</p>
- <p className="mt-1 text-[13px] text-[#4B5563]">Por que importa: {signalCopy.why}</p>
+ {signalCopy.why && <p className="mt-1 text-[13px] text-[#4B5563]">Por que importa: {signalCopy.why}</p>}
  <div className="mt-2 flex items-center justify-between">
- <span className="text-[12px] text-[#94A3B8]">Fonte: {mainEvidence.source.docLabel} {mainEvidence.source.date}</span>
+ <span className="text-[12px] text-[#94A3B8]">Fonte: {mainEvidenceSource}</span>
  <button
  onClick={(event) => {
  if (guardAction(event, mainEvidence.companyId)) return;
@@ -2987,12 +3520,14 @@ const changesCount = changesBySelectedWindow.length;
  </section>
  )}
 
+ {(ctaCopy.title || ctaCopy.button) && (
  <section className="rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-2.5">
  <p className="text-[13px] text-[#374151]">{ctaCopy.title}</p>
  <button className={cx('mt-2 rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[13px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
  {ctaCopy.button}
  </button>
  </section>
+ )}
  </div>
  </div>
  </article>
@@ -3010,19 +3545,16 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mt-3 border-t border-[#EEF2F6] pt-3">
   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do periodo</p>
   <p className="mt-2 max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
-   {principalChange
-   ? `Nos ultimos ${changesWindow.replace(' dias', '')} dias, a principal mudanca identificada foi ${principalChange.title.toLowerCase()}, com possivel efeito no pilar de ${principalChange.pillar}. Fora isso, o periodo teve atualizacoes mais rotineiras, sem alteracao estrutural relevante na leitura geral da empresa.`
-   : `Nos ultimos ${changesWindow.replace(' dias', '')} dias, o periodo foi marcado por atualizacoes de acompanhamento, sem mudanca estrutural dominante na leitura geral da empresa.`}
+   {changesSummaryText}
   </p>
   <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
-   <p className="font-semibold text-[#0F766E]">→ Pilar mais afetado: {periodMostAffected}</p>
-   <p>→ Mudancas estruturais: {structuralCount}</p>
-   <p>→ Atualizacoes de rotina: {routineCount}</p>
+   <p className="font-semibold text-[#0F766E]">Pilar mais afetado: {periodMostAffected}</p>
+   <p>Mudancas estruturais: {structuralCount}</p>
+   <p>Atualizacoes de rotina: {routineCount}</p>
   </div>
   </div>
  </section>
-
- <div className="mb-4 space-y-2">
+<div className="mb-4 space-y-2">
   <div className="flex flex-wrap items-center gap-2">
   {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
    <button key={period} onClick={() => setChangesWindow(period)} className={cx('h-7 rounded-full px-3.5 text-[13px]', period === changesWindow ? 'border border-[#DDE3EA] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]')}>
@@ -3103,7 +3635,7 @@ const changesCount = changesBySelectedWindow.length;
 
   {displayedRoutine.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 · Rotina</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 | Rotina</p>
    {displayedRoutine.map((item) => {
    if (item.type === 'single') return renderChangeCard(item.payload);
    const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
@@ -3154,9 +3686,9 @@ const changesCount = changesBySelectedWindow.length;
    : `Nos proximos ${eventsWindow.replace(' dias', '')} dias, a agenda esta concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
   </p>
   <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
-   <p className="font-semibold text-[#0F766E]">→ Pilar mais sensivel: {timelineMostAffectedPillar}</p>
-   <p>→ Gatilhos principais: {timelineStructuralCount}</p>
-   <p>→ Atualizacoes de rotina: {timelineRoutineCount}</p>
+   <p className="font-semibold text-[#0F766E]">Pilar mais sensivel: {timelineMostAffectedPillar}</p>
+   <p>Gatilhos principais: {timelineStructuralCount}</p>
+   <p>Atualizacoes de rotina: {timelineRoutineCount}</p>
   </div>
   </div>
  </section>
@@ -3242,7 +3774,7 @@ const changesCount = changesBySelectedWindow.length;
 
   {displayedTimelineRoutine.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 · Rotina</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 | Rotina</p>
    {displayedTimelineRoutine.map((item) => {
    if (item.type === 'single') return renderAgendaEventCard(item.payload);
    const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
@@ -3334,6 +3866,7 @@ const changesCount = changesBySelectedWindow.length;
  <p className="text-[14px] font-medium text-[#111827]">{priceReadingLine}</p>
  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Contexto</p>
  <p className="text-[13px] text-[#6B7280]">{priceContextLine}</p>
+ {priceSummaryLine && <p className="text-[13px] text-[#475569]">{priceSummaryLine}</p>}
  </div>
  <p className="mt-1 text-[11px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
  <p className="mt-1 text-[11px] text-[#9CA3AF]">Preco nominal: {safeMeta(activeData?.priceData.current)} (apoio de contexto, nao sinal principal).</p>
@@ -3438,15 +3971,15 @@ const changesCount = changesBySelectedWindow.length;
   <div className="flex flex-wrap items-center justify-between gap-2">
   <div>
    <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Confiabilidade das fontes</p>
-   <p className="mt-1 text-[14px] font-semibold text-[#111827]">{sourceConfidenceLabel}</p>
-  </div>
-  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', sourceConfidenceTone)}>{sourceConfidenceLabel}</span>
-  </div>
-  <p className="mt-2 text-[13px] text-[#475569]">{sourceConfidenceSummary}</p>
+  <p className="mt-1 text-[14px] font-semibold text-[#111827]">{resolvedSourceConfidenceLabel}</p>
+ </div>
+  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', sourceConfidenceTone)}>{resolvedSourceConfidenceLabel}</span>
+ </div>
+  <p className="mt-2 text-[13px] text-[#475569]">{resolvedSourceConfidenceSummary}</p>
   <div className="mt-3 space-y-1 text-[12px] text-[#374151]">
-  <p>→ Fontes principais atualizadas: {updatedPrimarySources}</p>
-  <p>→ Fontes complementares antigas: {outdatedComplementarySources}</p>
-  <p>→ Ultima atualizacao mais recente: {safeMeta(latestSourceDate)}</p>
+  <p>Fontes principais atualizadas: {updatedPrimarySources}</p>
+  <p>Fontes complementares antigas: {outdatedComplementarySources}</p>
+  <p>Ultima atualizacao mais recente: {safeMeta(latestSourceDate)}</p>
   </div>
  </section>
 
@@ -3548,6 +4081,8 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  );
 }
+
+
 
 
 
