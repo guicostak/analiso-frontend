@@ -36,6 +36,7 @@ import logoRenner from '../assets/logos/renner.png';
 import logoMrv from '../assets/logos/mrv.jpg';
 import logoTaesa from '../assets/logos/taesa.png';
 import logoItau from '../assets/logos/itau.png';
+import logoPetrobras from '../assets/logos/petrobras.webp';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
@@ -165,6 +166,7 @@ type PillarData = {
 };
 const queueItems: CompanyQueueItem[] = [
  { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposição a minério de ferro.' },
+ { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
  { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
  { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
  { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa, description: 'Empresa de transmissão de energia com receita regulada.' },
@@ -2084,14 +2086,16 @@ function MiniLineChart({
  .join(' ');
 
  const markerX =
+ variant === 'line' &&
  highlightIndex !== undefined
  ? padding + (Math.max(Math.min(highlightIndex, Math.max(values.length - 1, 0)), 0) * (width - padding * 2)) / Math.max(values.length - 1, 1)
  : null;
  const markerY =
+ variant === 'line' &&
  highlightIndex !== undefined && values[highlightIndex] !== undefined
  ? height - padding - ((values[highlightIndex] - min) / span) * (height - padding * 2)
  : null;
- const hasReference = typeof referenceValue === 'number' && Number.isFinite(referenceValue);
+ const hasReference = variant === 'line' && typeof referenceValue === 'number' && Number.isFinite(referenceValue);
  const refY = hasReference ? height - padding - (((referenceValue as number) - min) / span) * (height - padding * 2) : null;
  const safeRefY = refY === null ? null : Math.max(padding, Math.min(height - padding, refY));
  const latestValue = values[Math.max(values.length - 1, 0)];
@@ -3579,7 +3583,19 @@ const changesCount = changesBySelectedWindow.length;
  const accent = pillar.status === 'Saudavel' ? 'border-l-[#0E9384]' : pillar.status === 'Atencao' ? 'border-l-[#F59E0B]' : 'border-l-[#DC2626]';
  const pillarName = pillarLabel(pillar.name);
  const deltaLabel = formatDeltaForPillar(pillar.trend);
- const baseMetric = pillar.metrics[0];
+ const normalizedChartTitle = _normalizeSemanticText(pillar.chart.title);
+ const baseMetric = pillar.name === 'Proventos'
+ ? (
+  pillar.metrics.find((metric) => {
+   const normalizedLabel = _normalizeSemanticText(metric.label);
+   if (!normalizedLabel) return false;
+   if (normalizedChartTitle.includes('acao')) return normalizedLabel.includes('acao');
+   if (normalizedChartTitle.includes('payout')) return normalizedLabel.includes('payout');
+   if (normalizedChartTitle.includes('yield')) return normalizedLabel.includes('yield');
+   return false;
+  }) ?? pillar.metrics[0]
+ )
+ : pillar.metrics[0];
  const baseMetricValue = baseMetric ? toNumeric(baseMetric.value) : null;
  const baseMetricRef = median(pillar.chart.series5);
  const todayText = formatComparableValue(baseMetricValue, baseMetric?.value ?? '', baseMetric?.label);
@@ -3598,7 +3614,7 @@ const changesCount = changesBySelectedWindow.length;
  const signalCopy = signalCardCopy(pillar, indicatorLabel, mainEvidence?.why ?? '');
  const whatItMeans = meaningCopy(pillar, mainEvidence?.why ?? signalCopy.why);
  const mainEvidenceSource = evidenceSourceText(mainEvidence, pillar);
- const chartVariant: 'line' | 'bar' = pillar.name === 'Proventos' ? 'bar' : 'line';
+ const chartVariant: 'line' | 'bar' = 'line';
 
  return (
  <article id={`pillar-${pillar.name}`} key={pillar.name} className={cx('rounded-xl border border-[#E8EAED] border-l-[3px] bg-white p-5', accent)}>
