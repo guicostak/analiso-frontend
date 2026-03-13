@@ -38,10 +38,9 @@ import logoTaesa from '../assets/logos/taesa.png';
 import logoItau from '../assets/logos/itau.png';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
-type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preco' | 'Fontes';
+type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
 type QueueFilter = 'Todas' | 'Atencao' | 'Risco';
 type WindowSize = '5a' | '10a';
-type PriceMetric = 'P/L' | 'EV/EBITDA' | 'P/VP';
 type FeedWindow = '30 dias' | '60 dias' | '90 dias';
 type ChangesFocusFilter = 'Mais relevantes' | 'Rotina' | 'Estruturais';
 type EventsFocusFilter = 'Mais relevantes' | 'Rotina' | 'Principais';
@@ -54,6 +53,40 @@ type CompanyContext = {
  companyId: string;
  ticker: string;
  name: string;
+};
+
+type PriceValuationStateChip = {
+ label: string;
+ tone?: string;
+};
+
+type PriceValuationScenario = {
+ scenario: string;
+ estimatedValue: string;
+ differenceVsCurrent: string;
+ reading: string;
+};
+
+type PriceSensitivityDriver = {
+ driver: string;
+ value: string;
+ impact: string;
+};
+
+type PriceBulletChart = {
+ conservativeMin: number | null;
+ conservativeMax: number | null;
+ baseValue: number | null;
+ optimisticMin: number | null;
+ optimisticMax: number | null;
+ currentPrice: number | null;
+ min: number | null;
+ max: number | null;
+ conservativeLabel?: string;
+ baseLabel?: string;
+ optimisticLabel?: string;
+ currentLabel?: string;
+ sourceNote?: string;
 };
 
 type Contextual<T> = T & {
@@ -129,16 +162,16 @@ type PillarData = {
  meaningText?: string;
 };
 const queueItems: CompanyQueueItem[] = [
- { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposicao a minerio de ferro.' },
+ { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposição a minério de ferro.' },
  { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
- { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv, description: 'Construtora focada no segmento residencial de media e baixa renda.' },
- { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissao Paulista', status: 'Saudavel', logo: logoTaesa, description: 'Empresa de transmissao de energia com receita regulada.' },
- { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg, description: 'Empresa de equipamentos eletricos e automacao industrial com presenca global.' },
- { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itau Unibanco', status: 'Saudavel', logo: logoItau, description: 'Banco universal com foco em credito, servicos e seguros.' },
- { companyId: 'BBAS3', ticker: 'BBAS3', name: 'Banco do Brasil', status: 'Saudavel', initials: 'BB', description: 'Banco com forte exposicao ao agronegocio e setor publico.' },
+ { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
+ { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa, description: 'Empresa de transmissão de energia com receita regulada.' },
+ { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg, description: 'Empresa de equipamentos elétricos e automação industrial com presença global.' },
+ { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itaú Unibanco', status: 'Saudavel', logo: logoItau, description: 'Banco universal com foco em crédito, serviços e seguros.' },
+ { companyId: 'BBAS3', ticker: 'BBAS3', name: 'Banco do Brasil', status: 'Saudavel', initials: 'BB', description: 'Banco com forte exposição ao agronegócio e setor público.' },
 ];
 
-const mainTabs: MainTab[] = ['Resumo', 'Pilares', 'Mudancas', 'Eventos', 'Preco', 'Fontes'];
+const mainTabs: MainTab[] = ['Resumo', 'Pilares', 'Mudancas', 'Eventos', 'Preço', 'Fontes'];
 const EMPTY_RADAR_SCORES: Record<PillarName, number> = { Divida: 0, Caixa: 0, Margens: 0, Retorno: 0, Proventos: 0 };
 
 const pillars: PillarData[] = [
@@ -146,30 +179,30 @@ const pillars: PillarData[] = [
  name: 'Divida',
  status: 'Atencao',
  score: 58,
- trend: '? 3 vs ultimo trimestre',
- summary: 'Atencao porque a alavancagem subiu e exige acompanhamento de caixa.',
+ trend: '? 3 vs úúltimo trimestre',
+ summary: 'Atenção porque a alavancagem subiu e exige acompanhamento de caixa.',
  trust: { source: 'CVM', updatedAt: '04/02', status: 'Atualizado' },
  chart: {
- title: 'Evidencia: Divida Liq./EBITDA por ano',
+ title: 'Evidencia: Dívida Líq./EBITDA por ano',
  years5: ['2021', '2022', '2023', '2024', '2025'],
  years10: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
  series5: [0.6, 0.8, 1.1, 1.4, 1.6],
  series10: [0.4, 0.5, 0.6, 0.7, 0.7, 0.6, 0.8, 1.1, 1.4, 1.6],
  },
  metrics: [
- { label: 'Divida Liq./EBITDA', value: '1,6x', period: '12m +0,2x', source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02' } },
+ { label: 'Dívida Líq./EBITDA', value: '1,6x', period: '12m +0,2x', source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02' } },
  { label: 'Cobertura de juros', value: '6,8x', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
- { label: 'Caixa vs divida CP', value: '1,3x', period: 'Trimestre', source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02' } },
- { label: 'Prazo medio', value: '3,8 anos', period: 'Atual', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
+ { label: 'Caixa vs dívida CP', value: '1,3x', period: 'Trimestre', source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02' } },
+ { label: 'Prazo médio', value: '3,8 anos', period: 'Atual', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
  ],
  evidences: [
  {
  id: 'divida-1',
- label: 'Ponto de atencao',
+ label: 'Ponto de atenção',
  intensity: 'Moderada',
- title: 'Divida bruta subiu no trimestre',
+ title: 'Dívida bruta subiu no trimestre',
  value: '1,6x',
- metric: 'Divida Liq./EBITDA',
+ metric: 'Dívida Líq./EBITDA',
  why: 'Pode pressionar caixa em juros altos.',
  source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02', url: 'https://www.gov.br/cvm' },
  },
@@ -177,7 +210,7 @@ const pillars: PillarData[] = [
  id: 'divida-2',
  label: 'Ponto forte',
  intensity: 'Leve',
- title: 'Prazo de divida alongado',
+ title: 'Prazo de dívida alongado',
  value: '68%',
  metric: 'Longo prazo',
  why: 'Reduz risco de refinanciamento no curto prazo.',
@@ -190,7 +223,7 @@ const pillars: PillarData[] = [
  status: 'Saudavel',
  score: 72,
  trend: '? 2 vs 12m',
- summary: 'Esta saudavel porque o fluxo de caixa livre segue positivo.',
+ summary: 'Está saudável porque o fluxo de caixa livre segue positivo.',
  trust: { source: 'CVM', updatedAt: '04/02', status: 'Atualizado' },
  chart: {
  title: 'Evidencia: FCF por ano',
@@ -201,7 +234,7 @@ const pillars: PillarData[] = [
  },
  metrics: [
  { label: 'FCL', value: 'R$ 2,7 bi', period: '12m +0,2 bi', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
- { label: 'Conversao de caixa', value: '82%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
+ { label: 'Conversão de caixa', value: '82%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
  { label: 'Liquidez corrente', value: '1,6x', period: 'Trimestre', source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02' } },
  { label: 'Capex/Receita', value: '4,2%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
  ],
@@ -210,15 +243,15 @@ const pillars: PillarData[] = [
  id: 'caixa-1',
  label: 'Ponto forte',
  intensity: 'Leve',
- title: 'Caixa confortavel para investimentos',
+ title: 'Caixa confortável para investimentos',
  value: '18%',
  metric: 'Caixa/Receita',
- why: 'Mantem flexibilidade para crescimento organico.',
+ why: 'Mantém flexibilidade para crescimento orgânico.',
  source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02', url: 'https://www.weg.net/ri' },
  },
  {
  id: 'caixa-2',
- label: 'Ponto de atencao',
+ label: 'Ponto de atenção',
  intensity: 'Moderada',
  title: 'Capital de giro pressionou',
  value: '+6%',
@@ -233,7 +266,7 @@ const pillars: PillarData[] = [
  status: 'Saudavel',
  score: 70,
  trend: '? 0 vs 12m',
- summary: 'Esta saudavel porque margens permaneceram proximas da media historica.',
+ summary: 'Está saudável porque margens permaneceram proximas da media histórica.',
  trust: { source: 'CVM', updatedAt: '04/02', status: 'Atualizado' },
  chart: {
  title: 'Evidencia: Margem EBITDA',
@@ -244,8 +277,8 @@ const pillars: PillarData[] = [
  },
  metrics: [
  { label: 'Margem EBITDA', value: '20,0%', period: '12m', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
- { label: 'Margem liquida', value: '14,1%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
- { label: 'Preco vs custo', value: '1,2x', period: 'Trimestre', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
+ { label: 'Margem líquida', value: '14,1%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
+ { label: 'Preço vs custo', value: '1,2x', period: 'Trimestre', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
  { label: 'Margem bruta', value: '33,8%', period: '12m', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
  ],
  evidences: [
@@ -261,12 +294,12 @@ const pillars: PillarData[] = [
  },
  {
  id: 'margens-2',
- label: 'Ponto de atencao',
+ label: 'Ponto de atenção',
  intensity: 'Moderada',
  title: 'Custos diretos em alta',
  value: '58%',
  metric: 'Custo/Receita',
- why: 'Pode comprimir margem no proximo trimestre.',
+ why: 'Pode comprimir margem no próximo trimestre.',
  source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02', url: 'https://www.gov.br/cvm' },
  },
  ],
@@ -276,7 +309,7 @@ const pillars: PillarData[] = [
  status: 'Saudavel',
  score: 76,
  trend: '? 1 vs 12m',
- summary: 'Esta saudavel porque ROIC se mantem acima da referencia.',
+ summary: 'Está saudável porque ROIC se mantém acima da referência.',
  trust: { source: 'CVM', updatedAt: '04/02', status: 'Atualizado' },
  chart: {
  title: 'Evidencia: ROIC',
@@ -289,7 +322,7 @@ const pillars: PillarData[] = [
  { label: 'ROIC', value: '16,1%', period: '12m', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
  { label: 'ROE', value: '18,3%', period: '12m', source: { name: 'RI', docLabel: 'Release 3T25', date: '04/02' } },
  { label: 'Giro do ativo', value: '0,72x', period: '12m', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
- { label: 'Referencia de retorno', value: '12,0%', period: 'proxy', source: { name: 'Analiso', docLabel: 'Estimativa interna', date: '04/02' } },
+ { label: 'Referência de retorno', value: '12,0%', period: 'proxy', source: { name: 'Analiso', docLabel: 'Estimativa interna', date: '04/02' } },
  ],
  evidences: [
  {
@@ -299,17 +332,17 @@ const pillars: PillarData[] = [
  title: 'Retorno acima da referencia',
  value: '16,1%',
  metric: 'ROIC (12m)',
- why: 'Indica eficiencia na alocacao de capital.',
+ why: 'Indica eficiência na alocação de capital.',
  source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02', url: 'https://www.gov.br/cvm' },
  },
  {
  id: 'retorno-2',
- label: 'Ponto de atencao',
+ label: 'Ponto de atenção',
  intensity: 'Moderada',
  title: 'ROA recuou no trimestre',
  value: '6,1%',
  metric: 'ROA (12m)',
- why: 'Pode sinalizar menor eficiencia operacional.',
+ why: 'Pode sinalizar menor eficiência operacional.',
  source: { name: 'CVM', docLabel: 'ITR 3T25', date: '04/02', url: 'https://www.gov.br/cvm' },
  },
  ],
@@ -318,11 +351,11 @@ const pillars: PillarData[] = [
  name: 'Proventos',
  status: 'Atencao',
  score: 62,
- trend: '? 2 vs ultimo trimestre',
- summary: 'Atencao porque a distribuicao segue volatil em ciclos de investimento.',
+ trend: '? 2 vs úúltimo trimestre',
+ summary: 'Atenção porque a distribuição segue volátil em ciclos de investimento.',
  trust: { source: 'RI', updatedAt: '05/02', status: 'Antigo' },
  chart: {
- title: 'Evidencia: Dividendos por acao',
+ title: 'Evidência: Dividendos por ação',
  years5: ['2021', '2022', '2023', '2024', '2025'],
  years10: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
  series5: [0.9, 1.1, 1.0, 1.3, 1.2],
@@ -331,15 +364,15 @@ const pillars: PillarData[] = [
  metrics: [
  { label: 'Payout', value: '42%', period: '12m', source: { name: 'RI', docLabel: 'Comunicado', date: '05/02' } },
  { label: 'Dividend yield', value: '3,1%', period: '12m', source: { name: 'B3', docLabel: 'Dados de mercado', date: '05/02' } },
- { label: 'Proventos por acao', value: 'R$ 1,2', period: '12m', source: { name: 'RI', docLabel: 'Comunicado', date: '05/02' } },
+ { label: 'Proventos por ação', value: 'R$ 1,2', period: '12m', source: { name: 'RI', docLabel: 'Comunicado', date: '05/02' } },
  { label: 'Cobertura de proventos', value: '2,4x', period: '12m', source: { name: 'CVM', docLabel: 'DFP 2024', date: '04/02' } },
  ],
  evidences: [
  {
  id: 'proventos-1',
- label: 'Ponto de atencao',
+ label: 'Ponto de atenção',
  intensity: 'Moderada',
- title: 'Payout mais volatil',
+ title: 'Payout mais volátil',
  value: '42%',
  metric: 'Payout (12m)',
  why: 'Pode mudar previsibilidade de proventos.',
@@ -349,10 +382,10 @@ const pillars: PillarData[] = [
  id: 'proventos-2',
  label: 'Ponto forte',
  intensity: 'Leve',
- title: 'Historico de distribuicao estavel',
+ title: 'Historico de distribuição estável',
  value: '3,1%',
  metric: 'Dividend yield',
- why: 'Reforca previsibilidade para o acionista.',
+ why: 'Reforça previsibilidade para o acionista.',
  source: { name: 'RI', docLabel: 'Comunicado', date: '05/02', url: 'https://www.weg.net/ri' },
  },
  ],
@@ -365,9 +398,9 @@ const changes = [
  date: '04/02',
  severity: 'Leve',
  impact: 'Margens',
- title: 'Divulgacao de resultados do 3T25 com margem estavel.',
+ title: 'Divulgação de resultados do 3T25 com margem estável.',
  impactLine: 'Impacto principal: Margens',
- unchangedLine: 'Nao alterou Caixa nem Divida no curto prazo.',
+ unchangedLine: 'Não alterou Caixa nem Dívida no curto prazo.',
  source: { docLabel: 'ITR 3T25', url: 'https://www.gov.br/cvm' },
  },
  {
@@ -375,9 +408,9 @@ const changes = [
  date: '03/02',
  severity: 'Moderada',
  impact: 'Divida',
- title: 'Emissao de debentures para alongamento de prazo.',
- impactLine: 'Impacto principal: Divida (perfil de vencimento mais longo).',
- unchangedLine: 'Sem mudanca material em Margens.',
+ title: 'Emissão de debêntures para alongamento de prazo.',
+ impactLine: 'Impacto principal: Dívida (perfil de vencimento mais longo).',
+ unchangedLine: 'Sem mudança material em Margens.',
  source: { docLabel: 'Fato Relevante', url: 'https://www.b3.com.br' },
  },
  {
@@ -385,9 +418,9 @@ const changes = [
  date: '28/01',
  severity: 'Leve',
  impact: 'Proventos',
- title: 'Aprovacao de juros sobre capital proprio.',
+ title: 'Aprovação de juros sobre capital próprio.',
  impactLine: 'Impacto principal: Proventos',
- unchangedLine: 'Nao altera o diagnostico de Retorno por ora.',
+ unchangedLine: 'Não altera o diagnóstico de Retorno por ora.',
  source: { docLabel: 'Comunicado', url: 'https://www.weg.net/ri' },
  },
 ];
@@ -405,7 +438,7 @@ const timelineEvents = [
  date: '14/02',
  title: 'WEGE3 Dividendos/JCP',
  source: 'RI',
- why: 'Pode mexer em Proventos e leitura de distribuicao.',
+ why: 'Pode mexer em Proventos e leitura de distribuição.',
  expectedImpact: 'Moderado',
  pillars: ['Proventos'],
  },
@@ -413,7 +446,7 @@ const timelineEvents = [
  date: '16/02',
  title: 'WEGE3 Teleconferencia RI',
  source: 'RI / B3',
- why: 'Pode sinalizar mudancas de guidance para Margens e Divida.',
+ why: 'Pode sinalizar mudanças de guidance para Margens e Dívida.',
  expectedImpact: 'Leve',
  pillars: ['Margens', 'Divida'],
  },
@@ -421,22 +454,52 @@ const timelineEvents = [
 
 const priceData = {
  current: 'R$ 42,60',
- summary: 'Hoje o preco esta mais perto de premio vs historico, mas depende do ciclo e dos resultados.',
+ summary: 'Leitura de valuation por DCF com cenários conservador, base e otimista.',
+ estimatedFairValue: 'R$ 45,80',
+ differenceVsCurrent: '+7,5%',
+ valuationSummary: 'O cenário-base de valuation sugere valor estimado acima do preço atual, com alta sensibilidade a WACC e crescimento terminal.',
+ valuationStateChip: { label: 'Abaixo do preço justo estimado', tone: 'teal' },
+ valuationScenarios: [
+ { scenario: 'Conservador', estimatedValue: 'R$ 39,20', differenceVsCurrent: '-8,0%', reading: 'Valuation mais pressionado por premissas conservadoras de crescimento e margem.' },
+ { scenario: 'Base', estimatedValue: 'R$ 45,80', differenceVsCurrent: '+7,5%', reading: 'Cenário-base com premissas centrais de crescimento e reinvestimento.' },
+ { scenario: 'Otimista', estimatedValue: 'R$ 51,30', differenceVsCurrent: '+20,4%', reading: 'Cenário com execução operacional mais favorável e menor custo de capital.' },
+ ],
+ bulletChart: {
+ conservativeMin: 37.5,
+ conservativeMax: 41,
+ baseValue: 45.8,
+ optimisticMin: 49.2,
+ optimisticMax: 53.4,
+ currentPrice: 42.6,
+ min: 35,
+ max: 56,
+ conservativeLabel: 'Faixa conservadora',
+ baseLabel: 'Cenário-base',
+ optimisticLabel: 'Faixa otimista',
+ currentLabel: 'Preço atual',
+ },
+ sensitivityDrivers: [
+ { driver: 'Crescimento terminal', value: '3,0%', impact: 'Maior crescimento terminal eleva o valor estimado.' },
+ { driver: 'WACC', value: '10,8%', impact: 'WACC mais alto reduz valor presente dos fluxos futuros.' },
+ { driver: 'Margem operacional', value: '19,5%', impact: 'Margem sustentável mais alta amplia geração de caixa no cenário-base.' },
+ { driver: 'Capex / reinvestimento', value: '5,2% da receita', impact: 'Maior reinvestimento reduz FCF no curto prazo e impacta o valuation.' },
+ ],
+ multiplesSummary: 'Múltiplos são bloco de apoio para comparação relativa e não substituem o cenário-base de valuation.',
  labels: ['12x', '14x', '16x', '18x', '20x', '22x'],
  values: [4, 6, 9, 7, 5, 2],
  currentMarker: 4,
  medianMarker: 2,
  rows: [
- { metric: 'P/L', current: '20,1x', sector: '17,8x', historical: '16,4x', insight: 'Acima da mediana historica.' },
- { metric: 'EV/EBITDA', current: '13,5x', sector: '12,1x', historical: '11,8x', insight: 'Leve premio vs setor.' },
- { metric: 'P/VP', current: '4,2x', sector: '3,6x', historical: '3,4x', insight: 'Mais caro que a media 5a.' },
+ { metric: 'P/L', current: '20,1x', sector: '17,8x', histórical: '16,4x', insight: 'Acima da mediana histórica.' },
+ { metric: 'EV/EBITDA', current: '13,5x', sector: '12,1x', histórical: '11,8x', insight: 'Leve prêmio vs setor.' },
+ { metric: 'P/VP', current: '4,2x', sector: '3,6x', histórical: '3,4x', insight: 'Mais caro que a média 5a.' },
  ],
 };
 
 const sourceRows = [
  { category: 'Financeiro', source: 'CVM', doc: 'DFP 2024', date: '04/02', status: 'Atualizado', link: 'https://www.gov.br/cvm' },
  { category: 'Eventos', source: 'B3', doc: 'Fato Relevante', date: '03/02', status: 'Atualizado', link: 'https://www.b3.com.br' },
- { category: 'Preco', source: 'B3', doc: 'Dados de mercado', date: '05/02', status: 'Atualizado', link: 'https://www.b3.com.br' },
+ { category: 'Preço', source: 'B3', doc: 'Dados de mercado', date: '05/02', status: 'Atualizado', link: 'https://www.b3.com.br' },
  { category: 'RI', source: 'RI', doc: 'Comunicado', date: '05/02', status: 'Antigo', link: 'https://www.weg.net/ri' },
 ];
 
@@ -464,7 +527,15 @@ type CompanyData = {
  rows: Array<Contextual<(typeof priceData.rows)[number]>>;
  source?: string;
  updatedAt?: string;
- metricSeries?: Partial<Record<PriceMetric, { labels: string[]; values: number[]; currentMarker: number; medianMarker: number }>>;
+ metricSeries?: Record<string, { labels: string[]; values: number[]; currentMarker: number; medianMarker: number }>;
+ estimatedFairValue?: string;
+ differenceVsCurrent?: string;
+ valuationSummary?: string;
+ valuationStateChip?: PriceValuationStateChip;
+ valuationScenarios?: PriceValuationScenario[];
+ bulletChart?: PriceBulletChart;
+ sensitivityDrivers?: PriceSensitivityDriver[];
+ multiplesSummary?: string;
  };
  sourceRows: Array<Contextual<(typeof sourceRows)[number]> & { displaySource?: string; displayDoc?: string; displayStatus?: string }>;
  sourceConfidence?: { title?: string; level?: string; summary?: string };
@@ -478,7 +549,6 @@ type CompanyPreferences = {
  activeTab: MainTab;
  changesWindow: FeedWindow;
  eventsWindow: FeedWindow;
- priceMetric: PriceMetric;
  lastOpenPillar: 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos' | null;
 };
 
@@ -595,23 +665,23 @@ function getChangeDateSortValue(dateValue?: string) {
 function buildInterpretationLine(change: { impact?: string; impactLine?: string; unchangedLine?: string; beforeAfter?: string; level: ChangePriorityLevel }) {
  const impact = normalizeChangePillar(change.impact);
  if (change.level === 'Estrutural') {
-  if (impact === 'Divida') return 'Ainda nao muda a leitura estrutural da empresa hoje, mas merece acompanhamento porque pode alterar o perfil da divida nos proximos fechamentos.';
-  if (impact === 'Margens') return 'Ainda nao muda a leitura estrutural hoje, mas adiciona um ponto de monitoramento para as margens nos proximos resultados.';
-  if (impact === 'Retorno') return 'Ainda nao muda a leitura estrutural hoje, mas merece acompanhamento porque pode alterar a qualidade do retorno nos proximos fechamentos.';
-  return 'Ainda nao muda a leitura estrutural hoje, mas adiciona um ponto de monitoramento para os proximos fechamentos.';
+  if (impact === 'Divida') return 'Ainda não muda a leitura estrutural da empresa hoje, mas merece acompanhamento porque pode alterar o perfil da divida nos próximos fechamentos.';
+  if (impact === 'Margens') return 'Ainda não muda a leitura estrutural hoje, mas adiciona um ponto de monitoramento para as margens nos próximos resultados.';
+  if (impact === 'Retorno') return 'Ainda não muda a leitura estrutural hoje, mas merece acompanhamento porque pode alterar a qualidade do retorno nos próximos fechamentos.';
+  return 'Ainda não muda a leitura estrutural hoje, mas adiciona um ponto de monitoramento para os próximos fechamentos.';
  }
  if (change.level === 'Relevante') {
-  if (impact === 'Divida') return 'Ainda nao muda a leitura estrutural da empresa, mas merece acompanhamento pelo efeito potencial no perfil da divida.';
-  if (impact === 'Margens') return 'Ainda nao muda a leitura estrutural, mas adiciona um sinal para acompanhar a evolucao operacional.';
-  return 'Ainda nao muda a leitura estrutural da empresa, mas merece acompanhamento no proximo ciclo de resultados.';
+  if (impact === 'Divida') return 'Ainda não muda a leitura estrutural da empresa, mas merece acompanhamento pelo efeito potencial no perfil da divida.';
+  if (impact === 'Margens') return 'Ainda não muda a leitura estrutural, mas adiciona um sinal para acompanhar a evolução operacional.';
+  return 'Ainda não muda a leitura estrutural da empresa, mas merece acompanhamento no próximo ciclo de resultados.';
  }
  if (impact === 'Proventos') {
   return 'Distribuicao anunciada sem impacto estrutural relevante na leitura atual da empresa.';
  }
  if (change.unchangedLine && change.unchangedLine.trim().length > 0) {
-  return 'Atualizacao recorrente, sem impacto estrutural relevante na leitura atual da empresa.';
+  return 'Atualização recorrente, sem impacto estrutural relevante na leitura atual da empresa.';
  }
- return 'Evento de rotina com efeito informacional, mantendo o diagnostico estrutural no periodo.';
+ return 'Evento de rotina com efeito informacional, mantendo o diagnóstico estrutural no período.';
 }
 
 function buildWhyItMatters(change: { impact?: string; impactLine?: string; level: ChangePriorityLevel }) {
@@ -619,24 +689,24 @@ function buildWhyItMatters(change: { impact?: string; impactLine?: string; level
  if (change.level === 'Estrutural' && change.impactLine && change.impactLine.trim().length > 0) {
   const cleaned = change.impactLine.replace(/^Impacto principal:\s*/i, '').trim();
   if (cleaned.length > 0) {
-   return `Pode afetar o pilar de ${cleaned} nos proximos acompanhamentos.`;
+   return `Pode afetar o pilar de ${cleaned} nos próximos acompanhamentos.`;
   }
  }
  if (change.level === 'Estrutural') {
   if (impact === 'Divida') return 'Pode afetar o pilar de Divida ao alterar perfil de vencimento e custo financeiro.';
-  if (impact === 'Margens') return 'Pode afetar o pilar de Margens se a pressao operacional persistir nos proximos trimestres.';
+  if (impact === 'Margens') return 'Pode afetar o pilar de Margens se a pressao operacional persistir nos próximos trimestres.';
   if (impact === 'Retorno') return 'Pode afetar o pilar de Retorno ao mudar a eficiencia da alocacao de capital.';
-  return 'Pode afetar a leitura estrutural da empresa no proximo ciclo de confirmacao.';
+  return 'Pode afetar a leitura estrutural da empresa no próximo ciclo de confirmação.';
  }
  if (change.level === 'Relevante') {
-  if (impact === 'Divida') return 'Merece monitoramento em Divida, mas ainda sem deterioracao estrutural confirmada.';
-  if (impact === 'Margens') return 'Merece monitoramento em Margens, mas ainda sem deterioracao estrutural confirmada.';
-  if (impact === 'Caixa') return 'Merece monitoramento em Caixa para confirmar se o movimento ganha tracao.';
+  if (impact === 'Divida') return 'Merece monitoramento em Divida, mas ainda sem deterioração estrutural confirmada.';
+  if (impact === 'Margens') return 'Merece monitoramento em Margens, mas ainda sem deterioração estrutural confirmada.';
+  if (impact === 'Caixa') return 'Merece monitoramento em Caixa para confirmar se o movimento ganha tração.';
   if (impact === 'Retorno') return 'Merece monitoramento em Retorno para validar continuidade da tendencia.';
-  return 'Merece monitoramento no pilar afetado antes de revisao de diagnostico.';
+  return 'Merece monitoramento no pilar afetado antes de revisão de diagnóstico.';
  }
- if (impact === 'Proventos') return 'Reforca o acompanhamento de Proventos, sem alteracao relevante nos demais pilares no momento.';
- return 'Reforca acompanhamento pontual, sem gerar alerta estrutural neste momento.';
+ if (impact === 'Proventos') return 'Reforça o acompanhamento de Proventos, sem alteracao relevante nos demais pilares no momento.';
+ return 'Reforça acompanhamento pontual, sem gerar alerta estrutural neste momento.';
 }
 
 function getTimelineEventTypeLabel(title?: string) {
@@ -646,7 +716,7 @@ function getTimelineEventTypeLabel(title?: string) {
  if (raw.includes('teleconfer')) return 'Teleconferencia';
  if (raw.includes('dividend') || raw.includes('jcp') || raw.includes('provento')) return 'Proventos';
  if (raw.includes('assembleia') || raw.includes('societ')) return 'Societario';
- return 'Atualizacao';
+ return 'Atualização';
 }
 
 function getTimelineQuarterLabel(title?: string) {
@@ -659,9 +729,9 @@ function getTimelineQuarterLabel(title?: string) {
 function buildTimelineHeadlineLine(event: { title?: string; typeLabel: string; mainPillar: ChangePillarTag }, windowLabel: FeedWindow) {
  const quarter = getTimelineQuarterLabel(event.title);
  if (event.typeLabel === 'Resultado' && quarter) {
-  return `Nos proximos ${windowLabel.replace(' dias', '')} dias, o principal gatilho esperado e o resultado do ${quarter}, com possivel efeito em ${event.mainPillar}.`;
+  return `Nos próximos ${windowLabel.replace(' dias', '')} dias, o principal gatilho esperado e o resultado do ${quarter}, com possível efeito em ${event.mainPillar}.`;
  }
- return `Nos proximos ${windowLabel.replace(' dias', '')} dias, o principal gatilho esperado e ${event.title?.toLowerCase() ?? 'um evento relevante'}, com possivel efeito em ${event.mainPillar}.`;
+ return `Nos próximos ${windowLabel.replace(' dias', '')} dias, o principal gatilho esperado e ${event.title?.toLowerCase() ?? 'um evento relevante'}, com possível efeito em ${event.mainPillar}.`;
 }
 
 function getTimelineEventLevel(event: { expectedImpact?: string; title?: string; pillars?: string[] }): ChangePriorityLevel {
@@ -680,25 +750,25 @@ function buildTimelineInterpretationLine(event: { title?: string; typeLabel: str
   const supportingPillars = (event.pillars ?? [])
   .map((pillar) => normalizeChangePillar(pillar))
   .filter((pillar) => pillar !== event.mainPillar && pillar !== 'A classificar');
-  const supportingText = supportingPillars.length > 0 ? ` e influenciar tambem ${supportingPillars.join(' e ')}` : '';
+  const supportingText = supportingPillars.length > 0 ? ` e influenciar também ${supportingPillars.join(' e ')}` : '';
   const quarter = getTimelineQuarterLabel(event.title);
   if (event.typeLabel === 'Resultado' && quarter) {
    return `O resultado do ${quarter} pode mudar primeiro a leitura de ${event.mainPillar}${supportingText}, dependendo da qualidade do trimestre.`;
   }
-  if (event.mainPillar === 'Divida') return `Este gatilho pode mudar primeiro a leitura de Divida${supportingText} nos proximos fechamentos.`;
-  if (event.mainPillar === 'Margens') return `Este gatilho pode mudar primeiro a leitura de Margens${supportingText} nos proximos resultados.`;
-  if (event.mainPillar === 'Retorno') return `Este gatilho pode mudar primeiro a leitura de Retorno${supportingText} nos proximos fechamentos.`;
-  return `Este gatilho de ${event.typeLabel.toLowerCase()} pode mudar primeiro a leitura de ${event.mainPillar}${supportingText} nos proximos fechamentos.`;
+  if (event.mainPillar === 'Divida') return `Este gatilho pode mudar primeiro a leitura de Divida${supportingText} nos próximos fechamentos.`;
+  if (event.mainPillar === 'Margens') return `Este gatilho pode mudar primeiro a leitura de Margens${supportingText} nos próximos resultados.`;
+  if (event.mainPillar === 'Retorno') return `Este gatilho pode mudar primeiro a leitura de Retorno${supportingText} nos próximos fechamentos.`;
+  return `Este gatilho de ${event.typeLabel.toLowerCase()} pode mudar primeiro a leitura de ${event.mainPillar}${supportingText} nos próximos fechamentos.`;
  }
  if (event.level === 'Relevante') {
-  if (event.mainPillar === 'Divida') return 'Ainda nao muda a leitura estrutural da empresa, mas merece acompanhamento pelo efeito potencial no perfil da divida.';
-  if (event.mainPillar === 'Margens') return 'Ainda nao muda a leitura estrutural, mas adiciona sinal para acompanhar a evolucao operacional.';
-  if (event.mainPillar === 'Caixa') return 'Ainda nao muda a leitura estrutural, mas merece monitoramento para confirmar continuidade do movimento de caixa.';
-  if (event.mainPillar === 'Retorno') return 'Ainda nao muda a leitura estrutural, mas pode alterar a leitura de retorno nos proximos fechamentos.';
-  return `Ainda nao muda a leitura estrutural, mas o evento de ${event.typeLabel.toLowerCase()} merece acompanhamento.`;
+  if (event.mainPillar === 'Divida') return 'Ainda não muda a leitura estrutural da empresa, mas merece acompanhamento pelo efeito potencial no perfil da divida.';
+  if (event.mainPillar === 'Margens') return 'Ainda não muda a leitura estrutural, mas adiciona sinal para acompanhar a evolução operacional.';
+  if (event.mainPillar === 'Caixa') return 'Ainda não muda a leitura estrutural, mas merece monitoramento para confirmar continuidade do movimento de caixa.';
+  if (event.mainPillar === 'Retorno') return 'Ainda não muda a leitura estrutural, mas pode alterar a leitura de retorno nos próximos fechamentos.';
+  return `Ainda não muda a leitura estrutural, mas o evento de ${event.typeLabel.toLowerCase()} merece acompanhamento.`;
  }
- if (event.mainPillar === 'Proventos') return 'Atualizacao recorrente de distribuicao, sem impacto estrutural relevante na leitura atual da empresa.';
- return `Atualizacao recorrente de ${event.typeLabel.toLowerCase()}, sem impacto estrutural relevante na leitura atual da empresa.`;
+ if (event.mainPillar === 'Proventos') return 'Atualização recorrente de distribuição, sem impacto estrutural relevante na leitura atual da empresa.';
+ return `Atualização recorrente de ${event.typeLabel.toLowerCase()}, sem impacto estrutural relevante na leitura atual da empresa.`;
 }
 
 function buildTimelineWhyItMatters(event: { why?: string; level: ChangePriorityLevel; mainPillar: ChangePillarTag; pillars?: string[] }) {
@@ -708,14 +778,14 @@ function buildTimelineWhyItMatters(event: { why?: string; level: ChangePriorityL
  }
  if (cleanedWhy.length > 0) return cleanedWhy;
  if (event.level === 'Relevante') {
-  if (event.mainPillar === 'Divida') return 'Merece monitoramento em Divida, mas ainda sem deterioracao estrutural confirmada.';
-  if (event.mainPillar === 'Margens') return 'Merece monitoramento em Margens, mas ainda sem deterioracao estrutural confirmada.';
-  if (event.mainPillar === 'Caixa') return 'Merece monitoramento em Caixa para confirmar se o movimento ganha tracao.';
+  if (event.mainPillar === 'Divida') return 'Merece monitoramento em Divida, mas ainda sem deterioração estrutural confirmada.';
+  if (event.mainPillar === 'Margens') return 'Merece monitoramento em Margens, mas ainda sem deterioração estrutural confirmada.';
+  if (event.mainPillar === 'Caixa') return 'Merece monitoramento em Caixa para confirmar se o movimento ganha tração.';
   if (event.mainPillar === 'Retorno') return 'Merece monitoramento em Retorno para validar continuidade da tendencia.';
-  return 'Merece monitoramento no pilar afetado antes de revisao de diagnostico.';
+  return 'Merece monitoramento no pilar afetado antes de revisão de diagnóstico.';
  }
- if (event.mainPillar === 'Proventos') return 'Reforca o acompanhamento de Proventos, sem alteracao relevante nos demais pilares no momento.';
- return 'Reforca acompanhamento pontual, sem gerar alerta estrutural neste momento.';
+ if (event.mainPillar === 'Proventos') return 'Reforça o acompanhamento de Proventos, sem alteracao relevante nos demais pilares no momento.';
+ return 'Reforça acompanhamento pontual, sem gerar alerta estrutural neste momento.';
 }
 
 function timelineSourceUrl(source?: string) {
@@ -809,9 +879,9 @@ function normalizeMainTabParam(value?: string | null): MainTab | null {
  const raw = (value ?? '').trim().toLowerCase();
  if (raw === 'resumo') return 'Resumo';
  if (raw === 'pilares') return 'Pilares';
- if (raw === 'mudancas' || raw === 'mudanas') return 'Mudancas';
+ if (raw === 'mudancas' || raw === 'mudanças' || raw === 'mudanas') return 'Mudancas';
  if (raw === 'eventos') return 'Eventos';
- if (raw === 'preco' || raw === 'preo') return 'Preco';
+ if (raw === 'preco' || raw === 'preço') return 'Preço';
  if (raw === 'fontes') return 'Fontes';
  return null;
 }
@@ -826,7 +896,6 @@ function getDefaultPreferences(): CompanyPreferences {
  activeTab: 'Resumo',
  changesWindow: '90 dias',
  eventsWindow: '30 dias',
- priceMetric: 'P/L',
  lastOpenPillar: null,
  };
 }
@@ -861,29 +930,29 @@ const mockDataByCompany: Record<string, CompanyData> = {
  strongest: {
  title: 'Caixa',
  score: '72/100',
- badge: 'Saudvel',
+ badge: 'Saudável',
  trend: '? +2 vs 12m',
  summary: 'Fluxo de caixa livre segue positivo e sustenta investimentos sem dvida adicional.',
  },
  watchout: {
- title: 'Dvida',
+ title: 'Dívida',
  score: '58/100',
- badge: 'Ateno',
- trend: '? -3 vs ltimo trimestre',
+ badge: 'Atenção',
+ trend: '? -3 vs último trimestre',
  summary: 'Alavancagem subiu e exige acompanhamento de caixa em cenrio de juros altos.',
  },
  monitor: {
  pillar: 'Divida',
- text: 'Monitorar Dvida Lq./EBITDA e cobertura de juros no prximo resultado.',
+ text: 'Monitorar Dívida Lq./EBITDA e cobertura de juros no prximo resultado.',
  },
  summaryScan: {
- motherLine: 'Ateno: alavancagem subiu no trimestre; caixa ainda sustenta.',
+ motherLine: 'Atenção: alavancagem subiu no trimestre; caixa ainda sustenta.',
  strength: { pillar: 'Caixa', text: 'gerao de caixa livre permanece positiva.' },
  attention: { pillar: 'Divida', text: 'alavancagem avanou e exige disciplina financeira.' },
- monitor: { pillar: 'Divida', text: 'acompanhar Dvida Lq./EBITDA e cobertura de juros.' },
+ monitor: { pillar: 'Divida', text: 'acompanhar Dívida Lq./EBITDA e cobertura de juros.' },
  },
  summaryText:
- 'A WEG mantm posio financeira slida com gerao de caixa positiva e margens consistentes prximas mdia histrica. O ponto de ateno a alavancagem, que subiu 0,2x no trimestre e exige monitoramento em um cenrio de juros elevados. Proventos seguem estveis, mas com distribuio voltil dependente do ciclo de investimento.',
+ 'A WEG mantém posição financeira sólida com geração de caixa positiva e margens consistentes próximas à média histórica. O ponto de ateno a alavancagem, que subiu 0,2x no trimestre e exige monitoramento em um cenário de juros elevados. Proventos seguem estáveis, mas com distribuição volátil dependente do ciclo de investimento.',
  summaryMeta: { updatedAt: '05/02', source: 'CVM/B3/RI' },
  pillars: contextualize(pillars, 'WEGE3', 'WEGE3'),
  changes: contextualize(
@@ -919,36 +988,36 @@ const mockDataByCompany: Record<string, CompanyData> = {
  strongest: {
  title: 'Proventos',
  score: '70/100',
- badge: 'Saudvel',
+ badge: 'Saudável',
  trend: '? +1 vs 12m',
  summary: 'Distribuio permaneceu estvel e suportada por gerao de caixa.',
  },
  watchout: {
  title: 'Retorno',
  score: '62/100',
- badge: 'Ateno',
- trend: '? -2 vs ltimo trimestre',
- summary: 'Retorno recuou no trimestre com presso de preos de minrio.',
+ badge: 'Atenção',
+ trend: '? -2 vs último trimestre',
+ summary: 'Retorno recuou no trimestre com pressão de preços de minério.',
  },
  monitor: {
  pillar: 'Retorno',
  text: 'Monitorar ROIC e margem EBITDA no prximo release.',
  },
  summaryScan: {
- motherLine: 'Ateno: retorno recuou no trimestre; caixa segue resiliente.',
- strength: { pillar: 'Proventos', text: 'distribuio permaneceu estvel no ciclo recente.' },
- attention: { pillar: 'Retorno', text: 'eficincia caiu com presso de preos de minrio.' },
- monitor: { pillar: 'Retorno', text: 'acompanhar ROIC e evoluo de margens.' },
+ motherLine: 'Atenção: retorno recuou no trimestre; caixa segue resiliente.',
+ strength: { pillar: 'Proventos', text: 'distribuição permaneceu estável no ciclo recente.' },
+ attention: { pillar: 'Retorno', text: 'eficiência caiu com pressão de preços de minério.' },
+ monitor: { pillar: 'Retorno', text: 'acompanhar ROIC e evolução de margens.' },
  },
  summaryText:
- 'A Vale mantm caixa robusto, porm com maior volatilidade de retorno no curto prazo devido ao ciclo de commodities e ao contexto macro global.',
+ 'A Vale mantm caixa robusto, porm com maior volátilidade de retorno no curto prazo devido ao ciclo de commodities e ao contexto macro global.',
  summaryMeta: { updatedAt: '06/02', source: 'RI/B3/CVM' },
  pillars: contextualize(
  pillars.map((pillar) => ({
  ...pillar,
  summary:
  pillar.name === 'Retorno'
- ? 'Ateno porque o retorno recuou no trimestre em funo do ciclo de preos.'
+ ? 'Atenção porque o retorno recuou no trimestre em função do ciclo de preços.'
  : pillar.summary,
  })),
  'VALE3',
@@ -959,9 +1028,9 @@ const mockDataByCompany: Record<string, CompanyData> = {
  ...item,
  title:
  index === 0
- ? 'Atualizao de guidance e sensibilidade ao preo de minrio.'
+ ? 'Atualização de guidance e sensibilidade ao preço de minério.'
  : item.title,
- beforeAfter: index === 0 ? 'Antes: guidance neutro ? Depois: vis mais cauteloso' : undefined,
+ beforeAfter: index === 0 ? 'Antes: guidance neutro ? Depois: viés mais cauteloso' : undefined,
  })),
  'VALE3',
  'VALE3'
@@ -982,7 +1051,7 @@ const mockDataByCompany: Record<string, CompanyData> = {
  companyId: 'VALE3',
  ticker: 'VALE3',
  current: 'R$ 66,20',
- summary: 'Hoje o preo reflete maior sensibilidade ao ciclo de minrio e China.',
+ summary: 'Hoje o preço reflete maior sensibilidade ao ciclo de minério e China.',
  source: 'B3',
  updatedAt: '06/02',
  rows: contextualize(
@@ -1028,6 +1097,43 @@ function asDisplayValue(value: unknown) {
  return '';
 }
 
+function asTextValue(value: unknown) {
+ if (typeof value === 'string') return value;
+ if (typeof value === 'number') return String(value);
+ const display = asDisplayValue(value);
+ if (display) return display;
+ return '';
+}
+
+function asNumericValue(value: unknown): number | null {
+ if (typeof value === 'number' && Number.isFinite(value)) return value;
+ const text = asTextValue(value).trim();
+ if (!text) return null;
+ const normalized = text
+ .replace(/[R$\s%]/g, '')
+ .replace(/\./g, '')
+ .replace(',', '.')
+ .replace(/[^0-9.-]/g, '');
+ const parsed = Number.parseFloat(normalized);
+ return Number.isFinite(parsed) ? parsed : null;
+}
+
+function mapFairValueStateTone(stateRaw: unknown) {
+ const state = String(stateRaw ?? '').toLowerCase();
+ if (state.includes('below')) return 'teal';
+ if (state.includes('above')) return 'amber';
+ if (state.includes('over')) return 'coral';
+ return '';
+}
+
+function mapSensitivityImpactLabel(impactRaw: unknown) {
+ const impact = String(impactRaw ?? '').toLowerCase();
+ if (impact.includes('high')) return 'Impacto alto';
+ if (impact.includes('medium')) return 'Impacto médio';
+ if (impact.includes('low')) return 'Impacto baixo';
+ return safeMeta(impactRaw);
+}
+
 function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker: string): CompanyData | null {
  const overview = (raw.overview as Record<string, unknown> | undefined) ?? {};
  const radar = (raw.radar as Record<string, unknown> | undefined) ?? {};
@@ -1036,7 +1142,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const pillarsMap = (raw.pillars as Record<string, Record<string, unknown>> | undefined) ?? {};
  const changesBlock = (raw.changes as Record<string, unknown> | undefined) ?? {};
  const agenda = (raw.agenda as Record<string, unknown> | undefined) ?? {};
- const price = (raw.price as Record<string, unknown> | undefined) ?? {};
+ const fairValueAnalysis = (raw.fairValueAnalysis as Record<string, unknown> | undefined) ?? {};
  const sources = (raw.sources as Record<string, unknown> | undefined) ?? {};
 
  const radarScores: Record<PillarName, number> = {
@@ -1078,6 +1184,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   const explainer = (pillar.explainer as Record<string, unknown> | undefined) ?? {};
   const ctaRaw = pillar.cta;
   const ctaObj = (ctaRaw && typeof ctaRaw === 'object') ? (ctaRaw as Record<string, unknown>) : {};
+  const ctaPrimaryObj = (ctaObj.primary && typeof ctaObj.primary === 'object') ? (ctaObj.primary as Record<string, unknown>) : {};
 
   const metricLabel = safeMeta(primaryMetric.displayLabel) || safeMeta(primaryMetric.label);
   const currentFormatted = safeMeta(currentMetric.formatted);
@@ -1134,7 +1241,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   ticker,
   name,
   displayName: safeMeta(pillar.displayName),
-  status: normalizeStatusLabel(safeMeta(statusObj.display) || safeMeta(statusObj.key), statusFromScore(Number(scoreObj.raw ?? 50))),
+  status: normalizeStatusLabel(safeMeta(statusObj.display) || safeMeta(statusObj.key), 'Atencao'),
   score: Number(scoreObj.raw ?? 50),
   trend: safeMeta(trendObj.display),
   summary: safeMeta(pillar.summary) || safeMeta(meaning.text),
@@ -1167,8 +1274,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   watchItems,
   explainer: { text: safeMeta(explainer.text) },
   cta: {
-   title: safeMeta(ctaObj.title) || safeMeta(pillar.ctaTitle) || safeMeta(pillar.cta_title),
-   button: safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(pillar.ctaText) || safeMeta(pillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
+   title: safeMeta(ctaObj.subtitle) || safeMeta(ctaObj.title) || safeMeta(pillar.ctaTitle) || safeMeta(pillar.cta_title),
+   button: safeMeta(ctaPrimaryObj.label) || safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(pillar.ctaText) || safeMeta(pillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
   },
   } as Contextual<PillarData>;
  })
@@ -1245,17 +1352,86 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   };
  });
 
- const distribution = (price.distributionByMetric as Record<string, Record<string, unknown>> | undefined) ?? {};
- const priceRowsRaw = Array.isArray(price.rows) ? price.rows as Array<Record<string, unknown>> : [];
+ const distribution = (fairValueAnalysis.distributionByMetric as Record<string, Record<string, unknown>> | undefined) ?? {};
+ const priceRowsRaw = Array.isArray(fairValueAnalysis.rows) ? fairValueAnalysis.rows as Array<Record<string, unknown>> : [];
  const priceRows = priceRowsRaw.map((row) => ({
   companyId,
   ticker,
   metric: String(row.metric ?? ''),
   current: String(row.current ?? ''),
   sector: String(row.sector ?? ''),
-  historical: String(row.historical ?? ''),
+  histórical: String(row.histórical ?? ''),
   insight: String(row.insight ?? ''),
  }));
+ const fairMeta = (fairValueAnalysis.meta as Record<string, unknown> | undefined) ?? {};
+ const fairCards = (fairValueAnalysis.cards as Record<string, unknown> | undefined) ?? {};
+ const fairCurrentCard = (fairCards.currentPrice as Record<string, unknown> | undefined) ?? {};
+ const fairValueCard = (fairCards.fairValue as Record<string, unknown> | undefined) ?? {};
+ const fairGapCard = (fairCards.gap as Record<string, unknown> | undefined) ?? {};
+ const valuationState = {
+  label: safeMeta(fairValueAnalysis.label),
+  tone: mapFairValueStateTone(fairValueAnalysis.state),
+ };
+ const scenariosRaw = Array.isArray(fairValueAnalysis.scenarios)
+ ? fairValueAnalysis.scenarios as Array<Record<string, unknown>>
+ : [];
+ const fairSensitivity = (fairValueAnalysis.sensitivity as Record<string, unknown> | undefined) ?? {};
+ const sensitivityRaw = Array.isArray(fairSensitivity.drivers)
+ ? fairSensitivity.drivers as Array<Record<string, unknown>>
+ : [];
+ const fairChart = (fairValueAnalysis.chart as Record<string, unknown> | undefined) ?? {};
+ const fairRanges = (fairChart.ranges as Record<string, unknown> | undefined) ?? {};
+ const fairConservativeRange = (fairRanges.conservative as Record<string, unknown> | undefined) ?? {};
+ const fairBaseRange = (fairRanges.base as Record<string, unknown> | undefined) ?? {};
+ const fairOptimisticRange = (fairRanges.optimistic as Record<string, unknown> | undefined) ?? {};
+ const fairCurrentChart = (fairChart.currentPrice as Record<string, unknown> | undefined) ?? {};
+ const bulletRaw = {
+  conservative: fairConservativeRange,
+  base: fairBaseRange,
+  optimistic: fairOptimisticRange,
+  current: fairCurrentChart,
+  min: fairConservativeRange.min,
+  max: fairOptimisticRange.max,
+ };
+ const conservativeRaw = (bulletRaw.conservative as Record<string, unknown> | undefined) ?? {};
+ const baseRaw = (bulletRaw.base as Record<string, unknown> | undefined) ?? {};
+ const optimisticRaw = (bulletRaw.optimistic as Record<string, unknown> | undefined) ?? {};
+ const currentRaw = (bulletRaw.current as Record<string, unknown> | undefined) ?? {};
+ const inferredMin = [
+ asNumericValue(conservativeRaw.min),
+ asNumericValue(conservativeRaw.max),
+ asNumericValue(baseRaw.fairValue ?? baseRaw.value),
+ asNumericValue(optimisticRaw.min),
+ asNumericValue(optimisticRaw.max),
+ asNumericValue(currentRaw.value),
+ asNumericValue(fairCurrentCard.value),
+ ].filter((value): value is number => value != null && Number.isFinite(value));
+ const bulletChart: PriceBulletChart = {
+ conservativeMin: asNumericValue(conservativeRaw.min),
+ conservativeMax: asNumericValue(conservativeRaw.max),
+ baseValue: asNumericValue(baseRaw.fairValue ?? baseRaw.value),
+ optimisticMin: asNumericValue(optimisticRaw.min),
+ optimisticMax: asNumericValue(optimisticRaw.max),
+ currentPrice: asNumericValue(currentRaw.value) ?? asNumericValue(fairCurrentCard.value),
+ min: asNumericValue(bulletRaw.min) ?? (inferredMin.length > 0 ? Math.min(...inferredMin) : null),
+ max: asNumericValue(bulletRaw.max) ?? (inferredMin.length > 0 ? Math.max(...inferredMin) : null),
+ conservativeLabel: safeMeta(conservativeRaw.label) || 'Faixa conservadora',
+ baseLabel: safeMeta(baseRaw.label) || 'Cenário-base',
+ optimisticLabel: safeMeta(optimisticRaw.label) || 'Faixa otimista',
+ currentLabel: safeMeta(currentRaw.label) || 'Preço atual',
+ sourceNote: safeMeta(bulletRaw.sourceNote),
+ };
+ const valuationScenarios = scenariosRaw.map((scenario) => ({
+ scenario: safeMeta(scenario.label),
+ estimatedValue: asTextValue(scenario.displayEstimatedValue ?? scenario.estimatedValue),
+ differenceVsCurrent: asTextValue(scenario.displayGapVsCurrent ?? scenario.gapVsCurrentPct),
+ reading: asTextValue(scenario.reading),
+ })).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
+ const sensitivityDrivers = sensitivityRaw.map((driver) => ({
+ driver: safeMeta(driver.label),
+ value: mapSensitivityImpactLabel(driver.impact),
+ impact: mapSensitivityImpactLabel(driver.impact),
+ })).filter((driver) => driver.driver || driver.value || driver.impact);
 
  const sourceRowsRaw = Array.isArray(sources.rows) ? sources.rows as Array<Record<string, unknown>> : [];
  const sourceRows = sourceRowsRaw.map((row) => {
@@ -1342,15 +1518,41 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  priceData: {
   companyId,
   ticker,
-  current: asDisplayValue(price.currentPrice),
-  summary: String(price.summary ?? ''),
+  current: asTextValue(
+   fairCurrentCard.displayValue
+   ?? fairCurrentChart.displayValue
+  ),
+  summary: String(fairValueAnalysis.summary ?? fairValueAnalysis.headline ?? ''),
   labels: [],
   values: [],
   currentMarker: 0,
   medianMarker: 0,
   rows: priceRows as CompanyData['priceData']['rows'],
-  source: safeMeta(price.sourceDisplay),
-  updatedAt: asDisplayValue(price.updatedAt),
+  source: safeMeta(fairMeta.source),
+  updatedAt: asTextValue(fairMeta.updatedAt),
+  estimatedFairValue: asTextValue(
+   fairValueCard.displayValue
+   ?? fairBaseRange.displayFairValue
+  ),
+  differenceVsCurrent: asTextValue(
+   fairGapCard.displayValue
+  ),
+  valuationSummary: asTextValue(
+   fairValueAnalysis.whyItMatters
+   ?? fairValueAnalysis.meaning
+  ),
+  valuationStateChip: {
+   label: safeMeta(valuationState.label),
+   tone: safeMeta(valuationState.tone),
+  },
+  valuationScenarios,
+  bulletChart,
+  sensitivityDrivers,
+  multiplesSummary: asTextValue(
+   fairSensitivity.summary
+   ?? fairValueAnalysis.takeaway
+   ?? fairValueAnalysis.summary
+  ),
   metricSeries: Object.fromEntries(Object.entries(distribution).map(([metric, dist]) => {
    const labels = Array.isArray(dist.labels) ? dist.labels as string[] : [];
    const values = Array.isArray(dist.values) ? dist.values as number[] : [];
@@ -1394,7 +1596,7 @@ function normalizeLegacyCompanyData(raw: unknown, companyId: string, ticker: str
   ...pillar,
   name: pillarName,
   score,
-  status: normalizeStatusLabel(rawStatus, statusFromScore(score)),
+  status: normalizeStatusLabel(rawStatus, 'Atencao'),
   trust: {
    source: trust?.source ?? '',
    updatedAt: trust?.updatedAt ?? '',
@@ -1492,12 +1694,6 @@ const pillarOrder: PillarName[] = ['Divida', 'Caixa', 'Margens', 'Retorno', 'Pro
 
 function pillarLabel(pillar: PillarName) {
  return pillar === 'Divida' ? 'Dívida' : pillar;
-}
-
-function statusFromScore(score: number): Status {
- if (score < 50) return 'Risco';
- if (score < 70) return 'Atencao';
- return 'Saudavel';
 }
 
 function statusLabel(status: Status) {
@@ -2089,14 +2285,24 @@ function signalCardCopy(pillar: PillarData, indicatorLabel: string, fallbackWhy:
  : signal?.value?.trim() || pillar.summary || '';
  const why = signal?.why?.trim() || fallbackWhy || pillar.summary || '';
  const badgeLabel = safeMeta(signal?.label);
+ const badgeRaw = badgeLabel.toLowerCase();
  const intensityRaw = safeMeta(signal?.intensity).toLowerCase();
- const isAttention = intensityRaw.includes('high') || intensityRaw.includes('medium') || badgeLabel.toLowerCase().includes('aten') || badgeLabel.toLowerCase().includes('press');
+ const isRisk = intensityRaw.includes('critical') || intensityRaw.includes('alto') || badgeRaw.includes('ris');
+ const isAttention = !isRisk && (
+ intensityRaw.includes('high') ||
+ intensityRaw.includes('medium') ||
+ intensityRaw.includes('moder') ||
+ badgeRaw.includes('aten') ||
+ badgeRaw.includes('press')
+ );
+ const fallbackTone = pillar.status === 'Risco' ? 'risk' : pillar.status === 'Atencao' ? 'attention' : 'positive';
+ const badgeTone = isRisk ? 'risk' as const : isAttention ? 'attention' as const : (badgeLabel ? 'positive' as const : fallbackTone);
  return {
  title,
  body,
  why,
  badgeLabel: badgeLabel || '',
- badgeTone: isAttention ? 'attention' as const : 'positive' as const,
+ badgeTone,
  };
 }
 
@@ -2114,9 +2320,10 @@ function ctaCopyByPillar(pillar: PillarData) {
  const rawPillar = pillar as unknown as Record<string, unknown>;
  const ctaRaw = rawPillar.cta;
  const ctaObj = (ctaRaw && typeof ctaRaw === 'object') ? (ctaRaw as Record<string, unknown>) : {};
+ const ctaPrimaryObj = (ctaObj.primary && typeof ctaObj.primary === 'object') ? (ctaObj.primary as Record<string, unknown>) : {};
  return {
- title: safeMeta(pillar.cta?.title) || safeMeta(ctaObj.title) || safeMeta(rawPillar.ctaTitle) || safeMeta(rawPillar.cta_title),
- button: safeMeta(pillar.cta?.button) || safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(rawPillar.ctaText) || safeMeta(rawPillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
+ title: safeMeta(pillar.cta?.title) || safeMeta(ctaObj.subtitle) || safeMeta(ctaObj.title) || safeMeta(rawPillar.ctaTitle) || safeMeta(rawPillar.cta_title),
+ button: safeMeta(pillar.cta?.button) || safeMeta(ctaPrimaryObj.label) || safeMeta(ctaObj.button) || safeMeta(ctaObj.text) || safeMeta(rawPillar.ctaText) || safeMeta(rawPillar.cta_text) || (typeof ctaRaw === 'string' ? safeMeta(ctaRaw) : ''),
  };
 }
 
@@ -2157,13 +2364,6 @@ function median(values: number[]) {
  return sorted[middle];
 }
 
-function parseMultipleValue(value?: string | null) {
- if (!value) return null;
- const cleaned = value.replace(/\s+/g, '').replace('x', '').replace(',', '.');
- const parsed = Number.parseFloat(cleaned);
- return Number.isFinite(parsed) ? parsed : null;
-}
-
 function SkeletonBlock({ className }: { className: string }) {
  return <div className={cx('rounded-md bg-[#F3F4F6] skeleton-shimmer', className)} />;
 }
@@ -2185,7 +2385,6 @@ export function CompanyAnalysis() {
  const [showScoreInfo, setShowScoreInfo] = useState(false);
  const [showHeaderUpdateDetails, setShowHeaderUpdateDetails] = useState(false);
  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
- const [selectedPriceMetric, setSelectedPriceMetric] = useState<PriceMetric>('P/L');
  const [changesWindow, setChangesWindow] = useState<FeedWindow>('90 dias');
  const [changesFocus, setChangesFocus] = useState<ChangesFocusFilter>('Mais relevantes');
  const [changesPillarFilter, setChangesPillarFilter] = useState<ChangePillarTag | 'Todos'>('Todos');
@@ -2235,7 +2434,6 @@ export function CompanyAnalysis() {
  setLoadingTab(true);
  const requestedTab = normalizeMainTabParam(searchParams.get('tab'));
  setActiveTab(requestedTab ?? 'Resumo');
- setSelectedPriceMetric(prefs.priceMetric);
  setChangesWindow(prefs.changesWindow);
  setChangesFocus('Mais relevantes');
  setChangesPillarFilter('Todos');
@@ -2306,13 +2504,22 @@ export function CompanyAnalysis() {
  const scoreAverage = activeData
  ? Math.round((activeData.radarScores.Divida + activeData.radarScores.Caixa + activeData.radarScores.Margens + activeData.radarScores.Retorno + activeData.radarScores.Proventos) / 5)
  : 0;
- const companyStatus: Status = scoreAverage < 50 ? 'Risco' : scoreAverage < 70 ? 'Atencao' : 'Saudavel';
  const mapScores = activeData?.radarScores ?? EMPTY_RADAR_SCORES;
  const mapPreviousScores = activeData?.radarPreviousScores ?? EMPTY_RADAR_SCORES;
  const pillarDataByName = new Map((activeData?.pillars ?? []).map((pillar) => [pillar.name, pillar]));
+ const mapPillarEntries = pillarOrder.map((pillar) => ({
+ pillar,
+ score: mapScores[pillar],
+ status: pillarDataByName.get(pillar)?.status ?? 'Atencao',
+ }));
+ const companyStatus: Status = mapPillarEntries.some((entry) => entry.status === 'Risco')
+ ? 'Risco'
+ : mapPillarEntries.some((entry) => entry.status === 'Atencao')
+ ? 'Atencao'
+ : 'Saudavel';
  const mapPillarData: PillarMapDatum[] = pillarOrder.map((pillar) => {
  const score = mapScores[pillar];
- const status = statusFromScore(score);
+ const status = pillarDataByName.get(pillar)?.status ?? 'Atencao';
  const pillarData = pillarDataByName.get(pillar);
  const previousScore = mapPreviousScores[pillar];
  const deltaFromSeries = Number.isFinite(previousScore) ? score - previousScore : undefined;
@@ -2328,69 +2535,58 @@ export function CompanyAnalysis() {
  reason: pillarData?.summary,
  };
  });
- const mapPillarEntries = pillarOrder.map((pillar) => ({ pillar, score: mapScores[pillar], status: statusFromScore(mapScores[pillar]) }));
  const healthyPillars = mapPillarEntries.filter((entry) => entry.status === 'Saudavel');
  const attentionPillars = mapPillarEntries.filter((entry) => entry.status === 'Atencao');
  const riskPillars = mapPillarEntries.filter((entry) => entry.status === 'Risco');
  const mostCriticalPillar = [...mapPillarEntries].sort((a, b) => a.score - b.score)[0];
  const strongestPillar = [...mapPillarEntries].sort((a, b) => b.score - a.score)[0];
  const actionsDisabled = showSkeleton;
- const availablePriceMetrics = (Object.keys(activeData?.priceData.metricSeries ?? {}) as PriceMetric[]);
-const activePriceSeries =
- (activeData?.priceData.metricSeries && activeData.priceData.metricSeries[selectedPriceMetric]) ||
- (activeData?.priceData.metricSeries && availablePriceMetrics.length > 0 ? activeData.priceData.metricSeries[availablePriceMetrics[0]] : undefined) ||
- null;
-const activePriceRows = (activeData?.priceData.rows ?? []).filter((row) => row.companyId === companyContext.companyId && row.metric === selectedPriceMetric);
-const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).find((row) => row.companyId === companyContext.companyId);
- const currentMultipleValue = parseMultipleValue(activePriceRow?.current);
- const historicalMultipleValue = parseMultipleValue(activePriceRow?.historical);
- const sectorMultipleValue = parseMultipleValue(activePriceRow?.sector);
- const premiumVsHistorical = currentMultipleValue != null && historicalMultipleValue != null && historicalMultipleValue > 0
- ? ((currentMultipleValue / historicalMultipleValue) - 1) * 100
- : null;
- const premiumVsSector = currentMultipleValue != null && sectorMultipleValue != null && sectorMultipleValue > 0
- ? ((currentMultipleValue / sectorMultipleValue) - 1) * 100
- : null;
- const priceSummaryLine = (activeData?.priceData.summary ?? '').trim();
- const priceContextPosition = (() => {
- if (premiumVsHistorical == null) return 'Sem base suficiente para classificar a faixa historica agora.';
- if (premiumVsHistorical <= -15) return 'Hoje o mercado esta negociando com desconto relevante versus o historico recente.';
- if (premiumVsHistorical < -5) return 'Hoje o mercado esta negociando com desconto moderado versus o historico recente.';
- if (premiumVsHistorical <= 5) return 'Hoje o mercado esta proximo da faixa historica recente.';
- if (premiumVsHistorical <= 15) return 'Hoje o mercado esta pagando um premio moderado sobre o historico recente.';
- return 'O multiplo esta acima do historico e ja exige continuidade de qualidade e crescimento para se sustentar.';
- })();
- const priceReadingLine = (() => {
- if (!activePriceRow) return 'Sem dados suficientes para leitura de valuation neste momento.';
- if (historicalMultipleValue == null) return `O ativo negocia em ${activePriceRow.current} no indicador ${selectedPriceMetric}.`;
- if (currentMultipleValue != null && historicalMultipleValue != null && currentMultipleValue >= historicalMultipleValue) {
-  return `O ativo negocia acima da sua mediana historica em ${selectedPriceMetric}.`;
- }
- return `O ativo negocia abaixo da sua mediana historica em ${selectedPriceMetric}.`;
- })();
- const priceContextLine = (() => {
- if (!activePriceRow) return 'Sem comparativo historico e setorial para qualificar a leitura.';
- if (historicalMultipleValue == null || sectorMultipleValue == null) return `Hoje esta em ${activePriceRow.current} em ${selectedPriceMetric}.`;
- const vsHistorical = currentMultipleValue != null && historicalMultipleValue != null
- ? (currentMultipleValue >= historicalMultipleValue ? 'acima' : 'abaixo')
- : 'proximo de';
- const vsSector = currentMultipleValue != null && sectorMultipleValue != null
- ? (currentMultipleValue >= sectorMultipleValue ? 'acima' : 'abaixo')
- : 'proximo de';
- return `Hoje esta em ${activePriceRow.current}, ${vsHistorical} da mediana de 5 anos (${activePriceRow.historical}) e tambem ${vsSector} do setor (${activePriceRow.sector}). Isso da contexto para a leitura atual, mas nao significa automaticamente que o ativo esteja caro ou barato.`;
- })();
- const pricePremiumProfile = (() => {
- if (premiumVsHistorical == null && premiumVsSector == null) return 'Sem base suficiente para classificar premio ou desconto.';
- if ((premiumVsHistorical ?? 0) >= 0 && (premiumVsSector ?? 0) >= 0) return 'Negocia com premio sobre historico e setor.';
- if ((premiumVsHistorical ?? 0) <= 0 && (premiumVsSector ?? 0) <= 0) return 'Negocia com desconto versus historico e setor.';
- return 'Leitura mista entre historico e setor.';
- })();
+ const companyPriceRows = (activeData?.priceData.rows ?? []).filter((row) => row.companyId === companyContext.companyId);
+ const valuationStateChipLabel = safeMeta(activeData?.priceData.valuationStateChip?.label);
+ const valuationStateChipToneRaw = safeMeta(activeData?.priceData.valuationStateChip?.tone).toLowerCase();
+ const valuationStateChipTone = valuationStateChipToneRaw.includes('coral')
+ ? 'border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]'
+ : valuationStateChipToneRaw.includes('amber')
+ ? 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]'
+ : valuationStateChipToneRaw.includes('teal')
+ ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0F766E]'
+ : 'border-[#DDE3EA] bg-[#F8FAFC] text-[#475569]';
+ const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
+ const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
+ const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
+ const valuationBullet = activeData?.priceData.bulletChart ?? null;
+ const bulletPoints = [
+ valuationBullet?.min,
+ valuationBullet?.max,
+ valuationBullet?.conservativeMin,
+ valuationBullet?.conservativeMax,
+ valuationBullet?.baseValue,
+ valuationBullet?.optimisticMin,
+ valuationBullet?.optimisticMax,
+ valuationBullet?.currentPrice,
+ ].filter((value): value is number => value != null && Number.isFinite(value));
+ const bulletMin = valuationBullet?.min != null ? valuationBullet.min : (bulletPoints.length > 0 ? Math.min(...bulletPoints) : null);
+ const bulletMax = valuationBullet?.max != null ? valuationBullet.max : (bulletPoints.length > 0 ? Math.max(...bulletPoints) : null);
+ const hasBulletDomain = bulletMin != null && bulletMax != null && bulletMax > bulletMin;
+ const toBulletPercent = (value: number | null | undefined) => {
+ if (!hasBulletDomain || value == null) return null;
+ const pct = ((value - bulletMin) / (bulletMax - bulletMin)) * 100;
+ return Math.min(100, Math.max(0, pct));
+ };
+ const conservativeLeft = toBulletPercent(valuationBullet?.conservativeMin ?? null);
+ const conservativeRight = toBulletPercent(valuationBullet?.conservativeMax ?? null);
+ const optimisticLeft = toBulletPercent(valuationBullet?.optimisticMin ?? null);
+ const optimisticRight = toBulletPercent(valuationBullet?.optimisticMax ?? null);
+ const baseMarker = toBulletPercent(valuationBullet?.baseValue ?? null);
+ const currentMarker = toBulletPercent(valuationBullet?.currentPrice ?? null);
+ const hasConservativeRange = conservativeLeft != null && conservativeRight != null && conservativeRight >= conservativeLeft;
+ const hasOptimisticRange = optimisticLeft != null && optimisticRight != null && optimisticRight >= optimisticLeft;
  const companySourceRows = (activeData?.sourceRows ?? []).filter((row) => row.companyId === companyContext.companyId);
  const sourceRowsWithRelevance = companySourceRows.map((row) => {
  const displaySource = (row as { displaySource?: string }).displaySource ?? row.source;
  const displayDoc = (row as { displayDoc?: string }).displayDoc ?? row.doc;
  const displayStatus = (row as { displayStatus?: string }).displayStatus ?? row.status;
- const isPrimary = row.category === 'Financeiro' || row.category === 'Eventos' || row.category === 'Preco';
+ const isPrimary = row.category === 'Financeiro' || row.category === 'Eventos' || row.category === 'Preço';
  const statusLabel = displayStatus === 'Atualizado' ? 'Atualizado' : isPrimary ? 'Desatualizada' : 'Mais antiga';
  const consequence = displayStatus === 'Atualizado'
  ? isPrimary
@@ -2398,7 +2594,7 @@ const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).
   : 'Complementar atualizada.'
  : isPrimary
  ? 'Desatualizada; leitura pede cautela.'
- : 'Complementar; nao altera a leitura principal.';
+ : 'Complementar; não altera a leitura principal.';
  return { ...row, source: displaySource, doc: displayDoc, status: displayStatus, isPrimary, consequence, statusLabel };
  });
  const primarySourceRows = sourceRowsWithRelevance.filter((row) => row.isPrimary);
@@ -2412,16 +2608,16 @@ const activePriceRow = activePriceRows[0] ?? (activeData?.priceData.rows ?? []).
  const sourceConfidenceLabel = outdatedPrimarySources > 0
  ? 'Moderada'
  : updatedPrimarySources >= 2
- ? (outdatedComplementarySources > 0 ? 'Alta no nucleo da leitura' : 'Alta')
- : 'Em revisao';
+ ? (outdatedComplementarySources > 0 ? 'Alta no núcleo da leitura' : 'Alta')
+ : 'Em revisão';
  const sourceConfidenceTone = sourceConfidenceLabel === 'Alta'
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
  : sourceConfidenceLabel === 'Moderada'
  ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]'
  : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]';
  const sourceConfidenceSummary = outdatedPrimarySources > 0
- ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnostico.`
- : `A leitura atual esta apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Ha ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Nao ha alerta de desatualizacao relevante no conjunto principal.'}`;
+ ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnóstico.`
+ : `A leitura atual está apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Há ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Não há alerta de desatualização relevante no conjunto principal.'}`;
  const resolvedSourceConfidenceLabel = (activeData?.sourceConfidence?.level ?? '').trim() || sourceConfidenceLabel;
  const resolvedSourceConfidenceSummary = (activeData?.sourceConfidence?.summary ?? '').trim() || sourceConfidenceSummary;
 const allCompanyChanges = (activeData?.changes ?? []).filter((change) => change.companyId === companyContext.companyId);
@@ -2437,19 +2633,19 @@ const changesCount = changesBySelectedWindow.length;
  const strongestHumanLine = (() => {
  const base = activeData?.strongest.summary?.trim();
  if (base) return base;
- return 'Sem resumo de forca disponivel neste fechamento.';
+ return 'Sem resumo de força disponível neste fechamento.';
  })();
  const watchoutHumanLine = (() => {
  const base = activeData?.watchout.summary?.trim();
  if (base) return base;
- return 'Sem ponto de atencao detalhado neste fechamento.';
+ return 'Sem ponto de atenção detalhado neste fechamento.';
  })();
  const watchoutBadgeLabel = (() => {
  const raw = (activeData?.watchout.badge ?? '').toLowerCase();
  if (!raw) return 'Monitorar';
- if (raw.includes('saud')) return 'Em observacao';
+ if (raw.includes('saud')) return 'Em observação';
  if (raw.includes('aten')) return 'Monitorar';
- if (raw.includes('ris')) return 'Em observacao';
+ if (raw.includes('ris')) return 'Em observação';
  return activeData?.watchout.badge ?? 'Monitorar';
  })();
  const summaryNarrative = (() => {
@@ -2512,15 +2708,15 @@ const changesCount = changesBySelectedWindow.length;
  .map(([groupKey, items]) => {
   const newest = [...items].sort((a, b) => b.dateSortValue - a.dateSortValue)[0];
   const pillar = newest?.pillar ?? 'A classificar';
-  const type = newest?.type ?? 'Atualizacao';
-  const groupTitle = `${pillar} - ${items.length} atualizacoes rotineiras no periodo`;
+  const type = newest?.type ?? 'Atualização';
+  const groupTitle = `${pillar} - ${items.length} atualizações rotineiras no período`;
   return {
   groupKey,
   items: items.sort((a, b) => b.dateSortValue - a.dateSortValue),
   pillar,
   type,
   groupTitle,
-  summary: `Eventos recorrentes de ${type.toLowerCase()}, sem mudanca estrutural relevante na leitura atual da empresa.`,
+  summary: `Eventos recorrentes de ${type.toLowerCase()}, sem mudança estrutural relevante na leitura atual da empresa.`,
   };
  })
  .sort((a, b) => b.items[0].dateSortValue - a.items[0].dateSortValue);
@@ -2538,8 +2734,8 @@ const changesCount = changesBySelectedWindow.length;
   items: overflowRoutineSingles,
   pillar: 'A classificar' as ChangePillarTag,
   type: 'Outras rotinas',
-  groupTitle: `Outras rotinas - ${overflowRoutineSingles.length} atualizacoes`,
-  summary: 'Atualizacoes recorrentes agrupadas para reduzir ruido na leitura mobile.',
+  groupTitle: `Outras rotinas - ${overflowRoutineSingles.length} atualizações`,
+  summary: 'Atualizações recorrentes agrupadas para reduzir ruido na leitura mobile.',
  }
  : null;
 
@@ -2583,8 +2779,8 @@ const changesCount = changesBySelectedWindow.length;
  const structuralCount = backendChangesSummary?.structuralCount ?? enrichedChanges.filter((change) => change.level === 'Estrutural').length;
  const changesSummaryText = backendChangesSummary?.summaryText
  ?? (principalChange
- ? `Nos ultimos ${changesWindow.replace(' dias', '')} dias, a principal mudanca identificada foi ${principalChange.title.toLowerCase()}, com possivel efeito no pilar de ${principalChange.pillar}. Fora isso, o periodo teve atualizacoes mais rotineiras, sem alteracao estrutural relevante na leitura geral da empresa.`
- : `Nos ultimos ${changesWindow.replace(' dias', '')} dias, o periodo foi marcado por atualizacoes de acompanhamento, sem mudanca estrutural dominante na leitura geral da empresa.`);
+ ? `Nos úúltimos ${changesWindow.replace(' dias', '')} dias, a principal mudança identificada foi ${principalChange.title.toLowerCase()}, com possível efeito no pilar de ${principalChange.pillar}. Fora isso, o período teve atualizações mais rotineiras, sem alteracao estrutural relevante na leitura geral da empresa.`
+ : `Nos úúltimos ${changesWindow.replace(' dias', '')} dias, o período foi marcado por atualizações de acompanhamento, sem mudança estrutural dominante na leitura geral da empresa.`);
  const availablePillarsForFilter = pillarFilterOptions;
  const allCompanyTimelineEvents = (activeData?.timelineEvents ?? []).filter((timelineEvent) => timelineEvent.companyId === companyContext.companyId);
  const timelineEventsBySelectedWindow = useMemo(() => {
@@ -2667,13 +2863,13 @@ const changesCount = changesBySelectedWindow.length;
  .map(([groupKey, items]) => {
   const newest = [...items].sort((a, b) => b.dateSortValue - a.dateSortValue)[0];
   const pillar = newest?.mainPillar ?? 'A classificar';
-  const type = newest?.typeLabel ?? 'Atualizacao';
+  const type = newest?.typeLabel ?? 'Atualização';
   return {
   groupKey,
   items: items.sort((a, b) => b.dateSortValue - a.dateSortValue),
   pillar,
-  groupTitle: `${pillar} - ${items.length} atualizacoes nos ultimos ${eventsWindow.replace(' dias', '')} dias`,
-  summary: `Eventos recorrentes de ${type.toLowerCase()}, sem mudanca estrutural relevante na leitura atual da empresa.`,
+  groupTitle: `${pillar} - ${items.length} atualizações nos úúltimos ${eventsWindow.replace(' dias', '')} dias`,
+  summary: `Eventos recorrentes de ${type.toLowerCase()}, sem mudança estrutural relevante na leitura atual da empresa.`,
   };
  })
  .sort((a, b) => b.items[0].dateSortValue - a.items[0].dateSortValue);
@@ -2689,8 +2885,8 @@ const changesCount = changesBySelectedWindow.length;
   groupKey: 'agenda-rotina-overflow',
   items: overflowTimelineRoutineSingles,
   pillar: 'A classificar' as ChangePillarTag,
-  groupTitle: `Outras rotinas - ${overflowTimelineRoutineSingles.length} atualizacoes`,
-  summary: 'Atualizacoes recorrentes agrupadas para reduzir ruido na leitura mobile.',
+  groupTitle: `Outras rotinas - ${overflowTimelineRoutineSingles.length} atualizações`,
+  summary: 'Atualizações recorrentes agrupadas para reduzir ruido na leitura mobile.',
  }
  : null;
 
@@ -2915,14 +3111,6 @@ const changesCount = changesBySelectedWindow.length;
  }, [actionError]);
 
  useEffect(() => {
- if (!activeData?.priceData.metricSeries) return;
- const metrics = Object.keys(activeData.priceData.metricSeries) as PriceMetric[];
- if (metrics.length > 0 && !metrics.includes(selectedPriceMetric)) {
- setSelectedPriceMetric(metrics[0]);
- }
- }, [activeData, selectedPriceMetric]);
-
- useEffect(() => {
  const openPillar =
  (Object.entries(expandedPillars).find(([, isOpen]) => isOpen)?.[0] as Exclude<CompanyPreferences['lastOpenPillar'], null> | undefined) ??
  null;
@@ -2930,10 +3118,9 @@ const changesCount = changesBySelectedWindow.length;
  activeTab,
  changesWindow,
  eventsWindow,
- priceMetric: selectedPriceMetric,
  lastOpenPillar: openPillar,
  });
- }, [activeTab, changesWindow, companyContext.companyId, eventsWindow, expandedPillars, selectedPriceMetric]);
+ }, [activeTab, changesWindow, companyContext.companyId, eventsWindow, expandedPillars]);
 
  return (
  <div className="h-screen overflow-hidden bg-[#F7F8FA] font-['Plus_Jakarta_Sans','DM_Sans',system-ui,sans-serif] text-[#111827]">
@@ -3044,7 +3231,7 @@ const changesCount = changesBySelectedWindow.length;
  {statusLabel(companyStatus)} - {scoreAverage}/100
  </span>
  <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[11px] font-medium text-[#6B7280]">
- Preco atual: {safeMeta(activeData?.priceData.current)} <span className="text-[#9CA3AF]">+0,8%</span>
+ Preço atual: {safeMeta(activeData?.priceData.current)} <span className="text-[#9CA3AF]">+0,8%</span>
  </span>
  </div>
  <p className="mt-1 truncate text-[13px] text-[#6B7280]">{activeCompany.description}</p>
@@ -3054,13 +3241,13 @@ const changesCount = changesBySelectedWindow.length;
  <span title="Ver fontes na aba Fontes">Fontes: CVM, B3 e RI</span>
  <div className="relative">
  <button className="text-[12px] text-[#6B7280] hover:text-[#374151] hover:underline" onClick={() => setShowHeaderUpdateDetails((prev) => !prev)}>
- Ver detalhes da atualizacao
+ Ver detalhes da atualização
  </button>
  {showHeaderUpdateDetails && (
  <div className="absolute left-0 top-6 z-30 min-w-[220px] rounded-lg border border-[#E5E7EB] bg-white p-3 text-[12px] text-[#4B5563] shadow-lg">
  <p>Financeiro: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
  <p>Eventos: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p>Preco: {safeMeta(activeData?.priceData.updatedAt)}</p>
+ <p>Preço: {safeMeta(activeData?.priceData.updatedAt)}</p>
  <p>Fontes: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
  </div>
  )}
@@ -3091,7 +3278,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="absolute right-0 top-11 z-30 w-40 rounded-lg border border-[#E5E7EB] bg-white p-1.5 shadow-lg">
  <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-[#374151] hover:bg-[#F9FAFB]" onClick={(event) => guardAction(event)}>
  <Bell className="h-4 w-4" />
- Notificaes
+ Notificações
  </button>
  <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-[#374151] hover:bg-[#F9FAFB]" onClick={(event) => guardAction(event)}>
  <Share2 className="h-4 w-4" />
@@ -3115,9 +3302,9 @@ const changesCount = changesBySelectedWindow.length;
  {tab === 'Mudancas'
  ? `O que mudou (90 dias) (${changesCount})`
  : tab === 'Eventos'
- ? `Agenda (proximos eventos) (${eventsCount})`
- : tab === 'Preco'
- ? 'Preco'
+ ? `Agenda (próximos eventos) (${eventsCount})`
+ : tab === 'Preço'
+ ? 'Preço'
  : tab}
  </button>
  ))}
@@ -3137,7 +3324,7 @@ const changesCount = changesBySelectedWindow.length;
  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={() => setShowScoreInfo(false)}>Fechar</button>
  </div>
  <p className="mt-2 text-[12px] text-[#6B7280]">Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
- <p className="mt-1 text-[12px] text-[#6B7280]">Regra: score 0-100 por pilar com cortes em saudvel, ateno e risco.</p>
+ <p className="mt-1 text-[12px] text-[#6B7280]">Status exibido conforme informado no endpoint de cada pilar.</p>
  <p className="mt-1 text-[12px] text-[#6B7280]">Fontes: CVM, B3 e RI da empresa.</p>
  </div>
  )}
@@ -3175,9 +3362,9 @@ const changesCount = changesBySelectedWindow.length;
  )}
  {evidenceTab === 'Como calculamos' && (
  <div className="mt-3 space-y-1 text-[12px] text-[#6B7280]">
- <p>Frmula base: valor atual vs histrico de 5 anos.</p>
- <p>Notas: sinalizamos ponto forte/ateno conforme direo do pilar.</p>
- <p>Limitaes: sujeito a reviso aps novo release da companhia.</p>
+ <p>Fórmula base: valor atual vs histórico de 5 anos.</p>
+ <p>Notas: sinalizamos ponto forte/atenção conforme direção do pilar.</p>
+ <p>Limitações: sujeito a revisão após novo release da companhia.</p>
  </div>
  )}
  </div>
@@ -3193,16 +3380,16 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  ) : activePayload?.status === 'empty' ? (
  <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <h2 className="text-[15px] font-semibold text-[#111827]">Sem dados ainda para esta empresa (em ingesto)</h2>
+ <h2 className="text-[15px] font-semibold text-[#111827]">Sem dados ainda para está empresa (em ingestão)</h2>
  </article>
  ) : (
  <>
 {activeTab === 'Resumo' && (
 <div className="space-y-4">
 <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">Diagnostico rapido</p>
+ <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">Diagnóstico rápido</p>
  <h2 className="mt-2 text-[20px] font-semibold leading-tight text-[#0B1220]">
- {activeData?.diagnosisHeadline ?? 'A empresa permanece estruturalmente saudavel, com um ponto de atencao concentrado em divida.'}
+ {activeData?.diagnosisHeadline ?? 'A empresa permanece estruturalmente saudável, com um ponto de atenção concentrado em dívida.'}
  </h2>
  <p className="mt-2 text-[13px] text-[#6B7280]">Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.</p>
  <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -3210,13 +3397,13 @@ const changesCount = changesBySelectedWindow.length;
  className="rounded-lg border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[13px] font-semibold text-white"
  onClick={() => goToPillar(activeData?.strongest.title ?? 'Divida')}
  >
- Ver principal forca
+ Ver principal força
  </button>
  <button
  className="rounded-lg border border-[#F6DEA9] bg-[#FFFBEB] px-3.5 py-2 text-[13px] font-semibold text-[#9A6A0F]"
  onClick={() => goToPillar(activeData?.watchout.title ?? 'Margens')}
  >
- Ver principal atencao
+ Ver principal atenção
  </button>
  </div>
  </article>
@@ -3226,7 +3413,7 @@ const changesCount = changesBySelectedWindow.length;
  <article className="rounded-xl border border-[#E8EAED] border-l-[3px] border-l-[#0E9384] bg-white p-4">
  <div className="flex items-center gap-2">
  <BarChart3 className="h-4 w-4 text-[#0E9384]" />
- <h3 className="text-[14px] font-semibold text-[#111827]">Principal Forca</h3>
+ <h3 className="text-[14px] font-semibold text-[#111827]">Principal Força</h3>
  </div>
  <div className="mt-4">
  <p className="text-[24px] font-bold text-[#0E9384]">{activeData?.strongest.title ?? 'Divida'}</p>
@@ -3236,7 +3423,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
  <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.strongest.score ?? '95/100'}</span>
  <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.badge ?? ''}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variacao: {activeData?.strongest.trend ?? 'estavel'}</span>
+ <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
  </div>
  <div className="mt-3 flex items-center gap-2">
  <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
@@ -3262,7 +3449,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
  <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.watchout.score ?? '61/100'}</span>
  <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{watchoutBadgeLabel}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variacao: {activeData?.watchout.trend ?? 'piora'}</span>
+ <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
  </div>
  <div className="mt-3 flex items-center gap-2">
  <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
@@ -3284,7 +3471,7 @@ const changesCount = changesBySelectedWindow.length;
  Como calculamos
  </button>
  </div>
- <p className="mt-1 text-[12px] text-[#667085]">Visao geral para apoiar a leitura inicial, sem substituir o diagnostico.</p>
+ <p className="mt-1 text-[12px] text-[#667085]">Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.</p>
  <div className="mt-2">
  <PillarMap
  data={mapPillarData}
@@ -3302,7 +3489,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-[15px] font-semibold text-[#111827]">Resumo em 60s</h2>
- <p className="text-[12px] text-[#9CA3AF]">Uma visao simples do que sustenta a empresa hoje e do que merece acompanhamento.</p>
+ <p className="text-[12px] text-[#9CA3AF]">Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.</p>
  </div>
  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
@@ -3317,19 +3504,19 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
- <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confianca: Alta</span>
+ <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
  </div>
  </article>
 
  <article className="rounded-xl border border-[#D6F5EE] bg-[#F4FFFC] p-5">
  <div className="flex items-center justify-between gap-3">
- <h2 className="text-[15px] font-semibold text-[#111827]">Proximas acoes</h2>
+ <h2 className="text-[15px] font-semibold text-[#111827]">Próximas ações</h2>
  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
- <p className="mt-1 text-[12px] text-[#667085]">Feche a leitura com um proximo passo util e verificavel.</p>
+ <p className="mt-1 text-[12px] text-[#667085]">Feche a leitura com um próximo passo útil e verificável.</p>
  <div className="mt-3 flex flex-wrap items-center gap-2">
  <button className={cx('rounded-lg border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[13px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
- Criar alerta da principal atencao
+ Criar alerta da principal atenção
  </button>
  <button className="rounded-lg border border-[#E5E7EB] bg-white px-3.5 py-2 text-[13px] font-medium text-[#1F2937]" onClick={() => setActiveTab('Pilares')}>
  Ver pilares completos
@@ -3345,13 +3532,13 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Pilares' && (
  <div className="space-y-3">
  <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
- <h2 className="text-[15px] font-semibold text-[#111827]">Sintese do diagnostico por pilares</h2>
+ <h2 className="text-[15px] font-semibold text-[#111827]">Síntese do diagnóstico por pilares</h2>
  <p className="mt-1 text-[13px] text-[#6B7280]">
- {healthyPillars.length} pilares saudaveis, {attentionPillars.length} em atencao e {riskPillars.length} em risco.
+ {healthyPillars.length} pilares saudáveis, {attentionPillars.length} em atenção e {riskPillars.length} em risco.
  </p>
  <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#374151]">
  <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : ''}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal sustentacao: {strongestPillar ? pillarLabel(strongestPillar.pillar) : ''}</span>
+ <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : ''}</span>
  </div>
  </article>
  {(activeData?.pillars ?? []).filter((p) => p.companyId === companyContext.companyId).length === 0 && (
@@ -3491,14 +3678,32 @@ const changesCount = changesBySelectedWindow.length;
  </section>
 
  {mainEvidence && (
- <section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
- <h3 className="text-[13px] font-semibold text-[#111827]">Sinal principal</h3>
- <div className="mt-2 rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-2.5">
- {signalCopy.badgeLabel && (
-  <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
-  {signalCopy.badgeLabel}
-  </span>
+<section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
+<h3 className="text-[13px] font-semibold text-[#111827]">Sinal principal</h3>
+<div
+ className={cx(
+ 'mt-2 rounded-lg border p-2.5',
+ signalCopy.badgeTone === 'risk'
+ ? 'border-[#FECACA] bg-[#FEF2F2]'
+ : signalCopy.badgeTone === 'attention'
+ ? 'border-[#FDE68A] bg-[#FFFBEB]'
+ : 'border-[#D6F5EE] bg-[#F4FFFC]'
  )}
+>
+{signalCopy.badgeLabel && (
+ <span
+  className={cx(
+  'rounded-full border px-2.5 py-1 text-[12px] font-semibold',
+  signalCopy.badgeTone === 'risk'
+  ? 'border-[#DC2626] bg-[#DC2626] text-white'
+  : signalCopy.badgeTone === 'attention'
+  ? 'border-[#F59E0B] bg-[#F59E0B] text-white'
+  : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
+  )}
+ >
+ {signalCopy.badgeLabel}
+ </span>
+)}
  <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signalCopy.title}</p>
  <p className="mt-1 text-[13px] text-[#4B5563]">{signalCopy.body}</p>
  {signalCopy.why && <p className="mt-1 text-[13px] text-[#4B5563]">Por que importa: {signalCopy.why}</p>}
@@ -3533,7 +3738,7 @@ const changesCount = changesBySelectedWindow.length;
  </article>
  );
  })}
- <p className="py-2 text-center text-[13px] text-[#6B7280]">Sentiu falta de algum indicador? <button className="text-[#0E9384] hover:underline">Sugerir indicador</button></p>
+ <p className="py-2 text-center text-[13px] text-[#6B7280]">Sentiu falta de algum indicador? <button className="text-[12px] font-medium text-[#0E9384] hover:underline">Sugerir indicador</button></p>
  </div>
  )}
 
@@ -3541,16 +3746,16 @@ const changesCount = changesBySelectedWindow.length;
  <div>
  <section className="mb-4 rounded-xl border border-[#DDE3EA] bg-white p-4">
   <h2 className="text-[15px] font-semibold text-[#111827]">O que mudou ({changesWindow})</h2>
-  <p className="mt-1 text-[13px] text-[#5B6472]">Veja o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
+  <p className="mt-1 text-[13px] text-[#5B6472]">Vejá o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
  <div className="mt-3 border-t border-[#EEF2F6] pt-3">
-  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do periodo</p>
+  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do período</p>
   <p className="mt-2 max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
    {changesSummaryText}
   </p>
   <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
    <p className="font-semibold text-[#0F766E]">Pilar mais afetado: {periodMostAffected}</p>
-   <p>Mudancas estruturais: {structuralCount}</p>
-   <p>Atualizacoes de rotina: {routineCount}</p>
+   <p>Mudanças estruturais: {structuralCount}</p>
+   <p>Atualizações de rotina: {routineCount}</p>
   </div>
   </div>
  </section>
@@ -3592,9 +3797,9 @@ const changesCount = changesBySelectedWindow.length;
  <section className="mb-4 rounded-xl border border-[#F6C9BF] bg-[#FFF7F5] p-3">
   <div className="flex items-end justify-between gap-3">
   <div>
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudanca do periodo</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudança do período</p>
    <p className="mt-1 text-[13px] text-[#1F2937]">
-   {`${principalChange.title}, com possivel efeito no pilar de ${principalChange.pillar} nos proximos fechamentos.`}
+   {`${principalChange.title}, com possível efeito no pilar de ${principalChange.pillar} nos próximos fechamentos.`}
    </p>
   </div>
   <button
@@ -3615,27 +3820,27 @@ const changesCount = changesBySelectedWindow.length;
   {!hasVisibleChanges && (
   <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
    <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-   <p className="mt-1 text-[11px] text-[#9CA3AF]">Ultima atualizacao: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+   <p className="mt-1 text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
   </article>
   )}
 
   {displayedStructural.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Mudancas estruturais</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Mudanças estruturais</p>
    {displayedStructural.map((change) => renderChangeCard(change))}
   </section>
   )}
 
   {displayedRelevant.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9A6A0F]">Mudancas relevantes</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9A6A0F]">Mudanças relevantes</p>
    {displayedRelevant.map((change) => renderChangeCard(change))}
   </section>
   )}
 
   {displayedRoutine.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 | Rotina</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nível 3 | Rotina</p>
    {displayedRoutine.map((item) => {
    if (item.type === 'single') return renderChangeCard(item.payload);
    const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
@@ -3676,19 +3881,19 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Eventos' && (
  <div>
  <section className="mb-4 rounded-xl border border-[#DDE3EA] bg-white p-4">
-  <h2 className="text-[15px] font-semibold text-[#111827]">Agenda (proximos eventos) ({eventsWindow})</h2>
-  <p className="mt-1 text-[13px] text-[#5B6472]">Veja o que pode ter impacto real, o que e rotina e quais pilares podem ser mais afetados.</p>
+  <h2 className="text-[15px] font-semibold text-[#111827]">Agenda (próximos eventos) ({eventsWindow})</h2>
+  <p className="mt-1 text-[13px] text-[#5B6472]">Vejá o que pode ter impacto real, o que e rotina e quais pilares podem ser mais afetados.</p>
   <div className="mt-3 border-t border-[#EEF2F6] pt-3">
-  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do periodo</p>
+  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do período</p>
   <p className="mt-2 max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
    {principalTimelineChange
-   ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o periodo traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
-   : `Nos proximos ${eventsWindow.replace(' dias', '')} dias, a agenda esta concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
+   ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o período traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
+   : `Nos próximos ${eventsWindow.replace(' dias', '')} dias, a agenda está concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
   </p>
   <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
    <p className="font-semibold text-[#0F766E]">Pilar mais sensivel: {timelineMostAffectedPillar}</p>
    <p>Gatilhos principais: {timelineStructuralCount}</p>
-   <p>Atualizacoes de rotina: {timelineRoutineCount}</p>
+   <p>Atualizações de rotina: {timelineRoutineCount}</p>
   </div>
   </div>
  </section>
@@ -3731,9 +3936,9 @@ const changesCount = changesBySelectedWindow.length;
  <section className="mb-4 rounded-xl border border-[#F6C9BF] bg-[#FFF7F5] p-3">
   <div className="flex items-end justify-between gap-3">
   <div>
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudanca do periodo</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudança do período</p>
    <p className="mt-1 text-[13px] text-[#1F2937]">
-   {`${principalTimelineChange.title}, com possivel efeito no pilar de ${principalTimelineChange.mainPillar} nos proximos fechamentos.`}
+   {`${principalTimelineChange.title}, com possível efeito no pilar de ${principalTimelineChange.mainPillar} nos próximos fechamentos.`}
    </p>
   </div>
   <button
@@ -3754,7 +3959,7 @@ const changesCount = changesBySelectedWindow.length;
   {!hasVisibleTimelineEvents && (
   <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
    <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-   <p className="mt-1 text-[11px] text-[#9CA3AF]">Ultima atualizacao: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+   <p className="mt-1 text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
   </article>
   )}
 
@@ -3774,7 +3979,7 @@ const changesCount = changesBySelectedWindow.length;
 
   {displayedTimelineRoutine.length > 0 && (
   <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nivel 3 | Rotina</p>
+   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nível 3 | Rotina</p>
    {displayedTimelineRoutine.map((item) => {
    if (item.type === 'single') return renderAgendaEventCard(item.payload);
    const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
@@ -3811,7 +4016,7 @@ const changesCount = changesBySelectedWindow.length;
 
   {hasVisibleTimelineEvents && (
   <section className="rounded-xl border border-[#D6F5EE] bg-[#F4FFFC] p-4">
-   <p className="text-[13px] text-[#1F2937]">Feche a leitura com o proximo passo: acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
+   <p className="text-[13px] text-[#1F2937]">Feche a leitura com o próximo passo: acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
    <div className="mt-3 flex flex-wrap items-center gap-2">
     <button
     className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
@@ -3837,131 +4042,137 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  )}
 
- {activeTab === 'Preco' && (
+ {activeTab === 'Preço' && (
  <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <div className="flex items-center justify-between">
- <h2 className="text-[15px] font-semibold text-[#111827]">Preo em contexto</h2>
- <div className="inline-flex rounded-full bg-[#F9FAFB] p-1">
- {(['P/L', 'EV/EBITDA', 'P/VP'] as PriceMetric[]).map((metric) => {
- const hasMetric = availablePriceMetrics.includes(metric);
- return (
- <button
- key={metric}
- onClick={() => hasMetric && setSelectedPriceMetric(metric)}
- disabled={!hasMetric}
- className={cx(
- 'rounded-full px-2.5 py-1 text-[11px]',
- selectedPriceMetric === metric ? 'border border-[#99F6E4] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'text-[#6B7280]',
- !hasMetric ? 'cursor-not-allowed opacity-40' : ''
+ <div className="flex flex-wrap items-start justify-between gap-2">
+ <div>
+ <h2 className="text-[15px] font-semibold text-[#111827]">Preço vs valor estimado</h2>
+ <p className="mt-1 text-[13px] text-[#64748B]">Leitura por cenário-base de valuation (DCF). Não é recomendação de compra ou venda.</p>
+ </div>
+ {valuationStateChipLabel && (
+ <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', valuationStateChipTone)}>{valuationStateChipLabel}</span>
  )}
- >
- {metric}
- </button>
- );
- })}
  </div>
- </div>
- <div className="mt-2 space-y-1.5">
- <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Leitura atual</p>
- <p className="text-[14px] font-medium text-[#111827]">{priceReadingLine}</p>
- <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Contexto</p>
- <p className="text-[13px] text-[#6B7280]">{priceContextLine}</p>
- {priceSummaryLine && <p className="text-[13px] text-[#475569]">{priceSummaryLine}</p>}
- </div>
- <p className="mt-1 text-[11px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
- <p className="mt-1 text-[11px] text-[#9CA3AF]">Preco nominal: {safeMeta(activeData?.priceData.current)} (apoio de contexto, nao sinal principal).</p>
+ <p className="mt-2 text-[11px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} | Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
 
  <div className="mt-4 grid gap-2 sm:grid-cols-3">
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Hoje ({selectedPriceMetric})</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{activePriceRow?.current ?? '--'}</p>
+ <p className="text-[11px] text-[#64748B]">Preço atual</p>
+ <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.current) || '--'}</p>
  </div>
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Mediana 5a</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{activePriceRow?.historical ?? '--'}</p>
+ <p className="text-[11px] text-[#64748B]">Preço justo estimado</p>
+ <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.estimatedFairValue) || '--'}</p>
  </div>
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Setor</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{activePriceRow?.sector ?? '--'}</p>
+ <p className="text-[11px] text-[#64748B]">Diferença vs preço atual</p>
+ <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '--'}</p>
  </div>
  </div>
 
- <div className="mt-4 rounded-lg border border-[#E5EAF1] bg-[#FCFDFE] p-4">
- {!activePriceSeries && (
- <div className="py-3 text-[12px] text-[#9CA3AF]">
- Ainda no temos dados suficientes para este indicador. ltima tentativa: {safeMeta(activeData?.priceData.updatedAt)}. Fonte esperada: CVM/RI
- </div>
+ {valuationSummaryLine && <p className="mt-3 text-[13px] text-[#475569]">{valuationSummaryLine}</p>}
+
+ <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-[#FCFDFE] p-4">
+ <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Bullet chart de valuation</p>
+ {!hasBulletDomain && (
+ <div className="py-3 text-[12px] text-[#9CA3AF]">Sem base suficiente para exibir a faixa de cenários neste momento.</div>
  )}
- <div className="flex h-28 items-end gap-2">
- {(activePriceSeries?.values ?? []).map((value, index) => (
- <div key={activePriceSeries?.labels[index]} className="flex flex-1 flex-col items-center gap-1">
- <div className={cx('w-full rounded-md', index === activePriceSeries?.currentMarker ? 'bg-[#6B7F9E]' : 'bg-[#D7DFEA]')} style={{ height: `${value * 8}px` }} />
- <span className="text-[11px] text-[#9CA3AF]">{activePriceSeries?.labels[index]}</span>
+ {hasBulletDomain && (
+ <>
+ <div className="relative mt-3 h-6 rounded-full bg-[#EEF2F6]">
+ {hasConservativeRange && (
+ <div
+ className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#CFF6EF]"
+ style={{ left: `${conservativeLeft}%`, width: `${Math.max((conservativeRight ?? 0) - conservativeLeft, 0)}%` }}
+ />
+ )}
+ {hasOptimisticRange && (
+ <div
+ className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#FDE9BF]"
+ style={{ left: `${optimisticLeft}%`, width: `${Math.max((optimisticRight ?? 0) - optimisticLeft, 0)}%` }}
+ />
+ )}
+ {baseMarker != null && <div className="absolute top-0 h-6 w-[2px] bg-[#0F766E]" style={{ left: `${baseMarker}%` }} />}
+ {currentMarker != null && (
+ <div className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#334155] bg-white" style={{ left: `${currentMarker}%` }} />
+ )}
+ </div>
+ <div className="mt-3 grid gap-2 text-[11px] text-[#5B6472] sm:grid-cols-2">
+ <p>{safeMeta(valuationBullet?.conservativeLabel) || 'Faixa conservadora'}</p>
+ <p>{safeMeta(valuationBullet?.baseLabel) || 'Cenário-base'}</p>
+ <p>{safeMeta(valuationBullet?.optimisticLabel) || 'Faixa otimista'}</p>
+ <p>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}: {safeMeta(activeData?.priceData.current) || '--'}</p>
+ </div>
+ </>
+ )}
+ </section>
+
+ <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Cenários do valuation</p>
+ <div className="grid grid-cols-4 border-b border-[#EEF2F6] pb-2 text-[11px] font-semibold text-[#94A3B8]">
+ <span>Cenário</span>
+ <span>Valor estimado</span>
+ <span>Diferença vs preço atual</span>
+ <span>Leitura</span>
+ </div>
+ {valuationScenarios.map((scenario, index) => (
+ <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#EEF2F6] py-2.5 text-[12px] text-[#334155]">
+ <span className="font-medium">{scenario.scenario || '--'}</span>
+ <span>{scenario.estimatedValue || '--'}</span>
+ <span>{scenario.differenceVsCurrent || '--'}</span>
+ <span className="text-[#64748B]">{scenario.reading || '--'}</span>
  </div>
  ))}
- </div>
- <div className="relative mt-3 h-6">
- <div className="absolute inset-x-0 top-3 h-px bg-[#E5E7EB]" />
- <div className="absolute top-0 h-6 w-px bg-[#475569]" style={{ left: `${(((activePriceSeries?.currentMarker ?? 0) / Math.max((activePriceSeries?.labels.length ?? 1) - 1, 1)) * 100)}%` }} />
- <div className="absolute top-0 h-6 w-px border-l-2 border-[#475569]" style={{ left: `${(((activePriceSeries?.medianMarker ?? 0) / Math.max((activePriceSeries?.labels.length ?? 1) - 1, 1)) * 100)}%` }} />
- <span
- className="absolute top-0 -translate-x-1/2 rounded bg-[#EEF2F7] px-1.5 py-0.5 text-[10px] font-medium text-[#475569]"
- style={{ left: `${(((activePriceSeries?.medianMarker ?? 0) / Math.max((activePriceSeries?.labels.length ?? 1) - 1, 1)) * 100)}%` }}
- >
- Mediana
- </span>
- </div>
- <div className="mt-1 flex items-center justify-between text-[10px]">
- <span className="text-[#475569]">Hoje ({activePriceRow?.current ?? '--'})</span>
- <span className="text-[#6B7280]">Mediana 5a ({activePriceRow?.historical ?? '--'})</span>
- </div>
- <p className="mt-2 text-[12px] text-[#6B7280]">
- Distribuicao historica do multiplo: este grafico mostra frequencia por faixa, nao sinal de compra ou venda.
- </p>
- {(premiumVsHistorical != null || premiumVsSector != null) && (
- <p className="mt-1 text-[12px] text-[#475569]">
- Takeaway rapido:
- {premiumVsHistorical != null ? ` ${selectedPriceMetric} hoje esta ${premiumVsHistorical >= 0 ? `${premiumVsHistorical.toFixed(1)}% acima` : `${Math.abs(premiumVsHistorical).toFixed(1)}% abaixo`} da mediana historica.` : ''}
- {premiumVsSector != null ? ` Em relacao ao setor, esta ${premiumVsSector >= 0 ? `${premiumVsSector.toFixed(1)}% acima` : `${Math.abs(premiumVsSector).toFixed(1)}% abaixo`}.` : ''}
- </p>
- )}
- <p className="mt-1 text-[12px] font-medium text-[#475569]">{priceContextPosition} {pricePremiumProfile}</p>
- </div>
+ {valuationScenarios.length === 0 && <div className="py-3 text-[12px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
+ </section>
 
- <div className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
- <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Comparacao resumida</p>
+ <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-white p-3">
+ <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">Sensibilidade do valuation</p>
+ <p className="mt-1 text-[12px] text-[#6B7280]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
+ <div className="mt-3 grid gap-2 sm:grid-cols-2">
+ {sensitivityDrivers.map((driver, index) => (
+ <div key={`${driver.driver}-${index}`} className="rounded-md border border-[#E6EAF0] bg-[#FBFCFE] p-2.5">
+ <p className="text-[12px] font-semibold text-[#0F172A]">{driver.driver || '--'}</p>
+ <p className="mt-1 text-[12px] text-[#475569]">{driver.value || '--'}</p>
+ <p className="mt-1 text-[11px] text-[#6B7280]">{driver.impact || '--'}</p>
+ </div>
+ ))}
+ {sensitivityDrivers.length === 0 && <p className="text-[12px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
+ </div>
+ </section>
+
+ <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Múltiplos de apoio</p>
  <div className="grid grid-cols-5 border-b border-[#EEF2F6] pb-2 text-[11px] font-semibold text-[#94A3B8]">
- <span>Mtrica</span>
+ <span>Métrica</span>
  <span>Atual</span>
  <span>Setor</span>
- <span>Histrico 5a</span>
- <span>Interpretao</span>
+ <span>Histórico 5a</span>
+ <span>Leitura</span>
  </div>
- {(activeData?.priceData.rows ?? []).filter((row) => row.companyId === companyContext.companyId && row.metric === selectedPriceMetric).map((row) => (
- <div key={row.metric} className="grid grid-cols-5 border-b border-[#EEF2F6] py-2.5 text-[12px] text-[#334155]">
+ {companyPriceRows.map((row) => (
+ <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#EEF2F6] py-2.5 text-[12px] text-[#334155]">
  <span className="font-medium">{row.metric}</span>
  <span>{row.current}</span>
  <span>{row.sector}</span>
- <span>{row.historical}</span>
+ <span>{row.histórical}</span>
  <span className="text-[#64748B]">{row.insight}</span>
  </div>
  ))}
- {((activeData?.priceData.rows ?? []).filter((row) => row.companyId === companyContext.companyId && row.metric === selectedPriceMetric).length === 0) && (
- <div className="py-3 text-[12px] text-[#9CA3AF]">Sem dados para este indicador.</div>
- )}
- </div>
- <p className="mt-4 text-[12px] italic text-[#6B7280]">Multiplicadores ajudam a comparar contexto de valuation, mas nao sao recomendacao de compra ou venda.</p>
+ {companyPriceRows.length === 0 && <div className="py-3 text-[12px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
+ <p className="mt-3 text-[12px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
+ </section>
  </article>
  )}
 
  {activeTab === 'Fontes' && (
  <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
  <h2 className="text-[15px] font-semibold text-[#111827]">Fontes & Metodologia</h2>
- <p className="mt-1 text-[13px] text-[#6B7280]">Transparencia da leitura: veja de onde vem os dados e quao atualizadas estao as fontes que sustentam esta analise.</p>
+ <p className="mt-1 text-[13px] text-[#6B7280]">Transparência da leitura: veja de onde vem os dados e quão atualizadas estão as fontes que sustentam esta análise.</p>
 
  {sourceRowsWithRelevance.length === 0 && (
  <div className="mt-4 rounded-lg border border-[#F3F4F6] px-4 py-3 text-[12px] text-[#9CA3AF]">
- Ainda no temos dados suficientes para este indicador. ltima tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}. Fonte esperada: CVM/RI
+ Ainda não temos dados suficientes para este indicador. Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}. Fonte esperada: CVM/RI
  </div>
  )}
 
@@ -3979,7 +4190,7 @@ const changesCount = changesBySelectedWindow.length;
   <div className="mt-3 space-y-1 text-[12px] text-[#374151]">
   <p>Fontes principais atualizadas: {updatedPrimarySources}</p>
   <p>Fontes complementares antigas: {outdatedComplementarySources}</p>
-  <p>Ultima atualizacao mais recente: {safeMeta(latestSourceDate)}</p>
+  <p>Última atualização mais recente: {safeMeta(latestSourceDate)}</p>
   </div>
  </section>
 
@@ -4066,7 +4277,7 @@ const changesCount = changesBySelectedWindow.length;
   <ul className="mt-2 space-y-1 text-[12px] text-[#64748B]">
   <li>Dados financeiros sustentam os pilares estruturais da leitura.</li>
   <li>Eventos e comunicados complementam o contexto recente da empresa.</li>
-  <li>Fontes complementares nao substituem as fontes principais da analise.</li>
+  <li>Fontes complementares não substituem as fontes principais da análise.</li>
   </ul>
  </section>
  </>
@@ -4081,8 +4292,6 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  );
 }
-
-
 
 
 
