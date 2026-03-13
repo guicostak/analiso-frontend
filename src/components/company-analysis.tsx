@@ -76,6 +76,8 @@ type PriceSensitivityDriver = {
 type PriceBulletChart = {
  conservativeMin: number | null;
  conservativeMax: number | null;
+ baseMin: number | null;
+ baseMax: number | null;
  baseValue: number | null;
  optimisticMin: number | null;
  optimisticMax: number | null;
@@ -1134,6 +1136,16 @@ function mapSensitivityImpactLabel(impactRaw: unknown) {
  return safeMeta(impactRaw);
 }
 
+function formatCurrencyBRL(value: number | null | undefined) {
+ if (value == null || !Number.isFinite(value)) return '--';
+ return value.toLocaleString('pt-BR', {
+ style: 'currency',
+ currency: 'BRL',
+ minimumFractionDigits: 2,
+ maximumFractionDigits: 2,
+ });
+}
+
 function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker: string): CompanyData | null {
  const overview = (raw.overview as Record<string, unknown> | undefined) ?? {};
  const radar = (raw.radar as Record<string, unknown> | undefined) ?? {};
@@ -1400,6 +1412,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const inferredMin = [
  asNumericValue(conservativeRaw.min),
  asNumericValue(conservativeRaw.max),
+ asNumericValue(baseRaw.min),
+ asNumericValue(baseRaw.max),
  asNumericValue(baseRaw.fairValue ?? baseRaw.value),
  asNumericValue(optimisticRaw.min),
  asNumericValue(optimisticRaw.max),
@@ -1409,6 +1423,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const bulletChart: PriceBulletChart = {
  conservativeMin: asNumericValue(conservativeRaw.min),
  conservativeMax: asNumericValue(conservativeRaw.max),
+ baseMin: asNumericValue(baseRaw.min),
+ baseMax: asNumericValue(baseRaw.max),
  baseValue: asNumericValue(baseRaw.fairValue ?? baseRaw.value),
  optimisticMin: asNumericValue(optimisticRaw.min),
  optimisticMax: asNumericValue(optimisticRaw.max),
@@ -1428,8 +1444,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  reading: asTextValue(scenario.reading),
  })).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
  const sensitivityDrivers = sensitivityRaw.map((driver) => ({
- driver: safeMeta(driver.label),
- value: mapSensitivityImpactLabel(driver.impact),
+ driver: safeMeta(driver.key),
+ value: safeMeta(driver.label),
  impact: mapSensitivityImpactLabel(driver.impact),
  })).filter((driver) => driver.driver || driver.value || driver.impact);
 
@@ -2560,6 +2576,8 @@ export function CompanyAnalysis() {
  valuationBullet?.max,
  valuationBullet?.conservativeMin,
  valuationBullet?.conservativeMax,
+ valuationBullet?.baseMin,
+ valuationBullet?.baseMax,
  valuationBullet?.baseValue,
  valuationBullet?.optimisticMin,
  valuationBullet?.optimisticMax,
@@ -2575,11 +2593,14 @@ export function CompanyAnalysis() {
  };
  const conservativeLeft = toBulletPercent(valuationBullet?.conservativeMin ?? null);
  const conservativeRight = toBulletPercent(valuationBullet?.conservativeMax ?? null);
+ const baseLeft = toBulletPercent(valuationBullet?.baseMin ?? null);
+ const baseRight = toBulletPercent(valuationBullet?.baseMax ?? null);
  const optimisticLeft = toBulletPercent(valuationBullet?.optimisticMin ?? null);
  const optimisticRight = toBulletPercent(valuationBullet?.optimisticMax ?? null);
  const baseMarker = toBulletPercent(valuationBullet?.baseValue ?? null);
  const currentMarker = toBulletPercent(valuationBullet?.currentPrice ?? null);
  const hasConservativeRange = conservativeLeft != null && conservativeRight != null && conservativeRight >= conservativeLeft;
+ const hasBaseRange = baseLeft != null && baseRight != null && baseRight >= baseLeft;
  const hasOptimisticRange = optimisticLeft != null && optimisticRight != null && optimisticRight >= optimisticLeft;
  const companySourceRows = (activeData?.sourceRows ?? []).filter((row) => row.companyId === companyContext.companyId);
  const sourceRowsWithRelevance = companySourceRows.map((row) => {
@@ -4070,7 +4091,12 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  </div>
 
- {valuationSummaryLine && <p className="mt-3 text-[13px] text-[#475569]">{valuationSummaryLine}</p>}
+ {valuationSummaryLine && (
+ <section className="mt-3 rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-3">
+ <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0F766E]">Por que isso importa</p>
+ <p className="mt-1 text-[13px] text-[#334155]">{valuationSummaryLine}</p>
+ </section>
+ )}
 
  <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-[#FCFDFE] p-4">
  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Bullet chart de valuation</p>
@@ -4079,33 +4105,66 @@ const changesCount = changesBySelectedWindow.length;
  )}
  {hasBulletDomain && (
  <>
- <div className="relative mt-3 h-6 rounded-full bg-[#EEF2F6]">
+ <div className="mt-3 rounded-lg border border-[#E6ECF2] bg-white p-3">
+ <div className="mb-2 flex items-center justify-between text-[10px] font-medium text-[#94A3B8]">
+ <span>{formatCurrencyBRL(bulletMin)}</span>
+ <span>Faixa estimada</span>
+ <span>{formatCurrencyBRL(bulletMax)}</span>
+ </div>
+ <div className="relative space-y-2">
+ {currentMarker != null && (
+ <div className="pointer-events-none absolute bottom-0 top-0 z-20" style={{ left: `${currentMarker}%` }}>
+ <div className="-ml-[2px] h-full w-1 rounded-full bg-[#0B1220]/90 shadow-[0_0_0_2px_#ffffff]" />
+ <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#CBD5E1] bg-[#0B1220] px-1.5 py-0.5 text-[10px] font-semibold text-white">
+ {safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}
+ </div>
+ </div>
+ )}
+ <div className="grid grid-cols-[130px_minmax(0,1fr)] items-center gap-2">
+ <p className="text-[11px] font-medium text-[#475569]">{safeMeta(valuationBullet?.conservativeLabel) || 'Faixa conservadora'}</p>
+ <div className="relative h-7 rounded-md bg-[#EEF2F6]">
  {hasConservativeRange && (
  <div
- className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#CFF6EF]"
+ className="absolute top-1/2 h-4 -translate-y-1/2 rounded-md bg-[#CFEDE7]"
  style={{ left: `${conservativeLeft}%`, width: `${Math.max((conservativeRight ?? 0) - conservativeLeft, 0)}%` }}
  />
  )}
+ </div>
+ </div>
+ <div className="grid grid-cols-[130px_minmax(0,1fr)] items-center gap-2">
+ <p className="text-[11px] font-semibold text-[#0F766E]">{safeMeta(valuationBullet?.baseLabel) || 'Cenário-base'}</p>
+ <div className="relative h-8 rounded-md bg-[#EAF6F3]">
+ {hasBaseRange && (
+ <div
+ className="absolute top-1/2 h-5 -translate-y-1/2 rounded-md border border-[#6FD0BC] bg-[#BDEFE4]"
+ style={{ left: `${baseLeft}%`, width: `${Math.max((baseRight ?? 0) - baseLeft, 0)}%` }}
+ />
+ )}
+ {baseMarker != null && <div className="absolute bottom-0 top-0 z-10 w-[2px] bg-[#0F766E]" style={{ left: `${baseMarker}%` }} />}
+ </div>
+ </div>
+ <div className="grid grid-cols-[130px_minmax(0,1fr)] items-center gap-2">
+ <p className="text-[11px] font-medium text-[#475569]">{safeMeta(valuationBullet?.optimisticLabel) || 'Faixa otimista'}</p>
+ <div className="relative h-7 rounded-md bg-[#EEF2F6]">
  {hasOptimisticRange && (
  <div
- className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#FDE9BF]"
+ className="absolute top-1/2 h-4 -translate-y-1/2 rounded-md bg-[#FDE9BF]"
  style={{ left: `${optimisticLeft}%`, width: `${Math.max((optimisticRight ?? 0) - optimisticLeft, 0)}%` }}
  />
  )}
- {baseMarker != null && <div className="absolute top-0 h-6 w-[2px] bg-[#0F766E]" style={{ left: `${baseMarker}%` }} />}
- {currentMarker != null && (
- <div className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#334155] bg-white" style={{ left: `${currentMarker}%` }} />
- )}
  </div>
- <div className="mt-3 grid gap-2 text-[11px] text-[#5B6472] sm:grid-cols-2">
- <p>{safeMeta(valuationBullet?.conservativeLabel) || 'Faixa conservadora'}</p>
- <p>{safeMeta(valuationBullet?.baseLabel) || 'Cenário-base'}</p>
- <p>{safeMeta(valuationBullet?.optimisticLabel) || 'Faixa otimista'}</p>
- <p>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}: {safeMeta(activeData?.priceData.current) || '--'}</p>
+ </div>
+ </div>
+ <div className="mt-3 grid gap-2 text-[11px] text-[#5B6472] sm:grid-cols-3">
+ <p>Conservador: incerteza com premissas mais duras.</p>
+ <p>Base: cenário central para a leitura principal.</p>
+ <p>Otimista: faixa com premissas mais favoráveis.</p>
+ </div>
+ <p className="mt-2 text-[11px] font-medium text-[#334155]">{safeMeta(activeData?.priceData.current) || '--'} marcado pela linha vertical escura.</p>
  </div>
  </>
  )}
- </section>
+</section>
 
  <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
  <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Cenários do valuation</p>
@@ -4292,12 +4351,6 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  );
 }
-
-
-
-
-
-
 
 
 
