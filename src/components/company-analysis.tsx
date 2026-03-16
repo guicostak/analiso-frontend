@@ -36,6 +36,7 @@ import logoRenner from '../assets/logos/renner.png';
 import logoMrv from '../assets/logos/mrv.jpg';
 import logoTaesa from '../assets/logos/taesa.png';
 import logoItau from '../assets/logos/itau.png';
+import logoPetrobras from '../assets/logos/petrobras.webp';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
@@ -76,6 +77,8 @@ type PriceSensitivityDriver = {
 type PriceBulletChart = {
  conservativeMin: number | null;
  conservativeMax: number | null;
+ baseMin: number | null;
+ baseMax: number | null;
  baseValue: number | null;
  optimisticMin: number | null;
  optimisticMax: number | null;
@@ -163,6 +166,7 @@ type PillarData = {
 };
 const queueItems: CompanyQueueItem[] = [
  { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposição a minério de ferro.' },
+ { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
  { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
  { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
  { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa, description: 'Empresa de transmissão de energia com receita regulada.' },
@@ -1134,6 +1138,16 @@ function mapSensitivityImpactLabel(impactRaw: unknown) {
  return safeMeta(impactRaw);
 }
 
+function formatCurrencyBRL(value: number | null | undefined) {
+ if (value == null || !Number.isFinite(value)) return '--';
+ return value.toLocaleString('pt-BR', {
+ style: 'currency',
+ currency: 'BRL',
+ minimumFractionDigits: 2,
+ maximumFractionDigits: 2,
+ });
+}
+
 function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker: string): CompanyData | null {
  const overview = (raw.overview as Record<string, unknown> | undefined) ?? {};
  const radar = (raw.radar as Record<string, unknown> | undefined) ?? {};
@@ -1400,6 +1414,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const inferredMin = [
  asNumericValue(conservativeRaw.min),
  asNumericValue(conservativeRaw.max),
+ asNumericValue(baseRaw.min),
+ asNumericValue(baseRaw.max),
  asNumericValue(baseRaw.fairValue ?? baseRaw.value),
  asNumericValue(optimisticRaw.min),
  asNumericValue(optimisticRaw.max),
@@ -1409,6 +1425,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const bulletChart: PriceBulletChart = {
  conservativeMin: asNumericValue(conservativeRaw.min),
  conservativeMax: asNumericValue(conservativeRaw.max),
+ baseMin: asNumericValue(baseRaw.min),
+ baseMax: asNumericValue(baseRaw.max),
  baseValue: asNumericValue(baseRaw.fairValue ?? baseRaw.value),
  optimisticMin: asNumericValue(optimisticRaw.min),
  optimisticMax: asNumericValue(optimisticRaw.max),
@@ -1428,8 +1446,8 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  reading: asTextValue(scenario.reading),
  })).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
  const sensitivityDrivers = sensitivityRaw.map((driver) => ({
- driver: safeMeta(driver.label),
- value: mapSensitivityImpactLabel(driver.impact),
+ driver: safeMeta(driver.key),
+ value: safeMeta(driver.label),
  impact: mapSensitivityImpactLabel(driver.impact),
  })).filter((driver) => driver.driver || driver.value || driver.impact);
 
@@ -2068,14 +2086,16 @@ function MiniLineChart({
  .join(' ');
 
  const markerX =
+ variant === 'line' &&
  highlightIndex !== undefined
  ? padding + (Math.max(Math.min(highlightIndex, Math.max(values.length - 1, 0)), 0) * (width - padding * 2)) / Math.max(values.length - 1, 1)
  : null;
  const markerY =
+ variant === 'line' &&
  highlightIndex !== undefined && values[highlightIndex] !== undefined
  ? height - padding - ((values[highlightIndex] - min) / span) * (height - padding * 2)
  : null;
- const hasReference = typeof referenceValue === 'number' && Number.isFinite(referenceValue);
+ const hasReference = variant === 'line' && typeof referenceValue === 'number' && Number.isFinite(referenceValue);
  const refY = hasReference ? height - padding - (((referenceValue as number) - min) / span) * (height - padding * 2) : null;
  const safeRefY = refY === null ? null : Math.max(padding, Math.min(height - padding, refY));
  const latestValue = values[Math.max(values.length - 1, 0)];
@@ -2393,6 +2413,7 @@ export function CompanyAnalysis() {
  const [eventsFocus, setEventsFocus] = useState<EventsFocusFilter>('Mais relevantes');
  const [eventsPillarFilter, setEventsPillarFilter] = useState<ChangePillarTag | 'Todos'>('Todos');
  const [expandedEventRoutineGroups, setExpandedEventRoutineGroups] = useState<Record<string, boolean>>({});
+ const [showValuationMethodologyDrawer, setShowValuationMethodologyDrawer] = useState(false);
  const [evidenceModal, setEvidenceModal] = useState<{
  pillarName: string;
  evidence: PillarEvidence;
@@ -2439,6 +2460,7 @@ export function CompanyAnalysis() {
  setChangesPillarFilter('Todos');
  setExpandedRoutineGroups({});
  setEventsWindow(prefs.eventsWindow);
+ setShowValuationMethodologyDrawer(false);
  setEvidenceModal(null);
  setEvidenceTab('Fonte');
  setExpandedPillars({
@@ -2551,36 +2573,40 @@ export function CompanyAnalysis() {
  : valuationStateChipToneRaw.includes('teal')
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0F766E]'
  : 'border-[#DDE3EA] bg-[#F8FAFC] text-[#475569]';
- const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
- const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
- const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
- const valuationBullet = activeData?.priceData.bulletChart ?? null;
- const bulletPoints = [
- valuationBullet?.min,
- valuationBullet?.max,
- valuationBullet?.conservativeMin,
- valuationBullet?.conservativeMax,
- valuationBullet?.baseValue,
- valuationBullet?.optimisticMin,
- valuationBullet?.optimisticMax,
- valuationBullet?.currentPrice,
- ].filter((value): value is number => value != null && Number.isFinite(value));
- const bulletMin = valuationBullet?.min != null ? valuationBullet.min : (bulletPoints.length > 0 ? Math.min(...bulletPoints) : null);
- const bulletMax = valuationBullet?.max != null ? valuationBullet.max : (bulletPoints.length > 0 ? Math.max(...bulletPoints) : null);
- const hasBulletDomain = bulletMin != null && bulletMax != null && bulletMax > bulletMin;
- const toBulletPercent = (value: number | null | undefined) => {
- if (!hasBulletDomain || value == null) return null;
- const pct = ((value - bulletMin) / (bulletMax - bulletMin)) * 100;
+const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
+const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
+const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
+const valuationBullet = activeData?.priceData.bulletChart ?? null;
+ const fairValue = valuationBullet?.baseValue ?? asNumericValue(activeData?.priceData.estimatedFairValue);
+ const currentPriceForRuler = valuationBullet?.currentPrice ?? asNumericValue(activeData?.priceData.current);
+ const semanticThresholdPct = 0.1;
+ const semanticRangePct = 0.3;
+ const rulerMin = fairValue != null ? fairValue * (1 - semanticRangePct) : null;
+ const rulerMax = fairValue != null ? fairValue * (1 + semanticRangePct) : null;
+ const hasSemanticDomain = rulerMin != null && rulerMax != null && rulerMax > rulerMin;
+ const toRulerPercent = (value: number | null | undefined) => {
+ if (!hasSemanticDomain || value == null) return null;
+ const pct = ((value - rulerMin) / (rulerMax - rulerMin)) * 100;
  return Math.min(100, Math.max(0, pct));
  };
- const conservativeLeft = toBulletPercent(valuationBullet?.conservativeMin ?? null);
- const conservativeRight = toBulletPercent(valuationBullet?.conservativeMax ?? null);
- const optimisticLeft = toBulletPercent(valuationBullet?.optimisticMin ?? null);
- const optimisticRight = toBulletPercent(valuationBullet?.optimisticMax ?? null);
- const baseMarker = toBulletPercent(valuationBullet?.baseValue ?? null);
- const currentMarker = toBulletPercent(valuationBullet?.currentPrice ?? null);
- const hasConservativeRange = conservativeLeft != null && conservativeRight != null && conservativeRight >= conservativeLeft;
- const hasOptimisticRange = optimisticLeft != null && optimisticRight != null && optimisticRight >= optimisticLeft;
+ const fairMarker = hasSemanticDomain ? 50 : null;
+ const currentMarkerRaw = toRulerPercent(currentPriceForRuler);
+ const currentMarker = currentMarkerRaw != null ? Math.min(98, Math.max(2, currentMarkerRaw)) : null;
+ const nearZoneMin = fairValue != null ? fairValue * (1 - semanticThresholdPct) : null;
+ const nearZoneMax = fairValue != null ? fairValue * (1 + semanticThresholdPct) : null;
+ const nearZoneMinPct = toRulerPercent(nearZoneMin);
+ const nearZoneMaxPct = toRulerPercent(nearZoneMax);
+ const hasNearZone = nearZoneMinPct != null && nearZoneMaxPct != null && nearZoneMaxPct > nearZoneMinPct;
+ const belowZoneWidthPct = hasNearZone ? Math.max((nearZoneMinPct ?? 0), 0) : 0;
+ const nearZoneWidthPct = hasNearZone ? Math.max((nearZoneMaxPct ?? 0) - (nearZoneMinPct ?? 0), 0) : 0;
+ const aboveZoneWidthPct = hasNearZone ? Math.max(100 - (nearZoneMaxPct ?? 100), 0) : 0;
+ const currentMarkerLabelClass = currentMarker == null
+ ? 'left-1/2 -translate-x-1/2'
+ : currentMarker <= 14
+ ? 'left-0'
+ : currentMarker >= 86
+ ? 'right-0'
+ : 'left-1/2 -translate-x-1/2';
  const companySourceRows = (activeData?.sourceRows ?? []).filter((row) => row.companyId === companyContext.companyId);
  const sourceRowsWithRelevance = companySourceRows.map((row) => {
  const displaySource = (row as { displaySource?: string }).displaySource ?? row.source;
@@ -3557,7 +3583,19 @@ const changesCount = changesBySelectedWindow.length;
  const accent = pillar.status === 'Saudavel' ? 'border-l-[#0E9384]' : pillar.status === 'Atencao' ? 'border-l-[#F59E0B]' : 'border-l-[#DC2626]';
  const pillarName = pillarLabel(pillar.name);
  const deltaLabel = formatDeltaForPillar(pillar.trend);
- const baseMetric = pillar.metrics[0];
+ const normalizedChartTitle = _normalizeSemanticText(pillar.chart.title);
+ const baseMetric = pillar.name === 'Proventos'
+ ? (
+  pillar.metrics.find((metric) => {
+   const normalizedLabel = _normalizeSemanticText(metric.label);
+   if (!normalizedLabel) return false;
+   if (normalizedChartTitle.includes('acao')) return normalizedLabel.includes('acao');
+   if (normalizedChartTitle.includes('payout')) return normalizedLabel.includes('payout');
+   if (normalizedChartTitle.includes('yield')) return normalizedLabel.includes('yield');
+   return false;
+  }) ?? pillar.metrics[0]
+ )
+ : pillar.metrics[0];
  const baseMetricValue = baseMetric ? toNumeric(baseMetric.value) : null;
  const baseMetricRef = median(pillar.chart.series5);
  const todayText = formatComparableValue(baseMetricValue, baseMetric?.value ?? '', baseMetric?.label);
@@ -3576,7 +3614,7 @@ const changesCount = changesBySelectedWindow.length;
  const signalCopy = signalCardCopy(pillar, indicatorLabel, mainEvidence?.why ?? '');
  const whatItMeans = meaningCopy(pillar, mainEvidence?.why ?? signalCopy.why);
  const mainEvidenceSource = evidenceSourceText(mainEvidence, pillar);
- const chartVariant: 'line' | 'bar' = pillar.name === 'Proventos' ? 'bar' : 'line';
+ const chartVariant: 'line' | 'bar' = 'line';
 
  return (
  <article id={`pillar-${pillar.name}`} key={pillar.name} className={cx('rounded-xl border border-[#E8EAED] border-l-[3px] bg-white p-5', accent)}>
@@ -3738,7 +3776,7 @@ const changesCount = changesBySelectedWindow.length;
  </article>
  );
  })}
- <p className="py-2 text-center text-[13px] text-[#6B7280]">Sentiu falta de algum indicador? <button className="text-[12px] font-medium text-[#0E9384] hover:underline">Sugerir indicador</button></p>
+ <p className="py-2 text-center text-[13px] text-[#6B7280]">Sentiu falta de algum indicador? <button type="button" className={cx('text-[12px] font-medium text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Sugerir indicador</button></p>
  </div>
  )}
 
@@ -4047,65 +4085,118 @@ const changesCount = changesBySelectedWindow.length;
  <div className="flex flex-wrap items-start justify-between gap-2">
  <div>
  <h2 className="text-[15px] font-semibold text-[#111827]">Preço vs valor estimado</h2>
- <p className="mt-1 text-[13px] text-[#64748B]">Leitura por cenário-base de valuation (DCF). Não é recomendação de compra ou venda.</p>
+ <p className="mt-1 text-[14px] text-[#64748B]">Leitura por cenário-base de valuation (DCF). Não é recomendação de compra ou venda.</p>
  </div>
+ <div className="flex items-center gap-2">
  {valuationStateChipLabel && (
- <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', valuationStateChipTone)}>{valuationStateChipLabel}</span>
+ <span className={cx('rounded-full border px-2.5 py-1 text-[14px] font-semibold', valuationStateChipTone)}>{valuationStateChipLabel}</span>
  )}
+ <button
+ type="button"
+ onClick={(event) => {
+ event.preventDefault();
+ event.stopPropagation();
+ setShowValuationMethodologyDrawer(true);
+ }}
+ className="relative z-10 inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-[12px] text-[#64748B] transition-colors hover:bg-[#F5F7FA] hover:text-[#334155]"
+ aria-label="Aprender como calculamos o valuation"
+ title="Aprender"
+ >
+ <CircleHelp className="h-3.5 w-3.5" />
+ Aprender
+ </button>
  </div>
- <p className="mt-2 text-[11px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} | Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
+ </div>
+ <p className="mt-2 text-[14px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} | Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
 
  <div className="mt-4 grid gap-2 sm:grid-cols-3">
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Preço atual</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.current) || '--'}</p>
+ <p className="text-[14px] text-[#64748B]">Preço atual</p>
+ <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.current) || '--'}</p>
  </div>
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Preço justo estimado</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.estimatedFairValue) || '--'}</p>
+ <p className="text-[14px] text-[#64748B]">Preço justo estimado</p>
+ <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.estimatedFairValue) || '--'}</p>
  </div>
  <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[11px] text-[#64748B]">Diferença vs preço atual</p>
- <p className="text-[15px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '--'}</p>
+ <p className="text-[14px] text-[#64748B]">Diferença vs preço atual</p>
+ <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '--'}</p>
  </div>
  </div>
 
- {valuationSummaryLine && <p className="mt-3 text-[13px] text-[#475569]">{valuationSummaryLine}</p>}
+ {valuationSummaryLine && (
+ <section className="mt-3 rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-3">
+ <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0F766E]">Por que isso importa</p>
+ <p className="mt-1 text-[14px] text-[#334155]">{valuationSummaryLine}</p>
+ </section>
+ )}
 
  <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-[#FCFDFE] p-4">
- <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Bullet chart de valuation</p>
- {!hasBulletDomain && (
- <div className="py-3 text-[12px] text-[#9CA3AF]">Sem base suficiente para exibir a faixa de cenários neste momento.</div>
+ <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Régua de valuation</p>
+ {!hasSemanticDomain && (
+ <div className="py-3 text-[14px] text-[#9CA3AF]">Sem base suficiente para exibir a régua de valuation neste momento.</div>
  )}
- {hasBulletDomain && (
+ {hasSemanticDomain && (
  <>
- <div className="relative mt-3 h-6 rounded-full bg-[#EEF2F6]">
- {hasConservativeRange && (
- <div
- className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#CFF6EF]"
- style={{ left: `${conservativeLeft}%`, width: `${Math.max((conservativeRight ?? 0) - conservativeLeft, 0)}%` }}
- />
+ <div className="mt-3 rounded-lg border border-[#E6ECF2] bg-white p-3">
+ <div className="mb-2 flex items-center justify-between text-[14px] font-medium text-[#94A3B8]">
+ <span>{formatCurrencyBRL(rulerMin)}</span>
+ <span>Posição do preço atual vs. preço justo estimado</span>
+ <span>{formatCurrencyBRL(rulerMax)}</span>
+ </div>
+ <div className="relative pt-9">
+ {fairValue != null && fairMarker != null && (
+ <div className="pointer-events-none absolute left-0 right-0 top-0">
+ <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#CFE9E1] bg-white px-2 py-1 text-[14px] font-semibold text-[#0F766E] shadow-sm">
+ Preço justo estimado {formatCurrencyBRL(fairValue)}
+ </div>
+ </div>
  )}
- {hasOptimisticRange && (
- <div
- className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-[#FDE9BF]"
- style={{ left: `${optimisticLeft}%`, width: `${Math.max((optimisticRight ?? 0) - optimisticLeft, 0)}%` }}
- />
- )}
- {baseMarker != null && <div className="absolute top-0 h-6 w-[2px] bg-[#0F766E]" style={{ left: `${baseMarker}%` }} />}
  {currentMarker != null && (
- <div className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#334155] bg-white" style={{ left: `${currentMarker}%` }} />
+ <div className="pointer-events-none absolute bottom-0 top-0 z-[1]" style={{ left: `${currentMarker}%` }}>
+ <div className="-ml-[1.5px] h-full w-[3px] rounded-full bg-[#0B1220]/95 shadow-[0_0_0_2px_#ffffff]" />
+ <div className={`absolute -top-5 whitespace-nowrap rounded-md border border-[#CBD5E1] bg-white px-2 py-1 text-[14px] font-semibold text-[#0B1220] shadow-sm ${currentMarkerLabelClass}`}>
+ <span>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}</span>
+ <span className="ml-1 text-[#475569]">{formatCurrencyBRL(currentPriceForRuler)}</span>
+ </div>
+ </div>
+ )}
+ <div className="h-9 overflow-hidden rounded-full border border-[#DCE4EE] bg-[#F8FAFD]">
+ {hasNearZone ? (
+ <div className="flex h-full w-full">
+ <div className="h-full bg-[#E9F8F4]" style={{ width: `${belowZoneWidthPct}%` }} />
+ <div className="h-full border-x border-[#F2D28A] bg-[#FFF4DB]" style={{ width: `${nearZoneWidthPct}%` }} />
+ <div className="h-full bg-[#FDEBE7]" style={{ width: `${aboveZoneWidthPct}%` }} />
+ </div>
+ ) : (
+ <div className="h-full w-full bg-[#EEF2F6]" />
  )}
  </div>
- <div className="mt-3 grid gap-2 text-[11px] text-[#5B6472] sm:grid-cols-2">
- <p>{safeMeta(valuationBullet?.conservativeLabel) || 'Faixa conservadora'}</p>
- <p>{safeMeta(valuationBullet?.baseLabel) || 'Cenário-base'}</p>
- <p>{safeMeta(valuationBullet?.optimisticLabel) || 'Faixa otimista'}</p>
- <p>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}: {safeMeta(activeData?.priceData.current) || '--'}</p>
+ </div>
+ <div className="mt-3 grid gap-2 text-[14px] text-[#5B6472] sm:grid-cols-3">
+ <p><span className="inline-block h-2 w-2 rounded-full bg-[#A6E7D6]" /> <span className="ml-1 font-medium text-[#334155]">Abaixo do preço justo estimado</span></p>
+ <p><span className="inline-block h-2 w-2 rounded-full bg-[#F2C86B]" /> <span className="ml-1 font-medium text-[#334155]">Próximo do preço justo estimado</span></p>
+ <p><span className="inline-block h-2 w-2 rounded-full bg-[#F1B4A8]" /> <span className="ml-1 font-medium text-[#334155]">Acima do preço justo estimado</span></p>
+ </div>
+ <div className="mt-2">
+ <p className="text-[14px] font-medium text-[#334155]">A régua mostra em qual zona o preço atual cai em relação ao preço justo estimado.</p>
+ <button
+ type="button"
+ onClick={(event) => {
+ event.preventDefault();
+ event.stopPropagation();
+ setShowValuationMethodologyDrawer(true);
+ }}
+ className="mt-1 inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[12px] text-[#64748B] transition-colors hover:bg-[#F5F7FA] hover:text-[#334155]"
+ >
+ <CircleHelp className="h-3.5 w-3.5" />
+ Entender cálculo do valuation
+ </button>
+ </div>
  </div>
  </>
  )}
- </section>
+</section>
 
  <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
  <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Cenários do valuation</p>
@@ -4116,28 +4207,28 @@ const changesCount = changesBySelectedWindow.length;
  <span>Leitura</span>
  </div>
  {valuationScenarios.map((scenario, index) => (
- <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#EEF2F6] py-2.5 text-[12px] text-[#334155]">
+ <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#EEF2F6] py-2.5 text-[14px] text-[#334155]">
  <span className="font-medium">{scenario.scenario || '--'}</span>
  <span>{scenario.estimatedValue || '--'}</span>
  <span>{scenario.differenceVsCurrent || '--'}</span>
  <span className="text-[#64748B]">{scenario.reading || '--'}</span>
  </div>
  ))}
- {valuationScenarios.length === 0 && <div className="py-3 text-[12px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
+ {valuationScenarios.length === 0 && <div className="py-3 text-[14px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
  </section>
 
  <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-white p-3">
  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">Sensibilidade do valuation</p>
- <p className="mt-1 text-[12px] text-[#6B7280]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
+ <p className="mt-1 text-[14px] text-[#6B7280]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
  <div className="mt-3 grid gap-2 sm:grid-cols-2">
  {sensitivityDrivers.map((driver, index) => (
  <div key={`${driver.driver}-${index}`} className="rounded-md border border-[#E6EAF0] bg-[#FBFCFE] p-2.5">
- <p className="text-[12px] font-semibold text-[#0F172A]">{driver.driver || '--'}</p>
- <p className="mt-1 text-[12px] text-[#475569]">{driver.value || '--'}</p>
- <p className="mt-1 text-[11px] text-[#6B7280]">{driver.impact || '--'}</p>
+ <p className="text-[14px] font-semibold text-[#0F172A]">{driver.driver || '--'}</p>
+ <p className="mt-1 text-[14px] text-[#475569]">{driver.value || '--'}</p>
+ <p className="mt-1 text-[14px] text-[#6B7280]">{driver.impact || '--'}</p>
  </div>
  ))}
- {sensitivityDrivers.length === 0 && <p className="text-[12px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
+ {sensitivityDrivers.length === 0 && <p className="text-[14px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
  </div>
  </section>
 
@@ -4151,7 +4242,7 @@ const changesCount = changesBySelectedWindow.length;
  <span>Leitura</span>
  </div>
  {companyPriceRows.map((row) => (
- <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#EEF2F6] py-2.5 text-[12px] text-[#334155]">
+ <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#EEF2F6] py-2.5 text-[14px] text-[#334155]">
  <span className="font-medium">{row.metric}</span>
  <span>{row.current}</span>
  <span>{row.sector}</span>
@@ -4159,8 +4250,8 @@ const changesCount = changesBySelectedWindow.length;
  <span className="text-[#64748B]">{row.insight}</span>
  </div>
  ))}
- {companyPriceRows.length === 0 && <div className="py-3 text-[12px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
- <p className="mt-3 text-[12px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
+ {companyPriceRows.length === 0 && <div className="py-3 text-[14px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
+ <p className="mt-3 text-[14px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
  </section>
  </article>
  )}
@@ -4288,15 +4379,82 @@ const changesCount = changesBySelectedWindow.length;
  )}
  </section>
  </main>
+ {showValuationMethodologyDrawer && (
+ <div className="absolute inset-0 z-40">
+ <button
+ type="button"
+ aria-label="Fechar painel de metodologia"
+ className="absolute inset-0 bg-[#0B1220]/20"
+ onClick={() => setShowValuationMethodologyDrawer(false)}
+ />
+ <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-[#E7EAEE] bg-white p-6 shadow-2xl">
+ <div className="flex items-start justify-between gap-3">
+ <div>
+ <p className="text-[11px] uppercase tracking-wide text-[#94A3B8]">Metodologia</p>
+ <h3 className="mt-1 text-[16px] font-semibold text-[#111827]">Como calculamos o valuation</h3>
+ </div>
+ <button
+ type="button"
+ className="rounded-md border border-[#E5E7EB] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
+ onClick={() => setShowValuationMethodologyDrawer(false)}
+ >
+ Fechar
+ </button>
+ </div>
+ <div className="mt-4 space-y-4 text-[13px] text-[#475569]">
+ <p>Nosso valuation busca responder uma pergunta simples: quanto uma empresa vale hoje com base no caixa que ela pode gerar no futuro?</p>
+ <p>Para isso, usamos um modelo de Fluxo de Caixa Descontado (DCF).</p>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">Em termos simples</p>
+ <p className="mt-1">Projetamos a geração de caixa futura da empresa, trazemos esses valores para o presente com uma taxa de desconto e chegamos a uma estimativa de valor por ação.</p>
+ </section>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">A lógica central</p>
+ <p className="mt-1">Uma empresa vale o quanto consegue gerar de caixa ao longo do tempo. Como o dinheiro no futuro vale menos do que hoje, descontamos esses fluxos usando uma taxa que reflete risco, custo de capital e estrutura financeira.</p>
+ </section>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">Como fazemos isso</p>
+ <ul className="mt-2 list-disc space-y-1 pl-5">
+ <li>Partimos dos dados atuais da empresa, como receita, EBIT, imposto, dívida, caixa e número de ações.</li>
+ <li>Projetamos crescimento, margem operacional e reinvestimento para os próximos anos.</li>
+ <li>Calculamos o fluxo de caixa livre da firma (FCFF).</li>
+ <li>Trazemos esses fluxos ao valor presente usando o WACC.</li>
+ <li>Ajustamos dívida, caixa e outros itens para chegar ao valor do patrimônio.</li>
+ <li>Dividimos pelo número de ações para estimar o preço justo por ação.</li>
+ </ul>
+ </section>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">O que mais influencia o resultado</p>
+ <p className="mt-1">O valuation depende principalmente de crescimento da receita, margem operacional, reinvestimento, WACC, crescimento terminal e número de ações.</p>
+ <p className="mt-1">Pequenas mudanças nessas premissas podem alterar de forma relevante o preço justo estimado.</p>
+ </section>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">O que esse cálculo faz bem</p>
+ <p className="mt-1">Ele ajuda a enxergar o valor econômico do negócio, comparar preço de mercado com valor estimado e entender quais premissas sustentam a tese.</p>
+ </section>
+
+ <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <p className="font-semibold text-[#0F172A]">O que esse cálculo não faz</p>
+ <p className="mt-1">Ele não prevê o preço da ação no curto prazo, não garante retorno e não substitui a análise qualitativa do negócio.</p>
+ </section>
+
+ <section className="rounded-lg border border-[#E6EEF9] bg-[#F7FBFF] p-3">
+ <p className="font-semibold text-[#0F172A]">Em resumo</p>
+ <p className="mt-1">Projetamos a operação da empresa, estimamos o caixa que ela pode gerar, trazemos esse caixa para o valor de hoje e chegamos a um preço justo por ação.</p>
+ </section>
+ </div>
+ </aside>
+ </div>
+ )}
  </div>
  </div>
  );
 }
-
-
-
-
-
 
 
 
