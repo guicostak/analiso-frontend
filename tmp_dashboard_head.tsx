@@ -35,6 +35,7 @@ import logoRenner from "../assets/logos/renner.png";
 import logoTaesa from "../assets/logos/taesa.png";
 import logoVale from "../assets/logos/vale.png";
 import logoWeg from "../assets/logos/weg.jpeg";
+import AdsenseDashboardTop from "./adsense/AdsenseDashboardTop";
 
 type Status = "Saudável" | "Atenção" | "Risco";
 type Pillar = "Dívida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
@@ -704,6 +705,7 @@ export function Dashboard() {
 
         <main className="space-y-6 px-6 pb-10 pt-6">
           <section className="flex flex-wrap items-start justify-between gap-3">
+            <AdsenseDashboardTop />
             <div className="space-y-1">
               <div className="flex items-center gap-3">
                 <h1 className={cn("text-[24px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-[#101828]")}>Sua watchlist hoje</h1>
