@@ -2,7 +2,6 @@
 import { Search } from "lucide-react";
 import type { NavLink } from "../../data/landing";
 import { HeaderClient } from "./HeaderClient";
-import heroImage from "../../assets/landing/hero_image.png";
 
 interface HeroSectionProps {
   navLinks: NavLink[];
@@ -61,15 +60,7 @@ export function HeroSection({ navLinks }: HeroSectionProps) {
               <br />
               analisar com clareza,
               <br />
-              não com{" "}
-              <span className="-mx-6 inline-block" style={{ verticalAlign: "-0.48em" }}>
-                <img
-                  src={heroImage}
-                  alt="Hero"
-                  className="hero-image"
-                />
-              </span>{" "}
-              confusão.
+              não com confusão.
             </h1>
 
             <p
