@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { apiFetch } from "../../services/api";
 import bussolaOnboarding from "../../assets/onboarding/bussola_onboarding.png";
 import funilInfoOnboarding from "../../assets/onboarding/funil_info_onboarding.png";
 import acompanharOnboarding from "../../assets/onboarding/acompanhar_onboarding.png";
@@ -270,9 +272,12 @@ function PrimaryButton({
 
 export function OnboardingPage() {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const { draft, setDraft } = useLocalDraft();
   const [step, setStep] = useState(1);
   const [search, setSearch] = useState("");
+  const [completing, setCompleting] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
   const filteredSuggestions = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -324,15 +329,34 @@ export function OnboardingPage() {
     updateDraft({ watchlistTickers: draft.watchlistTickers.filter((item) => item !== ticker) });
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     track("onboarding_complete", {
       startIntent: draft.startIntent,
       watchlistCount: draft.watchlistTickers.length,
     });
-    updateDraft({ onboardingCompleted: true });
-    localStorage.setItem(COMPLETE_KEY, "true");
-    sessionStorage.setItem("onboarding_toast", "Tudo pronto. Sua watchlist já está montada.");
-    navigate("/dashboard");
+
+    setCompleting(true);
+    setCompleteError(null);
+
+    try {
+      await apiFetch(
+        "/api/me/watchlist/batch",
+        {
+          method: "POST",
+          body: JSON.stringify({ tickers: draft.watchlistTickers }),
+        },
+        token,
+      );
+
+      updateDraft({ onboardingCompleted: true });
+      localStorage.setItem(COMPLETE_KEY, "true");
+      sessionStorage.setItem("onboarding_toast", "Tudo pronto. Sua watchlist já está montada.");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("[onboarding] erro ao salvar watchlist:", err);
+      setCompleteError("Não foi possível salvar sua watchlist. Tente novamente.");
+      setCompleting(false);
+    }
   };
 
   const canContinue = () => {
@@ -603,9 +627,13 @@ export function OnboardingPage() {
 
             <div className="mt-8">{renderContent()}</div>
 
+            {completeError && (
+              <p className="mt-4 text-sm text-red-600 text-center">{completeError}</p>
+            )}
+
             <div className="mt-8 flex items-center justify-between">
               {step === 1 ? <div /> : (
-                <SecondaryButton onClick={goBack} disabled={step === 1}>
+                <SecondaryButton onClick={goBack} disabled={step === 1 || completing}>
                   &larr; Voltar
                 </SecondaryButton>
               )}
@@ -614,8 +642,8 @@ export function OnboardingPage() {
                   Continuar &rarr;
                 </PrimaryButton>
               ) : (
-                <PrimaryButton onClick={handleComplete} disabled={!canContinue()}>
-                  Ir para meu dashboard
+                <PrimaryButton onClick={handleComplete} disabled={!canContinue() || completing}>
+                  {completing ? "Salvando..." : "Ir para meu dashboard"}
                 </PrimaryButton>
               )}
             </div>

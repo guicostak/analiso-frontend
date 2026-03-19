@@ -1,12 +1,56 @@
 "use client";
 
-import { GoogleButton } from "./GoogleButton";
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { GoogleButton, type GoogleAuthUser } from "./GoogleButton";
 import { HeroShowcase } from "./HeroShowcase";
+import { useAuth } from "../../contexts/AuthContext";
+
+const ONBOARDING_COMPLETE_KEY = "analiso_onboarding_completed";
 
 export function LoginPage() {
-  const handleGoogleLogin = () => {
-    // Placeholder de autenticação
-    console.log("[auth] login_google_click");
+  const navigate = useNavigate();
+  const { login, isAuthenticated, isLoading } = useAuth();
+
+  // Prevents the "already authenticated" effect from overriding the post-login
+  // navigation when the user just clicked the Google button on this same render.
+  const justLoggedIn = useRef(false);
+
+  // Already authenticated on page load — bounce to dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && !justLoggedIn.current) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  const handleLoginSuccess = (data: GoogleAuthUser) => {
+    justLoggedIn.current = true;
+
+    console.log("[login-page] handleLoginSuccess — isNewUser:", data.isNewUser);
+
+    // New user: wipe any leftover onboarding completion flag so the
+    // onboarding page doesn't skip straight to dashboard.
+    if (data.isNewUser) {
+      localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
+    }
+
+    login(
+      {
+        id: data.id ?? 0,
+        email: data.email,
+        name: data.name,
+        picture: data.picture,
+      },
+      data.token,
+    );
+
+    const destination = data.isNewUser ? "/onboarding" : "/dashboard";
+    console.log("[login-page] navegando para:", destination);
+    navigate(destination, { replace: true });
+  };
+
+  const handleLoginError = () => {
+    console.error("[auth] google_login_error");
   };
 
   return (
@@ -26,7 +70,10 @@ export function LoginPage() {
               </p>
             </div>
 
-            <GoogleButton onClick={handleGoogleLogin} />
+            <GoogleButton
+              onSuccess={handleLoginSuccess}
+              onError={handleLoginError}
+            />
 
             <p className="text-xs text-[#667085] max-w-md">
               Criando uma conta, você concorda com todos os nossos{" "}

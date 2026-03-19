@@ -1,49 +1,74 @@
-﻿import { createBrowserRouter } from 'react-router-dom';
-import { Dashboard } from './components/dashboard';
-import { CompanyAnalysis } from './components/company-analysis';
-import { ExplorePage } from './components/explore';
-import { LandingPage } from './components/landing';
-import { DemoPage } from './components/demo-page';
-import { LoginPage } from './components/auth/login-page';
-import { OnboardingPage } from './components/onboarding/onboarding-page';
-import { WatchlistPage } from './components/watchlist';
-import { ComparePage } from './components/compare-page';
+import { createBrowserRouter } from "react-router-dom";
+import { Dashboard } from "./components/dashboard";
+import { CompanyAnalysis } from "./components/company-analysis";
+import { ExplorePage } from "./components/explore";
+import { LandingPage } from "./components/landing";
+import { DemoPage } from "./components/demo-page";
+import { LoginPage } from "./components/auth/login-page";
+import { OnboardingPage } from "./components/onboarding/onboarding-page";
+import { WatchlistPage } from "./components/watchlist";
+import { ComparePage } from "./components/compare-page";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <LandingPage />,
   },
   {
-    path: '/dashboard',
-    element: <Dashboard />,
-  },
-  {
-    path: '/demo',
-    element: <DemoPage />,
-  },
-  {
-    path: '/login',
+    path: "/login",
     element: <LoginPage />,
   },
   {
-    path: '/onboarding',
-    element: <OnboardingPage />,
+    path: "/demo",
+    element: <DemoPage />,
   },
   {
-    path: '/explorar',
-    element: <ExplorePage />,
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/watchlist',
-    element: <WatchlistPage />,
+    path: "/onboarding",
+    element: (
+      <ProtectedRoute>
+        <OnboardingPage />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/comparar',
-    element: <ComparePage />,
+    path: "/explorar",
+    element: (
+      <ProtectedRoute>
+        <ExplorePage />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/empresa/:ticker',
-    element: <CompanyAnalysis />,
+    path: "/watchlist",
+    element: (
+      <ProtectedRoute>
+        <WatchlistPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/comparar",
+    element: (
+      <ProtectedRoute>
+        <ComparePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/empresa/:ticker",
+    element: (
+      <ProtectedRoute>
+        <CompanyAnalysis />
+      </ProtectedRoute>
+    ),
   },
 ]);
