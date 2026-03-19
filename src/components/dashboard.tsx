@@ -1,5 +1,8 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { getDashboard, type DashboardResponse } from "../services/dashboard";
+import { ApiError } from "../services/api";
 import {
   Activity,
   Bell,
@@ -85,6 +88,7 @@ type InboxFilters = {
 
 const INBOX_FILTERS_STORAGE_KEY = "dashboard-inbox-filters:v1";
 const INBOX_MODE_STORAGE_KEY = "dashboard-inbox-mode:v1";
+const READING_PROGRESS_STORAGE_KEY = "dashboard-reading-progress:v1";
 const NEW_ITEM_HIGHLIGHT_MS = 10_000;
 
 const allStatuses: Status[] = ["Risco", "Atenção", "Saudável"];
@@ -99,6 +103,37 @@ const logoByTicker: Record<string, string> = {
   TAEE11: logoTaesa,
   WEGE3: logoWeg,
 };
+
+// -------------------------------------------------------
+// API → Dashboard mappings
+// -------------------------------------------------------
+
+const companyNameByTicker: Record<string, string> = {
+  VALE3: "Vale", PETR4: "Petrobras", PETR3: "Petrobras",
+  ITUB4: "Itaú Unibanco", ITUB3: "Itaú Unibanco",
+  BBAS3: "Banco do Brasil", BBDC4: "Bradesco", BBDC3: "Bradesco",
+  ABEV3: "Ambev", WEGE3: "WEG", RENT3: "Localiza",
+  LREN3: "Lojas Renner", MGLU3: "Magazine Luiza",
+  MRVE3: "MRV Engenharia", TAEE11: "Taesa",
+  FLRY3: "Fleury", CSAN3: "Cosan",
+};
+
+function apiPillarToDashboard(apiPillar: string): Pillar | undefined {
+  const map: Record<string, Pillar> = {
+    debt: "Dívida",
+    cash: "Caixa",
+    profitability: "Margens",
+    growth: "Retorno",
+    dividends: "Proventos",
+  };
+  return map[apiPillar];
+}
+
+function apiTemplateToSeverity(template: string): Status {
+  if (template === "ITEM_HIGH_RISK_ACTIONABLE" || template === "ITEM_HIGH_RISK_VALIDATE") return "Risco";
+  if (template === "ITEM_MEDIUM_RISK_MONITOR" || template === "ITEM_EVENT_AHEAD" || template === "ITEM_MIXED_SIGNALS") return "Atenção";
+  return "Saudável";
+}
 
 const statusClasses: Record<Status, string> = {
   Saudável: "border-emerald-300 bg-emerald-100 text-emerald-900",
@@ -290,6 +325,17 @@ function loadInboxMode(): InboxMode {
   return loadInboxFilters().sortBy === "Mais recente" ? "tempo-real" : "top-impacto";
 }
 
+function loadViewedInboxItemIds() {
+  try {
+    const raw = window.localStorage.getItem(READING_PROGRESS_STORAGE_KEY);
+    if (!raw) return [] as string[];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 function getPeriodLimitMinutes(period: WindowRange) {
   if (period === "24h") return 24 * 60;
   if (period === "7d") return 7 * 24 * 60;
@@ -351,8 +397,137 @@ function SegmentedHealthBar({ healthy, attention, risk }: { healthy: number; att
   );
 }
 
+function ReadingProgressStep({
+  label,
+  status,
+  isDarkMode,
+}: {
+  label: string;
+  status: "done" | "current" | "upcoming";
+  isDarkMode: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border px-3 py-2",
+        status === "current"
+          ? isDarkMode
+            ? "border-[#2DD4BF]/40 bg-[#0F2B2A]"
+            : "border-mint-200 bg-mint-50"
+          : status === "done"
+            ? isDarkMode
+              ? "border-[#334155] bg-[#111827]"
+              : "border-slate-200 bg-slate-50"
+            : isDarkMode
+              ? "border-[#1F2937] bg-[#0B1220]"
+              : "border-slate-200 bg-white",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={cn(
+            "inline-flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-semibold",
+            status === "current"
+              ? "border-mint-600 bg-mint-600 text-white"
+              : status === "done"
+                ? isDarkMode
+                  ? "border-[#475467] bg-[#0F172A] text-[#CCFBF1]"
+                  : "border-mint-200 bg-white text-mint-600"
+                : isDarkMode
+                  ? "border-[#334155] bg-[#0F172A] text-slate-400"
+                  : "border-slate-200 bg-slate-50 text-slate-500",
+          )}
+        >
+          {status === "done" ? "OK" : ""}
+        </span>
+        <p
+          className={cn(
+            "text-[12px] font-medium",
+            status === "current"
+              ? isDarkMode
+                ? "text-[#F3F4F6]"
+                : "text-slate-900"
+              : isDarkMode
+                ? "text-slate-400"
+                : "text-slate-600",
+          )}
+        >
+          {label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function Dashboard() {
   const navigate = useNavigate();
+  const { token, user, logout } = useAuth();
+
+  // API state
+  const [dashboardData, setDashboardData]       = useState<DashboardResponse | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError]     = useState<string | null>(null);
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchDashboard = () => {
+      setDashboardLoading(true);
+      setDashboardError(null);
+
+      getDashboard(token)
+        .then((data) => {
+          if (!cancelled) {
+            setDashboardData(data);
+            setDashboardLoading(false);
+          }
+        })
+        .catch((err: unknown) => {
+          if (cancelled) return;
+          setDashboardLoading(false);
+          if (err instanceof ApiError && err.code === "dashboard_not_ready") {
+            setDashboardError("not_ready");
+            // Worker ainda processando — tenta de novo em 5s
+            retryTimeoutRef.current = setTimeout(() => {
+              if (!cancelled) fetchDashboard();
+            }, 5000);
+          } else if (err instanceof ApiError && err.status === 401) {
+            logout();
+          } else {
+            setDashboardError("error");
+          }
+        });
+    };
+
+    fetchDashboard();
+
+    return () => {
+      cancelled = true;
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+    };
+  }, [token]);
+
+  // Map API items → InboxSeedItem[] to feed the existing UI
+  const apiInboxItems = useMemo<InboxSeedItem[]>(() => {
+    if (!dashboardData) return [];
+    return dashboardData.items.map((item, idx) => ({
+      id: `api-${item.ticker}-${item.pillar}-${item.priorityRank}`,
+      companyId: item.ticker,
+      ticker: item.ticker,
+      companyName: companyNameByTicker[item.ticker] ?? item.ticker,
+      title: item.card.title,
+      whyItMatters: item.card.whyItMatters,
+      severity: apiTemplateToSeverity(item.primaryTemplate),
+      pillarKey: apiPillarToDashboard(item.pillar),
+      source: undefined,
+      // rank 1 = most recent feel: rank * 8 minutes ago
+      ageMinutes: (item.priorityRank - 1) * 8 + 1,
+      impactScore: Math.max(1, 100 - idx * 7),
+      eventType: "mudanca" as const,
+    }));
+  }, [dashboardData]);
+
   const [inboxError, setInboxError] = useState(false);
   const [inboxFilters, setInboxFilters] = useState<InboxFilters>(() => loadInboxFilters());
   const [inboxMode, setInboxMode] = useState<InboxMode>(() => loadInboxMode());
@@ -364,11 +539,11 @@ export function Dashboard() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [realtimeItems, setRealtimeItems] = useState<InboxSeedItem[]>([]);
   const [newBadgeUntil, setNewBadgeUntil] = useState<Record<string, number>>({});
+  const [viewedInboxItemIds, setViewedInboxItemIds] = useState<string[]>(() => loadViewedInboxItemIds());
   const inboxRef = useRef<HTMLElement | null>(null);
   const refreshSequenceRef = useRef(0);
 
   const isLoading = false;
-  const sourceFailed = false;
   const activeSeverities = inboxFilters.severities.length ? inboxFilters.severities : allStatuses;
   const activePillars = inboxFilters.pillars.length ? inboxFilters.pillars : allPillars;
   const activeSources = inboxFilters.sources.length ? inboxFilters.sources : allSources;
@@ -380,15 +555,18 @@ export function Dashboard() {
   const advancedFiltersCount = Number(hasSeverityFilter) + Number(hasPillarFilter) + Number(hasSourceFilter);
   const showFiltersCount = advancedFiltersCount > 0;
 
+  // Use API items when available; fall back to mock seed while loading or on error
+  const baseInboxItems = apiInboxItems.length > 0 ? apiInboxItems : inboxSeed;
+
   const inboxItems = useMemo<InboxItem[]>(
     () =>
-      [...realtimeItems, ...inboxSeed].map((item) => ({
+      [...realtimeItems, ...baseInboxItems].map((item) => ({
         ...item,
         ageMinutes: item.ageMinutes,
         timestamp: new Date(lastRefreshAt - item.ageMinutes * 60_000).toISOString(),
         relativeTime: relativeFromMinutes(item.ageMinutes),
       })),
-    [lastRefreshAt, realtimeItems],
+    [lastRefreshAt, realtimeItems, baseInboxItems],
   );
 
   useEffect(() => {
@@ -406,6 +584,14 @@ export function Dashboard() {
       // ignore storage errors
     }
   }, [inboxMode]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(READING_PROGRESS_STORAGE_KEY, JSON.stringify(viewedInboxItemIds));
+    } catch {
+      // ignore storage errors
+    }
+  }, [viewedInboxItemIds]);
 
   useEffect(() => {
     try {
@@ -520,6 +706,7 @@ export function Dashboard() {
   }, [inboxMode]);
 
   const openInboxItem = (item: InboxItem) => {
+    setViewedInboxItemIds((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
     const params = new URLSearchParams();
     if (item.pillarKey) {
       params.set("pilar", toPillarQueryKey(item.pillarKey));
@@ -594,12 +781,10 @@ export function Dashboard() {
   };
 
   const feedCtaLabel = (item: InboxItem, isPriority: boolean) => {
-    // Regra editorial:
-    // - visão da empresa: Ver análise completa
-    // - evento pontual (agenda/sinal futuro): Entender impacto
-    if (isPriority) return "Ver análise completa";
+    if (isPriority) return "Abrir prioridade";
     if (item.eventType === "evento_futuro") return "Entender impacto";
-    return "Ver análise completa";
+    if (item.severity === "Risco" || item.severity === "Atenção") return "Ler analise";
+    return "Ver contexto";
   };
 
   const supportCards = [
@@ -661,23 +846,16 @@ export function Dashboard() {
   const hasClearPriority = Boolean(priorityItem && priorityItem.impactScore >= 85);
   const hasNearTermFollowUp = todayItems.some((item) => item.eventType === "evento_futuro");
   const showSessionClosing = hasClearPriority || hasDominantPillar || hasNearTermFollowUp;
-
-  const impactedCompanies = useMemo(() => {
-    const scoreByTicker = new Map<string, { ticker: string; companyName: string; hits: number; maxImpact: number }>();
-    todayItems
-      .filter((item) => item.severity !== "Saudável" || item.pillarKey === leadingPillarMovement.pillar)
-      .forEach((item) => {
-        const prev = scoreByTicker.get(item.ticker);
-        if (!prev) {
-          scoreByTicker.set(item.ticker, { ticker: item.ticker, companyName: item.companyName, hits: 1, maxImpact: item.impactScore });
-          return;
-        }
-        prev.hits += 1;
-        prev.maxImpact = Math.max(prev.maxImpact, item.impactScore);
-      });
-
-    return [...scoreByTicker.values()].sort((a, b) => b.hits - a.hits || b.maxImpact - a.maxImpact).slice(0, 3);
-  }, [todayItems, leadingPillarMovement.pillar]);
+  const followUpItem = inboxRows.find((item, index) => feedSectionLabel(item, index) === "Acompanhamento relevante");
+  const stableItem = inboxRows.find((item, index) => feedSectionLabel(item, index) === "Estaveis e positivos");
+  const progressStates = [
+    { label: "Prioridade do dia", done: priorityItem ? viewedInboxItemIds.includes(priorityItem.id) : true },
+    { label: "Acompanhamentos relevantes", done: followUpItem ? viewedInboxItemIds.includes(followUpItem.id) : false },
+    { label: "Itens estaveis", done: stableItem ? viewedInboxItemIds.includes(stableItem.id) : false },
+  ];
+  const completedSteps = progressStates.filter((item) => item.done).length;
+  const currentProgressStep = progressStates.findIndex((item) => !item.done);
+  const progressHeadlineStep = currentProgressStep === -1 ? progressStates.length : currentProgressStep + 1;
 
   const activeFilterChips = [
     hasSeverityFilter ? activeSeverities : [],
@@ -730,14 +908,22 @@ export function Dashboard() {
               >
                 {isDarkMode ? <Sun className="h-5 w-5 text-[#FBBF24]" /> : <Moon className="h-5 w-5 text-slate-500" />}
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <UserCircle2 className={cn("h-5 w-5", isDarkMode ? "text-slate-400" : "text-slate-500")} />
-              </Button>
+              <button
+                onClick={logout}
+                title="Sair"
+                className="h-8 w-8 rounded-full overflow-hidden border border-slate-200 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40"
+              >
+                {user?.picture ? (
+                  <img src={user.picture} alt={user.name} className="h-full w-full object-cover" />
+                ) : (
+                  <UserCircle2 className={cn("h-5 w-5 m-auto", isDarkMode ? "text-slate-400" : "text-slate-500")} />
+                )}
+              </button>
             </div>
           </div>
         </header>
 
-        <main className="space-y-6 px-6 pb-10 pt-6">
+        <main className="space-y-5 px-6 pb-10 pt-5">
           <section className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -746,93 +932,108 @@ export function Dashboard() {
               </div>
               <p className={cn("text-[13px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>Leitura das últimas 24h</p>
             </div>
-            <Button
-              variant="outline"
-              className={cn(
-                "h-8 rounded-lg border px-3 text-[12px] font-medium",
-                isDarkMode ? "border-[#334155] bg-[#0F172A] text-slate-400 hover:bg-[#1F2937]" : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-white",
-              )}
-            >
+            <Button variant="ghost" className={cn("h-8 rounded-lg px-2 text-[12px] font-medium", isDarkMode ? "text-slate-400 hover:bg-[#0F172A]" : "text-slate-600 hover:bg-slate-100")}>
               + Criar alerta
             </Button>
           </section>
 
           <section>
             <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#134E48] bg-[#0B2A2A]" : "border-mint-200 bg-gradient-to-r from-[#ECFDF9] to-white")}>
-              <CardContent className="space-y-3 p-4">
-                <div className="space-y-1.5">
-                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo do dia</p>
-                  <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
-                    {todayRiskCount > 0 || todayAttentionCount > 0
-                      ? `Hoje sua watchlist teve ${pluralize(todayRiskCount, "mudança de risco", "mudanças de risco")} e ${pluralize(todayHealthyCount, "melhora importante", "melhoras importantes")}.`
-                      : "Sua watchlist está estável hoje, sem pioras críticas novas."}
-                  </p>
-                  <p className={cn("text-[14px]", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
-                    {priorityItem
-                      ? `${priorityItem.ticker} concentrou a principal mudança de contexto, enquanto ${leadingPillarMovement.pillar} liderou o volume de sinais do dia.`
-                      : "O dia segue estável, com poucas mudanças materiais no contexto da watchlist."}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button onClick={focusInboxRecentImpact} className="h-9 rounded-lg bg-mint-600 px-3 text-[12px] font-semibold text-white hover:bg-mint-700">
-                    Ver prioridades do dia
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={focusInboxRecentImpact}
-                    className={cn(
-                      "h-9 rounded-lg border px-3 text-[12px] font-semibold",
-                      isDarkMode ? "border-[#2DD4BF]/40 bg-transparent text-[#CCFBF1] hover:bg-[#0F3A39]" : "border-mint-200 bg-white text-mint-600 hover:bg-mint-50",
-                    )}
-                  >
-                    Ver atualizações
-                  </Button>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px]",
-                      isDarkMode ? "border-[#334155] bg-[#0F172A] text-slate-400" : "border-slate-300 bg-white text-slate-500",
-                    )}
-                  >
-                    <Database className="h-3 w-3" />
-                    Dados oficiais · CVM / B3 / RI
-                  </span>
-                </div>
+              <CardContent className="p-4">
+                {dashboardLoading ? (
+                  /* Skeleton while API loads */
+                  <div className="space-y-2 animate-pulse">
+                    <div className={cn("h-3 w-24 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
+                    <div className={cn("h-6 w-3/4 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
+                    <div className={cn("h-4 w-1/2 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
+                  </div>
+                ) : dashboardError === "not_ready" ? (
+                  <div className="space-y-1">
+                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo de hoje</p>
+                    <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
+                      Análise em processamento.
+                    </p>
+                    <p className={cn("text-[14px] leading-relaxed", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
+                      Os sinais da sua watchlist ainda estão sendo processados. Volte em alguns instantes.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="max-w-3xl space-y-1.5">
+                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo de hoje</p>
+                      <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
+                        {dashboardData?.summary.headline ??
+                          (todayRiskCount > 0 || todayAttentionCount > 0
+                            ? `Hoje sua watchlist teve ${pluralize(todayRiskCount, "mudança de risco", "mudanças de risco")} e ${pluralize(todayHealthyCount, "melhora importante", "melhoras importantes")}.`
+                            : "Sua watchlist está estável hoje, sem pioras críticas novas.")}
+                      </p>
+                      <p className={cn("text-[14px] leading-relaxed", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
+                        {dashboardData?.summary.body ??
+                          dashboardData?.nextStep.headline ??
+                          (priorityItem
+                            ? `Comece por ${priorityItem.ticker} e valide o impacto antes de revisar os acompanhamentos relevantes e os itens estaveis.`
+                            : "Revise primeiro os itens de maior impacto para confirmar se o contexto da watchlist segue estável.")}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-start gap-2 lg:items-end">
+                      <Button onClick={focusInboxRecentImpact} className="h-9 rounded-lg bg-mint-600 px-3 text-[12px] font-semibold text-white hover:bg-mint-700">
+                        {dashboardData?.summary.ctaPrimary ?? "Abrir prioridade 1"}
+                      </Button>
+                      <button onClick={focusInboxRecentImpact} className={cn("text-[12px] font-medium", isDarkMode ? "text-[#CCFBF1] hover:text-white" : "text-mint-700 hover:text-mint-800")}>
+                        Ver todas as atualizações
+                      </button>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px]",
+                          isDarkMode ? "border-[#334155] bg-[#0F172A] text-slate-400" : "border-white/70 bg-white/70 text-slate-500",
+                        )}
+                      >
+                        <Database className="h-3 w-3" />
+                        Dados oficiais · CVM / B3 / RI
+                      </span>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </section>
 
-          <section>
+          <section ref={inboxRef} className="space-y-3">
             <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
-              <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div className="space-y-1">
-                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Proximo passo</p>
-                  <p className={cn("text-[15px] font-semibold leading-snug", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
-                    {priorityItem
-                      ? `Abra ${priorityItem.ticker}, valide o impacto e avance para os itens de acompanhamento relevante.`
-                      : "Revise os itens de maior impacto e confirme se o contexto da watchlist se mantém estável."}
+              <CardContent className="space-y-3 p-4">
+                <div className="flex flex-col gap-1">
+                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>
+                    Leitura de hoje: {progressHeadlineStep} de {progressStates.length} etapas
                   </p>
-                  <p className={cn("text-[12px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                    Siga nesta ordem: prioridade do dia, depois acompanhamento relevante e, por fim, itens estaveis.
+                  <p className={cn("text-[13px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                    {completedSteps === progressStates.length
+                      ? "Fluxo principal concluido. Se quiser, revise os blocos de apoio antes de encerrar."
+                      : "Siga a ordem sugerida para reduzir ruido e concluir a sessao com mais contexto."}
                   </p>
                 </div>
-                <Button onClick={focusInboxRecentImpact} className="h-9 rounded-lg bg-mint-600 px-3 text-[12px] font-semibold text-white hover:bg-mint-700">
-                  Abrir prioridade 1 do dia
-                </Button>
+                <div className="grid gap-2 md:grid-cols-3">
+                  {progressStates.map((step, index) => (
+                    <ReadingProgressStep
+                      key={step.label}
+                      label={step.label}
+                      isDarkMode={isDarkMode}
+                      status={step.done ? "done" : index === currentProgressStep ? "current" : "upcoming"}
+                    />
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          </section>
 
-          <section ref={inboxRef} className="grid items-start gap-4 xl:grid-cols-3">
-            <Card className={cn("rounded-2xl border xl:col-span-2", isDarkMode ? "border-[#1F2937] bg-[#0F172A]" : "border-slate-200 bg-white")}>
+            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0F172A]" : "border-slate-200 bg-white")}>
               <CardHeader className="space-y-3 px-4 pt-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="max-w-2xl">
                     <CardTitle className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>Atualizações da watchlist</CardTitle>
                     <CardDescription className={cn("text-[14px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      Fluxo guiado: priorize o primeiro item, avance no acompanhamento relevante e finalize nos estaveis.
+                      Fluxo guiado: comece pelo primeiro item, avance nos relevantes e finalize nos estaveis.
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 text-[12px]">
                     <div className={cn("inline-flex rounded-lg border p-0.5", isDarkMode ? "border-[#374151] bg-[#0F172A]" : "border-slate-300 bg-white")}>
                       <button
                         onClick={setImpactMode}
@@ -853,6 +1054,13 @@ export function Dashboard() {
                         Tempo real
                       </button>
                     </div>
+                    <button
+                      onClick={refreshInboxNow}
+                      className={cn("font-medium", isDarkMode ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-700")}
+                      disabled={isRefreshing}
+                    >
+                      {isRefreshing ? "Atualizando..." : "Atualizar agora"}
+                    </button>
                   </div>
                 </div>
 
@@ -886,16 +1094,11 @@ export function Dashboard() {
                     </button>
                   </div>
 
-                  <div className="mt-2 flex items-center justify-between gap-2 text-[12px]">
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px]">
                     <p className={cn(isDarkMode ? "text-slate-400" : "text-slate-500")}>
                       {inboxRows.length} atualizações · ordenado por {orderLabel}
                     </p>
-                    <div className={cn("flex items-center gap-2", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      <span>Atualizado {refreshLabel}</span>
-                      <button onClick={refreshInboxNow} className="font-semibold text-mint-600 hover:text-mint-700" disabled={isRefreshing}>
-                        {isRefreshing ? "Atualizando..." : "Atualizar agora"}
-                      </button>
-                    </div>
+                    <p className={cn(isDarkMode ? "text-slate-400" : "text-slate-500")}>Última leitura sincronizada {refreshLabel}</p>
                   </div>
 
                   {refreshError && <p className="mt-2 text-[12px] font-medium text-[#B42318]">{refreshError}</p>}
@@ -1009,8 +1212,8 @@ export function Dashboard() {
                   <>
                     {inboxMode === "top-impacto" && priorityItem && (
                       <div className={cn("rounded-xl border px-3 py-2", isDarkMode ? "border-[#134E48] bg-[#0F2B2A]" : "border-mint-200 bg-mint-50")}>
-                        <p className={cn("text-[12px] font-semibold", isDarkMode ? "text-[#99F6E4]" : "text-mint-600")}>
-                          Maior impacto hoje: {priorityItem.ticker}
+                        <p className={cn("text-[12px] font-semibold", isDarkMode ? "text-[#99F6E4]" : "text-mint-700")}>
+                          Comece por aqui: {priorityItem.ticker}
                           {priorityItem.pillarKey ? ` em ${priorityItem.pillarKey}` : ""}
                         </p>
                       </div>
@@ -1039,8 +1242,8 @@ export function Dashboard() {
                               </Avatar>
                               <div className="min-w-0">
                                 {isPriority && (
-                                  <span className={cn("mb-1 inline-flex h-[22px] items-center rounded-full border px-2 text-[11px] font-semibold", isDarkMode ? "border-[#2DD4BF]/40 bg-[#134E48] text-[#CCFBF1]" : "border-mint-200 bg-mint-50 text-mint-600")}>
-                                    Prioridade 1
+                                  <span className={cn("mb-1 inline-flex h-[22px] items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em]", isDarkMode ? "border-[#2DD4BF]/40 bg-[#134E48] text-[#CCFBF1]" : "border-mint-200 bg-mint-50 text-mint-700")}>
+                                    Comece por aqui
                                   </span>
                                 )}
                                 {!isPriority && !isStablePositive && (
@@ -1090,18 +1293,59 @@ export function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0F172A]" : "border-slate-200 bg-white")}>
-              <CardHeader className="px-4 pt-4">
-                <CardTitle className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>Pilares em movimento</CardTitle>
-                <CardDescription className={cn("text-[14px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                  Atalho de exploracao: use apos revisar a prioridade e o feed principal.
+          </section>
+
+          <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.8fr)]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className={cn("text-[14px] font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>Blocos de apoio</h2>
+                <p className={cn("text-[12px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>Apoiam a leitura, mas nao substituem o fluxo principal.</p>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {supportCards.map((card) => (
+                  <button
+                    key={card.title}
+                    onClick={card.action}
+                    className={cn(
+                      "group rounded-2xl border p-3 text-left transition-all duration-150",
+                      isDarkMode
+                        ? "border-[#1F2937] bg-[#0F172A] hover:border-[#334155] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_2px_10px_rgba(16,24,40,0.05)]",
+                    )}
+                  >
+                    <p className={cn("mb-2 text-[11px] font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>{card.title}</p>
+                    <div className="flex min-h-[36px] items-center gap-2">
+                      {card.logoTicker && logoByTicker[card.logoTicker] ? (
+                        <Avatar className="h-7 w-7 rounded-md">
+                          <AvatarImage src={logoByTicker[card.logoTicker]} alt={card.logoTicker} className="object-cover" />
+                          <AvatarFallback className="rounded-md text-[10px]">{card.logoTicker.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                      ) : null}
+                      <p className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>{card.value}</p>
+                    </div>
+                    <p className={cn("mt-1.5 line-clamp-2 min-h-[34px] text-[12px] leading-snug", isDarkMode ? "text-[#CBD5E1]" : "text-slate-700")}>{card.subtitle}</p>
+                    <p className={cn("mt-2.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium", card.accent)}>{card.delta}</p>
+                    <div className="mt-2.5 flex items-center justify-between">
+                      <span className="text-[12px] font-semibold text-mint-600">{card.ctaLabel}</span>
+                      <ChevronRight className={cn("h-4 w-4", isDarkMode ? "text-[#94A3B8]" : "text-slate-400")} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
+              <CardHeader className="space-y-1 px-4 pt-4">
+                <CardTitle className={cn("text-[14px] font-semibold", isDarkMode ? "text-[#E5E7EB]" : "text-slate-800")}>Pilares em movimento</CardTitle>
+                <CardDescription className={cn("text-[12px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>
+                  Apoio de leitura. Use depois da prioridade e do feed principal.
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-0.5 px-4">
+              <CardContent className="space-y-1 px-4 pb-3">
                 {isLoading ? (
                   <div className="space-y-2">
-                    {[1, 2, 3, 4, 5].map((item) => (
+                    {[1, 2].map((item) => (
                       <div key={item} className="h-12 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
                     ))}
                   </div>
@@ -1111,18 +1355,19 @@ export function Dashboard() {
                       key={item.pillar}
                       onClick={() => applySinglePillarFilter(item.pillar)}
                       className={cn(
-                        "w-full cursor-default rounded-xl border border-transparent p-2 text-left transition hover:border-slate-300 hover:bg-slate-50",
+                        "w-full rounded-xl border border-transparent p-2 text-left transition",
+                        isDarkMode ? "hover:border-[#334155] hover:bg-[#111827]" : "hover:border-slate-200 hover:bg-slate-50",
                         idx > 0 && "border-t border-t-[#F2F4F7]",
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-[14px] font-medium text-slate-900">{item.pillar}</p>
-                          <p className="mt-0.5 text-[11px] text-slate-600">{item.pillar} {pillarInsight[item.pillar]}.</p>
+                          <p className={cn("text-[13px] font-medium", isDarkMode ? "text-slate-200" : "text-slate-900")}>{item.pillar}</p>
+                          <p className={cn("mt-0.5 text-[11px]", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.pillar} {pillarInsight[item.pillar]}.</p>
                           <div className="mt-1.5">
                             <SegmentedHealthBar healthy={item.healthy} attention={item.attention} risk={item.risk} />
                             <div className="mt-1 flex flex-wrap items-center gap-3 text-[10px]">
-                              <span className="text-slate-500">{item.events} eventos</span>
+                              <span className={cn(isDarkMode ? "text-slate-500" : "text-slate-500")}>{item.events} eventos</span>
                               <span className="text-rose-600">Risco {item.risk}</span>
                               <span className="text-amber-600">Atenção {item.attention}</span>
                               <span className="text-emerald-600">Saudável {item.healthy}</span>
@@ -1136,79 +1381,13 @@ export function Dashboard() {
                 )}
               </CardContent>
 
-              <CardFooter className="block space-y-3 border-t border-[#F2F4F7] px-4 pt-3 pb-3.5">
-                {impactedCompanies.length > 0 && (
-                  <div className={cn("rounded-xl border p-2.5", isDarkMode ? "border-[#1F2937] bg-[#111827]" : "border-slate-200 bg-slate-50")}>
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.06em]", isDarkMode ? "text-slate-300" : "text-slate-600")}>Empresas mais afetadas</p>
-                    <p className={cn("mt-1 text-[11px] leading-snug", isDarkMode ? "text-slate-400" : "text-slate-500")}>
-                      Concentraram sinais em {leadingPillarMovement.pillar} e {secondPillarMovement?.pillar ?? "outros pilares"} hoje.
-                    </p>
-                    <div className="mt-1.5 space-y-1">
-                      {impactedCompanies.map((company) => (
-                        <button
-                          key={company.ticker}
-                          onClick={() => navigate(`/empresa/${company.ticker}`)}
-                          className={cn(
-                            "flex w-full items-center justify-between rounded-lg px-2 py-1 text-left transition",
-                            isDarkMode ? "hover:bg-[#0F172A]" : "hover:bg-white",
-                          )}
-                        >
-                          <span className={cn("text-[12px] font-medium", isDarkMode ? "text-slate-200" : "text-slate-700")}>{company.ticker}</span>
-                          <span className={cn("text-[11px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>{company.hits} sinais</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[12px] text-slate-500">Atualizado {refreshLabel} · Fontes: CVM / B3 / RI</p>
-                    {sourceFailed && <p className="text-[12px] text-amber-700">1 fonte falhou hoje; tentaremos novamente.</p>}
-                  </div>
-                  <button onClick={() => applySinglePillarFilter(focusedPillar)} className="text-[12px] font-semibold text-mint-600 hover:text-mint-700">
-                    Filtrar por pilar
-                  </button>
-                </div>
+              <CardFooter className={cn("flex items-center justify-between border-t px-4 py-3", isDarkMode ? "border-[#1F2937]" : "border-[#F2F4F7]")}>
+                <p className={cn("text-[11px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>Fontes: CVM / B3 / RI</p>
+                <button onClick={() => applySinglePillarFilter(focusedPillar)} className="text-[12px] font-semibold text-mint-600 hover:text-mint-700">
+                  Filtrar pilar
+                </button>
               </CardFooter>
             </Card>
-          </section>
-
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className={cn("text-[14px] font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>Blocos de apoio</h2>
-              <p className={cn("text-[12px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>Apoiam a leitura, mas nao substituem o fluxo principal.</p>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {supportCards.map((card) => (
-                <button
-                  key={card.title}
-                  onClick={card.action}
-                  className={cn(
-                    "group rounded-2xl border p-3 text-left transition-all duration-150",
-                    isDarkMode
-                      ? "border-[#1F2937] bg-[#0F172A] hover:border-[#334155] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_2px_10px_rgba(16,24,40,0.05)]",
-                  )}
-                >
-                  <p className={cn("mb-2 text-[11px] font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>{card.title}</p>
-                  <div className="flex items-center gap-2">
-                    {card.logoTicker && logoByTicker[card.logoTicker] ? (
-                      <Avatar className="h-7 w-7 rounded-md">
-                        <AvatarImage src={logoByTicker[card.logoTicker]} alt={card.logoTicker} className="object-cover" />
-                        <AvatarFallback className="rounded-md text-[10px]">{card.logoTicker.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                    ) : null}
-                    <p className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>{card.value}</p>
-                  </div>
-                  <p className={cn("mt-1.5 text-[12px] leading-snug", isDarkMode ? "text-[#CBD5E1]" : "text-slate-700")}>{card.subtitle}</p>
-                  <p className={cn("mt-2.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium", card.accent)}>{card.delta}</p>
-                  <div className="mt-2.5 flex items-center justify-between">
-                    <span className="text-[12px] font-semibold text-mint-600">{card.ctaLabel}</span>
-                    <ChevronRight className={cn("h-4 w-4", isDarkMode ? "text-[#94A3B8]" : "text-slate-400")} />
-                  </div>
-                </button>
-              ))}
-            </div>
           </section>
 
           {showSessionClosing && (
