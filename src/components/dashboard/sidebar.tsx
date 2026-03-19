@@ -52,7 +52,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
 
       if (item.href.startsWith("/")) {
         return (
-          <Link key={item.id} to={item.href} className={className} title={item.label} aria-label={item.label}>
+          <Link key={item.id} href={item.href} className={className} title={item.label} aria-label={item.label}>
             <Icon className="h-[18px] w-[18px]" />
             {isActive ? <span className="pointer-events-none absolute -right-[14px] h-1.5 w-1.5 rounded-full bg-mint-500" /> : null}
           </Link>

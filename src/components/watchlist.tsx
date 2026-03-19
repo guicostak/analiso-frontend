@@ -664,7 +664,7 @@ export function WatchlistPage() {
                       />
                     </div>
                     <Link
-                      to="/explorar"
+                      href="/explorar"
                       className="px-4 py-2 rounded-xl bg-mint-500 text-white text-sm font-medium text-center"
                     >
                       Explorar mercado
@@ -774,7 +774,7 @@ export function WatchlistPage() {
                           <div className="flex items-center justify-between gap-3 text-[11px] text-neutral-600">
                             <span>{item.evidence}</span>
                             <Link
-                              to={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
+                              href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
                               className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900"
                             >
@@ -944,7 +944,7 @@ export function WatchlistPage() {
                           <div className="flex items-center justify-between text-[11px] text-neutral-600">
                             <span>{item.evidence}</span>
                             <Link
-                              to={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
+                              href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
                               className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900"
                             >
@@ -1184,7 +1184,7 @@ export function WatchlistPage() {
                               </button>
                               {!isCompactCard && (
                                 <Link
-                                  to={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
+                                  href={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
                                   onClick={(event) => event.stopPropagation()}
                                   className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900 whitespace-nowrap"
                                 >

@@ -11,21 +11,21 @@ export function FooterSection() {
           <p className="mt-2 max-w-[220px] text-sm text-[#6B7280]">Inteligência financeira para investidores brasileiros.</p>
           <div className="mt-4 flex items-center gap-2">
             <Link
-              to="/social/x"
+              href="/social/x"
               aria-label="Seguir no X"
               className="rounded-full border border-[#E5E7EB] p-2 text-[#6B7280] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
             >
               <Twitter className="h-4 w-4" />
             </Link>
             <Link
-              to="/social/linkedin"
+              href="/social/linkedin"
               aria-label="Seguir no LinkedIn"
               className="rounded-full border border-[#E5E7EB] p-2 text-[#6B7280] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
             >
               <Linkedin className="h-4 w-4" />
             </Link>
             <Link
-              to="/social/instagram"
+              href="/social/instagram"
               aria-label="Seguir no Instagram"
               className="rounded-full border border-[#E5E7EB] p-2 text-[#6B7280] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
             >
@@ -39,27 +39,27 @@ export function FooterSection() {
           <div className="mt-3 flex flex-col gap-2 text-sm text-[#6B7280]">
             <a href="#funcionalidades" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Funcionalidades</a>
             <a href="#planos" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Preços</a>
-            <Link to="/roadmap" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Roadmap</Link>
-            <Link to="/changelog" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Changelog</Link>
+            <Link href="/roadmap" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Roadmap</Link>
+            <Link href="/changelog" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Changelog</Link>
           </div>
         </div>
 
         <div>
           <h3 className="text-sm font-semibold text-[#111827]">Empresa</h3>
           <div className="mt-3 flex flex-col gap-2 text-sm text-[#6B7280]">
-            <Link to="/about" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Sobre</Link>
-            <Link to="/blog" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Blog</Link>
-            <Link to="/careers" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Carreiras</Link>
-            <Link to="/contact" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Contato</Link>
+            <Link href="/about" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Sobre</Link>
+            <Link href="/blog" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Blog</Link>
+            <Link href="/careers" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Carreiras</Link>
+            <Link href="/contact" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Contato</Link>
           </div>
         </div>
 
         <div>
           <h3 className="text-sm font-semibold text-[#111827]">Legal</h3>
           <div className="mt-3 flex flex-col gap-2 text-sm text-[#6B7280]">
-            <Link to="/legal/terms" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Termos de uso</Link>
-            <Link to="/legal/privacy" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Privacidade</Link>
-            <Link to="/legal/cookies" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Cookies</Link>
+            <Link href="/legal/terms" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Termos de uso</Link>
+            <Link href="/legal/privacy" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Privacidade</Link>
+            <Link href="/legal/cookies" className="rounded-sm hover:text-[#0E9384] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2">Cookies</Link>
           </div>
         </div>
       </div>

@@ -131,7 +131,7 @@ export function PricingToggleClient({ pricingPlans }: PricingToggleClientProps) 
 
               <div className="mt-auto pt-6">
                 <Link
-                  to={plan.ctaHref}
+                  href={plan.ctaHref}
                   className={`inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[18px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2 ${
                     isPremium
                       ? "bg-[#0E9384] text-white hover:bg-[#0B7F74]"

@@ -315,12 +315,12 @@ export function DemoPage() {
         <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-10">
           <div className="flex items-center gap-5">
             <AppLogo />
-            <Link to="/" className="inline-flex items-center gap-1 text-[12px] text-[#475467] hover:text-[#0E9384]">
+            <Link href="/" className="inline-flex items-center gap-1 text-[12px] text-[#475467] hover:text-[#0E9384]">
               <ChevronLeft className="size-3.5" />
               Voltar
             </Link>
           </div>
-          <Link to="/login" className="inline-flex h-10 items-center justify-center rounded-full bg-[#0E9384] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#0A7D72] active:bg-[#07665D]">
+          <Link href="/login" className="inline-flex h-10 items-center justify-center rounded-full bg-[#0E9384] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#0A7D72] active:bg-[#07665D]">
             Criar conta grátis
           </Link>
         </div>
@@ -492,7 +492,7 @@ export function DemoPage() {
               <li>• Rastreabilidade por documento e data</li>
             </ul>
             <div className="mt-6 flex gap-3">
-              <Link to="/login" className="inline-flex h-11 items-center justify-center rounded-full bg-[#0E9384] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#0A7D72] active:bg-[#07665D]">Criar conta grátis</Link>
+              <Link href="/login" className="inline-flex h-11 items-center justify-center rounded-full bg-[#0E9384] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#0A7D72] active:bg-[#07665D]">Criar conta grátis</Link>
               <button className="inline-flex h-11 items-center justify-center rounded-full border border-[#0E9384] bg-white px-6 text-[14px] font-semibold text-[#0E9384] hover:bg-[#F4FBF9]">Ver planos</button>
             </div>
           </div>

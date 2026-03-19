@@ -1,5 +1,5 @@
 ﻿import { AlertTriangle, Bell, Plus, Database, ArrowRight, Eye, Compass, GitCompare } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { 
   mockAttentionCompanies, 
   mockActiveAlerts, 

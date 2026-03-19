@@ -20,7 +20,7 @@ export function ComparisonCtaBanner() {
             </p>
 
             <Link
-              to="/signup"
+              href="/signup"
               className="mt-8 inline-flex h-[56px] w-full max-w-[460px] items-center justify-center rounded-full bg-white px-8 text-[20px] font-semibold text-[#101727] transition hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E9384]"
             >
               Iniciar teste gratis agora

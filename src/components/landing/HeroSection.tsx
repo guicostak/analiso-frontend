@@ -80,7 +80,7 @@ export function HeroSection({ navLinks }: HeroSectionProps) {
 
             <div>
               <Link
-                to="/signup"
+                href="/signup"
                 className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
                 style={{
                   display: "inline-flex",

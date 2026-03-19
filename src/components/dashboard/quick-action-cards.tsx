@@ -1,5 +1,7 @@
-﻿import { Compass, GitCompare, Bell, Play, Eye, TrendingUp, AlertTriangle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+"use client";
+
+import { Compass, GitCompare, Bell, Play, Eye, TrendingUp, AlertTriangle, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function QuickActionCards() {
   const actions = [
@@ -41,12 +43,11 @@ export function QuickActionCards() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {actions.map((action, index) => {
         const Icon = action.icon;
-        const Component = action.href.startsWith('/') ? Link : 'button';
         return (
-          <Component
+          <Link
             key={index}
-            to={action.href.startsWith('/') ? action.href : undefined}
-            onClick={!action.href.startsWith('/') ? (e) => e.preventDefault() : undefined}
+            href={action.href}
+            onClick={action.href === '#' ? (e) => e.preventDefault() : undefined}
             className="bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-all text-left group block"
           >
             <div className={`w-10 h-10 rounded-xl ${action.iconBg} flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
@@ -54,7 +55,7 @@ export function QuickActionCards() {
             </div>
             <h3 className="font-medium text-neutral-900 mb-1">{action.title}</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">{action.description}</p>
-          </Component>
+          </Link>
         );
       })}
     </div>
@@ -119,4 +120,3 @@ export function KPICards() {
     </div>
   );
 }
-
