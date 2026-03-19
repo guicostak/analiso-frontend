@@ -948,14 +948,20 @@ export function Dashboard() {
                     <div className={cn("h-4 w-1/2 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
                   </div>
                 ) : dashboardError === "not_ready" ? (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo de hoje</p>
                     <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
-                      Análise em processamento.
+                      Preparando seu dashboard...
                     </p>
                     <p className={cn("text-[14px] leading-relaxed", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
-                      Os sinais da sua watchlist ainda estão sendo processados. Volte em alguns instantes.
+                      Estamos analisando sua watchlist pela primeira vez. Isso leva menos de um minuto.
                     </p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <div className="w-4 h-4 border-2 border-[#0E9384] border-t-transparent rounded-full animate-spin" />
+                      <span className={cn("text-[13px]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>
+                        Atualizando automaticamente...
+                      </span>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
