@@ -98,12 +98,12 @@ const allPillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Provent
 const allSources: InboxSource[] = ["CVM", "B3", "RI"];
 
 const logoByTicker: Record<string, string> = {
-  VALE3: logoVale,
-  LREN3: logoRenner,
-  ITUB4: logoItau,
-  MRVE3: logoMrv,
-  TAEE11: logoTaesa,
-  WEGE3: logoWeg,
+  VALE3: logoVale.src,
+  LREN3: logoRenner.src,
+  ITUB4: logoItau.src,
+  MRVE3: logoMrv.src,
+  TAEE11: logoTaesa.src,
+  WEGE3: logoWeg.src,
 };
 
 // -------------------------------------------------------

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiFetch } from "../../services/api";
@@ -41,10 +41,10 @@ const defaultDraft: OnboardingDraft = {
 const popularTickers = ["WEGE3", "ITUB4", "PETR4", "VALE3", "BBDC4", "BBAS3", "ABEV3"];
 
 const companyLogoByTicker: Record<string, string> = {
-  WEGE3: wegLogo,
-  ITUB4: itauLogo,
-  PETR4: petrobrasLogo,
-  VALE3: valeLogo,
+  WEGE3: wegLogo.src,
+  ITUB4: itauLogo.src,
+  PETR4: petrobrasLogo.src,
+  VALE3: valeLogo.src,
 };
 
 const watchlistSuggestions = [
@@ -152,7 +152,7 @@ function TileGrid({
         return (
           <button
             key={item.id}
-            ref={(el) => (itemRefs.current[index] = el)}
+            ref={(el) => { itemRefs.current[index] = el; }}
             type="button"
             onClick={() => onSelect(item.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
@@ -186,7 +186,7 @@ function TileGrid({
 }
 
 function Icon3D({ name }: { name: string }) {
-  const accents: Record<string, JSX.Element> = {
+  const accents: Record<string, React.ReactElement> = {
     b3: <rect x="20" y="22" width="24" height="16" rx="3" fill="#0E9384" opacity="0.25" />,
     cap: <path d="M20 28l12-6 12 6-12 6-12-6z" fill="#0E9384" opacity="0.25" />,
     magnifier: (
@@ -378,7 +378,7 @@ export function OnboardingPage() {
               title: "Não sei por onde começar",
               helper: "Receba um caminho claro para sair da dúvida inicial.",
               icon: "cap",
-              imageSrc: bussolaOnboarding,
+              imageSrc: bussolaOnboarding.src,
               imageAlt: "Ícone de bússola",
             },
             {
@@ -386,7 +386,7 @@ export function OnboardingPage() {
               title: "Vejo muitos indicadores e fico perdido",
               helper: "Foco no que importa, com contexto simples.",
               icon: "magnifier",
-              imageSrc: funilInfoOnboarding,
+              imageSrc: funilInfoOnboarding.src,
               imageAlt: "Ícone de funil com informações",
             },
             {
@@ -394,7 +394,7 @@ export function OnboardingPage() {
               title: "Quero acompanhar minhas empresas sem ruído",
               helper: "Acompanhe mudanças relevantes sem excesso de informação.",
               icon: "bellpulse",
-              imageSrc: acompanharOnboarding,
+              imageSrc: acompanharOnboarding.src,
               imageAlt: "Ícone de watchlist",
             },
             {
@@ -402,7 +402,7 @@ export function OnboardingPage() {
               title: "Quero entender rápido quando uma empresa pede atenção",
               helper: "Veja sinais de atenção de forma direta e acionável.",
               icon: "bookmark",
-              imageSrc: entenderOnboarding,
+              imageSrc: entenderOnboarding.src,
               imageAlt: "Ícone de atenção rápida",
             },
           ]}
@@ -419,21 +419,21 @@ export function OnboardingPage() {
           title: "Resumo em 60s",
           description: "Entenda uma empresa em minutos, sem virar analista.",
           icon: "dash",
-          imageSrc: relogioOnboarding,
+          imageSrc: relogioOnboarding.src,
         },
         {
           id: "v2",
           title: "Principal força e principal atenção",
           description: "Veja rápido o que está bem e o que pede atenção.",
           icon: "bookmark",
-          imageSrc: pilaresOnboarding,
+          imageSrc: pilaresOnboarding.src,
         },
         {
           id: "v3",
           title: "Mudanças e fontes oficiais",
           description: "Entenda o que mudou e confirme tudo na fonte.",
           icon: "b3",
-          imageSrc: feedOnboarding,
+          imageSrc: feedOnboarding.src,
         },
       ] as const;
 
@@ -614,7 +614,7 @@ export function OnboardingPage() {
             <div className="text-center">
               {step === 4 && (
                 <img
-                  src={portaOnboarding}
+                  src={portaOnboarding.src}
                   alt="Porta de entrada no produto"
                   className="mx-auto mb-3 h-30 w-30 object-contain"
                   loading="lazy"

@@ -144,7 +144,7 @@ export function StepsSection({ steps }: StepsSectionProps) {
             </p>
           </div>
           <div className="pointer-events-none absolute -right-20 top-1/2 h-[280px] w-[520px] -translate-y-1/2">
-            <img src={resumoBannerImage} alt="Resumo com evidências" className="h-full w-full object-cover object-right" loading="lazy" />
+            <img src={resumoBannerImage.src} alt="Resumo com evidências" className="h-full w-full object-cover object-right" loading="lazy" />
           </div>
           </article>
         </div>

@@ -82,7 +82,7 @@ export function GuidedWorkspaceSection() {
           <div className="h-[695px] w-[756px] origin-top-left scale-[0.74]">
           <div className="flex items-start justify-between gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3">
             <div className="flex items-start gap-2.5">
-              <img src={logoVale} alt="Logo da Vale" className="h-8 w-8 rounded-md object-cover" loading="lazy" />
+              <img src={logoVale.src} alt="Logo da Vale" className="h-8 w-8 rounded-md object-cover" loading="lazy" />
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-[20px] font-bold leading-none text-[#0B1220]">Vale</p>

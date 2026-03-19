@@ -132,6 +132,8 @@ type PillarEvidence = {
  metric: string;
  why: string;
  source: Source;
+ companyId?: string;
+ ticker?: string;
 };
 
 type PillarPrimarySignal = {
@@ -167,13 +169,13 @@ type PillarData = {
  meaningText?: string;
 };
 const queueItems: CompanyQueueItem[] = [
- { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale, description: 'Mineradora global com forte exposição a minério de ferro.' },
- { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
- { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
- { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
- { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa, description: 'Empresa de transmissão de energia com receita regulada.' },
- { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg, description: 'Empresa de equipamentos elétricos e automação industrial com presença global.' },
- { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itaú Unibanco', status: 'Saudavel', logo: logoItau, description: 'Banco universal com foco em crédito, serviços e seguros.' },
+ { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale.src, description: 'Mineradora global com forte exposição a minério de ferro.' },
+ { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras.src, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
+ { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner.src, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
+ { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv.src, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
+ { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa.src, description: 'Empresa de transmissão de energia com receita regulada.' },
+ { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg.src, description: 'Empresa de equipamentos elétricos e automação industrial com presença global.' },
+ { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itaú Unibanco', status: 'Saudavel', logo: logoItau.src, description: 'Banco universal com foco em crédito, serviços e seguros.' },
  { companyId: 'BBAS3', ticker: 'BBAS3', name: 'Banco do Brasil', status: 'Saudavel', initials: 'BB', description: 'Banco com forte exposição ao agronegócio e setor público.' },
 ];
 
@@ -473,6 +475,8 @@ const priceData = {
  bulletChart: {
  conservativeMin: 37.5,
  conservativeMax: 41,
+ baseMin: null,
+ baseMax: null,
  baseValue: 45.8,
  optimisticMin: 49.2,
  optimisticMax: 53.4,
@@ -545,6 +549,9 @@ type CompanyData = {
  };
  sourceRows: Array<Contextual<(typeof sourceRows)[number]> & { displaySource?: string; displayDoc?: string; displayStatus?: string }>;
  sourceConfidence?: { title?: string; level?: string; summary?: string };
+ changesSummaryByWindow?: Record<string, Record<string, unknown>>;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ changesSummary?: any;
 };
 
 type TabPayload =
@@ -971,7 +978,7 @@ const mockDataByCompany: Record<string, CompanyData> = {
  ),
  timelineEvents: contextualize(timelineEvents, 'WEGE3', 'WEGE3'),
  priceData: {
- ...priceData,
+ ...(priceData as Omit<typeof priceData, 'bulletChart'> & { bulletChart: PriceBulletChart }),
  companyId: 'WEGE3',
  ticker: 'WEGE3',
  source: 'B3',
@@ -982,7 +989,7 @@ const mockDataByCompany: Record<string, CompanyData> = {
  'EV/EBITDA': { labels: ['8x', '10x', '12x', '14x', '16x', '18x'], values: [2, 4, 7, 8, 5, 2], currentMarker: 3, medianMarker: 2 },
  'P/VP': { labels: ['2x', '2.5x', '3x', '3.5x', '4x', '4.5x'], values: [2, 3, 6, 8, 7, 4], currentMarker: 4, medianMarker: 2 },
  },
- },
+ } as CompanyData['priceData'],
  sourceRows: contextualize(sourceRows, 'WEGE3', 'WEGE3'),
  },
  VALE3: {
@@ -1439,7 +1446,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  baseLabel: safeMeta(baseRaw.label) || 'Cenário-base',
  optimisticLabel: safeMeta(optimisticRaw.label) || 'Faixa otimista',
  currentLabel: safeMeta(currentRaw.label) || 'Preço atual',
- sourceNote: safeMeta(bulletRaw.sourceNote),
+ sourceNote: safeMeta((bulletRaw as Record<string, unknown>).sourceNote),
  };
  const valuationScenarios = scenariosRaw.map((scenario) => ({
  scenario: safeMeta(scenario.label),
@@ -1566,7 +1573,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
    tone: safeMeta(valuationState.tone),
   },
   valuationScenarios,
-  bulletChart,
+  bulletChart: bulletChart as PriceBulletChart,
   sensitivityDrivers,
   multiplesSummary: asTextValue(
    fairSensitivity.summary
@@ -1580,7 +1587,7 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
    const medianMarker = Number(dist.medianMarker ?? 0);
    return [metric, { labels, values, currentMarker, medianMarker }];
   })) as CompanyData['priceData']['metricSeries'],
- },
+ } as CompanyData['priceData'],
  sourceRows: sourceRows as CompanyData['sourceRows'],
  sourceConfidence: {
   title: String(confidenceSummary.title ?? ''),
@@ -2565,7 +2572,7 @@ export function CompanyAnalysis() {
  const mostCriticalPillar = [...mapPillarEntries].sort((a, b) => a.score - b.score)[0];
  const strongestPillar = [...mapPillarEntries].sort((a, b) => b.score - a.score)[0];
  const actionsDisabled = showSkeleton;
- const companyPriceRows = (activeData?.priceData.rows ?? []).filter((row) => row.companyId === companyContext.companyId);
+ const companyPriceRows = ((activeData?.priceData.rows ?? []) as Array<{ companyId: string; ticker: string; metric: string; current: string; sector: string; histórical: string; insight: string }>).filter((row) => row.companyId === companyContext.companyId);
  const valuationStateChipLabel = safeMeta(activeData?.priceData.valuationStateChip?.label);
  const valuationStateChipToneRaw = safeMeta(activeData?.priceData.valuationStateChip?.tone).toLowerCase();
  const valuationStateChipTone = valuationStateChipToneRaw.includes('coral')

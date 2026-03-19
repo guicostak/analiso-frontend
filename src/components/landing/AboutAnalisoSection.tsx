@@ -13,11 +13,11 @@ type QueueItem = {
 };
 
 const queueItems: QueueItem[] = [
-  { name: "Vale", ticker: "VALE3", status: "Risco", logo: logoVale },
-  { name: "Lojas Renner", ticker: "LREN3", status: "Atenção", logo: logoRenner },
-  { name: "MRV Engenharia", ticker: "MRVE3", status: "Atenção", logo: logoMrv },
-  { name: "Transmissão Paulista", ticker: "TAEE11", status: "Saudável", logo: logoTaesa },
-  { name: "WEG", ticker: "WEGE3", status: "Atenção", logo: logoWeg },
+  { name: "Vale", ticker: "VALE3", status: "Risco", logo: logoVale.src },
+  { name: "Lojas Renner", ticker: "LREN3", status: "Atenção", logo: logoRenner.src },
+  { name: "MRV Engenharia", ticker: "MRVE3", status: "Atenção", logo: logoMrv.src },
+  { name: "Transmissão Paulista", ticker: "TAEE11", status: "Saudável", logo: logoTaesa.src },
+  { name: "WEG", ticker: "WEGE3", status: "Atenção", logo: logoWeg.src },
 ];
 
 const statusClass: Record<QueueItem["status"], string> = {
@@ -111,7 +111,7 @@ export function AboutAnalisoSection() {
             <div className="overflow-hidden rounded-2xl border border-[#E8EAED] bg-white">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
                 <div className="flex items-start gap-3">
-                  <img src={logoWeg} alt="Logo da WEG" className="h-10 w-10 rounded-md object-cover" loading="lazy" />
+                  <img src={logoWeg.src} alt="Logo da WEG" className="h-10 w-10 rounded-md object-cover" loading="lazy" />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-[24px] font-bold leading-none text-[#0B1220]">WEG</h3>

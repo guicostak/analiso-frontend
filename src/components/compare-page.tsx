@@ -366,8 +366,8 @@ const evidenceReadLabel = (delta: number | null) => {
   return "Diferenca pequena";
 };
 const TICKER_LOGOS: Record<string, string> = {
-  WEGE3: wegLogo,
-  VALE3: valeLogo,
+  WEGE3: wegLogo.src,
+  VALE3: valeLogo.src,
 };
 
 function TickerLogo({ ticker, size = 18 }: { ticker: string; size?: number }) {

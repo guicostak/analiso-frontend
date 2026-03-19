@@ -183,7 +183,7 @@ function DashboardPanel() {
                 title: "Dívida líquida/EBITDA acima do limite interno",
                 why: "Por que importa: aumento da alavancagem pode reduzir flexibilidade financeira.",
                 s: "Risco",
-                logo: logoVale,
+                logo: logoVale.src,
               },
               {
                 t: "LREN3",
@@ -191,7 +191,7 @@ function DashboardPanel() {
                 title: "Margens pressionadas no trimestre",
                 why: "Por que importa: compressão de margem pode limitar revisão positiva de lucro.",
                 s: "Atenção",
-                logo: logoRenner,
+                logo: logoRenner.src,
               },
               {
                 t: "WEGE3",
@@ -199,7 +199,7 @@ function DashboardPanel() {
                 title: "Resultado 4T25 agendado para esta semana",
                 why: "Por que importa: evento pode alterar diagnóstico de margens e retorno.",
                 s: "Atenção",
-                logo: logoWeg,
+                logo: logoWeg.src,
               },
             ].map((row) => (
               <div key={row.t} className="rounded-lg border border-[#EEF2F6] bg-[#FCFDFD] p-2.5">
@@ -233,7 +233,7 @@ function DashboardPanel() {
               ["Margens", "9 eventos", "up 10%", true, 2, 6, 1],
               ["Caixa", "7 eventos", "down 6%", false, 1, 2, 4],
             ].map(([pillar, events, trend, trendUp, risk, attention, healthy]) => (
-              <div key={pillar} className="rounded-lg border border-[#EEF2F6] bg-[#FCFDFD] p-2.5">
+              <div key={String(pillar)} className="rounded-lg border border-[#EEF2F6] bg-[#FCFDFD] p-2.5">
                 <div className="flex items-center justify-between text-[11px]">
                   <p className="font-semibold text-[#101828]">{pillar}</p>
                   <p className={`${trendUp ? "text-emerald-600" : "text-rose-600"}`}>{trend}</p>
@@ -284,9 +284,9 @@ function ExplorarPanel() {
   ];
 
   const companies = [
-    { name: "Vale", ticker: "VALE3", sector: "Mineração", status: "Atenção", diagnosis: "Atenção em dívida, caixa ainda resiliente.", logo: logoVale },
-    { name: "Lojas Renner", ticker: "LREN3", sector: "Consumo", status: "Saudável", diagnosis: "Melhora gradual em retorno e margens.", logo: logoRenner },
-    { name: "Fleury", ticker: "FLRY3", sector: "Saúde", status: "Atenção", diagnosis: "Proventos e crescimento com sinais mistos.", logo: logoFleury },
+    { name: "Vale", ticker: "VALE3", sector: "Mineração", status: "Atenção", diagnosis: "Atenção em dívida, caixa ainda resiliente.", logo: logoVale.src },
+    { name: "Lojas Renner", ticker: "LREN3", sector: "Consumo", status: "Saudável", diagnosis: "Melhora gradual em retorno e margens.", logo: logoRenner.src },
+    { name: "Fleury", ticker: "FLRY3", sector: "Saúde", status: "Atenção", diagnosis: "Proventos e crescimento com sinais mistos.", logo: logoFleury.src },
   ];
 
   return (
@@ -323,7 +323,7 @@ function ExplorarPanel() {
               <article key={row.ticker} className="rounded-lg border border-[#EEF2F6] bg-[#FCFDFD] p-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img src={row.ticker === "VALE3" ? logoVale : row.ticker === "LREN3" ? logoRenner : logoWeg} alt={row.ticker} className="h-7 w-7 rounded-full border border-neutral-200 object-cover bg-white" />
+                    <img src={row.ticker === "VALE3" ? logoVale.src : row.ticker === "LREN3" ? logoRenner.src : logoWeg.src} alt={row.ticker} className="h-7 w-7 rounded-full border border-neutral-200 object-cover bg-white" />
                     <div>
                       <p className="text-[12px] font-semibold text-[#111827]">{row.ticker}</p>
                       <p className="text-[10px] text-[#6B7280]">{row.name}</p>

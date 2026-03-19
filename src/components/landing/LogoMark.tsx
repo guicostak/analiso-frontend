@@ -8,7 +8,7 @@ export function LogoMark() {
       className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
     >
       <img
-        src={logo}
+        src={logo.src}
         alt="Analiso"
         className="h-15 w-auto object-contain"
         loading="eager"

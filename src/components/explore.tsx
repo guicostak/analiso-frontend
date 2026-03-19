@@ -515,19 +515,19 @@ const getTrendStatus = (trend: IndexCard["trend"]) => {
 };
 
 const companyLogos: Record<string, string> = {
-  COGN3: logoCogna,
-  CSAN3: logoCosan,
-  EZTC3: logoEztec,
-  FLRY3: logoFleury,
-  IRBR3: logoIrb,
-  ITUB4: logoItau,
-  LREN3: logoRenner,
-  MRVE3: logoMrv,
-  PETR4: logoPetrobras,
-  RAIL3: logoRumo,
-  TAEE11: logoTaesa,
-  VALE3: logoVale,
-  WEGE3: logoWeg,
+  COGN3: logoCogna.src,
+  CSAN3: logoCosan.src,
+  EZTC3: logoEztec.src,
+  FLRY3: logoFleury.src,
+  IRBR3: logoIrb.src,
+  ITUB4: logoItau.src,
+  LREN3: logoRenner.src,
+  MRVE3: logoMrv.src,
+  PETR4: logoPetrobras.src,
+  RAIL3: logoRumo.src,
+  TAEE11: logoTaesa.src,
+  VALE3: logoVale.src,
+  WEGE3: logoWeg.src,
 };
 
 const getCompanyLogo = (ticker: string) => companyLogos[ticker];

@@ -566,7 +566,7 @@ export function WatchlistPage() {
     setSeenTickers((prev) => (prev.includes(ticker) ? prev.filter((item) => item !== ticker) : [...prev, ticker]));
   };
 
-  const getFeedCTA = (item: FeedItem) => (item.source === "CVM" ? "Ver evidência" : "Ver análise");
+  const getFeedCTA = (item: FeedItem | PriorityItem) => ('source' in item && item.source === "CVM" ? "Ver evidência" : "Ver análise");
 
   return (
     <div className="min-h-screen bg-neutral-50">

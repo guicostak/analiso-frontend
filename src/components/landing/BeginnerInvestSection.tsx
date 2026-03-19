@@ -222,7 +222,7 @@ export function BeginnerInvestSection() {
     name: "Vale",
     ticker: "VALE3",
     score: "Risco 66/100",
-    logo: valeLogo,
+    logo: valeLogo.src,
     logoAlt: "Logo da Vale",
   };
 
@@ -230,7 +230,7 @@ export function BeginnerInvestSection() {
     name: "Renner",
     ticker: "LREN3",
     score: "Atenção 64/100",
-    logo: rennerLogo,
+    logo: rennerLogo.src,
     logoAlt: "Logo da Renner",
   };
 
@@ -238,7 +238,7 @@ export function BeginnerInvestSection() {
     name: "Fleury",
     ticker: "FLRY3",
     score: "Saudável 72/100",
-    logo: fleuryLogo,
+    logo: fleuryLogo.src,
     logoAlt: "Logo da Fleury",
   };
 
