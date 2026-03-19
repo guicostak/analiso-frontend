@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, Search } from "lucide-react";
 import { useState } from "react";
 

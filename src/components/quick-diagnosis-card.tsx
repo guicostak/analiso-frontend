@@ -1,4 +1,6 @@
-﻿import { CheckCircle2, AlertCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
+﻿"use client";
+
+import { CheckCircle2, AlertCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface QuickDiagnosisCardProps {

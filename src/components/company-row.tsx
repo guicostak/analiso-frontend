@@ -1,3 +1,5 @@
+"use client";
+
 import { Company } from '../data/mock-companies';
 import { MiniSparkline } from './mini-sparkline';
 import { MiniRadar } from './mini-radar';

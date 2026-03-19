@@ -1,4 +1,6 @@
-﻿import { Loader2 } from 'lucide-react';
+﻿"use client";
+
+import { Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function LoadingState() {

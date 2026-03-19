@@ -1,4 +1,6 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { getDashboard, type DashboardResponse } from "../services/dashboard";

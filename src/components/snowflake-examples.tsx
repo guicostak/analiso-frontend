@@ -5,6 +5,8 @@
  * with subtle depth effects, smooth animations, and interactive tooltips.
  */
 
+"use client";
+
 import { SnowflakeChart, SnowflakeChartMini, SnowflakeDimension } from './snowflake-chart';
 
 // Example 1: Basic usage with company health metrics

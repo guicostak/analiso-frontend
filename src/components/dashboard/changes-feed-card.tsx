@@ -1,4 +1,6 @@
-﻿import { useState } from 'react';
+﻿"use client";
+
+import { useState } from 'react';
 import { Filter, ExternalLink, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 

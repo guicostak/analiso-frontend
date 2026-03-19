@@ -1,3 +1,5 @@
+"use client";
+
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from 'recharts';
 
 interface PillarRadarProps {
