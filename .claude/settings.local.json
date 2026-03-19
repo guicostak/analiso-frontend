@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(WT=\"C:/Users/Pablo Benevenuto/Documents/apps/analiso-frontend/.claude/worktrees/eager-ardinghelli\")",
+      "Bash(sed -i 's/<Link to=/<Link href=/g' \"$WT/src/components/demo-page.tsx\")",
+      "Bash(sed -i 's/<Link to=/<Link href=/g' \"$WT/src/components/explore.tsx\")",
+      "Bash(sed -i 's/<Link to=/<Link href=/g' \"$WT/src/components/landing/FooterSection.tsx\")"
+    ]
+  }
+}

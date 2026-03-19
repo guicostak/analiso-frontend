@@ -1,5 +1,5 @@
 ﻿import { CheckCircle2, ChevronDown, Ellipsis } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import logoVale from "../../assets/logos/vale.png";
 
 const highlights = [
@@ -69,7 +69,7 @@ export function GuidedWorkspaceSection() {
 
           <div className="mt-7">
             <Link
-              to="/signup"
+              href="/signup"
               className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#14B8A6_0%,#0E9384_100%)] px-9 py-4 text-xl font-semibold text-white transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
             >
               Começar grátis

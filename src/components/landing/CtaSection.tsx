@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿import Link from "next/link";
 
 export function CtaSection() {
   return (
@@ -14,7 +14,7 @@ export function CtaSection() {
 
           <div className="mt-8 flex items-center justify-center">
             <Link
-              to="/signup"
+              href="/signup"
               className="inline-flex items-center justify-center rounded-full bg-white text-[#0E9384] transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E9384]"
               style={{ width: "358px", height: "57px", fontSize: "18px", fontWeight: 600 }}
             >

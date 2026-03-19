@@ -1,6 +1,8 @@
-﻿import { useState } from 'react';
+﻿"use client";
+
+import { useState } from 'react';
 import { Filter, ExternalLink, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { 
   ChangeFeedItem, 
   mockChangeFeed, 
@@ -151,7 +153,7 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
 
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Link 
-            to={`/empresa/${item.ticker}`}
+            href={`/empresa/${item.ticker}`}
             className="px-3 py-1.5 bg-mint-500 hover:bg-mint-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 transition-colors"
           >
             Abrir análise

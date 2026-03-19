@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiFetch } from "../../services/api";
 import bussolaOnboarding from "../../assets/onboarding/bussola_onboarding.png";
@@ -271,7 +271,7 @@ function PrimaryButton({
 }
 
 export function OnboardingPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token } = useAuth();
   const { draft, setDraft } = useLocalDraft();
   const [step, setStep] = useState(1);
@@ -298,9 +298,9 @@ export function OnboardingPage() {
   useEffect(() => {
     const completed = localStorage.getItem(COMPLETE_KEY) === "true";
     if (completed) {
-      navigate("/dashboard");
+      router.push("/dashboard");
     }
-  }, [navigate]);
+  }, [router]);
 
   useEffect(() => {
     const nextStep = draft.startIntent === null ? 1 : 2;
@@ -351,7 +351,7 @@ export function OnboardingPage() {
       updateDraft({ onboardingCompleted: true });
       localStorage.setItem(COMPLETE_KEY, "true");
       sessionStorage.setItem("onboarding_toast", "Tudo pronto. Sua watchlist já está montada.");
-      navigate("/dashboard");
+      router.push("/dashboard");
     } catch (err) {
       console.error("[onboarding] erro ao salvar watchlist:", err);
       setCompleteError("Não foi possível salvar sua watchlist. Tente novamente.");

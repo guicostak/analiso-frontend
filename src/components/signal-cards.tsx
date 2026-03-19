@@ -1,4 +1,6 @@
-﻿import { LineChart, Line, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+﻿"use client";
+
+import { LineChart, Line, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Percent, Shield, Gift } from 'lucide-react';
 import { GlossaryText } from './glossary/glossary-text';
 

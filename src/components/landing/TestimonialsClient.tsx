@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Star, UserCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Testimonial } from "../../data/landing";
@@ -111,7 +111,7 @@ export function TestimonialsClient({ testimonials }: TestimonialsClientProps) {
 
         <div className="mt-8 text-center">
           <Link
-            to="/signup"
+            href="/signup"
             className="inline-flex h-[57px] w-full max-w-[358px] items-center justify-center rounded-full bg-[#0E9384] px-8 text-[18px] font-semibold text-white shadow-[0_16px_30px_-18px_rgba(14,147,132,0.65)] transition hover:bg-[#0B7F74]"
           >
             Quero conhecer a Analiso

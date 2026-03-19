@@ -12,7 +12,8 @@ import {
   Settings,
   GitCompare,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { GlossaryText } from "./glossary/glossary-text";
 
 import { Sidebar } from "./dashboard/sidebar";
@@ -396,7 +397,7 @@ const rangeOptions: Array<"7d" | "30d" | "90d" | "Todos"> = ["7d", "30d", "90d",
 const priorityRankingLabels = ["Maior piora relativa do dia", "Maior pressão estrutural", "Maior sinal de atenção"] as const;
 
 export function WatchlistPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"updates" | "list">("updates");
   const [activeRange, setActiveRange] = useState<"7d" | "30d" | "90d" | "Todos">("30d");
   const [activePillars, setActivePillars] = useState<Pillar[]>([]);
@@ -663,7 +664,7 @@ export function WatchlistPage() {
                       />
                     </div>
                     <Link
-                      to="/explorar"
+                      href="/explorar"
                       className="px-4 py-2 rounded-xl bg-mint-500 text-white text-sm font-medium text-center"
                     >
                       Explorar mercado
@@ -730,11 +731,11 @@ export function WatchlistPage() {
                           key={item.id}
                           role="button"
                           tabIndex={0}
-                          onClick={() => navigate(buildCompanyDeepLink(item.ticker, item.pillar))}
+                          onClick={() => router.push(buildCompanyDeepLink(item.ticker, item.pillar))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              navigate(buildCompanyDeepLink(item.ticker, item.pillar));
+                              router.push(buildCompanyDeepLink(item.ticker, item.pillar));
                             }
                           }}
                           className={`rounded-xl border border-neutral-200 border-l-4 bg-neutral-50 p-3 flex flex-col gap-2 cursor-pointer transition-colors ${clickableItemStyles[item.badge]} ${
@@ -773,7 +774,7 @@ export function WatchlistPage() {
                           <div className="flex items-center justify-between gap-3 text-[11px] text-neutral-600">
                             <span>{item.evidence}</span>
                             <Link
-                              to={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
+                              href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
                               className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900"
                             >
@@ -902,11 +903,11 @@ export function WatchlistPage() {
                           key={item.id}
                           role="button"
                           tabIndex={0}
-                          onClick={() => navigate(buildCompanyDeepLink(item.ticker, item.pillar))}
+                          onClick={() => router.push(buildCompanyDeepLink(item.ticker, item.pillar))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              navigate(buildCompanyDeepLink(item.ticker, item.pillar));
+                              router.push(buildCompanyDeepLink(item.ticker, item.pillar));
                             }
                           }}
                           className={`rounded-xl border border-neutral-200 border-l-4 bg-neutral-50 cursor-pointer transition-colors ${clickableItemStyles[item.severity]} ${
@@ -943,7 +944,7 @@ export function WatchlistPage() {
                           <div className="flex items-center justify-between text-[11px] text-neutral-600">
                             <span>{item.evidence}</span>
                             <Link
-                              to={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
+                              href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
                               className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900"
                             >
@@ -1123,11 +1124,11 @@ export function WatchlistPage() {
                           key={company.ticker}
                           role="button"
                           tabIndex={0}
-                          onClick={() => navigate(buildCompanyDeepLink(company.ticker, company.attentionPillar))}
+                          onClick={() => router.push(buildCompanyDeepLink(company.ticker, company.attentionPillar))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              navigate(buildCompanyDeepLink(company.ticker, company.attentionPillar));
+                              router.push(buildCompanyDeepLink(company.ticker, company.attentionPillar));
                             }
                           }}
                           className={`bg-white rounded-2xl border border-neutral-200 border-l-4 shadow-sm cursor-pointer transition-colors ${clickableItemStyles[status]} ${
@@ -1175,7 +1176,7 @@ export function WatchlistPage() {
                               <button
                                 onClick={(event) => {
                                   event.stopPropagation();
-                                  navigate(buildCompanyDeepLink(company.ticker, company.attentionPillar));
+                                  router.push(buildCompanyDeepLink(company.ticker, company.attentionPillar));
                                 }}
                                 className="inline-flex items-center rounded-lg bg-mint-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-mint-600 whitespace-nowrap"
                               >
@@ -1183,7 +1184,7 @@ export function WatchlistPage() {
                               </button>
                               {!isCompactCard && (
                                 <Link
-                                  to={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
+                                  href={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
                                   onClick={(event) => event.stopPropagation()}
                                   className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900 whitespace-nowrap"
                                 >

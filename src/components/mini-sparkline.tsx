@@ -1,3 +1,5 @@
+"use client";
+
 import { LineChart, Line } from 'recharts';
 
 interface MiniSparklineProps {

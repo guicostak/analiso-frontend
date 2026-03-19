@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿import Link from "next/link";
 import { BellRing, ChevronDown, FileText, Pentagon } from "lucide-react";
 import valeLogo from "../../assets/logos/vale.png";
 import rennerLogo from "../../assets/logos/renner.png";
@@ -321,7 +321,7 @@ export function BeginnerInvestSection() {
           </p>
 
           <Link
-            to="/signup"
+            href="/signup"
             className="inline-flex h-[57px] w-full max-w-[358px] items-center justify-center rounded-full bg-[linear-gradient(180deg,#22BFAE_0%,#0E9384_100%)] text-[18px] font-semibold text-white transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
           >
             Quero conhecer a Analiso

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { NavLink } from "../../data/landing";
@@ -52,13 +52,13 @@ export function HeaderClient({ navLinks }: HeaderClientProps) {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/login"
+            href="/login"
             className="rounded-full border border-[#E5E7EB] px-5 py-2 text-sm text-[#111827] transition hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
           >
             Entrar
           </Link>
           <Link
-            to="/signup"
+            href="/signup"
             className="inline-flex items-center gap-2 rounded-full bg-[#0E9384] px-5 py-2 text-sm font-semibold text-white transition hover:scale-[1.02] hover:bg-[#0B7F74] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
           >
             Começar grátis
@@ -82,7 +82,7 @@ export function HeaderClient({ navLinks }: HeaderClientProps) {
         <LogoMark />
 
         <Link
-          to="/signup"
+          href="/signup"
           className="rounded-full bg-[#0E9384] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0B7F74] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
         >
           Começar grátis
@@ -103,7 +103,7 @@ export function HeaderClient({ navLinks }: HeaderClientProps) {
               </a>
             ))}
             <Link
-              to="/login"
+              href="/login"
               onClick={closeMenu}
               className="rounded-sm text-[#6B7280] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E9384] focus-visible:ring-offset-2"
             >

@@ -1,4 +1,6 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+﻿"use client";
+
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
  Activity,
  BarChart3,
@@ -28,7 +30,7 @@ import {
  RadarChart as RechartsRadarChart,
  ResponsiveContainer,
 } from 'recharts';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from './dashboard/sidebar';
 import logoWeg from '../assets/logos/weg.jpeg';
 import logoVale from '../assets/logos/vale.png';
@@ -556,7 +558,7 @@ type CompanyPreferences = {
  lastOpenPillar: 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos' | null;
 };
 
-const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').trim();
+const RAW_API_BASE_URL = String(process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080').trim();
 const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 function contextualize<T>(items: T[], companyId: string, ticker: string): Array<Contextual<T>> {
@@ -2389,9 +2391,9 @@ function SkeletonBlock({ className }: { className: string }) {
 }
 
 export function CompanyAnalysis() {
- const navigate = useNavigate();
- const { ticker } = useParams();
- const [searchParams] = useSearchParams();
+ const router = useRouter();
+ const { ticker } = useParams() as { ticker: string };
+ const searchParams = useSearchParams();
 
  const [queueFilter, setQueueFilter] = useState<QueueFilter>('Todas');
  const [activeTab, setActiveTab] = useState<MainTab>('Resumo');
@@ -2946,7 +2948,7 @@ const changesCount = changesBySelectedWindow.length;
  if (nextTicker === companyContext.ticker) return;
  const nextContext = companyContextFromTicker(nextTicker);
  setCompanyContext(nextContext);
- navigate(`/empresa/${nextTicker}`);
+ router.push(`/empresa/${nextTicker}`);
  };
 
  const guardAction = (event?: React.MouseEvent, itemCompanyId?: string) => {
