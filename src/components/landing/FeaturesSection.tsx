@@ -9,7 +9,7 @@ import {
   Sparkles,
   Waypoints,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import type { Feature } from "../../data/landing";
 
 interface FeaturesSectionProps {

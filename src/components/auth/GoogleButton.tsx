@@ -3,8 +3,7 @@
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 
 const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-  "http://localhost:8080";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 // -------------------------------------------------------
 // Types — espelham exatamente os DTOs do backend

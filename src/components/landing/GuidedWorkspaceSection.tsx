@@ -1,5 +1,5 @@
 ﻿import { CheckCircle2, ChevronDown, Ellipsis } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import logoVale from "../../assets/logos/vale.png";
 
 const highlights = [

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Building2, ChevronDown, ChevronLeft, ChevronRight, FileText, ShieldCheck, Waves, X } from "lucide-react";
 
 type Health = "Saudavel" | "Atencao" | "Risco";

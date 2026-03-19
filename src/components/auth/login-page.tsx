@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { GoogleButton, type GoogleAuthUser } from "./GoogleButton";
 import { HeroShowcase } from "./HeroShowcase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -9,7 +9,7 @@ import { useAuth } from "../../contexts/AuthContext";
 const ONBOARDING_COMPLETE_KEY = "analiso_onboarding_completed";
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login, isAuthenticated, isLoading } = useAuth();
 
   // Prevents the "already authenticated" effect from overriding the post-login
@@ -19,9 +19,9 @@ export function LoginPage() {
   // Already authenticated on page load — bounce to dashboard
   useEffect(() => {
     if (!isLoading && isAuthenticated && !justLoggedIn.current) {
-      navigate("/dashboard", { replace: true });
+      router.replace("/dashboard");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, router]);
 
   const handleLoginSuccess = (data: GoogleAuthUser) => {
     justLoggedIn.current = true;
@@ -46,7 +46,7 @@ export function LoginPage() {
 
     const destination = data.isNewUser ? "/onboarding" : "/dashboard";
     console.log("[login-page] navegando para:", destination);
-    navigate(destination, { replace: true });
+    router.replace(destination);
   };
 
   const handleLoginError = () => {

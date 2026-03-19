@@ -1,14 +1,13 @@
 /**
  * Base API fetch utility.
  *
- * - Uses VITE_API_BASE_URL env var (defaults to localhost:8080)
+ * - Uses NEXT_PUBLIC_API_BASE_URL env var (defaults to localhost:8080)
  * - Attaches Authorization: Bearer <token> when a token is provided
  * - Throws ApiError for non-2xx responses with the backend error code
  */
 
 const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-  "http://localhost:8080";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 export class ApiError extends Error {
   constructor(

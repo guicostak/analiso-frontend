@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { getDashboard, type DashboardResponse } from "../services/dashboard";
 import { ApiError } from "../services/api";
@@ -460,7 +460,7 @@ function ReadingProgressStep({
 }
 
 export function Dashboard() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token, user, logout } = useAuth();
 
   // API state
@@ -724,7 +724,7 @@ export function Dashboard() {
       params.set("foco", "mudancas");
     }
 
-    navigate(`/empresa/${item.ticker}?${params.toString()}`);
+    router.push(`/empresa/${item.ticker}?${params.toString()}`);
   };
 
   const applySinglePillarFilter = (pillar: Pillar) => {
@@ -831,7 +831,7 @@ export function Dashboard() {
       subtitle: "A maior parte da watchlist segue estável hoje, com pressão concentrada em poucos nomes.",
       delta: `${healthyWatchlistCount} de ${totalWatchlistCount} sem sinais relevantes · +2,1 p.p. vs semana passada`,
       ctaLabel: "Ver composição por grupo",
-      action: () => navigate("/watchlist?filtro=saude"),
+      action: () => router.push("/watchlist?filtro=saude"),
       accent: "border-slate-300 bg-slate-50 text-slate-700",
     },
   ];

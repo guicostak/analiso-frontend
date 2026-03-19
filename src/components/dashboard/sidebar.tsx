@@ -10,7 +10,7 @@ import {
   UserCircle2,
   Users,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import logo from "../../assets/logos/logo.png";
 
 interface SidebarProps {

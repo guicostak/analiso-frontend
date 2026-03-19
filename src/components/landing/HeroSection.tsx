@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿import Link from "next/link";
 import { Search } from "lucide-react";
 import type { NavLink } from "../../data/landing";
 import { HeaderClient } from "./HeaderClient";

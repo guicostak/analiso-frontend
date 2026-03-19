@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Star, UserCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Testimonial } from "../../data/landing";

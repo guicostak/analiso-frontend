@@ -19,7 +19,7 @@ import {
   UserCircle2,
   X,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
 import { GlossaryText } from "./glossary/glossary-text";
 
 import { Sidebar } from "./dashboard/sidebar";
@@ -569,7 +569,6 @@ function Drawer({
 }
 
 export function ExplorePage() {
-  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<MoverRow["type"]>("altas");
   const [selectedEntryPoints, setSelectedEntryPoints] = useState<string[]>([]);
   const [compareTickers, setCompareTickers] = useState<string[]>([]);

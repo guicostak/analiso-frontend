@@ -1,4 +1,7 @@
-import { Navigate } from "react-router-dom";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
@@ -12,6 +15,13 @@ interface ProtectedRouteProps {
  */
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -22,7 +32,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0E9384] border-t-transparent" />
+      </div>
+    );
   }
 
   return <>{children}</>;

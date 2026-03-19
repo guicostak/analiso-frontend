@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿import Link from "next/link";
 import { Instagram, Linkedin, Twitter } from "lucide-react";
 import { LogoMark } from "./LogoMark";
 

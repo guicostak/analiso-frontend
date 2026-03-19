@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿import Link from "next/link";
 import { BellRing, ChevronDown, FileText, Pentagon } from "lucide-react";
 import valeLogo from "../../assets/logos/vale.png";
 import rennerLogo from "../../assets/logos/renner.png";

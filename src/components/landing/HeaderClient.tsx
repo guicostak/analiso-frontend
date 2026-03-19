@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { NavLink } from "../../data/landing";
