@@ -261,10 +261,10 @@ export function Dashboard() {
           <section className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h1 className={cn("text-[24px] font-semibold", "text-foreground")}>Sua watchlist hoje</h1>
+                <h1 className={cn("text-[24px] font-semibold", "text-foreground")}>Painel</h1>
                 <span className={cn("rounded-full border px-2.5 py-1 text-[12px]", "border-border bg-card text-muted-foreground")}>Atualizado {refreshLabel}</span>
               </div>
-              <p className={cn("text-[13px]", "text-muted-foreground")}>Leitura das últimas 24h</p>
+              <p className={cn("text-[13px]", "text-muted-foreground")}>Leitura das últimas 24h da sua watchlist.</p>
             </div>
             <Button variant="ghost" className={cn("h-8 rounded-lg px-2 text-[12px] font-medium", "text-muted-foreground hover:bg-hover")}>
               + Criar alerta

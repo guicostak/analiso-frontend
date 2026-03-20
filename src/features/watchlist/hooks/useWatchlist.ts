@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../auth/AuthContext";
 import {
   getWatchlist,
   mapPriorityItemDto,

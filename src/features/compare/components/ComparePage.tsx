@@ -180,6 +180,13 @@ export function ComparePage() {
       <AppTopBar />
       <main className="pt-12 lg:ml-[88px]">
         <div className="px-8 py-8">
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-2xl font-semibold text-foreground">Comparar</h1>
+              <p className="text-sm text-muted-foreground">Compare empresas lado a lado por pilar.</p>
+            </div>
+          </div>
+
           {/* Setup bar */}
           <section className={`sticky top-12 z-30 mb-6 rounded-[18px] border border-border bg-card/95 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur transition-all ${compactSticky ? "p-2" : "p-2.5"}`}>
             <div className="grid grid-cols-1 gap-2 xl:grid-cols-12">

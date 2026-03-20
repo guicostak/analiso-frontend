@@ -10,7 +10,7 @@ export function WatchlistHeader({ activeTab }: WatchlistHeaderProps) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex flex-col gap-0.5">
-        <h1 className="text-2xl font-semibold text-foreground">Watchlist</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Monitorados</h1>
         <p className="text-sm text-muted-foreground">
           {activeTab === "updates"
             ? "Triagem primeiro, organização depois. Foque no que mudou."
