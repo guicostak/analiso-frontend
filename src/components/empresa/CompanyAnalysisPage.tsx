@@ -31,14 +31,14 @@ import {
  ResponsiveContainer,
 } from 'recharts';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { Sidebar } from './dashboard/sidebar';
-import logoWeg from '../assets/logos/weg.jpeg';
-import logoVale from '../assets/logos/vale.png';
-import logoRenner from '../assets/logos/renner.png';
-import logoMrv from '../assets/logos/mrv.jpg';
-import logoTaesa from '../assets/logos/taesa.png';
-import logoItau from '../assets/logos/itau.png';
-import logoPetrobras from '../assets/logos/petrobras.webp';
+import { Sidebar } from '../dashboard/sidebar';
+import logoWeg from '../../assets/logos/weg.jpeg';
+import logoVale from '../../assets/logos/vale.png';
+import logoRenner from '../../assets/logos/renner.png';
+import logoMrv from '../../assets/logos/mrv.jpg';
+import logoTaesa from '../../assets/logos/taesa.png';
+import logoItau from '../../assets/logos/itau.png';
+import logoPetrobras from '../../assets/logos/petrobras.webp';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';

@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { AppTopBar } from "./app-top-bar";
+import { AppTopBar } from "../shared/app-top-bar";
 import {
   Activity,
   ChevronDown,
@@ -12,24 +12,24 @@ import {
   FileText,
 } from "lucide-react";
 
-import { useDashboardInbox, allStatuses, allPillars, allSources } from "../hooks/useDashboardInbox";
-import type { InboxItem, Status, Pillar, WindowRange } from "../types/dashboard";
+import { useDashboardInbox, allStatuses, allPillars, allSources } from "../../hooks/useDashboardInbox";
+import type { InboxItem, Status, Pillar, WindowRange } from "../../types/dashboard";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { cn } from "./ui/utils";
-import { Sidebar } from "./dashboard/sidebar";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { cn } from "../ui/utils";
+import { Sidebar } from "./sidebar";
 
-import logoItau from "../assets/logos/itau.png";
-import logoMrv from "../assets/logos/mrv.jpg";
-import logoRenner from "../assets/logos/renner.png";
-import logoTaesa from "../assets/logos/taesa.png";
-import logoVale from "../assets/logos/vale.png";
-import logoWeg from "../assets/logos/weg.jpeg";
+import logoItau from "../../assets/logos/itau.png";
+import logoMrv from "../../assets/logos/mrv.jpg";
+import logoRenner from "../../assets/logos/renner.png";
+import logoTaesa from "../../assets/logos/taesa.png";
+import logoVale from "../../assets/logos/vale.png";
+import logoWeg from "../../assets/logos/weg.jpeg";
 
 
 const logoByTicker: Record<string, string> = {
@@ -147,7 +147,6 @@ export function Dashboard() {
     inboxRef,
   } = useDashboardInbox();
 
-  // pillarMovements renomeado para evitar shadowing com a variável local
   const pillarMovements = pillarMovementsData;
   const secondPillarMovement = [...pillarMovements].sort((a, b) => b.events - a.events)[1];
 
@@ -255,10 +254,10 @@ export function Dashboard() {
       </div>
 
       <div className="md:pl-[88px]">
-              <AppTopBar />
-
+        <AppTopBar />
 
         <main className="space-y-5 px-6 pb-10 pt-5">
+          {/* Page header */}
           <section className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -272,11 +271,11 @@ export function Dashboard() {
             </Button>
           </section>
 
+          {/* Watchlist summary card */}
           <section>
             <Card className={cn("rounded-2xl border", isDarkMode ? "border-brand-border bg-brand-surface" : "border-mint-200 bg-gradient-to-r from-[#ECFDF9] to-white")}>
               <CardContent className="p-4">
                 {dashboardLoading ? (
-                  /* Skeleton while API loads */
                   <div className="space-y-2 animate-pulse">
                     <div className={cn("h-3 w-24 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
                     <div className={cn("h-6 w-3/4 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
@@ -339,6 +338,7 @@ export function Dashboard() {
             </Card>
           </section>
 
+          {/* Reading progress + inbox feed */}
           <section ref={inboxRef} className="space-y-3">
             <Card className={cn("rounded-2xl border", "border-border bg-card")}>
               <CardContent className="space-y-3 p-4">
@@ -565,15 +565,15 @@ export function Dashboard() {
                       return (
                         <button
                           key={item.id}
-                        onClick={() => openInboxItem(item)}
-                        className={cn(
-                          "w-full cursor-default rounded-xl border border-transparent text-left transition hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
-                          isStablePositive ? "p-1.5" : "p-3",
-                          isNew && (isDarkMode ? "border-blue-700 bg-muted" : "border-blue-200 bg-blue-50"),
-                          isPriority && ("border-brand-border bg-brand-surface hover:bg-brand-surface hover:border-brand/60"),
-                        )}
-                      >
-                        <div className={cn("flex items-start justify-between", isStablePositive ? "gap-1" : "gap-3")}>
+                          onClick={() => openInboxItem(item)}
+                          className={cn(
+                            "w-full cursor-default rounded-xl border border-transparent text-left transition hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
+                            isStablePositive ? "p-1.5" : "p-3",
+                            isNew && (isDarkMode ? "border-blue-700 bg-muted" : "border-blue-200 bg-blue-50"),
+                            isPriority && ("border-brand-border bg-brand-surface hover:bg-brand-surface hover:border-brand/60"),
+                          )}
+                        >
+                          <div className={cn("flex items-start justify-between", isStablePositive ? "gap-1" : "gap-3")}>
                             <div className={cn("flex min-w-0 flex-1 items-start", isStablePositive ? "gap-1.5" : "gap-2.5")}>
                               <Avatar className={cn("rounded-md", isStablePositive ? "h-6 w-6" : "h-8 w-8")}>
                                 <AvatarImage src={logoByTicker[item.ticker]} alt={item.ticker} className="object-cover" />
@@ -634,6 +634,7 @@ export function Dashboard() {
 
           </section>
 
+          {/* Support cards + pillar movements */}
           <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.8fr)]">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -673,6 +674,7 @@ export function Dashboard() {
               </div>
             </div>
 
+            {/* Pillar movements */}
             <Card className={cn("rounded-2xl border", "border-border bg-card")}>
               <CardHeader className="space-y-1 px-4 pt-4">
                 <CardTitle className={cn("text-[14px] font-semibold", "text-foreground")}>Pilares em movimento</CardTitle>
@@ -729,6 +731,7 @@ export function Dashboard() {
             </Card>
           </section>
 
+          {/* Session closing */}
           {showSessionClosing && (
             <section>
               <Card className={cn("rounded-2xl border", "border-border bg-card")}>
@@ -749,5 +752,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

@@ -1,7 +1,7 @@
 "use client";
 
 import { WatchlistPage } from "../../src/components/watchlist";
-import { ProtectedRoute } from "../../src/components/ProtectedRoute";
+import { ProtectedRoute } from "../../src/components/shared";
 
 export default function Watchlist() {
   return (
