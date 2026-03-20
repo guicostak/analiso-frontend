@@ -18,7 +18,9 @@
       "Bash(1 cat:*)",
       "Bash(grep -v \"/.tsx$\")",
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/src)",
-      "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)"
+      "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend -not -path */node_modules/* -type f)",
+      "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)"
     ]
   }
 }

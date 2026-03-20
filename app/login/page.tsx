@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginPage } from "../../src/components/auth/login-page";
+import { LoginPage } from "../../src/features/auth/components/login-page";
 
 export default function Login() {
   return <LoginPage />;

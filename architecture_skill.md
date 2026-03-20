@@ -18,7 +18,12 @@ Organize o projeto utilizando uma abordagem híbrida de feature-based + layered 
 
 src/
   app/                     # App Router do Next.js (páginas)
-  components/              # Componentes reutilizáveis (UI genérica)
+  components/              # Componentes reutilizáveis globais
+    ui/                    # Design system (componentes genéricos)
+    layout/                # Estrutura da aplicação (Header, Sidebar, etc)
+    shared/                # Componentes reutilizáveis com semântica leve
+    feedback/              # Loading, erro, empty states
+    forms/                 # Componentes de formulário
   features/
     <feature-name>/
       components/          # Componentes específicos da feature
@@ -42,12 +47,37 @@ public/                    # Arquivos estáticos acessíveis diretamente
   videos/                  # Vídeos (se houver)
   favicon.ico              # Favicon da aplicação
 
+## Organização da pasta components
+
+### components/ui
+- Componentes totalmente reutilizáveis (design system)
+- Sem regra de negócio
+- Exemplos: Button, Input, Card, Modal
+
+### components/layout
+- Componentes estruturais da aplicação
+- Exemplos: Header, Sidebar, Footer, PageWrapper
+
+### components/shared
+- Componentes reutilizáveis com leve contexto de domínio
+- Exemplos: UserCard, ProductCard, SectionHeader
+
+### components/feedback
+- Estados visuais da aplicação
+- Exemplos: Loading, Skeleton, ErrorState, EmptyState
+
+### components/forms
+- Componentes relacionados a formulários
+- Exemplos: FormField, FormLabel, FormError, ControlledInput
+
 ## Regras de Arquitetura
 
 ### 1. Componentes
 - Devem ser burros (presentational) sempre que possível
 - Não devem conter lógica de negócio complexa
 - Recebem dados via props
+- Devem ser pequenos e reutilizáveis
+- Se crescerem demais, dividir ou mover lógica para hooks
 
 ### 2. Hooks
 - Centralizam lógica de estado e comportamento
@@ -86,6 +116,23 @@ UserDTO -> UserModel
 - Sempre usar services para dados externos
 - Criar mappers quando houver transformação
 
+## Regras específicas para components
+
+- Componentes globais não devem depender de features
+- Componentes específicos devem ficar dentro de features/<feature>/components
+- Evitar componentes grandes (acima de ~200 linhas)
+- Sempre que necessário, dividir em subcomponentes
+- Utilizar barrel files (index.ts) para exportação
+- Manter consistência de estrutura de arquivos
+
+### Estrutura padrão de um componente
+
+ComponentName/
+  ComponentName.tsx
+  ComponentName.types.ts
+  ComponentName.styles.ts (opcional)
+  index.ts
+
 ## Padrões recomendados
 
 - SOLID aplicado ao frontend
@@ -99,11 +146,6 @@ UserDTO -> UserModel
 
 - Criar um design system básico em components/ui
 - Usar Tailwind com consistência (tokens de cor, spacing)
-- Componentes reutilizáveis:
-  - Button
-  - Input
-  - Card
-  - Modal
 - Padronizar:
   - espaçamento
   - tipografia

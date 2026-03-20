@@ -2,8 +2,8 @@
 
 import { ThemeProvider } from "next-themes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { AuthProvider } from "../src/contexts/AuthContext";
-import { GlossaryProvider } from "../src/components/glossary/glossary-context";
+import { AuthProvider } from "../src/features/auth/AuthContext";
+import { GlossaryProvider } from "../src/features/glossary/components/glossary-context";
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ??

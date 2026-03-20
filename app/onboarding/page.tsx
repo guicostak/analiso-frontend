@@ -1,7 +1,7 @@
 "use client";
 
-import { OnboardingPage } from "../../src/components/onboarding/onboarding-page";
-import { ProtectedRoute } from "../../src/components/shared";
+import { OnboardingPage } from "../../src/features/onboarding/components";
+import { ProtectedRoute } from "@/src/components/layout";
 
 export default function Onboarding() {
   return (

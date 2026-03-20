@@ -1,8 +1,8 @@
 "use client";
 
 import { Company } from '../../data/mock-companies';
-import { MiniSparkline } from '../mini-sparkline';
-import { MiniRadar } from '../mini-radar';
+import { MiniSparkline } from './MiniSparkline';
+import { MiniRadar } from './MiniRadar';
 import { motion } from 'motion/react';
 
 interface CompanyRowProps {
