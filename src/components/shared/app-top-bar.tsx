@@ -2,7 +2,7 @@
 
 import { Bell, Moon, Search, Settings, Sun, UserCircle2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export function AppTopBar() {
   const { setTheme, resolvedTheme } = useTheme();

@@ -28,13 +28,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Sidebar } from "./dashboard/sidebar";
-import { AppTopBar } from "./app-top-bar";
-import wegLogo from "../assets/logos/weg.jpeg";
-import valeLogo from "../assets/logos/vale.png";
-import { useCompare } from "../hooks/useCompare";
-import { pillarCopy } from "../services/compare";
-import type { CompareTrend, CompareEvidence } from "../types/compare";
+import { Sidebar } from "../dashboard/sidebar";
+import { AppTopBar } from "../shared/app-top-bar";
+import wegLogo from "../../assets/logos/weg.jpeg";
+import valeLogo from "../../assets/logos/vale.png";
+import { useCompare } from "../../hooks/useCompare";
+import { pillarCopy } from "../../services/compare";
+import type { CompareTrend } from "../../types/compare";
+import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
 
 // ─── UI-only style maps ───────────────────────────────────────────────────────
 
@@ -65,7 +66,7 @@ const TICKER_LOGOS: Record<string, string> = {
   VALE3: valeLogo.src,
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Local sub-components ─────────────────────────────────────────────────────
 
 function TickerLogo({ ticker, size = 18 }: { ticker: string; size?: number }) {
   const logo = TICKER_LOGOS[ticker];
@@ -86,90 +87,6 @@ function TickerLogo({ ticker, size = 18 }: { ticker: string; size?: number }) {
       className="rounded-full border border-border bg-card object-cover"
       style={{ width: size, height: size }}
     />
-  );
-}
-
-function EvidenceDrawer({
-  data,
-  onClose,
-  formatMetric,
-}: {
-  data: CompareEvidence | null;
-  onClose: () => void;
-  formatMetric: (value: number | null, unit: string) => string;
-}) {
-  if (!data) return null;
-  return (
-    <div className="fixed inset-0 z-50">
-      <button onClick={onClose} className="absolute inset-0 bg-black/30" />
-      <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-border bg-card p-6 shadow-2xl">
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              Evidence drawer
-            </p>
-            <h3 className="mt-1 text-lg font-semibold text-foreground">{data.metricName}</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-border p-1.5 text-muted-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="space-y-4 text-sm">
-          <div className="rounded-xl border border-border bg-muted p-4">
-            <p className="text-[12px] font-semibold text-muted-foreground">Valor atual A/B</p>
-            <div className="mt-2 grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{data.aTicker}</p>
-                <p className="font-semibold">{formatMetric(data.aValue, data.unit)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{data.bTicker}</p>
-                <p className="font-semibold">{formatMetric(data.bValue, data.unit)}</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-[12px] font-semibold text-muted-foreground">Definicao simples</p>
-            <p className="mt-1 text-foreground">{data.definition}</p>
-          </div>
-          <div>
-            <p className="text-[12px] font-semibold text-muted-foreground">Como calculamos</p>
-            <p className="mt-1 text-foreground">{data.source.method}</p>
-          </div>
-          <div>
-            <p className="text-[12px] font-semibold text-muted-foreground">Fonte</p>
-            <p className="mt-1 text-foreground">
-              {data.source.provider} / {data.source.document}
-            </p>
-          </div>
-          <div>
-            <p className="text-[12px] font-semibold text-muted-foreground">
-              Data de atualizacao
-            </p>
-            <p className="mt-1 text-foreground">{data.source.updatedAt}</p>
-          </div>
-          {data.source.reference ? (
-            <div>
-              <p className="text-[12px] font-semibold text-muted-foreground">
-                Trecho/identificador
-              </p>
-              <p className="mt-1 text-foreground">{data.source.reference}</p>
-            </div>
-          ) : null}
-          <a
-            href={data.source.link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-hover"
-          >
-            Abrir documento <Share2 className="h-3.5 w-3.5" />
-          </a>
-        </div>
-      </aside>
-    </div>
   );
 }
 
@@ -263,6 +180,7 @@ export function ComparePage() {
       <AppTopBar />
       <main className="pt-12 lg:ml-[88px]">
         <div className="px-8 py-8">
+          {/* Setup bar */}
           <section className={`sticky top-12 z-30 mb-6 rounded-[18px] border border-border bg-card/95 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur transition-all ${compactSticky ? "p-2" : "p-2.5"}`}>
             <div className="grid grid-cols-1 gap-2 xl:grid-cols-12">
               <article className="rounded-2xl border border-border bg-muted p-2.5 xl:col-span-7">
@@ -428,6 +346,7 @@ export function ComparePage() {
             </div>
           </section>
 
+          {/* Empty state */}
           {!canCompare ? (
             <section className="rounded-2xl border border-border bg-card p-8 text-center">
               <h2 className="text-xl font-semibold">Selecione duas empresas para comparar</h2>
@@ -451,6 +370,7 @@ export function ComparePage() {
             <LoadingBlocks />
           ) : (
             <div className="space-y-8">
+              {/* Verdict section */}
               {verdict && a && b ? (
                 <section
                   ref={verdictRef}
@@ -556,6 +476,7 @@ export function ComparePage() {
                 </section>
               ) : null}
 
+              {/* Top 3 pillar diffs */}
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="text-[22px] font-semibold">
                   Os 3 fatores que mais separam essas empresas
@@ -594,6 +515,7 @@ export function ComparePage() {
                 </div>
               </section>
 
+              {/* All pillars */}
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="text-[20px] font-semibold">Todos os pilares</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -631,6 +553,7 @@ export function ComparePage() {
                 </div>
               </section>
 
+              {/* Pillar detail */}
               <section
                 ref={detailRef}
                 className="scroll-mt-[160px] rounded-2xl border border-border bg-card p-6"
@@ -853,6 +776,7 @@ export function ComparePage() {
                 </div>
               </section>
 
+              {/* Metric table (pillar detail evidence) */}
               <section className="scroll-mt-[160px] rounded-2xl border border-border bg-card p-6">
                 <h2 className="text-[20px] font-semibold">Evidencias por metrica</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -980,6 +904,7 @@ export function ComparePage() {
                 ) : null}
               </section>
 
+              {/* Context section */}
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="text-[20px] font-semibold">O que pode explicar essa diferenca</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -1161,7 +1086,7 @@ export function ComparePage() {
           {toast}
         </div>
       ) : null}
-      <EvidenceDrawer
+      <CompareEvidenceDrawer
         data={evidence}
         onClose={() => setEvidence(null)}
         formatMetric={formatMetric}

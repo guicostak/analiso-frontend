@@ -13,7 +13,12 @@
       "Bash(npx tsc:*)",
       "Bash(find C:UsersguilhDesktopanaliso-frontend.claudeworktreesagent-a0bbd8f0 -name *.ts -o -name *.tsx)",
       "Bash(find C:UsersguilhDesktopanaliso-frontend.claudeworktreesagent-aa447705 -name *.ts -o -name *.tsx)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(xargs wc:*)",
+      "Bash(1 cat:*)",
+      "Bash(grep -v \"/.tsx$\")",
+      "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/src)",
+      "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)"
     ]
   }
 }
