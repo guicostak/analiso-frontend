@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { Sidebar } from "../dashboard/sidebar";
 import { AppTopBar } from "../shared/app-top-bar";
 import { useWatchlist } from "../../hooks/useWatchlist";
-import { getStatusFromScores, watchlistCompanies, suggestedCompanies } from "../../services/watchlist";
+import { getStatusFromScores, suggestedCompanies } from "../../services/watchlist";
 import type { Pillar, FeedItem, PriorityItem, WatchlistCompany } from "../../types/watchlist";
 import { WatchlistHeader } from "./WatchlistHeader";
 import { WatchlistUpdatesTab } from "./WatchlistUpdatesTab";
@@ -37,6 +37,7 @@ export function WatchlistPage() {
     uiState,
     filteredFeedItems,
     filteredCompanies,
+    companies,
     priorityItems,
     alerts,
     sourceByTicker,
@@ -49,13 +50,13 @@ export function WatchlistPage() {
     (listSeverityFilter !== "Todos" ? 1 : 0) +
     (listSourceFilter !== "Todas" ? 1 : 0);
 
-  const summaryAttentionCount = watchlistCompanies.filter((c) => {
+  const summaryAttentionCount = companies.filter((c) => {
     const s = getStatusFromScores(c.scores);
     return s === "Risco" || s === "Atenção";
   }).length;
-  const summaryRiskCount = watchlistCompanies.filter((c) => getStatusFromScores(c.scores) === "Risco").length;
-  const summaryHealthyCount = watchlistCompanies.filter((c) => getStatusFromScores(c.scores) === "Saudável").length;
-  const summaryChanges30dCount = watchlistCompanies.filter((c) => c.lastChangeDays <= 30).length;
+  const summaryRiskCount = companies.filter((c) => getStatusFromScores(c.scores) === "Risco").length;
+  const summaryHealthyCount = companies.filter((c) => getStatusFromScores(c.scores) === "Saudável").length;
+  const summaryChanges30dCount = companies.filter((c) => c.lastChangeDays <= 30).length;
 
   const alertsToShow = showAlertActionOnly ? alerts.filter((a) => a.severity !== "Saudável") : alerts;
   const watchlistExecutiveSummary =

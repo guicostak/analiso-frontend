@@ -2,21 +2,193 @@
  * Watchlist service.
  *
  * Responsabilidades:
- *  1. Dados mock (priorityItems, feedItems, watchlistCompanies, alerts)
- *  2. Mapeamentos auxiliares (sourceByTicker)
+ *  1. Tipos que espelham os DTOs do backend
+ *  2. Funções de chamada HTTP (getWatchlist, getUserWatchlist, etc.)
  *  3. Funções puras de transformação/cálculo de status
+ *  4. Mapeamentos auxiliares (sourceByTicker)
  *
  * Independente de React — sem imports de hooks ou JSX.
- * Preparado para substituição por chamadas HTTP reais.
  */
 
+import { apiFetch } from "./api";
 import type {
   PriorityItem,
   FeedItem,
   WatchlistCompany,
   AlertItem,
   WatchlistStatus,
+  Pillar,
+  PriorityBadge,
+  FeedSeverity,
+  FeedSource,
 } from "../types/watchlist";
+
+// ─── DTOs do backend ──────────────────────────────────────────────────────────
+
+export interface WatchlistPriorityItemDto {
+  ticker: string;
+  companyName: string;
+  sectorLabel: string;
+  topTag: string;
+  badge: string;
+  contextLine: string;
+  whatChangedLabel: string;
+  whatChanged: string;
+  whyMattersLabel: string;
+  whyMatters: string;
+  metaLine: string;
+  ctaLabel: string;
+}
+
+export interface WatchlistFeedItemDto {
+  badge: string;
+  pillarBadge: string;
+  title: string;
+  body: string;
+  watchLine: string;
+  metaLine: string;
+  ctaLabel: string;
+}
+
+export interface WatchlistListItemDto {
+  ticker: string;
+  companyName: string;
+  sectorLabel: string;
+  badge: string;
+  headline: string;
+  supportLine: string;
+  metaLine: string;
+  statusChip: string;
+  unseenChip: string | null;
+  pendingDataBadge: string | null;
+  ctaPrimary: string;
+  ctaSecondary: string | null;
+}
+
+export interface WatchlistAlertItemDto {
+  badge: string;
+  title: string;
+  body: string;
+  timeLabel: string;
+}
+
+export interface WatchlistHeaderDto {
+  title: string;
+  subtitle: string;
+}
+
+export interface WatchlistPrioritySectionDto {
+  title: string;
+  body: string;
+  countLabel: string;
+}
+
+export interface WatchlistUpdatesSectionDto {
+  title: string;
+  body: string;
+  items: WatchlistFeedItemDto[];
+}
+
+export interface WatchlistListSectionDto {
+  title: string;
+  sortOrder: string;
+  items: WatchlistListItemDto[];
+}
+
+export interface WatchlistAlertsPanelDto {
+  title: string;
+  body: string;
+  ctaLabel: string;
+  items: WatchlistAlertItemDto[];
+}
+
+export interface WatchlistStateBlockDto {
+  eyebrow: string;
+  headline: string;
+  body: string;
+  pill: string;
+}
+
+export interface WatchlistQuickOverviewDto {
+  title: string;
+  body: string;
+  metrics: Record<string, unknown>[];
+}
+
+export interface WatchlistSessionClosingDto {
+  title: string;
+  body: string;
+}
+
+export interface WatchlistResponse {
+  referenceDate: string;
+  mode: string;
+  pageTemplate: string;
+  header: WatchlistHeaderDto;
+  stateBlock: WatchlistStateBlockDto | null;
+  prioritySection: WatchlistPrioritySectionDto | null;
+  priorityItems: WatchlistPriorityItemDto[];
+  updatesSection: WatchlistUpdatesSectionDto | null;
+  listSection: WatchlistListSectionDto | null;
+  quickOverview: WatchlistQuickOverviewDto | null;
+  alertsPanel: WatchlistAlertsPanelDto | null;
+  sessionClosing: WatchlistSessionClosingDto | null;
+  manifestVersion: string;
+  renderedAt: string;
+}
+
+export interface WatchlistItemResponse {
+  ticker: string;
+  createdAt: string;
+}
+
+export interface AddWatchlistItemsBatchResponse {
+  added: string[];
+  skipped: string[];
+  invalid: string[];
+}
+
+// ─── Chamadas HTTP ────────────────────────────────────────────────────────────
+
+export async function getWatchlist(
+  mode: "UPDATES" | "LIST",
+  token?: string | null,
+  date?: string,
+): Promise<WatchlistResponse> {
+  const params = new URLSearchParams({ mode });
+  if (date) params.set("date", date);
+  return apiFetch<WatchlistResponse>(`/api/watchlist?${params.toString()}`, {}, token);
+}
+
+export async function getUserWatchlist(token?: string | null): Promise<WatchlistItemResponse[]> {
+  return apiFetch<WatchlistItemResponse[]>("/api/me/watchlist", {}, token);
+}
+
+export async function addWatchlistItem(
+  ticker: string,
+  token?: string | null,
+): Promise<WatchlistItemResponse> {
+  return apiFetch<WatchlistItemResponse>(
+    "/api/me/watchlist",
+    { method: "POST", body: JSON.stringify({ ticker }) },
+    token,
+  );
+}
+
+export async function addWatchlistItemsBatch(
+  tickers: string[],
+  token?: string | null,
+): Promise<AddWatchlistItemsBatchResponse> {
+  return apiFetch<AddWatchlistItemsBatchResponse>(
+    "/api/me/watchlist/batch",
+    { method: "POST", body: JSON.stringify({ tickers }) },
+    token,
+  );
+}
+
+export async function removeWatchlistItem(ticker: string, token?: string | null): Promise<void> {
+  return apiFetch<void>(`/api/me/watchlist/${ticker}`, { method: "DELETE" }, token);
+}
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────
 
@@ -35,6 +207,8 @@ export const sourceByTicker: Record<string, "CVM" | "B3" | "RI"> = {
   VBBR3:  "RI",
 };
 
+export const suggestedCompanies = ["BBAS3", "SUZB3", "EQTL3", "LREN3", "RAIL3", "RADL3"];
+
 // ─── Funções puras ────────────────────────────────────────────────────────────
 
 export function getStatusFromScores(scores: number[]): WatchlistStatus {
@@ -44,177 +218,86 @@ export function getStatusFromScores(scores: number[]): WatchlistStatus {
   return "Saudável";
 }
 
-// ─── Dados mock ───────────────────────────────────────────────────────────────
+// ─── Helpers internos de parsing ──────────────────────────────────────────────
 
-export const priorityItems: PriorityItem[] = [
-  {
-    id: "p1",
-    company: "Cosan",
-    ticker: "CSAN3",
-    sector: "Consumo",
-    badge: "Risco",
-    change: "Dívida líquida subiu 18% em 90 dias.",
-    why: "Aumenta pressão sobre caixa e pode limitar investimento.",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    pillar: "Dívida",
-    evidenceId: "divida-1",
-  },
-  {
-    id: "p2",
-    company: "MRV",
-    ticker: "MRVE3",
-    sector: "Construção",
-    badge: "Atenção",
-    change: "Margens pressionadas no último trimestre reportado.",
-    why: "Pode limitar recuperação de resultado e pede monitoramento de custos.",
-    evidence: "Fonte: CVM • ITR 2T25 • 12/11",
-    pillar: "Margens",
-    evidenceId: "margens-1",
-  },
-  {
-    id: "p3",
-    company: "Taesa",
-    ticker: "TAEE11",
-    sector: "Energia",
-    badge: "Atenção",
-    change: "Proventos abaixo do histórico de 12 meses.",
-    why: "Reduz previsibilidade de renda no curto prazo.",
-    evidence: "Fonte: RI • Comunicado • 02/02",
-    pillar: "Proventos",
-    evidenceId: "proventos-1",
-  },
-  {
-    id: "p4",
-    company: "Azul",
-    ticker: "AZUL4",
-    sector: "Transportes",
-    badge: "Atenção",
-    change: "Caixa líquido caiu para o menor nível em 4 trimestres.",
-    why: "Menos flexibilidade para atravessar períodos de alta de custos.",
-    evidence: "Fonte: CVM • ITR 3T25 • 03/02",
-    pillar: "Caixa",
-    evidenceId: "caixa-1",
-  },
-];
+function parseBadgeAsSeverity(badge: string): FeedSeverity {
+  if (badge === "Risco" || badge === "Atenção" || badge === "Saudável") return badge as FeedSeverity;
+  return "Saudável";
+}
 
-export const feedItems: FeedItem[] = [
-  {
-    id: "f1",
-    headline: "Dívida subiu acima da média setorial.",
-    detail: "Comparado ao setor, a alavancagem ficou 1,3x acima.",
-    detailTwo: "O que observar: renegociação e cronograma de amortização.",
-    pillar: "Dívida",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "CSAN3",
-    severity: "Risco",
-    source: "CVM",
+function parseBadgeAsPriorityBadge(badge: string): PriorityBadge {
+  if (badge === "Risco" || badge === "Atenção" || badge === "Saudável") return badge as PriorityBadge;
+  return "Saudável";
+}
+
+function parsePillar(pillarBadge: string): Pillar {
+  const pillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
+  return pillars.includes(pillarBadge as Pillar) ? (pillarBadge as Pillar) : "Dívida";
+}
+
+function parseSourceFromMeta(metaLine: string): FeedSource {
+  if (metaLine.includes("CVM")) return "CVM";
+  if (metaLine.includes(" RI") || metaLine.includes("• RI") || metaLine.startsWith("RI")) return "RI";
+  if (metaLine.includes("B3")) return "B3";
+  return "CVM";
+}
+
+function scoreFromBadge(badge: string): number[] {
+  if (badge === "Risco") return [30];
+  if (badge === "Atenção") return [65];
+  return [80];
+}
+
+// ─── Funções de transformação API → UI ───────────────────────────────────────
+
+export function mapPriorityItemDto(dto: WatchlistPriorityItemDto, index: number): PriorityItem {
+  return {
+    id: dto.ticker || `p-${index}`,
+    company: dto.companyName,
+    ticker: dto.ticker,
+    sector: dto.sectorLabel,
+    badge: parseBadgeAsPriorityBadge(dto.badge),
+    change: dto.whatChanged,
+    why: dto.whyMatters,
+    evidence: dto.metaLine,
+    pillar: parsePillar(dto.topTag),
+  };
+}
+
+export function mapFeedItemDto(dto: WatchlistFeedItemDto, index: number): FeedItem {
+  return {
+    id: `f-${index}`,
+    headline: dto.title,
+    detail: dto.body,
+    detailTwo: dto.watchLine,
+    pillar: parsePillar(dto.pillarBadge),
+    evidence: dto.metaLine,
+    ticker: "",
+    severity: parseBadgeAsSeverity(dto.badge),
+    source: parseSourceFromMeta(dto.metaLine),
     range: "30d",
-    evidenceId: "divida-1",
-  },
-  {
-    id: "f2",
-    headline: "Caixa voltou para faixa confortável.",
-    detail: "Liquidez recuperou após duas captações recentes.",
-    detailTwo: "O que observar: manutenção do ritmo de geração de caixa.",
-    pillar: "Caixa",
-    evidence: "Fonte: RI • 05/02",
-    ticker: "WEGE3",
-    severity: "Saudável",
-    source: "RI",
-    range: "7d",
-    evidenceId: "caixa-1",
-  },
-  {
-    id: "f3",
-    headline: "Margens operacionais melhoraram 0,8 p.p.",
-    detail: "Recuperação gradual de custos de insumos.",
-    detailTwo: "O que observar: impacto em fluxo de caixa livre.",
-    pillar: "Margens",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "FLRY3",
-    severity: "Atenção",
-    source: "CVM",
-    range: "30d",
-    evidenceId: "margens-1",
-  },
-  {
-    id: "f4",
-    headline: "Retorno sobre capital ficou abaixo do histórico.",
-    detail: "ROIC caiu pelo segundo trimestre consecutivo.",
-    detailTwo: "O que observar: eficiência operacional e reinvestimento.",
-    pillar: "Retorno",
-    evidence: "Fonte: CVM • ITR 3T25 • 02/02",
-    ticker: "ABEV3",
-    severity: "Atenção",
-    source: "CVM",
-    range: "90d",
-    evidenceId: "retorno-1",
-  },
-  {
-    id: "f5",
-    headline: "Proventos mais estáveis após 2 trimestres.",
-    detail: "Payout normalizado acima do mínimo histórico.",
-    detailTwo: "O que observar: guidance de distribuição.",
-    pillar: "Proventos",
-    evidence: "Fonte: RI • 01/02",
-    ticker: "ITUB4",
-    severity: "Saudável",
-    source: "RI",
-    range: "30d",
-    evidenceId: "proventos-1",
-  },
-  {
-    id: "f6",
-    headline: "Dívida em moeda estrangeira aumentou.",
-    detail: "Mais exposição cambial no curto prazo.",
-    detailTwo: "O que observar: hedge e sensibilidade ao câmbio.",
-    pillar: "Dívida",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "GGBR4",
-    severity: "Risco",
-    source: "CVM",
-    range: "90d",
-    evidenceId: "divida-2",
-  },
-];
+  };
+}
 
-export const watchlistCompanies: WatchlistCompany[] = [
-  { name: "WEG",             ticker: "WEGE3",  sector: "Indústria",   scores: [78, 84, 72, 80, 64], lastChangeDays: 2,  freshness: "Atual",     volatility: "Baixa",    attentionPillar: "Margens",   tags: ["Qualidade", "Defensiva"] },
-  { name: "Itaú Unibanco",   ticker: "ITUB4",  sector: "Bancos",      scores: [72, 78, 70, 76, 74], lastChangeDays: 4,  freshness: "Atual",     volatility: "Baixa",    attentionPillar: "Retorno",   tags: ["Dividendos"] },
-  { name: "Taesa",           ticker: "TAEE11", sector: "Energia",     scores: [56, 62, 60, 64, 82], lastChangeDays: 6,  freshness: "Atual",     volatility: "Moderada", attentionPillar: "Proventos", tags: ["Renda"] },
-  { name: "Cosan",           ticker: "CSAN3",  sector: "Consumo",     scores: [42, 58, 46, 52, 48], lastChangeDays: 1,  freshness: "Falha",     volatility: "Alta",     attentionPillar: "Dívida",    tags: ["Cíclica"] },
-  { name: "Fleury",          ticker: "FLRY3",  sector: "Saúde",       scores: [70, 74, 68, 72, 58], lastChangeDays: 3,  freshness: "Atual",     volatility: "Baixa",    attentionPillar: "Margens",   tags: ["Qualidade"] },
-  { name: "MRV",             ticker: "MRVE3",  sector: "Construção",  scores: [32, 44, 30, 36, 40], lastChangeDays: 12, freshness: "Falha",     volatility: "Alta",     attentionPillar: "Dívida",    tags: ["Risco"] },
-  { name: "Petrobras",       ticker: "PETR4",  sector: "Energia",     scores: [60, 66, 58, 64, 70], lastChangeDays: 5,  freshness: "Atual",     volatility: "Moderada", attentionPillar: "Proventos", tags: ["Dividendos"] },
-  { name: "Ambev",           ticker: "ABEV3",  sector: "Consumo",     scores: [68, 72, 54, 50, 62], lastChangeDays: 9,  freshness: "Atual",     volatility: "Baixa",    attentionPillar: "Retorno",   tags: ["Defensiva"] },
-  { name: "Gerdau",          ticker: "GGBR4",  sector: "Siderurgia",  scores: [50, 60, 56, 58, 52], lastChangeDays: 7,  freshness: "Atual",     volatility: "Moderada", attentionPillar: "Dívida",    tags: ["Cíclica"] },
-  { name: "Magazine Luiza",  ticker: "MGLU3",  sector: "Varejo",      scores: [38, 48, 40, 34, 30], lastChangeDays: 14, freshness: "Falha",     volatility: "Alta",     attentionPillar: "Caixa",     tags: ["Risco"] },
-  { name: "RaiaDrogasil",    ticker: "RADL3",  sector: "Saúde",       scores: [66, 70, 62, 68, 54], lastChangeDays: 4,  freshness: "Atual",     volatility: "Baixa",    attentionPillar: "Margens",   tags: ["Qualidade"] },
-  { name: "Vibra",           ticker: "VBBR3",  sector: "Energia",     scores: [48, 54, 50, 52, 46], lastChangeDays: 8,  freshness: "Sem dados", attentionPillar: "Caixa",     tags: ["Atenção"] },
-];
+export function mapListItemDto(dto: WatchlistListItemDto): WatchlistCompany {
+  return {
+    name: dto.companyName,
+    ticker: dto.ticker,
+    sector: dto.sectorLabel,
+    scores: scoreFromBadge(dto.badge),
+    lastChangeDays: 0,
+    freshness: dto.pendingDataBadge ? "Falha" : "Atual",
+    attentionPillar: "Dívida",
+    tags: [],
+  };
+}
 
-export const watchlistAlerts: AlertItem[] = [
-  {
-    id: "a1",
-    title: "Dívida em atenção (CSAN3)",
-    summary: "Alavancagem acima do limite definido na watchlist.",
-    time: "Hoje • 10:12",
-    severity: "Risco",
-  },
-  {
-    id: "a2",
-    title: "Margens em atenção (MRVE3)",
-    summary: "Pressão de custos manteve margens abaixo da média setorial.",
-    time: "Ontem • 19:40",
-    severity: "Atenção",
-  },
-  {
-    id: "a3",
-    title: "Proventos abaixo do esperado (TAEE11)",
-    summary: "Distribuição ficou 12% abaixo da média 12m.",
-    time: "02/02 • 08:30",
-    severity: "Atenção",
-  },
-];
-
-export const suggestedCompanies = ["BBAS3", "SUZB3", "EQTL3", "LREN3", "RAIL3", "RADL3"];
+export function mapAlertItemDto(dto: WatchlistAlertItemDto, index: number): AlertItem {
+  return {
+    id: `a-${index}`,
+    title: dto.title,
+    summary: dto.body,
+    time: dto.timeLabel,
+    severity: parseBadgeAsSeverity(dto.badge),
+  };
+}

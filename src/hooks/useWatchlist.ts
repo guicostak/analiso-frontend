@@ -4,6 +4,7 @@
  * useWatchlist
  *
  * Centraliza todo o estado e a lógica da página de Watchlist:
+ *  - Busca de dados via API (modo UPDATES e LIST em paralelo)
  *  - Filtros do feed (período, pilar, severidade, fonte)
  *  - Filtros da lista de empresas (busca, ordenação, densidade, etc.)
  *  - Controle de tickers vistos/não vistos
@@ -14,14 +15,16 @@
  * e renderizar o JSX.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "../contexts/AuthContext";
 import {
-  feedItems,
-  watchlistCompanies,
-  watchlistAlerts,
-  priorityItems,
+  getWatchlist,
+  mapPriorityItemDto,
+  mapFeedItemDto,
+  mapListItemDto,
+  mapAlertItemDto,
   sourceByTicker,
   getStatusFromScores,
 } from "../services/watchlist";
@@ -70,6 +73,7 @@ export interface UseWatchlistReturn {
   // Dados derivados
   filteredFeedItems:  FeedItem[];
   filteredCompanies:  WatchlistCompany[];
+  companies:          WatchlistCompany[];
   priorityItems:      PriorityItem[];
   alerts:             AlertItem[];
 
@@ -106,7 +110,14 @@ export interface UseWatchlistReturn {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useWatchlist(): UseWatchlistReturn {
-  const router = useRouter();
+  const router    = useRouter();
+  const { token } = useAuth();
+
+  // — Dados da API —
+  const [apiPriorityItems, setApiPriorityItems] = useState<PriorityItem[]>([]);
+  const [apiFeedItems,     setApiFeedItems]     = useState<FeedItem[]>([]);
+  const [apiCompanies,     setApiCompanies]     = useState<WatchlistCompany[]>([]);
+  const [apiAlerts,        setApiAlerts]        = useState<AlertItem[]>([]);
 
   // — Estado do feed —
   const [activeTab,               setActiveTab]               = useState<"updates" | "list">("updates");
@@ -129,7 +140,35 @@ export function useWatchlist(): UseWatchlistReturn {
   const [showAlertActionOnly, setShowAlertActionOnly] = useState(true);
   const [expandedTicker,      setExpandedTicker]      = useState<string | null>(null);
   const [quickActionsTicker,  setQuickActionsTicker]  = useState<string | null>(null);
-  const [uiState] = useState<"ready" | "loading" | "empty">("ready");
+  const [uiState,             setUiState]             = useState<"ready" | "loading" | "empty">("loading");
+
+  // — Busca de dados da API —
+  useEffect(() => {
+    if (!token) return;
+
+    setUiState("loading");
+
+    Promise.all([
+      getWatchlist("UPDATES", token),
+      getWatchlist("LIST", token),
+    ])
+      .then(([updatesData, listData]) => {
+        const priority  = (updatesData.priorityItems         ?? []).map(mapPriorityItemDto);
+        const feed      = (updatesData.updatesSection?.items ?? []).map(mapFeedItemDto);
+        const alerts    = (updatesData.alertsPanel?.items    ?? []).map(mapAlertItemDto);
+        const companies = (listData.listSection?.items       ?? []).map(mapListItemDto);
+
+        setApiPriorityItems(priority);
+        setApiFeedItems(feed);
+        setApiAlerts(alerts);
+        setApiCompanies(companies);
+        setUiState(priority.length === 0 && companies.length === 0 ? "empty" : "ready");
+      })
+      .catch((err) => {
+        console.error("[watchlist] erro ao buscar dados:", err);
+        setUiState("empty");
+      });
+  }, [token]);
 
   // — Ações —
   const togglePillar = useCallback((pillar: Pillar) => {
@@ -154,20 +193,20 @@ export function useWatchlist(): UseWatchlistReturn {
 
   // — Dados derivados: feed filtrado —
   const filteredFeedItems = useMemo<FeedItem[]>(() => {
-    return feedItems.filter((item) => {
+    return apiFeedItems.filter((item) => {
       if (activeRange !== "Todos" && item.range !== activeRange) return false;
       if (activePillars.length > 0 && !activePillars.includes(item.pillar)) return false;
       if (severityFilter !== "Todos" && item.severity !== severityFilter) return false;
       if (sourceFilter  !== "Todas" && item.source   !== sourceFilter)    return false;
       return true;
     });
-  }, [activePillars, activeRange, severityFilter, sourceFilter]);
+  }, [apiFeedItems, activePillars, activeRange, severityFilter, sourceFilter]);
 
   // — Dados derivados: lista de empresas filtrada e ordenada —
   const filteredCompanies = useMemo<WatchlistCompany[]>(() => {
     const statusWeight: Record<WatchlistStatus, number> = { Risco: 0, Atenção: 1, Saudável: 2 };
 
-    return watchlistCompanies
+    return apiCompanies
       .filter((company) => {
         const companyStatus = getStatusFromScores(company.scores);
         const companySource = sourceByTicker[company.ticker] ?? "CVM";
@@ -191,7 +230,7 @@ export function useWatchlist(): UseWatchlistReturn {
         return Math.min(...a.scores) - Math.min(...b.scores);
       });
   }, [
-    listSearch, unseenOnly, seenTickers, filters,
+    apiCompanies, listSearch, unseenOnly, seenTickers, filters,
     listSeverityFilter, listSourceFilter, sortBy,
   ]);
 
@@ -222,8 +261,9 @@ export function useWatchlist(): UseWatchlistReturn {
     // Dados derivados
     filteredFeedItems,
     filteredCompanies,
-    priorityItems,
-    alerts: watchlistAlerts,
+    companies: apiCompanies,
+    priorityItems: apiPriorityItems,
+    alerts: apiAlerts,
 
     // Ações do feed
     setActiveTab,
