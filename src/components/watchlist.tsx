@@ -280,8 +280,10 @@ export function WatchlistPage() {
                               router.push(buildCompanyDeepLink(item.ticker, item.pillar));
                             }
                           }}
-                          className={`rounded-xl border border-border border-l-4 bg-muted p-3 flex flex-col gap-2 cursor-pointer transition-colors ${clickableItemStyles[item.badge]} ${
-                            index === 0 ? "border-brand-border bg-brand-surface shadow-[0_6px_16px_rgba(16,185,129,0.08)]" : ""
+                          className={`rounded-xl border border-l-4 p-3 flex flex-col gap-2 cursor-pointer transition-colors ${clickableItemStyles[item.badge]} ${
+                            index === 0
+                              ? "border-brand-border bg-brand-surface shadow-[0_6px_16px_rgba(16,185,129,0.08)]"
+                              : "border-border bg-muted"
                           }`}
                         >
                           {index === 0 && (
@@ -908,7 +910,7 @@ export function WatchlistPage() {
                 </div>
                 <div className="space-y-2">
                   {alertsToShow.map((alert) => (
-                    <div key={alert.id} className={`rounded-xl border p-3 ${alert.severity === "Risco" ? "border-rose-200 bg-rose-50/40" : "border-border bg-muted"}`}>
+                    <div key={alert.id} className={`rounded-xl border p-3 ${alert.severity === "Risco" ? "border-brand-border bg-brand-surface" : "border-border bg-muted"}`}>
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold text-foreground">{alert.title}</p>
                         <span className={`px-2 py-0.5 rounded-full border text-[10px] ${alertStyles[alert.severity]}`}>
