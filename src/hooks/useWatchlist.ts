@@ -27,6 +27,11 @@ import {
   mapAlertItemDto,
   sourceByTicker,
   getStatusFromScores,
+  type WatchlistHeaderDto,
+  type WatchlistStateBlockDto,
+  type WatchlistPrioritySectionDto,
+  type WatchlistQuickOverviewDto,
+  type WatchlistSessionClosingDto,
 } from "../services/watchlist";
 
 import type {
@@ -102,6 +107,15 @@ export interface UseWatchlistReturn {
   // Navegação
   navigateToCompany: (ticker: string, pillar: Pillar) => void;
 
+  // Blocos do endpoint (zonas da tela)
+  pageHeader:           WatchlistHeaderDto | null;
+  stateBlock:           WatchlistStateBlockDto | null;
+  prioritySection:      WatchlistPrioritySectionDto | null;
+  updatesSectionHeader: { title: string; body: string } | null;
+  quickOverview:        WatchlistQuickOverviewDto | null;
+  alertsPanelHeader:    { title: string; body: string; ctaLabel: string } | null;
+  sessionClosing:       WatchlistSessionClosingDto | null;
+
   // Helpers expostos
   getStatusFromScores: (scores: number[]) => WatchlistStatus;
   sourceByTicker:      Record<string, "CVM" | "B3" | "RI">;
@@ -114,10 +128,17 @@ export function useWatchlist(): UseWatchlistReturn {
   const { token } = useAuth();
 
   // — Dados da API —
-  const [apiPriorityItems, setApiPriorityItems] = useState<PriorityItem[]>([]);
-  const [apiFeedItems,     setApiFeedItems]     = useState<FeedItem[]>([]);
-  const [apiCompanies,     setApiCompanies]     = useState<WatchlistCompany[]>([]);
-  const [apiAlerts,        setApiAlerts]        = useState<AlertItem[]>([]);
+  const [apiPriorityItems,       setApiPriorityItems]       = useState<PriorityItem[]>([]);
+  const [apiFeedItems,           setApiFeedItems]           = useState<FeedItem[]>([]);
+  const [apiCompanies,           setApiCompanies]           = useState<WatchlistCompany[]>([]);
+  const [apiAlerts,              setApiAlerts]              = useState<AlertItem[]>([]);
+  const [apiPageHeader,          setApiPageHeader]          = useState<WatchlistHeaderDto | null>(null);
+  const [apiStateBlock,          setApiStateBlock]          = useState<WatchlistStateBlockDto | null>(null);
+  const [apiPrioritySection,     setApiPrioritySection]     = useState<WatchlistPrioritySectionDto | null>(null);
+  const [apiUpdatesSectionHeader, setApiUpdatesSectionHeader] = useState<{ title: string; body: string } | null>(null);
+  const [apiQuickOverview,       setApiQuickOverview]       = useState<WatchlistQuickOverviewDto | null>(null);
+  const [apiAlertsPanelHeader,   setApiAlertsPanelHeader]   = useState<{ title: string; body: string; ctaLabel: string } | null>(null);
+  const [apiSessionClosing,      setApiSessionClosing]      = useState<WatchlistSessionClosingDto | null>(null);
 
   // — Estado do feed —
   const [activeTab,               setActiveTab]               = useState<"updates" | "list">("updates");
@@ -162,6 +183,21 @@ export function useWatchlist(): UseWatchlistReturn {
         setApiFeedItems(feed);
         setApiAlerts(alerts);
         setApiCompanies(companies);
+        setApiPageHeader(updatesData.header ?? null);
+        setApiStateBlock(updatesData.stateBlock ?? null);
+        setApiPrioritySection(updatesData.prioritySection ?? null);
+        setApiUpdatesSectionHeader(
+          updatesData.updatesSection
+            ? { title: updatesData.updatesSection.title, body: updatesData.updatesSection.body }
+            : null,
+        );
+        setApiQuickOverview(updatesData.quickOverview ?? null);
+        setApiAlertsPanelHeader(
+          updatesData.alertsPanel
+            ? { title: updatesData.alertsPanel.title, body: updatesData.alertsPanel.body, ctaLabel: updatesData.alertsPanel.ctaLabel }
+            : null,
+        );
+        setApiSessionClosing(updatesData.sessionClosing ?? null);
         setUiState(priority.length === 0 && companies.length === 0 ? "empty" : "ready");
       })
       .catch((err) => {
@@ -286,6 +322,15 @@ export function useWatchlist(): UseWatchlistReturn {
     setShowAlertActionOnly,
     setExpandedTicker,
     setQuickActionsTicker,
+
+    // Blocos do endpoint (zonas da tela)
+    pageHeader:           apiPageHeader,
+    stateBlock:           apiStateBlock,
+    prioritySection:      apiPrioritySection,
+    updatesSectionHeader: apiUpdatesSectionHeader,
+    quickOverview:        apiQuickOverview,
+    alertsPanelHeader:    apiAlertsPanelHeader,
+    sessionClosing:       apiSessionClosing,
 
     // Navegação
     navigateToCompany,

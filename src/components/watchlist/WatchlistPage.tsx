@@ -6,7 +6,7 @@ import { Sidebar } from "../dashboard/sidebar";
 import { AppTopBar } from "../shared/app-top-bar";
 import { useWatchlist } from "../../hooks/useWatchlist";
 import { getStatusFromScores, suggestedCompanies } from "../../services/watchlist";
-import type { Pillar, FeedItem, PriorityItem, WatchlistCompany } from "../../types/watchlist";
+import type { Pillar, WatchlistCompany } from "../../types/watchlist";
 import { WatchlistHeader } from "./WatchlistHeader";
 import { WatchlistUpdatesTab } from "./WatchlistUpdatesTab";
 import { WatchlistListTab } from "./WatchlistListTab";
@@ -40,6 +40,12 @@ export function WatchlistPage() {
     companies,
     priorityItems,
     alerts,
+    stateBlock,
+    prioritySection,
+    updatesSectionHeader,
+    quickOverview,
+    alertsPanelHeader,
+    sessionClosing,
     sourceByTicker,
   } = useWatchlist();
 
@@ -50,19 +56,7 @@ export function WatchlistPage() {
     (listSeverityFilter !== "Todos" ? 1 : 0) +
     (listSourceFilter !== "Todas" ? 1 : 0);
 
-  const summaryAttentionCount = companies.filter((c) => {
-    const s = getStatusFromScores(c.scores);
-    return s === "Risco" || s === "Atenção";
-  }).length;
-  const summaryRiskCount = companies.filter((c) => getStatusFromScores(c.scores) === "Risco").length;
-  const summaryHealthyCount = companies.filter((c) => getStatusFromScores(c.scores) === "Saudável").length;
-  const summaryChanges30dCount = companies.filter((c) => c.lastChangeDays <= 30).length;
-
   const alertsToShow = showAlertActionOnly ? alerts.filter((a) => a.severity !== "Saudável") : alerts;
-  const watchlistExecutiveSummary =
-    summaryAttentionCount > summaryHealthyCount
-      ? "Hoje sua watchlist concentra mais sinais de atenção do que de estabilidade."
-      : "Hoje sua watchlist está mais estável, com menos sinais críticos na triagem.";
 
   const pillarToSlug = (pillar: Pillar) =>
     pillar.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -89,9 +83,6 @@ export function WatchlistPage() {
     if (minScore < 70) return `${pillar} pede monitoramento para evitar piora dos próximos trimestres.`;
     return "Sem sinais críticos no momento; mantenha o acompanhamento periódico.";
   };
-
-  const getFeedCTA = (item: FeedItem | PriorityItem) =>
-    ("source" in item && item.source === "CVM" ? "Ver evidência" : "Ver análise");
 
   const applySummaryAttentionFilter = () => { setActiveTab("list"); setListSeverityFilter("Atenção"); };
   const applySummaryRiskFilter = () => { setActiveTab("list"); setListSeverityFilter("Risco"); };
@@ -178,20 +169,18 @@ export function WatchlistPage() {
                 </div>
               ) : activeTab === "updates" ? (
                 <WatchlistUpdatesTab
-                  watchlistExecutiveSummary={watchlistExecutiveSummary}
-                  summaryRiskCount={summaryRiskCount}
-                  summaryAttentionCount={summaryAttentionCount}
-                  summaryHealthyCount={summaryHealthyCount}
-                  summaryChanges30dCount={summaryChanges30dCount}
+                  stateBlock={stateBlock}
+                  prioritySection={prioritySection}
+                  updatesSectionHeader={updatesSectionHeader}
                   priorityItems={priorityItems}
                   filteredFeedItems={filteredFeedItems}
+                  sessionClosing={sessionClosing}
                   activeRange={activeRange}
                   severityFilter={severityFilter}
                   sourceFilter={sourceFilter}
                   showAdvancedFeedFilters={showAdvancedFeedFilters}
                   activePillars={activePillars}
                   buildCompanyDeepLink={buildCompanyDeepLink}
-                  getFeedCTA={getFeedCTA}
                   setActiveRange={setActiveRange}
                   setSeverityFilter={setSeverityFilter}
                   setSourceFilter={setSourceFilter}
@@ -233,9 +222,8 @@ export function WatchlistPage() {
             </section>
 
             <WatchlistSidebar
-              summaryAttentionCount={summaryAttentionCount}
-              summaryRiskCount={summaryRiskCount}
-              summaryChanges30dCount={summaryChanges30dCount}
+              quickOverview={quickOverview}
+              alertsPanelHeader={alertsPanelHeader}
               alertsToShow={alertsToShow}
               showAlertActionOnly={showAlertActionOnly}
               applySummaryAttentionFilter={applySummaryAttentionFilter}

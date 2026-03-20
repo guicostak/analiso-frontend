@@ -18,7 +18,6 @@ import type {
   AlertItem,
   WatchlistStatus,
   Pillar,
-  PriorityBadge,
   FeedSeverity,
   FeedSource,
 } from "../types/watchlist";
@@ -28,8 +27,10 @@ import type {
 export interface WatchlistPriorityItemDto {
   ticker: string;
   companyName: string;
-  sectorLabel: string;
-  topTag: string;
+  /** Pode ser null — não renderizar a linha do setor quando null */
+  sectorLabel: string | null;
+  /** Label de destaque do card, ex: "Comece por aqui". Null quando não é o primeiro item. */
+  topTag: string | null;
   badge: string;
   contextLine: string;
   whatChangedLabel: string;
@@ -109,10 +110,15 @@ export interface WatchlistStateBlockDto {
   pill: string;
 }
 
+export interface WatchlistQuickOverviewMetricDto {
+  label: string;
+  value: string | number;
+}
+
 export interface WatchlistQuickOverviewDto {
   title: string;
   body: string;
-  metrics: Record<string, unknown>[];
+  metrics: WatchlistQuickOverviewMetricDto[];
 }
 
 export interface WatchlistSessionClosingDto {
@@ -120,11 +126,22 @@ export interface WatchlistSessionClosingDto {
   body: string;
 }
 
+export interface WatchlistTabBarItemDto {
+  label: string;
+  key: string;
+}
+
+export interface WatchlistTabBarDto {
+  activeTab: string;
+  items: WatchlistTabBarItemDto[];
+}
+
 export interface WatchlistResponse {
   referenceDate: string;
   mode: string;
   pageTemplate: string;
   header: WatchlistHeaderDto;
+  tabBar: WatchlistTabBarDto | null;
   stateBlock: WatchlistStateBlockDto | null;
   prioritySection: WatchlistPrioritySectionDto | null;
   priorityItems: WatchlistPriorityItemDto[];
@@ -225,11 +242,6 @@ function parseBadgeAsSeverity(badge: string): FeedSeverity {
   return "Saudável";
 }
 
-function parseBadgeAsPriorityBadge(badge: string): PriorityBadge {
-  if (badge === "Risco" || badge === "Atenção" || badge === "Saudável") return badge as PriorityBadge;
-  return "Saudável";
-}
-
 function parsePillar(pillarBadge: string): Pillar {
   const pillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
   return pillars.includes(pillarBadge as Pillar) ? (pillarBadge as Pillar) : "Dívida";
@@ -253,29 +265,40 @@ function scoreFromBadge(badge: string): number[] {
 export function mapPriorityItemDto(dto: WatchlistPriorityItemDto, index: number): PriorityItem {
   return {
     id: dto.ticker || `p-${index}`,
-    company: dto.companyName,
-    ticker: dto.ticker,
-    sector: dto.sectorLabel,
-    badge: parseBadgeAsPriorityBadge(dto.badge),
-    change: dto.whatChanged,
-    why: dto.whyMatters,
-    evidence: dto.metaLine,
-    pillar: parsePillar(dto.topTag),
+    company:     dto.companyName,
+    ticker:      dto.ticker,
+    // sectorLabel pode ser null — o componente deve checar antes de renderizar
+    sector:      dto.sectorLabel,
+    badge:       dto.badge,
+    // topTag é o label de destaque do card ("Comece por aqui", etc.)
+    // NÃO deve ser interpretado como pilar
+    topTag:      dto.topTag,
+    contextLine: dto.contextLine,
+    changeLabel: dto.whatChangedLabel,
+    change:      dto.whatChanged,
+    whyLabel:    dto.whyMattersLabel,
+    why:         dto.whyMatters,
+    evidence:    dto.metaLine,
+    ctaLabel:    dto.ctaLabel,
+    // O endpoint priorityItems não envia pillar; mantém "Dívida" como fallback
+    // para não quebrar o deep-link de navegação até o backend expor o campo
+    pillar:      "Dívida",
   };
 }
 
 export function mapFeedItemDto(dto: WatchlistFeedItemDto, index: number): FeedItem {
   return {
     id: `f-${index}`,
-    headline: dto.title,
-    detail: dto.body,
+    headline:  dto.title,
+    detail:    dto.body,
     detailTwo: dto.watchLine,
-    pillar: parsePillar(dto.pillarBadge),
-    evidence: dto.metaLine,
-    ticker: "",
-    severity: parseBadgeAsSeverity(dto.badge),
-    source: parseSourceFromMeta(dto.metaLine),
-    range: "30d",
+    pillar:    parsePillar(dto.pillarBadge),
+    evidence:  dto.metaLine,
+    ctaLabel:  dto.ctaLabel,
+    ticker:    "",     // updatesSection.items não carrega ticker
+    severity:  parseBadgeAsSeverity(dto.badge),
+    source:    parseSourceFromMeta(dto.metaLine),
+    range:     "30d",  // updatesSection.items não carrega range
   };
 }
 
