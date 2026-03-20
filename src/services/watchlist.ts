@@ -1,7 +1,7 @@
 /**
  * Watchlist service.
- *
- * Responsabilidades:
+  *
+  * Responsabilidades:
  *  1. Dados mock (priorityItems, feedItems, watchlistCompanies, alerts)
  *  2. Mapeamentos auxiliares (sourceByTicker)
  *  3. Funções puras de transformação/cálculo de status
