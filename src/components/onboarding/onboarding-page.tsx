@@ -1,97 +1,69 @@
-﻿"use client";
+"use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../../contexts/AuthContext";
-import { apiFetch } from "../../services/api";
-import bussolaOnboarding from "../../assets/onboarding/bussola_onboarding.png";
-import funilInfoOnboarding from "../../assets/onboarding/funil_info_onboarding.png";
-import acompanharOnboarding from "../../assets/onboarding/acompanhar_onboarding.png";
-import entenderOnboarding from "../../assets/onboarding/entender_onboarding.png";
-import relogioOnboarding from "../../assets/onboarding/relogio_onboarding.png";
-import pilaresOnboarding from "../../assets/onboarding/pilares_onboarding.png";
-import feedOnboarding from "../../assets/onboarding/feed_onboarding.png";
-import portaOnboarding from "../../assets/onboarding/porta_onboarding.png";
-import wegLogo from "../../assets/logos/weg.jpeg";
-import itauLogo from "../../assets/logos/itau.png";
-import petrobrasLogo from "../../assets/logos/petrobras.webp";
-import valeLogo from "../../assets/logos/vale.png";
+import React, { useEffect, useRef, useState } from "react";
 
-type StartIntent =
-  | "nao_sei_por_onde_comecar"
-  | "muitos_indicadores"
-  | "acompanhar_sem_ruido"
-  | "entender_atencao_rapido";
+import { useOnboarding } from "../../hooks/useOnboarding";
+import {
+  intentTileItems,
+  valueItems,
+  popularTickers,
+  companyLogoByTicker,
+  portaOnboardingSrc,
+  stepMeta,
+  TOTAL_STEPS,
+} from "../../services/onboarding";
+import type { StartIntent } from "../../types/onboarding";
 
-type OnboardingDraft = {
-  startIntent: StartIntent | null;
-  watchlistTickers: string[];
-  onboardingCompleted: boolean;
-};
-
-const DRAFT_KEY = "analiso_onboarding_draft";
-const COMPLETE_KEY = "analiso_onboarding_completed";
-
-const defaultDraft: OnboardingDraft = {
-  startIntent: null,
-  watchlistTickers: [],
-  onboardingCompleted: false,
-};
-
-const popularTickers = ["WEGE3", "ITUB4", "PETR4", "VALE3", "BBDC4", "BBAS3", "ABEV3"];
-
-const companyLogoByTicker: Record<string, string> = {
-  WEGE3: wegLogo.src,
-  ITUB4: itauLogo.src,
-  PETR4: petrobrasLogo.src,
-  VALE3: valeLogo.src,
-};
-
-const watchlistSuggestions = [
-  { name: "WEG S.A.", ticker: "WEGE3", tag: "Popular", icon: "factory" },
-  { name: "Itaú Unibanco", ticker: "ITUB4", tag: "Grande", icon: "bank" },
-  { name: "Petrobras", ticker: "PETR4", tag: "Popular", icon: "oil" },
-  { name: "Vale", ticker: "VALE3", tag: "Grande", icon: "mine" },
-  { name: "Bradesco", ticker: "BBDC4", tag: "Grande", icon: "bank" },
-  { name: "Banco do Brasil", ticker: "BBAS3", tag: "Popular", icon: "bank" },
-  { name: "Ambev", ticker: "ABEV3", tag: "Popular", icon: "factory" },
-  { name: "Magalu", ticker: "MGLU3", tag: "Popular", icon: "store" },
-  { name: "Localiza", ticker: "RENT3", tag: "Grande", icon: "car" },
-  { name: "RaiaDrogasil", ticker: "RADL3", tag: "Popular", icon: "pharmacy" },
-];
-
-function track(event: string, props?: Record<string, unknown>) {
-  // Placeholder de analytics
-  console.log("[analytics]", event, props ?? {});
-}
-
-function useLocalDraft() {
-  const [draft, setDraft] = useState<OnboardingDraft>(defaultDraft);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(DRAFT_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Partial<OnboardingDraft>;
-        setDraft({ ...defaultDraft, ...parsed });
-      } catch {
-        setDraft(defaultDraft);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-  }, [draft]);
-
-  return { draft, setDraft };
-}
+// ─── Sub-componentes visuais ──────────────────────────────────────────────────
 
 function ProgressBar({ step }: { step: number }) {
-  const percent = Math.min(100, Math.max(0, (step / 4) * 100));
+  const percent = Math.min(100, Math.max(0, (step / TOTAL_STEPS) * 100));
   return (
     <div className="w-48 h-1 rounded-full bg-[#E4E7EC] overflow-hidden">
       <div className="h-full bg-[#0E9384] transition-all" style={{ width: `${percent}%` }} />
+    </div>
+  );
+}
+
+function Icon3D({ name }: { name: string }) {
+  const accents: Record<string, React.ReactElement> = {
+    b3:       <rect x="20" y="22" width="24" height="16" rx="3" fill="#0E9384" opacity="0.25" />,
+    cap:      <path d="M20 28l12-6 12 6-12 6-12-6z" fill="#0E9384" opacity="0.25" />,
+    magnifier: (
+      <>
+        <circle cx="28" cy="30" r="6" fill="#0E9384" opacity="0.25" />
+        <rect x="34" y="34" width="10" height="3" rx="1.5" fill="#0E9384" opacity="0.35" />
+      </>
+    ),
+    dash:      <rect x="22" y="24" width="20" height="14" rx="2" fill="#0E9384" opacity="0.25" />,
+    bookmark:  <path d="M24 22h16v20l-8-5-8 5V22z" fill="#0E9384" opacity="0.25" />,
+    bellpulse: (
+      <>
+        <path d="M24 38h16l-2-3v-5a6 6 0 0 0-12 0v5l-2 3z" fill="#0E9384" opacity="0.25" />
+        <circle cx="44" cy="22" r="3" fill="#0E9384" opacity="0.35" />
+      </>
+    ),
+    factory:  <rect x="20" y="24" width="24" height="16" rx="2" fill="#0E9384" opacity="0.25" />,
+    bank:     <path d="M20 30h24v10H20z" fill="#0E9384" opacity="0.25" />,
+    oil:      <ellipse cx="32" cy="34" rx="8" ry="10" fill="#0E9384" opacity="0.25" />,
+    mine:     <path d="M22 38l10-12 10 12H22z" fill="#0E9384" opacity="0.25" />,
+    store:    <rect x="20" y="26" width="24" height="14" rx="2" fill="#0E9384" opacity="0.25" />,
+    car:      <rect x="20" y="30" width="24" height="8" rx="3" fill="#0E9384" opacity="0.25" />,
+    pharmacy: <rect x="24" y="26" width="16" height="16" rx="3" fill="#0E9384" opacity="0.25" />,
+  };
+
+  return (
+    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAECF0] shadow-sm flex items-center justify-center">
+      <svg viewBox="0 0 64 64" className="w-8 h-8" aria-hidden="true">
+        <path
+          d="M32 6l22 12v28L32 58 10 46V18L32 6z"
+          fill="#E8F6F4"
+          stroke="#0E9384"
+          strokeWidth="2"
+        />
+        <path d="M32 6v52" stroke="#0E9384" strokeWidth="2" strokeOpacity="0.35" />
+        {accents[name]}
+      </svg>
     </div>
   );
 }
@@ -121,7 +93,7 @@ function TileGrid({
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
-    const idx = Math.max(0, items.findIndex((item) => item.id === selectedId));
+    const idx = items.findIndex((item) => item.id === selectedId);
     setFocusedIndex(idx >= 0 ? idx : 0);
   }, [items, selectedId]);
 
@@ -129,9 +101,9 @@ function TileGrid({
     const colCount = columns;
     let nextIndex = index;
     if (event.key === "ArrowRight") nextIndex = Math.min(items.length - 1, index + 1);
-    if (event.key === "ArrowLeft") nextIndex = Math.max(0, index - 1);
-    if (event.key === "ArrowDown") nextIndex = Math.min(items.length - 1, index + colCount);
-    if (event.key === "ArrowUp") nextIndex = Math.max(0, index - colCount);
+    if (event.key === "ArrowLeft")  nextIndex = Math.max(0, index - 1);
+    if (event.key === "ArrowDown")  nextIndex = Math.min(items.length - 1, index + colCount);
+    if (event.key === "ArrowUp")    nextIndex = Math.max(0, index - colCount);
 
     if (nextIndex !== index) {
       event.preventDefault();
@@ -148,7 +120,7 @@ function TileGrid({
     <div className={`grid grid-cols-1 ${columns === 2 ? "md:grid-cols-2" : ""} gap-4`}>
       {items.map((item, index) => {
         const isSelected = item.id === selectedId;
-        const isLocked = lockedIds.includes(item.id);
+        const isLocked   = lockedIds.includes(item.id);
         return (
           <button
             key={item.id}
@@ -165,7 +137,12 @@ function TileGrid({
             <div className="relative flex items-center justify-center">
               {item.imageSrc ? (
                 <div className="w-24 h-24 flex items-center justify-center">
-                  <img src={item.imageSrc} alt={item.imageAlt ?? item.title} className="h-full w-full object-contain" loading="lazy" />
+                  <img
+                    src={item.imageSrc}
+                    alt={item.imageAlt ?? item.title}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
                 </div>
               ) : (
                 <Icon3D name={item.icon} />
@@ -181,49 +158,6 @@ function TileGrid({
           </button>
         );
       })}
-    </div>
-  );
-}
-
-function Icon3D({ name }: { name: string }) {
-  const accents: Record<string, React.ReactElement> = {
-    b3: <rect x="20" y="22" width="24" height="16" rx="3" fill="#0E9384" opacity="0.25" />,
-    cap: <path d="M20 28l12-6 12 6-12 6-12-6z" fill="#0E9384" opacity="0.25" />,
-    magnifier: (
-      <>
-        <circle cx="28" cy="30" r="6" fill="#0E9384" opacity="0.25" />
-        <rect x="34" y="34" width="10" height="3" rx="1.5" fill="#0E9384" opacity="0.35" />
-      </>
-    ),
-    dash: <rect x="22" y="24" width="20" height="14" rx="2" fill="#0E9384" opacity="0.25" />,
-    bookmark: <path d="M24 22h16v20l-8-5-8 5V22z" fill="#0E9384" opacity="0.25" />,
-    bellpulse: (
-      <>
-        <path d="M24 38h16l-2-3v-5a6 6 0 0 0-12 0v5l-2 3z" fill="#0E9384" opacity="0.25" />
-        <circle cx="44" cy="22" r="3" fill="#0E9384" opacity="0.35" />
-      </>
-    ),
-    factory: <rect x="20" y="24" width="24" height="16" rx="2" fill="#0E9384" opacity="0.25" />,
-    bank: <path d="M20 30h24v10H20z" fill="#0E9384" opacity="0.25" />,
-    oil: <ellipse cx="32" cy="34" rx="8" ry="10" fill="#0E9384" opacity="0.25" />,
-    mine: <path d="M22 38l10-12 10 12H22z" fill="#0E9384" opacity="0.25" />,
-    store: <rect x="20" y="26" width="24" height="14" rx="2" fill="#0E9384" opacity="0.25" />,
-    car: <rect x="20" y="30" width="24" height="8" rx="3" fill="#0E9384" opacity="0.25" />,
-    pharmacy: <rect x="24" y="26" width="16" height="16" rx="3" fill="#0E9384" opacity="0.25" />,
-  };
-
-  return (
-    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAECF0] shadow-sm flex items-center justify-center">
-      <svg viewBox="0 0 64 64" className="w-8 h-8" aria-hidden="true">
-        <path
-          d="M32 6l22 12v28L32 58 10 46V18L32 6z"
-          fill="#E8F6F4"
-          stroke="#0E9384"
-          strokeWidth="2"
-        />
-        <path d="M32 6v52" stroke="#0E9384" strokeWidth="2" strokeOpacity="0.35" />
-        {accents[name]}
-      </svg>
     </div>
   );
 }
@@ -270,177 +204,49 @@ function PrimaryButton({
   );
 }
 
+// ─── Componente principal ─────────────────────────────────────────────────────
+
 export function OnboardingPage() {
-  const router = useRouter();
-  const { token } = useAuth();
-  const { draft, setDraft } = useLocalDraft();
-  const [step, setStep] = useState(1);
-  const [search, setSearch] = useState("");
-  const [completing, setCompleting] = useState(false);
-  const [completeError, setCompleteError] = useState<string | null>(null);
+  const {
+    step,
+    draft,
+    search,
+    completing,
+    completeError,
+    filteredSuggestions,
+    canContinue,
+    goNext,
+    goBack,
+    setStartIntent,
+    addTicker,
+    removeTicker,
+    setSearch,
+    handleSearchKeyDown,
+    handleComplete,
+  } = useOnboarding();
 
-  const filteredSuggestions = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return watchlistSuggestions;
-    return watchlistSuggestions.filter(
-      (item) => item.name.toLowerCase().includes(q) || item.ticker.toLowerCase().includes(q),
-    );
-  }, [search]);
-
-  useEffect(() => {
-    track("onboarding_start");
-  }, []);
-
-  useEffect(() => {
-    track("onboarding_step_view", { step });
-  }, [step]);
-
-  useEffect(() => {
-    const completed = localStorage.getItem(COMPLETE_KEY) === "true";
-    if (completed) {
-      router.push("/dashboard");
-    }
-  }, [router]);
-
-  useEffect(() => {
-    const nextStep = draft.startIntent === null ? 1 : 2;
-    setStep((prev) => (prev === 1 ? nextStep : prev));
-  }, [draft.startIntent]);
-
-  const updateDraft = (partial: Partial<OnboardingDraft>) => {
-    setDraft((prev) => ({ ...prev, ...partial }));
-  };
-
-  const goNext = () => {
-    track("onboarding_step_complete", { step });
-    setStep((prev) => Math.min(4, prev + 1));
-  };
-
-  const goBack = () => setStep((prev) => Math.max(1, prev - 1));
-
-  const addTicker = (ticker: string, source: "search" | "chip" | "grid") => {
-    if (draft.watchlistTickers.includes(ticker) || draft.watchlistTickers.length >= 10) return;
-    const next = [...draft.watchlistTickers, ticker];
-    updateDraft({ watchlistTickers: next });
-    track("watchlist_add", { ticker, source });
-  };
-
-  const removeTicker = (ticker: string) => {
-    updateDraft({ watchlistTickers: draft.watchlistTickers.filter((item) => item !== ticker) });
-  };
-
-  const handleComplete = async () => {
-    track("onboarding_complete", {
-      startIntent: draft.startIntent,
-      watchlistCount: draft.watchlistTickers.length,
-    });
-
-    setCompleting(true);
-    setCompleteError(null);
-
-    try {
-      await apiFetch(
-        "/api/me/watchlist/batch",
-        {
-          method: "POST",
-          body: JSON.stringify({ tickers: draft.watchlistTickers }),
-        },
-        token,
-      );
-
-      updateDraft({ onboardingCompleted: true });
-      localStorage.setItem(COMPLETE_KEY, "true");
-      sessionStorage.setItem("onboarding_toast", "Tudo pronto. Sua watchlist já está montada.");
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("[onboarding] erro ao salvar watchlist:", err);
-      setCompleteError("Não foi possível salvar sua watchlist. Tente novamente.");
-      setCompleting(false);
-    }
-  };
-
-  const canContinue = () => {
-    if (step === 1) return draft.startIntent !== null;
-    if (step === 2) return true;
-    if (step === 3) return draft.watchlistTickers.length >= 3;
-    if (step === 4) return true;
-    return false;
-  };
+  const meta = stepMeta[step - 1];
 
   const renderContent = () => {
     if (step === 1) {
       return (
         <TileGrid
           columns={2}
-          items={[
-            {
-              id: "nao_sei_por_onde_comecar",
-              title: "Não sei por onde começar",
-              helper: "Receba um caminho claro para sair da dúvida inicial.",
-              icon: "cap",
-              imageSrc: bussolaOnboarding.src,
-              imageAlt: "Ícone de bússola",
-            },
-            {
-              id: "muitos_indicadores",
-              title: "Vejo muitos indicadores e fico perdido",
-              helper: "Foco no que importa, com contexto simples.",
-              icon: "magnifier",
-              imageSrc: funilInfoOnboarding.src,
-              imageAlt: "Ícone de funil com informações",
-            },
-            {
-              id: "acompanhar_sem_ruido",
-              title: "Quero acompanhar minhas empresas sem ruído",
-              helper: "Acompanhe mudanças relevantes sem excesso de informação.",
-              icon: "bellpulse",
-              imageSrc: acompanharOnboarding.src,
-              imageAlt: "Ícone de watchlist",
-            },
-            {
-              id: "entender_atencao_rapido",
-              title: "Quero entender rápido quando uma empresa pede atenção",
-              helper: "Veja sinais de atenção de forma direta e acionável.",
-              icon: "bookmark",
-              imageSrc: entenderOnboarding.src,
-              imageAlt: "Ícone de atenção rápida",
-            },
-          ]}
+          items={intentTileItems}
           selectedId={draft.startIntent}
-          onSelect={(id) => updateDraft({ startIntent: id as StartIntent })}
+          onSelect={(id) => setStartIntent(id as StartIntent)}
         />
       );
     }
 
     if (step === 2) {
-      const valueItems = [
-        {
-          id: "v1",
-          title: "Resumo em 60s",
-          description: "Entenda uma empresa em minutos, sem virar analista.",
-          icon: "dash",
-          imageSrc: relogioOnboarding.src,
-        },
-        {
-          id: "v2",
-          title: "Principal força e principal atenção",
-          description: "Veja rápido o que está bem e o que pede atenção.",
-          icon: "bookmark",
-          imageSrc: pilaresOnboarding.src,
-        },
-        {
-          id: "v3",
-          title: "Mudanças e fontes oficiais",
-          description: "Entenda o que mudou e confirme tudo na fonte.",
-          icon: "b3",
-          imageSrc: feedOnboarding.src,
-        },
-      ] as const;
-
       return (
         <div className="grid grid-cols-1 gap-4">
           {valueItems.map((item) => (
-            <article key={item.id} className="rounded-2xl border border-[#EAECF0] bg-[#F9FAFB] p-4 md:p-5">
+            <article
+              key={item.id}
+              className="rounded-2xl border border-[#EAECF0] bg-[#F9FAFB] p-4 md:p-5"
+            >
               <div className="flex items-center gap-3">
                 {item.imageSrc ? (
                   <img
@@ -469,19 +275,7 @@ export function OnboardingPage() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                const q = search.trim();
-                if (!q) return;
-                const match = watchlistSuggestions.find(
-                  (item) => item.ticker.toLowerCase() === q.toLowerCase(),
-                );
-                const ticker = match?.ticker ?? q.toUpperCase();
-                addTicker(ticker, "search");
-                setSearch("");
-              }
-            }}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Buscar por nome ou ticker (ex: WEGE3)"
             className="w-full rounded-xl border border-[#D0D5DD] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E9384]/30"
           />
@@ -503,7 +297,9 @@ export function OnboardingPage() {
           </div>
 
           <div className="mt-4">
-            <p className="text-xs text-[#667085] mb-2">Selecionadas ({draft.watchlistTickers.length}/3)</p>
+            <p className="text-xs text-[#667085] mb-2">
+              Selecionadas ({draft.watchlistTickers.length}/3)
+            </p>
             <div className="flex flex-wrap gap-2">
               {draft.watchlistTickers.map((ticker) => (
                 <button
@@ -579,20 +375,6 @@ export function OnboardingPage() {
     );
   };
 
-  const titles = [
-    "O que mais te trava hoje ao investir?",
-    "Entenda uma empresa em minutos, sem virar analista",
-    "Escolha 3 empresas para começar",
-    "Tudo pronto para começar",
-  ];
-
-  const subtitles = [
-    "Ajustamos a sua experiência para te levar ao valor mais rápido.",
-    "Te mostramos o que importa, por que importa e como confirmar direto em fontes oficiais.",
-    "Com isso, seu dashboard já nasce útil e conseguimos te mostrar mudanças, contexto e prioridades logo no primeiro acesso.",
-    "Sua base inicial já está montada. Agora é só entrar no dashboard e começar.",
-  ];
-
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#0B1220]">
       <div className="max-w-[1200px] mx-auto px-6 py-8">
@@ -614,15 +396,15 @@ export function OnboardingPage() {
             <div className="text-center">
               {step === 4 && (
                 <img
-                  src={portaOnboarding.src}
+                  src={portaOnboardingSrc}
                   alt="Porta de entrada no produto"
                   className="mx-auto mb-3 h-30 w-30 object-contain"
                   loading="lazy"
                 />
               )}
-              <p className="text-xs text-[#667085]">Etapa {step} de 4</p>
-              <h1 className="mt-2 text-2xl md:text-3xl font-semibold">{titles[step - 1]}</h1>
-              <p className="mt-2 text-sm text-[#475467]">{subtitles[step - 1]}</p>
+              <p className="text-xs text-[#667085]">Etapa {step} de {TOTAL_STEPS}</p>
+              <h1 className="mt-2 text-2xl md:text-3xl font-semibold">{meta.title}</h1>
+              <p className="mt-2 text-sm text-[#475467]">{meta.subtitle}</p>
             </div>
 
             <div className="mt-8">{renderContent()}</div>
@@ -632,17 +414,22 @@ export function OnboardingPage() {
             )}
 
             <div className="mt-8 flex items-center justify-between">
-              {step === 1 ? <div /> : (
-                <SecondaryButton onClick={goBack} disabled={step === 1 || completing}>
+              {step === 1 ? (
+                <div />
+              ) : (
+                <SecondaryButton onClick={goBack} disabled={completing}>
                   &larr; Voltar
                 </SecondaryButton>
               )}
-              {step < 4 ? (
-                <PrimaryButton onClick={goNext} disabled={!canContinue()}>
+              {step < TOTAL_STEPS ? (
+                <PrimaryButton onClick={goNext} disabled={!canContinue}>
                   Continuar &rarr;
                 </PrimaryButton>
               ) : (
-                <PrimaryButton onClick={handleComplete} disabled={!canContinue() || completing}>
+                <PrimaryButton
+                  onClick={handleComplete}
+                  disabled={!canContinue || completing}
+                >
                   {completing ? "Salvando..." : "Ir para meu dashboard"}
                 </PrimaryButton>
               )}

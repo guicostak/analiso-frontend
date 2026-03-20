@@ -3,12 +3,8 @@
 import { useState } from 'react';
 import { Filter, ExternalLink, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { 
-  ChangeFeedItem, 
-  mockChangeFeed, 
-  pillarLabels, 
-  pillarColors 
-} from '../../data/dashboard-feed';
+import type { ChangeFeedItem } from '../../types/dashboard';
+import { getChangeFeed, feedPillarLabels, feedPillarColors } from '../../services/dashboard';
 
 export function ChangesFeedCard() {
   const [timeFilter, setTimeFilter] = useState('7d');
@@ -86,7 +82,7 @@ export function ChangesFeedCard() {
 
       {/* Feed Items */}
       <div className="space-y-4">
-        {mockChangeFeed.map((item) => (
+        {getChangeFeed().map((item) => (
           <FeedItem key={item.id} item={item} />
         ))}
       </div>
@@ -141,8 +137,8 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
       {/* Meta Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className={`px-2 py-1 rounded-md border ${pillarColors[item.pillar]}`}>
-            {pillarLabels[item.pillar]}
+          <span className={`px-2 py-1 rounded-md border ${feedPillarColors[item.pillar]}`}>
+            {feedPillarLabels[item.pillar]}
           </span>
           <span>{new Date(item.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
           <div className="flex items-center gap-1">

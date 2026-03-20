@@ -44,7 +44,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
     items.map((item) => {
       const Icon = item.icon;
       const isActive = currentPage === item.id;
-      const className = `group relative grid h-10 w-10 place-items-center rounded-xl border transition-colors ${
+      const className = `group relative grid h-10 w-10 place-items-center rounded-xl border ${
         isActive
           ? "border-brand-border bg-brand-surface text-brand-text"
           : "border-transparent text-muted-foreground hover:border-border hover:bg-hover hover:text-foreground"

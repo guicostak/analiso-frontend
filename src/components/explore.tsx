@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode } from "react";
 import {
   AlertTriangle,
   ChevronDown,
@@ -21,513 +21,58 @@ import { GlossaryText } from "./glossary/glossary-text";
 import { Sidebar } from "./dashboard/sidebar";
 import { AppTopBar } from "./app-top-bar";
 import { MiniSparkline } from "./mini-sparkline";
-import logoCogna from "../assets/logos/cogna.png";
-import logoCosan from "../assets/logos/cosan.png";
-import logoEztec from "../assets/logos/eztec.jpg";
-import logoFleury from "../assets/logos/fleury.png";
-import logoIrb from "../assets/logos/irbbrasil.png";
-import logoItau from "../assets/logos/itau.png";
-import logoMrv from "../assets/logos/mrv.jpg";
-import logoPetrobras from "../assets/logos/petrobras.webp";
-import logoRenner from "../assets/logos/renner.png";
-import logoRumo from "../assets/logos/rumo.png";
-import logoTaesa from "../assets/logos/taesa.png";
-import logoVale from "../assets/logos/vale.png";
-import logoWeg from "../assets/logos/weg.jpeg";
 
-type IndexCard = {
-  name: string;
-  symbol: string;
-  value: string;
-  changeAbs: string;
-  changePct: string;
-  trend: "up" | "down" | "neutral";
-  sparkline: number[];
-};
+import { useExplore } from "../hooks/useExplore";
 
-type MoverRow = {
-  ticker: string;
-  name: string;
-  price: string;
-  changePct: string;
-  note: string;
-  updatedAt: string;
-  source: string;
-  type: "altas" | "baixas" | "negociadas";
-};
-
-type Volatility = {
-  value: number;
-  label: "Baixa" | "Moderada" | "Alta";
-  updatedAt: string;
-  source: string;
-};
-
-type HighlightPreset = {
-  pillar: "divida" | "caixa" | "margens" | "retorno" | "proventos";
-  signal: string;
-  severity: "leve" | "moderada" | "forte";
-  timeframe: "7d" | "30d" | "90d" | "2q" | "12m";
-  scope: "mercado" | "setor" | "watchlist";
-};
-
-type HighlightItem = {
-  id: string;
-  companyName: string;
-  ticker: string;
-  changeTitle: string;
-  whyItMatters: string;
-  pillar: "Dívida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
-  severity: "Leve" | "Moderada" | "Forte";
-  timeframeLabel: string;
-  scope: "Mercado" | "Setor" | "Minha watchlist";
-  source: {
-    name: string;
-    updatedAt: string;
-    docLabel: string;
-    url?: string;
-  };
-  filterPreset: HighlightPreset;
-};
-
-type CompanyCard = {
-  name: string;
-  ticker: string;
-  sector: string;
-  size: "Grande" | "Média" | "Pequena";
-  status: "Saudável" | "Atenção" | "Risco";
-  pillarsScores: number[];
-  shortDiagnosis: string;
-  freshnessStatus: "Atualizado" | "Antigo";
-  updatedAt: string;
-  source: string;
-  highlightPillar: "Dívida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
-};
-
-type FilterKey = "sector" | "size" | "status" | "freshness" | "pillar";
-type Filters = Record<FilterKey, string> & { sort: string };
-type ExploreTab = "mercado" | "encontrar" | "colecoes";
-
-const indexCards: IndexCard[] = [
-  {
-    name: "Ibovespa",
-    symbol: "IBOV",
-    value: "127.540",
-    changeAbs: "+680",
-    changePct: "+0,54%",
-    trend: "up",
-    sparkline: [120, 122, 121, 124, 126, 127, 126, 128, 127, 129],
-  },
-  {
-    name: "IBrX 100",
-    symbol: "IBRX",
-    value: "54.280",
-    changeAbs: "-120",
-    changePct: "-0,22%",
-    trend: "down",
-    sparkline: [55, 54.6, 54.4, 54.2, 54.3, 54.1, 54, 54.2, 54.1, 54],
-  },
-  {
-    name: "Small Caps",
-    symbol: "SMLL",
-    value: "2.145",
-    changeAbs: "+6",
-    changePct: "+0,28%",
-    trend: "up",
-    sparkline: [2.05, 2.06, 2.08, 2.07, 2.09, 2.1, 2.12, 2.11, 2.13, 2.145],
-  },
-  {
-    name: "IFIX",
-    symbol: "IFIX",
-    value: "3.267",
-    changeAbs: "+2",
-    changePct: "+0,06%",
-    trend: "neutral",
-    sparkline: [3.24, 3.25, 3.26, 3.25, 3.26, 3.27, 3.265, 3.268, 3.266, 3.267],
-  },
-  {
-    name: "Volatilidade",
-    symbol: "IVBX2",
-    value: "18,4",
-    changeAbs: "-0,3",
-    changePct: "-1,6%",
-    trend: "down",
-    sparkline: [19, 18.8, 18.6, 18.9, 18.5, 18.4, 18.7, 18.3, 18.5, 18.4],
-  },
-];
-
-const movers: MoverRow[] = [
-  {
-    ticker: "EZTC3",
-    name: "EZTEC",
-    price: "R$ 17,80",
-    changePct: "+3,4%",
-    note: "Volume acima da média semanal.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "altas",
-  },
-  {
-    ticker: "LREN3",
-    name: "Lojas Renner",
-    price: "R$ 15,12",
-    changePct: "+2,6%",
-    note: "Reação após resultado trimestral.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "altas",
-  },
-  {
-    ticker: "RAIL3",
-    name: "Rumo",
-    price: "R$ 18,42",
-    changePct: "+2,1%",
-    note: "Fluxo comprador consistente.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "altas",
-  },
-  {
-    ticker: "COGN3",
-    name: "Cogna",
-    price: "R$ 2,84",
-    changePct: "-3,8%",
-    note: "Correção após alta recente.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "baixas",
-  },
-  {
-    ticker: "IRBR3",
-    name: "IRB Brasil",
-    price: "R$ 46,20",
-    changePct: "-2,9%",
-    note: "Oscilação elevada no intradia.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "baixas",
-  },
-  {
-    ticker: "PETR4",
-    name: "Petrobras",
-    price: "R$ 41,30",
-    changePct: "+0,4%",
-    note: "Maior volume negociado do dia.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "negociadas",
-  },
-  {
-    ticker: "ITUB4",
-    name: "Itaú Unibanco",
-    price: "R$ 33,15",
-    changePct: "+0,1%",
-    note: "Fluxo estável em bancos.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "negociadas",
-  },
-  {
-    ticker: "VALE3",
-    name: "Vale",
-    price: "R$ 63,90",
-    changePct: "-0,2%",
-    note: "Negociação consistente no dia.",
-    updatedAt: "05/02",
-    source: "B3",
-    type: "negociadas",
-  },
-];
-
-const movementInsights: Record<string, { why: string; impactPillars: string }> = {
-  EZTC3: {
-    why: "Volume acima da média pode antecipar revisão de expectativa para lançamentos e margens.",
-    impactPillars: "Margens e Retorno",
-  },
-  LREN3: {
-    why: "Reação pós-resultado pede validar se a melhora é recorrente ou apenas ajuste pontual.",
-    impactPillars: "Margens e Caixa",
-  },
-  RAIL3: {
-    why: "Fluxo comprador consistente pode refletir leitura mais positiva sobre eficiência operacional.",
-    impactPillars: "Retorno e Margens",
-  },
-  COGN3: {
-    why: "Correção forte exige separar ruído de preço de possível deterioração nos fundamentos recentes.",
-    impactPillars: "Caixa e Margens",
-  },
-  IRBR3: {
-    why: "Oscilação intradia elevada pede checar exposição a eventos e sustentabilidade do resultado.",
-    impactPillars: "Retorno e Caixa",
-  },
-  PETR4: {
-    why: "Volume líder do dia pode indicar mudança de narrativa; vale confirmar impactos operacionais.",
-    impactPillars: "Proventos e Caixa",
-  },
-  ITUB4: {
-    why: "Fluxo estável em bancos sugere leitura de continuidade; confirme qualidade do retorno.",
-    impactPillars: "Retorno e Proventos",
-  },
-  VALE3: {
-    why: "Negociação consistente com queda leve pode sinalizar reprecificação gradual de cenário.",
-    impactPillars: "Caixa e Retorno",
-  },
-};
-
-const volatility: Volatility = {
-  value: 64,
-  label: "Moderada",
-  updatedAt: "05/02",
-  source: "B3",
-};
-
-const highlights: HighlightItem[] = [
-  {
-    id: "margens-wege3",
-    companyName: "WEG",
-    ticker: "WEGE3",
-    changeTitle: "Margens pressionadas recentemente",
-    whyItMatters: "Pode reduzir lucro mesmo com receita estável.",
-    pillar: "Margens",
-    severity: "Moderada",
-    timeframeLabel: "últimos 2 trimestres",
-    scope: "Mercado",
-    source: {
-      name: "CVM",
-      updatedAt: "04/02",
-      docLabel: "Formulário de Referência",
-      url: "https://www.gov.br/cvm",
-    },
-    filterPreset: {
-      pillar: "margens",
-      signal: "margem_caindo",
-      severity: "moderada",
-      timeframe: "2q",
-      scope: "mercado",
-    },
-  },
-  {
-    id: "proventos-itub4",
-    companyName: "Itaú Unibanco",
-    ticker: "ITUB4",
-    changeTitle: "Proventos mais consistentes",
-    whyItMatters: "Melhora previsibilidade de caixa e retorno ao acionista.",
-    pillar: "Proventos",
-    severity: "Leve",
-    timeframeLabel: "últimos 12 meses",
-    scope: "Mercado",
-    source: {
-      name: "RI",
-      updatedAt: "05/02",
-      docLabel: "Comunicado ao Mercado",
-      url: "https://www.itau.com.br/relacoes-com-investidores",
-    },
-    filterPreset: {
-      pillar: "proventos",
-      signal: "payout_subindo",
-      severity: "leve",
-      timeframe: "12m",
-      scope: "mercado",
-    },
-  },
-  {
-    id: "divida-petr4",
-    companyName: "Petrobras",
-    ticker: "PETR4",
-    changeTitle: "Dívida líquida aumentou",
-    whyItMatters: "Aumenta pressão no caixa e pode limitar investimento.",
-    pillar: "Dívida",
-    severity: "Forte",
-    timeframeLabel: "últimos 90 dias",
-    scope: "Mercado",
-    source: {
-      name: "B3",
-      updatedAt: "05/02",
-      docLabel: "Fato Relevante",
-      url: "https://www.b3.com.br",
-    },
-    filterPreset: {
-      pillar: "divida",
-      signal: "divida_subindo",
-      severity: "forte",
-      timeframe: "90d",
-      scope: "mercado",
-    },
-  },
-];
-
-const thesisCollections = [
-  "Dívida sob controle",
-  "Caixa forte",
-  "Margens melhorando",
-  "Retorno consistente",
-  "Proventos estáveis",
-  "Dados atualizados",
-];
-
-const sectorCollections = ["Bancos", "Energia", "Consumo", "Saúde", "Indústria", "Construção"];
-
-const companies: CompanyCard[] = [
-  {
-    name: "WEG",
-    ticker: "WEGE3",
-    sector: "Indústria",
-    size: "Grande",
-    status: "Saudável",
-    pillarsScores: [82, 78, 74, 80, 62],
-    shortDiagnosis: "Consistência operacional com margens sólidas.",
-    freshnessStatus: "Atualizado",
-    updatedAt: "05/02",
-    source: "CVM/B3/RI",
-    highlightPillar: "Margens",
-  },
-  {
-    name: "Itaú Unibanco",
-    ticker: "ITUB4",
-    sector: "Bancos",
-    size: "Grande",
-    status: "Saudável",
-    pillarsScores: [70, 76, 68, 74, 72],
-    shortDiagnosis: "Retorno estável e caixa resiliente.",
-    freshnessStatus: "Atualizado",
-    updatedAt: "05/02",
-    source: "CVM/B3/RI",
-    highlightPillar: "Retorno",
-  },
-  {
-    name: "Taesa",
-    ticker: "TAEE11",
-    sector: "Energia",
-    size: "Média",
-    status: "Atenção",
-    pillarsScores: [56, 64, 52, 60, 78],
-    shortDiagnosis: "Proventos consistentes, mas dívida em atenção.",
-    freshnessStatus: "Atualizado",
-    updatedAt: "05/02",
-    source: "CVM/B3/RI",
-    highlightPillar: "Proventos",
-  },
-  {
-    name: "Cosan",
-    ticker: "CSAN3",
-    sector: "Consumo",
-    size: "Média",
-    status: "Atenção",
-    pillarsScores: [44, 58, 41, 52, 48],
-    shortDiagnosis: "Oscilações recentes em alavancagem.",
-    freshnessStatus: "Antigo",
-    updatedAt: "22/01",
-    source: "CVM/B3/RI",
-    highlightPillar: "Dívida",
-  },
-  {
-    name: "Fleury",
-    ticker: "FLRY3",
-    sector: "Saúde",
-    size: "Média",
-    status: "Saudável",
-    pillarsScores: [68, 72, 66, 70, 54],
-    shortDiagnosis: "Margens e retorno dentro do esperado.",
-    freshnessStatus: "Atualizado",
-    updatedAt: "04/02",
-    source: "CVM/B3/RI",
-    highlightPillar: "Margens",
-  },
-  {
-    name: "MRV",
-    ticker: "MRVE3",
-    sector: "Construção",
-    size: "Média",
-    status: "Risco",
-    pillarsScores: [30, 42, 28, 34, 36],
-    shortDiagnosis: "Alavancagem elevada e retorno pressionado.",
-    freshnessStatus: "Antigo",
-    updatedAt: "18/01",
-    source: "CVM/B3/RI",
-    highlightPillar: "Dívida",
-  },
-];
-
-const pillars = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"] as const;
-
+import type {
+  CompanyCard,
+  FilterKey,
+  Filters,
+  HighlightItem,
+  HighlightPreset,
+  IndexCard,
+} from "../types/explore";
 const statusColors: Record<CompanyCard["status"], string> = {
   Saudável: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  Atenção: "bg-amber-50 text-amber-700 border-amber-100",
-  Risco: "bg-rose-50 text-rose-700 border-rose-100",
+  Atenção:  "bg-amber-50 text-amber-700 border-amber-100",
+  Risco:    "bg-rose-50 text-rose-700 border-rose-100",
 };
 
 const freshnessColors: Record<CompanyCard["freshnessStatus"], string> = {
   Atualizado: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  Antigo: "bg-amber-50 text-amber-700 border-amber-100",
+  Antigo:     "bg-amber-50 text-amber-700 border-amber-100",
 };
 
 const freshnessLabelMap: Record<CompanyCard["freshnessStatus"], string> = {
   Atualizado: "Fonte atualizada",
-  Antigo: "Fonte atrasada",
+  Antigo:     "Fonte atrasada",
 };
 
 const severityStyles: Record<HighlightItem["severity"], string> = {
-  Leve: "bg-muted text-foreground/80 border-border",
+  Leve:     "bg-muted text-foreground/80 border-border",
   Moderada: "bg-amber-50 text-amber-700 border-amber-100",
-  Forte: "bg-rose-50 text-rose-700 border-rose-100",
-};
-
-const pillarLabelMap: Record<HighlightPreset["pillar"], CompanyCard["highlightPillar"]> = {
-  divida: "Dívida",
-  caixa: "Caixa",
-  margens: "Margens",
-  retorno: "Retorno",
-  proventos: "Proventos",
+  Forte:    "bg-rose-50 text-rose-700 border-rose-100",
 };
 
 const priorityLabelMap: Record<HighlightItem["severity"], string> = {
-  Leve: "Prioridade baixa",
+  Leve:     "Prioridade baixa",
   Moderada: "Prioridade média",
-  Forte: "Prioridade alta",
-};
-
-const presetChipLabels = (preset: HighlightPreset) => {
-  const severityLabel =
-    preset.severity === "leve" ? "Prioridade baixa" : preset.severity === "moderada" ? "Prioridade média" : "Prioridade alta";
-  const timeframeLabelMap: Record<HighlightPreset["timeframe"], string> = {
-    "7d": "últimos 7 dias",
-    "30d": "últimos 30 dias",
-    "90d": "últimos 90 dias",
-    "2q": "últimos 2 trimestres",
-    "12m": "últimos 12 meses",
-  };
-  return [pillarLabelMap[preset.pillar], severityLabel, timeframeLabelMap[preset.timeframe]];
+  Forte:    "Prioridade alta",
 };
 
 const getTrendColor = (trend: IndexCard["trend"]) => {
-  if (trend === "up") return "text-emerald-600";
+  if (trend === "up")   return "text-emerald-600";
   if (trend === "down") return "text-rose-600";
   return "text-muted-foreground";
 };
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
-  if (trend === "up") return "healthy";
+  if (trend === "up")   return "healthy";
   if (trend === "down") return "risk";
   return "attention";
 };
 
-const companyLogos: Record<string, string> = {
-  COGN3: logoCogna.src,
-  CSAN3: logoCosan.src,
-  EZTC3: logoEztec.src,
-  FLRY3: logoFleury.src,
-  IRBR3: logoIrb.src,
-  ITUB4: logoItau.src,
-  LREN3: logoRenner.src,
-  MRVE3: logoMrv.src,
-  PETR4: logoPetrobras.src,
-  RAIL3: logoRumo.src,
-  TAEE11: logoTaesa.src,
-  VALE3: logoVale.src,
-  WEGE3: logoWeg.src,
-};
-
-const getCompanyLogo = (ticker: string) => companyLogos[ticker];
+// ─── Sub-component ────────────────────────────────────────────────────────────
 
 function Drawer({
   open,
@@ -565,137 +110,62 @@ function Drawer({
   );
 }
 
+// ─── Page component ───────────────────────────────────────────────────────────
+
 export function ExplorePage() {
-  const [selectedTab, setSelectedTab] = useState<MoverRow["type"]>("altas");
-  const [selectedEntryPoints, setSelectedEntryPoints] = useState<string[]>([]);
-  const [compareTickers, setCompareTickers] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [summaryScope, setSummaryScope] = useState<"Mercado" | "Setor" | "Minha watchlist">("Mercado");
-  const [summaryState, setSummaryState] = useState<"loading" | "ready" | "empty" | "error">("ready");
-  const [activePreset, setActivePreset] = useState<HighlightPreset | null>(null);
-  const [appliedChips, setAppliedChips] = useState<string[]>([]);
-  const [selectedSource, setSelectedSource] = useState<HighlightItem | null>(null);
-  const [showAllHighlights, setShowAllHighlights] = useState(false);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [showAllMovements, setShowAllMovements] = useState(false);
-  const [showVolatilityInfo, setShowVolatilityInfo] = useState(false);
-  const [showVolatilityDetails, setShowVolatilityDetails] = useState(false);
-  const [showContextPanel, setShowContextPanel] = useState(false);
-
-  const [filters, setFilters] = useState<Filters>({
-    sector: "Todos",
-    size: "Todos",
-    status: "Todos",
-    freshness: "Todos",
-    pillar: "Todos",
-    sort: "Mais atualizadas",
-  });
-
-  const isLoading = false; // pronto para ligar quando vier API
-
-  const filteredCompanies = useMemo(() => {
-    return companies
-      .filter((company) => {
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          if (!company.name.toLowerCase().includes(query) && !company.ticker.toLowerCase().includes(query)) {
-            return false;
-          }
-        }
-
-        if (activePreset) {
-          const pillarMatch = company.highlightPillar === pillarLabelMap[activePreset.pillar];
-          if (!pillarMatch) return false;
-          if (activePreset.severity === "forte" && company.status !== "Risco") return false;
-          if (activePreset.severity === "moderada" && company.status === "Saudável") return false;
-        }
-
-        if (filters.sector !== "Todos" && company.sector !== filters.sector) return false;
-        if (filters.size !== "Todos" && company.size !== filters.size) return false;
-        if (filters.status !== "Todos" && company.status !== filters.status) return false;
-        if (filters.freshness !== "Todos" && company.freshnessStatus !== filters.freshness) return false;
-        if (filters.pillar !== "Todos" && company.highlightPillar !== filters.pillar) return false;
-
-        return true;
-      })
-      .sort((a, b) => {
-        if (filters.sort === "Mais relevantes para este destaque") {
-          if (a.status === "Risco" && b.status !== "Risco") return -1;
-          if (b.status === "Risco" && a.status !== "Risco") return 1;
-          return a.updatedAt < b.updatedAt ? 1 : -1;
-        }
-        if (filters.sort === "Mais atualizadas") return a.updatedAt < b.updatedAt ? 1 : -1;
-        if (filters.sort === "Mudanças recentes") return a.status === "Risco" ? -1 : 1;
-        if (filters.sort === "Maior consistência") return a.status === "Saudável" ? -1 : 1;
-        return 0;
-      });
-  }, [filters, searchQuery, activePreset]);
-
-  const staleCount = filteredCompanies.filter((company) => company.freshnessStatus === "Antigo").length;
-  const showStaleBanner = staleCount >= 2;
-  const hasSectorSelected = filters.sector !== "Todos";
-  const hasWatchlist = false;
-  const volatilityIsStale = false;
-  const sortedHighlights = useMemo(
-    () =>
-      [...highlights].sort((a, b) => {
-        const rank: Record<HighlightItem["severity"], number> = { Forte: 0, Moderada: 1, Leve: 2 };
-        return rank[a.severity] - rank[b.severity];
-      }),
-    [],
-  );
-
-  const toggleEntryPoint = (entry: string) => {
-    setSelectedEntryPoints((prev) => (prev.includes(entry) ? prev.filter((item) => item !== entry) : [...prev, entry]));
-
-    if (entry.startsWith("Setor: ")) setFilters((prev) => ({ ...prev, sector: entry.replace("Setor: ", "") }));
-    if (entry === "Dados atualizados") setFilters((prev) => ({ ...prev, freshness: "Atualizado" }));
-  };
-
-  const clearEntryPoints = () => {
-    setSelectedEntryPoints([]);
-    setFilters((prev) => ({ ...prev, sector: "Todos", freshness: "Todos" }));
-  };
-
-  const applyHighlightPreset = (preset: HighlightPreset) => {
-    setActivePreset(preset);
-    setAppliedChips(presetChipLabels(preset));
-    setSummaryScope(preset.scope === "mercado" ? "Mercado" : preset.scope === "setor" ? "Setor" : "Minha watchlist");
-    setFilters((prev) => ({
-      ...prev,
-      sort: "Mais relevantes para este destaque",
-      pillar: pillarLabelMap[preset.pillar],
-    }));
-  };
-
-  const clearPreset = () => {
-    setActivePreset(null);
-    setAppliedChips([]);
-    setFilters((prev) => ({ ...prev, sort: "Mais atualizadas", pillar: "Todos" }));
-  };
-
-  const toggleCompare = (ticker: string) => {
-    setCompareTickers((prev) => {
-      if (prev.includes(ticker)) return prev.filter((item) => item !== ticker);
-      if (prev.length >= 4) return prev;
-      return [...prev, ticker];
-    });
-  };
-
-  const resetFilters = () => {
-    setSearchQuery("");
-    setActivePreset(null);
-    setAppliedChips([]);
-    setSelectedEntryPoints([]);
-    setFilters({
-      sector: "Todos",
-      size: "Todos",
-      status: "Todos",
-      freshness: "Todos",
-      pillar: "Todos",
-      sort: "Mais atualizadas",
-    });
-  };
+  const {
+    selectedTab,
+    selectedEntryPoints,
+    compareTickers,
+    searchQuery,
+    summaryScope,
+    summaryState,
+    activePreset,
+    appliedChips,
+    selectedSource,
+    showAllHighlights,
+    showAdvancedFilters,
+    showAllMovements,
+    showVolatilityInfo,
+    showVolatilityDetails,
+    showContextPanel,
+    filters,
+    isLoading,
+    filteredCompanies,
+    sortedHighlights,
+    staleCount,
+    showStaleBanner,
+    hasSectorSelected,
+    hasWatchlist,
+    volatilityIsStale,
+    indexCards,
+    movers,
+    movementInsights,
+    volatility,
+    thesisCollections,
+    sectorCollections,
+    pillars,
+    highlights,
+    getCompanyLogo,
+    setSelectedTab,
+    setSearchQuery,
+    setSummaryScope,
+    setSummaryState,
+    setSelectedSource,
+    setShowAllHighlights,
+    setShowAdvancedFilters,
+    setShowAllMovements,
+    setShowVolatilityInfo,
+    setShowVolatilityDetails,
+    setShowContextPanel,
+    setFilters,
+    toggleEntryPoint,
+    clearEntryPoints,
+    applyHighlightPreset,
+    clearPreset,
+    toggleCompare,
+    resetFilters,
+  } = useExplore();
 
   const renderMovementsPanel = (compact = false) => (
     <section className={`bg-card rounded-2xl border border-border ${compact ? "p-4" : "p-5"}`}>
@@ -718,7 +188,7 @@ export function ExplorePage() {
           <button
             key={tab.value}
             onClick={() => {
-              setSelectedTab(tab.value as MoverRow["type"]);
+              setSelectedTab(tab.value as typeof selectedTab);
               setShowAllMovements(false);
             }}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
@@ -1386,16 +856,3 @@ export function ExplorePage() {
 }
 
 export default ExplorePage;
-
-
-
-
-
-
-
-
-
-
-
-
-

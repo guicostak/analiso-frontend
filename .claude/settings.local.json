@@ -7,7 +7,12 @@
       "Bash(sed -i 's/<Link to=/<Link href=/g' \"$WT/src/components/landing/FooterSection.tsx\")",
       "Bash(grep -r \"next-themes\\\\|ThemeProvider\" /c/Users/guilh/Desktop/analiso-frontend/app /c/Users/guilh/Desktop/analiso-frontend/src --include=*.ts --include=*.tsx)",
       "Bash(grep -r className.*dark /c/Users/guilh/Desktop/analiso-frontend/src --include=*.tsx --include=*.ts)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(find . -type d -not -path */node_modules/* -not -path */.git/* -not -path */.*)",
+      "Bash(grep -l \"useState\\\\|useEffect\\\\|useMemo\" /c/Users/guilh/Desktop/analiso-frontend/src/components/*.tsx /c/Users/guilh/Desktop/analiso-frontend/src/components/**/*.tsx)",
+      "Bash(npx tsc:*)",
+      "Bash(find C:UsersguilhDesktopanaliso-frontend.claudeworktreesagent-a0bbd8f0 -name *.ts -o -name *.tsx)",
+      "Bash(find C:UsersguilhDesktopanaliso-frontend.claudeworktreesagent-aa447705 -name *.ts -o -name *.tsx)"
     ]
   }
 }

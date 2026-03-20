@@ -1,167 +1,37 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-
-type Nivel = "Saudavel" | "Atencao" | "Risco";
-type PeriodoSegment = "Diario" | "Semanal" | "Mensal" | "Anual";
-
-type Celula = {
-  saudavel: number;
-  atencao: number;
-  risco: number;
-  detalhe: {
-    pilar: "Divida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
-    severidade: Nivel;
-    evento: string;
-    fonte: "CVM" | "B3" | "RI";
-  };
-};
-
-export type HeatmapSelection = {
-  ticker: string;
-  date: string;
-  pillar: "Divida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
-};
+import { useHeatmapMudancas } from "../../hooks/useHeatmapMudancas";
+import { toneForCell, cellCount } from "../../services/dashboard";
+import type { HeatmapNivel, HeatmapPeriodoSegment, HeatmapSelection } from "../../types/dashboard";
 
 type HeatmapMudancasCardProps = {
   stale?: boolean;
   onCellSelect?: (selection: HeatmapSelection) => void;
-  externalNivelFilter?: Nivel | null;
-};
-
-const datas = ["01/02", "02/02", "03/02", "04/02", "05/02", "06/02", "07/02"];
-const empresas = ["VALE3", "LREN3", "ITUB4", "WEGE3", "MRVE3"];
-
-const heatmapData: Record<string, Record<string, Celula>> = {
-  VALE3: {
-    "01/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Divida", severidade: "Atencao", evento: "Divida liq./EBITDA subiu", fonte: "CVM" } },
-    "02/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Custos unitarios em alta", fonte: "RI" } },
-    "03/02": { saudavel: 0, atencao: 0, risco: 1, detalhe: { pilar: "Divida", severidade: "Risco", evento: "Cobertura de juros enfraqueceu", fonte: "CVM" } },
-    "04/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Retorno", severidade: "Atencao", evento: "ROIC desacelerou", fonte: "RI" } },
-    "05/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Proventos", severidade: "Saudavel", evento: "Politica de payout mantida", fonte: "RI" } },
-    "06/02": { saudavel: 0, atencao: 0, risco: 1, detalhe: { pilar: "Divida", severidade: "Risco", evento: "Divida liq./EBITDA subiu", fonte: "CVM" } },
-    "07/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Caixa", severidade: "Atencao", evento: "Caixa operacional pressionado", fonte: "B3" } },
-  },
-  LREN3: {
-    "01/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Margens", severidade: "Saudavel", evento: "Mix comercial melhorou", fonte: "RI" } },
-    "02/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Margem bruta recuou", fonte: "CVM" } },
-    "03/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Caixa", severidade: "Atencao", evento: "Consumo de caixa cresceu", fonte: "RI" } },
-    "04/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Retorno", severidade: "Atencao", evento: "Retorno sobre capital caiu", fonte: "B3" } },
-    "05/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Custo de vendas acelerou", fonte: "CVM" } },
-    "06/02": { saudavel: 0, atencao: 0, risco: 1, detalhe: { pilar: "Margens", severidade: "Risco", evento: "Margem critica no trimestre", fonte: "CVM" } },
-    "07/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Proventos", severidade: "Saudavel", evento: "Distribuicao confirmada", fonte: "RI" } },
-  },
-  ITUB4: {
-    "01/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Retorno", severidade: "Saudavel", evento: "ROE estavel", fonte: "CVM" } },
-    "02/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Caixa", severidade: "Saudavel", evento: "Liquidez robusta", fonte: "B3" } },
-    "03/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Proventos", severidade: "Saudavel", evento: "Payout recorrente", fonte: "RI" } },
-    "04/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Divida", severidade: "Saudavel", evento: "Capitacao equilibrada", fonte: "CVM" } },
-    "05/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Retorno", severidade: "Saudavel", evento: "Rentabilidade consistente", fonte: "RI" } },
-    "06/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Spread menor no dia", fonte: "B3" } },
-    "07/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Caixa", severidade: "Saudavel", evento: "Folga de liquidez", fonte: "RI" } },
-  },
-  WEGE3: {
-    "01/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Caixa", severidade: "Saudavel", evento: "Geracao de caixa forte", fonte: "CVM" } },
-    "02/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Margens", severidade: "Saudavel", evento: "Eficiencia operacional", fonte: "RI" } },
-    "03/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Retorno", severidade: "Atencao", evento: "ROIC abaixo da media", fonte: "B3" } },
-    "04/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Proventos", severidade: "Saudavel", evento: "Politica mantida", fonte: "RI" } },
-    "05/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Divida", severidade: "Saudavel", evento: "Alavancagem em linha", fonte: "CVM" } },
-    "06/02": { saudavel: 1, atencao: 0, risco: 0, detalhe: { pilar: "Caixa", severidade: "Saudavel", evento: "Conversao melhorou", fonte: "RI" } },
-    "07/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Pressao em insumos", fonte: "B3" } },
-  },
-  MRVE3: {
-    "01/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Caixa", severidade: "Atencao", evento: "Caixa abaixo da media", fonte: "B3" } },
-    "02/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Divida", severidade: "Atencao", evento: "Custo de divida subiu", fonte: "CVM" } },
-    "03/02": { saudavel: 0, atencao: 0, risco: 1, detalhe: { pilar: "Divida", severidade: "Risco", evento: "Alavancagem em nivel critico", fonte: "CVM" } },
-    "04/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Retorno", severidade: "Atencao", evento: "Retorno em queda", fonte: "RI" } },
-    "05/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Margens", severidade: "Atencao", evento: "Margem operacional comprimida", fonte: "CVM" } },
-    "06/02": { saudavel: 0, atencao: 0, risco: 1, detalhe: { pilar: "Caixa", severidade: "Risco", evento: "Queima de caixa acelerou", fonte: "B3" } },
-    "07/02": { saudavel: 0, atencao: 1, risco: 0, detalhe: { pilar: "Proventos", severidade: "Atencao", evento: "Distribuicao reduzida", fonte: "RI" } },
-  },
+  externalNivelFilter?: HeatmapNivel | null;
 };
 
 function cx(...classes: Array<string | null | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function toneFor(cell: Celula, selected: Nivel[]) {
-  const s = selected.includes("Saudavel") ? cell.saudavel : 0;
-  const a = selected.includes("Atencao") ? cell.atencao : 0;
-  const r = selected.includes("Risco") ? cell.risco : 0;
-
-  if (r > 0) return { bg: "bg-[rgba(220,38,38,0.10)]", border: "border-[rgba(220,38,38,0.22)]", text: "text-[#991B1B]" };
-  if (a > 0) return { bg: "bg-[rgba(217,119,6,0.12)]", border: "border-[rgba(217,119,6,0.25)]", text: "text-[#92400E]" };
-  if (s > 0) return { bg: "bg-[rgba(22,163,74,0.10)]", border: "border-[rgba(22,163,74,0.22)]", text: "text-[#166534]" };
-  return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#9CA3AF]" };
-}
-
 export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivelFilter = null }: HeatmapMudancasCardProps) {
-  const [segmento, setSegmento] = useState<PeriodoSegment>("Semanal");
-  const [periodo, setPeriodo] = useState("Ultimos 7 dias");
-  const [importantesApenas, setImportantesApenas] = useState(false);
-  const [selectedNiveis, setSelectedNiveis] = useState<Nivel[]>(["Saudavel", "Atencao", "Risco"]);
-
-  useEffect(() => {
-    if (!externalNivelFilter) {
-      setSelectedNiveis(["Saudavel", "Atencao", "Risco"]);
-      return;
-    }
-    setImportantesApenas(false);
-    setSelectedNiveis([externalNivelFilter]);
-  }, [externalNivelFilter]);
-
-  const activeDates = useMemo(() => {
-    if (segmento === "Diario") return [datas[datas.length - 1]];
-    if (segmento === "Mensal") return datas.slice(0, 5);
-    if (segmento === "Anual") return datas.slice(0, 3);
-    return datas;
-  }, [segmento]);
-
-  const niveisAtivos = useMemo(() => {
-    if (importantesApenas) return ["Atencao", "Risco"] as Nivel[];
-    return selectedNiveis;
-  }, [importantesApenas, selectedNiveis]);
-
-  const cellCount = (cell: Celula) => {
-    const s = niveisAtivos.includes("Saudavel") ? cell.saudavel : 0;
-    const a = niveisAtivos.includes("Atencao") ? cell.atencao : 0;
-    const r = niveisAtivos.includes("Risco") ? cell.risco : 0;
-    return s + a + r;
-  };
-
-  const chipsCount = useMemo(() => {
-    let saudavel = 0;
-    let atencao = 0;
-    let risco = 0;
-    empresas.forEach((ticker) => {
-      activeDates.forEach((date) => {
-        const cell = heatmapData[ticker][date];
-        saudavel += cell.saudavel;
-        atencao += cell.atencao;
-        risco += cell.risco;
-      });
-    });
-    return { Saudavel: saudavel, Atencao: atencao, Risco: risco };
-  }, [activeDates]);
-
-  const maxRiskDate = useMemo(() => {
-    return activeDates.reduce(
-      (best, date) => {
-        const risk = empresas.reduce((acc, ticker) => acc + heatmapData[ticker][date].risco, 0);
-        if (risk > best.risk) return { date, risk };
-        return best;
-      },
-      { date: activeDates[0], risk: -1 },
-    );
-  }, [activeDates]);
-
-  const mobileRows = useMemo(() => {
-    return empresas.map((ticker) => {
-      const total = activeDates.reduce((acc, date) => acc + cellCount(heatmapData[ticker][date]), 0);
-      return { ticker, total, top: heatmapData[ticker][activeDates[activeDates.length - 1]].detalhe };
-    });
-  }, [activeDates, niveisAtivos]);
+  const {
+    segmento,
+    setSegmento,
+    periodo,
+    setPeriodo,
+    importantesApenas,
+    setImportantesApenas,
+    selectedNiveis,
+    setSelectedNiveis,
+    activeDates,
+    niveisAtivos,
+    chipsCount,
+    maxRiskDate,
+    mobileRows,
+    heatmapData,
+  } = useHeatmapMudancas(externalNivelFilter);
 
   return (
     <section className={cx("rounded-[20px] border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]", stale && "border-[#D97706]/35")}>
@@ -177,7 +47,7 @@ export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivel
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-full bg-[#EFEFF4] p-1">
-          {(["Diario", "Semanal", "Mensal", "Anual"] as PeriodoSegment[]).map((item) => (
+          {(["Diario", "Semanal", "Mensal", "Anual"] as HeatmapPeriodoSegment[]).map((item) => (
             <button
               key={item}
               onClick={() => setSegmento(item)}
@@ -215,7 +85,7 @@ export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivel
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        {(["Saudavel", "Atencao", "Risco"] as Nivel[]).map((nivel) => {
+        {(["Saudavel", "Atencao", "Risco"] as HeatmapNivel[]).map((nivel) => {
           const isOn = niveisAtivos.includes(nivel);
           const tone =
             nivel === "Saudavel"
@@ -254,13 +124,13 @@ export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivel
               </div>
             ))}
 
-            {empresas.map((ticker) => (
+            {Object.keys(heatmapData).map((ticker) => (
               <div key={ticker} className="contents">
                 <div className="flex h-12 items-center px-2 text-[13px] font-semibold text-[#111827]">{ticker}</div>
                 {activeDates.map((date) => {
                   const cell = heatmapData[ticker][date];
-                  const count = cellCount(cell);
-                  const tone = toneFor(cell, niveisAtivos);
+                  const count = cellCount(cell, niveisAtivos);
+                  const tone = toneForCell(cell, niveisAtivos);
                   return (
                     <button
                       key={`${ticker}-${date}`}
