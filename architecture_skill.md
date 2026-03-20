@@ -146,10 +146,10 @@ ComponentName/
 
 - Criar um design system básico em components/ui
 - Usar Tailwind com consistência (tokens de cor, spacing)
-- Padronizar:
-  - espaçamento
-  - tipografia
-  - cores
+- Utilizar as variáveis globais de CSS já existentes no projeto (definidas em :root ou arquivos globais)
+- Evitar hardcode de cores, fontes, espaçamentos e tamanhos
+- Priorizar uso de tokens (ex: var(--color-primary), var(--spacing-md))
+- Garantir consistência visual em toda a aplicação
 
 ## Estratégia de Refatoração
 
