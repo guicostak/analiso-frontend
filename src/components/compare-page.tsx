@@ -30,7 +30,7 @@ import {
   YAxis,
 } from "recharts";
 import { Sidebar } from "./dashboard/sidebar";
-import { TopBar } from "./dashboard/top-bar";
+import { AppTopBar } from "./app-top-bar";
 import wegLogo from "../assets/logos/weg.jpeg";
 import valeLogo from "../assets/logos/vale.png";
 
@@ -375,7 +375,7 @@ function TickerLogo({ ticker, size = 18 }: { ticker: string; size?: number }) {
   if (!logo) {
     return (
       <span
-        className="inline-flex items-center justify-center rounded-full border border-[#E7EAEE] bg-white text-[10px] font-semibold text-[#475569]"
+        className="inline-flex items-center justify-center rounded-full border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] text-[10px] font-semibold text-[#475569] dark:text-slate-400"
         style={{ width: size, height: size }}
       >
         {ticker.slice(0, 1)}
@@ -386,7 +386,7 @@ function TickerLogo({ ticker, size = 18 }: { ticker: string; size?: number }) {
     <img
       src={logo}
       alt={`Logo ${ticker}`}
-      className="rounded-full border border-[#E7EAEE] bg-white object-cover"
+      className="rounded-full border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] object-cover"
       style={{ width: size, height: size }}
     />
   );
@@ -397,59 +397,59 @@ function EvidenceDrawer({ data, onClose }: { data: Evidence | null; onClose: () 
   return (
     <div className="fixed inset-0 z-50">
       <button onClick={onClose} className="absolute inset-0 bg-black/30" />
-      <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-[#E7EAEE] bg-white p-6 shadow-2xl">
+      <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6 shadow-2xl">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.08em] text-[#94A3B8]">Evidence drawer</p>
-            <h3 className="mt-1 text-lg font-semibold text-[#0F172A]">{data.metricName}</h3>
+            <p className="text-xs uppercase tracking-[0.08em] text-[#94A3B8] dark:text-slate-500">Evidence drawer</p>
+            <h3 className="mt-1 text-lg font-semibold text-[#0F172A] dark:text-[#E5E7EB]">{data.metricName}</h3>
           </div>
-          <button onClick={onClose} className="rounded-full border border-[#E7EAEE] p-1.5 text-[#475569]">
+          <button onClick={onClose} className="rounded-full border border-[#E7EAEE] dark:border-[#1F2937] p-1.5 text-[#475569] dark:text-slate-400">
             <X className="h-4 w-4" />
           </button>
         </div>
         <div className="space-y-4 text-sm">
-          <div className="rounded-xl border border-[#E7EAEE] bg-[#F8FAFC] p-4">
-            <p className="text-[12px] font-semibold text-[#475569]">Valor atual A/B</p>
+          <div className="rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] p-4">
+            <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Valor atual A/B</p>
             <div className="mt-2 grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-[#475569]">{data.aTicker}</p>
+                <p className="text-xs text-[#475569] dark:text-slate-400">{data.aTicker}</p>
                 <p className="font-semibold">{formatMetric(data.aValue, data.unit)}</p>
               </div>
               <div>
-                <p className="text-xs text-[#475569]">{data.bTicker}</p>
+                <p className="text-xs text-[#475569] dark:text-slate-400">{data.bTicker}</p>
                 <p className="font-semibold">{formatMetric(data.bValue, data.unit)}</p>
               </div>
             </div>
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-[#475569]">Definicao simples</p>
-            <p className="mt-1 text-[#0F172A]">{data.definition}</p>
+            <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Definicao simples</p>
+            <p className="mt-1 text-[#0F172A] dark:text-[#E5E7EB]">{data.definition}</p>
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-[#475569]">Como calculamos</p>
-            <p className="mt-1 text-[#0F172A]">{data.source.method}</p>
+            <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Como calculamos</p>
+            <p className="mt-1 text-[#0F172A] dark:text-[#E5E7EB]">{data.source.method}</p>
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-[#475569]">Fonte</p>
-            <p className="mt-1 text-[#0F172A]">
+            <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Fonte</p>
+            <p className="mt-1 text-[#0F172A] dark:text-[#E5E7EB]">
               {data.source.provider} / {data.source.document}
             </p>
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-[#475569]">Data de atualizacao</p>
-            <p className="mt-1 text-[#0F172A]">{data.source.updatedAt}</p>
+            <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Data de atualizacao</p>
+            <p className="mt-1 text-[#0F172A] dark:text-[#E5E7EB]">{data.source.updatedAt}</p>
           </div>
           {data.source.reference ? (
             <div>
-              <p className="text-[12px] font-semibold text-[#475569]">Trecho/identificador</p>
-              <p className="mt-1 text-[#0F172A]">{data.source.reference}</p>
+              <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Trecho/identificador</p>
+              <p className="mt-1 text-[#0F172A] dark:text-[#E5E7EB]">{data.source.reference}</p>
             </div>
           ) : null}
           <a
             href={data.source.link}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] px-3 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] px-3 py-2 text-sm font-medium text-[#0F172A] dark:text-[#E5E7EB] hover:bg-[#F8FAFC]"
           >
             Abrir documento <Share2 className="h-3.5 w-3.5" />
           </a>
@@ -461,9 +461,9 @@ function EvidenceDrawer({ data, onClose }: { data: Evidence | null; onClose: () 
 
 const LoadingBlocks = () => (
   <div className="space-y-8">
-    <div className="h-[160px] animate-pulse rounded-2xl border border-[#E7EAEE] bg-white" />
-    <div className="h-[220px] animate-pulse rounded-2xl border border-[#E7EAEE] bg-white" />
-    <div className="h-[300px] animate-pulse rounded-2xl border border-[#E7EAEE] bg-white" />
+    <div className="h-[160px] animate-pulse rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220]" />
+    <div className="h-[220px] animate-pulse rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220]" />
+    <div className="h-[300px] animate-pulse rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220]" />
   </div>
 );
 
@@ -724,22 +724,22 @@ export function ComparePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#0F172A]" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-[#F7F8FA] dark:bg-[#0B1220] text-[#0F172A] dark:text-[#E5E7EB] dark:bg-[#020617] dark:text-[#E5E7EB]" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="hidden lg:block">
         <Sidebar currentPage="comparar" />
       </div>
-      <TopBar updatedAt="07/02/2026" />
-      <main className="pt-16 lg:ml-[88px]">
+      <AppTopBar />
+      <main className="pt-12 lg:ml-[88px]">
         <div className="px-8 py-8">
-          <section className={`sticky top-16 z-30 mb-6 rounded-[18px] border border-[#DCE3EA] bg-[#FDFEFE]/95 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur transition-all ${compactSticky ? "p-2" : "p-2.5"}`}>
+          <section className={`sticky top-12 z-30 mb-6 rounded-[18px] border border-[#DCE3EA] dark:border-[#1F2937] dark:border-[#1F2937] bg-[#FDFEFE]/95 dark:bg-[#0B1220]/95 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur transition-all ${compactSticky ? "p-2" : "p-2.5"}`}>
             <div className="grid grid-cols-1 gap-2 xl:grid-cols-12">
-              <article className="rounded-2xl border border-[#D5DEE7] bg-[#F4F8FB] p-2.5 xl:col-span-7">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Setup da comparacao</p>
+              <article className="rounded-2xl border border-[#D5DEE7] dark:border-[#1F2937] bg-[#F4F8FB] dark:bg-[#0F172A] p-2.5 xl:col-span-7">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B] dark:text-slate-400">Setup da comparacao</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   {selected.map((c, i) => (
                     <span
                       key={c.ticker}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] bg-white px-3 py-1.5 text-xs font-medium text-[#0F172A]"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-3 py-1.5 text-xs font-medium text-[#0F172A] dark:text-[#E5E7EB]"
                     >
                       <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: SLOT_COLORS[i] }} />
                       <TickerLogo ticker={c.ticker} size={16} />
@@ -754,7 +754,7 @@ export function ComparePage() {
                   {selected.length < 4 ? (
                     <button
                       onClick={() => setOpenPicker((v) => !v)}
-                      className="inline-flex items-center gap-1 rounded-xl border border-dashed border-[#E7EAEE] bg-white px-2.5 py-1.5 text-xs font-medium text-[#475569] hover:border-[#0E9384]"
+                      className="inline-flex items-center gap-1 rounded-xl border border-dashed border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2.5 py-1.5 text-xs font-medium text-[#475569] dark:text-slate-400 hover:border-[#0E9384]"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Adicionar empresa
@@ -763,7 +763,7 @@ export function ComparePage() {
                   {selected.length >= 2 ? (
                     <button
                       onClick={() => setSelectedTickers((v) => (v.length < 2 ? v : [v[1], v[0], ...v.slice(2)]))}
-                      className="inline-flex items-center gap-1 rounded-xl border border-[#E7EAEE] bg-white px-2.5 py-1.5 text-xs font-medium text-[#475569]"
+                      className="inline-flex items-center gap-1 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2.5 py-1.5 text-xs font-medium text-[#475569] dark:text-slate-400"
                     >
                       <ArrowRightLeft className="h-3.5 w-3.5" />
                       Trocar A/B
@@ -771,7 +771,7 @@ export function ComparePage() {
                   ) : null}
                 </div>
                 <div className="relative mt-2.5 w-full max-w-[420px]">
-                  <Search className="pointer-events-none absolute left-3 top-2 h-3.5 w-3.5 text-[#94A3B8]" />
+                  <Search className="pointer-events-none absolute left-3 top-2 h-3.5 w-3.5 text-[#94A3B8] dark:text-slate-500" />
                   <input
                     value={search}
                     onFocus={() => setOpenPicker(true)}
@@ -779,37 +779,37 @@ export function ComparePage() {
                       setSearch(e.target.value);
                       setOpenPicker(true);
                     }}
-                    className="h-8 w-full rounded-xl border border-[#E7EAEE] bg-white pl-8 pr-3 text-xs"
+                    className="h-8 w-full rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] pl-8 pr-3 text-xs"
                     placeholder="Buscar ticker ou nome (opcional)"
                   />
                   {openPicker && selected.length < 4 ? (
-                    <div className="absolute z-40 mt-2 w-full rounded-xl border border-[#E7EAEE] bg-white p-1 shadow-xl">
+                    <div className="absolute z-40 mt-2 w-full rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1 shadow-xl">
                       {available.length ? (
                         available.map((c) => (
                           <button key={c.ticker} onClick={() => addTicker(c.ticker)} className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-[#F8FAFC]">
                             <div>
                               <p className="text-xs font-semibold">{c.ticker}</p>
-                              <p className="text-[11px] text-[#475569]">{c.name}</p>
+                              <p className="text-[11px] text-[#475569] dark:text-slate-400">{c.name}</p>
                             </div>
-                            <span className="text-[11px] text-[#94A3B8]">{c.sector}</span>
+                            <span className="text-[11px] text-[#94A3B8] dark:text-slate-500">{c.sector}</span>
                           </button>
                         ))
                       ) : (
-                        <p className="px-3 py-2 text-xs text-[#94A3B8]">Nenhuma empresa encontrada.</p>
+                        <p className="px-3 py-2 text-xs text-[#94A3B8] dark:text-slate-500">Nenhuma empresa encontrada.</p>
                       )}
                     </div>
                   ) : null}
                 </div>
               </article>
-              <article className="rounded-2xl border border-[#D5DEE7] bg-[#FAFCFE] p-2.5 xl:col-span-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Leitura da comparacao</p>
+              <article className="rounded-2xl border border-[#D5DEE7] dark:border-[#1F2937] bg-[#FAFCFE] p-2.5 xl:col-span-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B] dark:text-slate-400">Leitura da comparacao</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <div className="flex items-center rounded-xl border border-[#E7EAEE] bg-[#F8FAFC] p-0.5">
+                  <div className="flex items-center rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] p-0.5">
                     {RANGES.map((r) => (
                       <button
                         key={r.key}
                         onClick={() => setRange(r.key)}
-                        className={`rounded-lg px-2.5 py-1 text-xs font-medium ${range === r.key ? "bg-[#0E9384] text-white" : "text-[#475569]"}`}
+                        className={`rounded-lg px-2.5 py-1 text-xs font-medium ${range === r.key ? "bg-[#0E9384] text-white" : "text-[#475569] dark:text-slate-400"}`}
                       >
                         {r.label}
                       </button>
@@ -823,17 +823,17 @@ export function ComparePage() {
                       Ver veredito
                     </button>
                   ) : null}
-                  {canCompare ? <span className="rounded-lg border border-[#E7EAEE] bg-[#F8FAFC] px-2 py-1 text-[11px] text-[#475569]">Pilar em foco: {PILLAR_LABEL[activePillar]}</span> : null}
+                  {canCompare ? <span className="rounded-lg border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-2 py-1 text-[11px] text-[#475569] dark:text-slate-400">Pilar em foco: {PILLAR_LABEL[activePillar]}</span> : null}
                 </div>
                 <div className="relative mt-2.5">
                   <button
                     onClick={() => setActionsOpen((v) => !v)}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-[#E7EAEE] bg-white px-2.5 text-xs font-medium text-[#475569]"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2.5 text-xs font-medium text-[#475569] dark:text-slate-400"
                   >
                     Opcoes da comparacao <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                   {actionsOpen ? (
-                    <div className="absolute left-0 z-40 mt-2 w-[220px] rounded-xl border border-[#E7EAEE] bg-white p-1.5 shadow-xl">
+                    <div className="absolute left-0 z-40 mt-2 w-[220px] rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1.5 shadow-xl">
                       <button
                         onClick={() => {
                           setToast("Comparacao salva.");
@@ -881,12 +881,12 @@ export function ComparePage() {
           </section>
 
           {!canCompare ? (
-            <section className="rounded-2xl border border-[#E7EAEE] bg-white p-8 text-center">
+            <section className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-8 text-center">
               <h2 className="text-xl font-semibold">Selecione duas empresas para comparar</h2>
-              <p className="mt-2 text-sm text-[#475569]">Adicione Empresa A e Empresa B para ver quem esta melhor hoje, onde esta o risco e como confirmar.</p>
+              <p className="mt-2 text-sm text-[#475569] dark:text-slate-400">Adicione Empresa A e Empresa B para ver quem esta melhor hoje, onde esta o risco e como confirmar.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 {["WEGE3", "VALE3", "ITUB4"].map((t) => (
-                  <button key={t} onClick={() => addTicker(t)} className="rounded-xl border border-[#E7EAEE] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium">{t}</button>
+                  <button key={t} onClick={() => addTicker(t)} className="rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium">{t}</button>
                 ))}
               </div>
             </section>
@@ -896,34 +896,34 @@ export function ComparePage() {
             <div className="space-y-8">
               {verdict && a && b ? (
                 <section ref={verdictRef} className="scroll-mt-[160px] grid grid-cols-1 gap-4 xl:grid-cols-12">
-                  <article className="rounded-3xl border border-[#DDE3EA] bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)] xl:col-span-8">
+                  <article className="rounded-3xl border border-[#DDE3EA] bg-white dark:bg-[#0B1220] p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)] xl:col-span-8">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0E9384]">Veredito da comparacao</p>
                     <h2 className="mt-2 text-[28px] font-semibold leading-tight">
                       {verdict.winner.ticker} aparece mais solida que {verdict.loser.ticker} hoje.
                     </h2>
-                    <p className="mt-2 text-[15px] font-medium text-[#0F172A]">{verdict.consequence}</p>
+                    <p className="mt-2 text-[15px] font-medium text-[#0F172A] dark:text-[#E5E7EB]">{verdict.consequence}</p>
                     <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#F1F5F9] px-3 py-1.5 text-xs font-medium text-[#334155]">
                       <Check className="h-3.5 w-3.5 text-[#0E9384]" />
                       Confianca da leitura: {verdict.confidence}
                     </div>
-                    <p className="mt-3 text-sm text-[#475569]">Baseado em 5 pilares | Dados oficiais de CVM, B3 e RI | Atualizado em {verdict.latestUpdate}</p>
-                    <div className="mt-4 rounded-2xl border border-[#E7EAEE] bg-[#F8FAFC] p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B]">Score de apoio da leitura</p>
+                    <p className="mt-3 text-sm text-[#475569] dark:text-slate-400">Baseado em 5 pilares | Dados oficiais de CVM, B3 e RI | Atualizado em {verdict.latestUpdate}</p>
+                    <div className="mt-4 rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B] dark:text-slate-400">Score de apoio da leitura</p>
                       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                        <div className="rounded-xl bg-white px-3 py-2">
-                          <p className="text-[11px] text-[#64748B]">{a.ticker}</p>
+                        <div className="rounded-xl bg-white dark:bg-[#0B1220] px-3 py-2">
+                          <p className="text-[11px] text-[#64748B] dark:text-slate-400">{a.ticker}</p>
                           <p className="text-base font-semibold text-[#0E9384]">{n(scoreboard?.avgA ?? 0, 1)}</p>
                         </div>
-                        <div className="rounded-xl bg-white px-3 py-2">
-                          <p className="text-[11px] text-[#64748B]">{b.ticker}</p>
+                        <div className="rounded-xl bg-white dark:bg-[#0B1220] px-3 py-2">
+                          <p className="text-[11px] text-[#64748B] dark:text-slate-400">{b.ticker}</p>
                           <p className="text-base font-semibold text-[#3F5F7D]">{n(scoreboard?.avgB ?? 0, 1)}</p>
                         </div>
-                        <div className="rounded-xl bg-white px-3 py-2">
-                          <p className="text-[11px] text-[#64748B]">Diferenca</p>
-                          <p className="text-base font-semibold text-[#0F172A]">{n(Math.abs((scoreboard?.avgA ?? 0) - (scoreboard?.avgB ?? 0)), 1)} pts</p>
+                        <div className="rounded-xl bg-white dark:bg-[#0B1220] px-3 py-2">
+                          <p className="text-[11px] text-[#64748B] dark:text-slate-400">Diferenca</p>
+                          <p className="text-base font-semibold text-[#0F172A] dark:text-[#E5E7EB]">{n(Math.abs((scoreboard?.avgA ?? 0) - (scoreboard?.avgB ?? 0)), 1)} pts</p>
                         </div>
                       </div>
-                      <p className="mt-2 text-[12px] text-[#475569]">Use o score para calibrar intensidade, nao para substituir o contexto dos pilares.</p>
+                      <p className="mt-2 text-[12px] text-[#475569] dark:text-slate-400">Use o score para calibrar intensidade, nao para substituir o contexto dos pilares.</p>
                     </div>
                     <ul className="mt-4 space-y-2 text-sm text-[#334155]">
                       {verdict.reasons.slice(0, 3).map((reason) => (
@@ -943,43 +943,43 @@ export function ComparePage() {
                     </button>
                   </article>
                   <div className="space-y-4 xl:col-span-4">
-                    <article className="rounded-2xl border border-[#E7EAEE] bg-white p-5">
-                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0F172A]"><TriangleAlert className="h-3.5 w-3.5 text-[#B45309]" />Onde olhar com mais cuidado</p>
-                      <p className="mt-2 text-sm text-[#0F172A]">
+                    <article className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-5">
+                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0F172A] dark:text-[#E5E7EB]"><TriangleAlert className="h-3.5 w-3.5 text-[#B45309]" />Onde olhar com mais cuidado</p>
+                      <p className="mt-2 text-sm text-[#0F172A] dark:text-[#E5E7EB]">
                         {verdict.keyRisk?.loser.ticker} exige mais atencao em {PILLAR_LABEL[verdict.keyRisk?.p ?? "Divida"]}.
                       </p>
-                      <p className="mt-1 text-xs text-[#64748B]">Pior score identificado: {n(verdict.keyRisk?.lowestScore ?? 0, 1)}/10</p>
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">Pior score identificado: {n(verdict.keyRisk?.lowestScore ?? 0, 1)}/10</p>
                     </article>
-                    <article className="rounded-2xl border border-[#E7EAEE] bg-white p-5">
-                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0F172A]"><ArrowRightLeft className="h-3.5 w-3.5 text-[#3F5F7D]" />Onde a diferenca realmente aparece</p>
-                      <p className="mt-2 text-sm text-[#0F172A]">
+                    <article className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-5">
+                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#0F172A] dark:text-[#E5E7EB]"><ArrowRightLeft className="h-3.5 w-3.5 text-[#3F5F7D]" />Onde a diferenca realmente aparece</p>
+                      <p className="mt-2 text-sm text-[#0F172A] dark:text-[#E5E7EB]">
                         {PILLAR_LABEL[verdict.biggestGap?.p ?? "Divida"]} e o pilar que mais separa as empresas.
                       </p>
-                      <p className="mt-1 text-xs text-[#64748B]">Delta de score: {n(verdict.biggestGap?.delta ?? 0, 1)}/10</p>
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">Delta de score: {n(verdict.biggestGap?.delta ?? 0, 1)}/10</p>
                     </article>
                   </div>
                 </section>
               ) : null}
 
-              <section className="rounded-2xl border border-[#E7EAEE] bg-white p-6">
+              <section className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6">
                 <h2 className="text-[22px] font-semibold">Os 3 fatores que mais separam essas empresas</h2>
-                <p className="mt-1 text-sm text-[#475569]">Comece por aqui para decidir onde focar primeiro.</p>
+                <p className="mt-1 text-sm text-[#475569] dark:text-slate-400">Comece por aqui para decidir onde focar primeiro.</p>
                 <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
                   {topPillarDiffs.map((item) => (
                     <button
                       key={item.p}
                       onClick={() => selectPillar(item.p)}
-                      className={`rounded-2xl border p-4 text-left transition-all ${item.p === activePillar ? "border-[#0E9384] bg-[#F4FBF8] shadow-[0_8px_16px_rgba(14,147,132,0.08)]" : "border-[#E7EAEE] bg-white hover:border-[#0E938433]"}`}
+                      className={`rounded-2xl border p-4 text-left transition-all ${item.p === activePillar ? "border-[#0E9384] bg-[#F4FBF8] shadow-[0_8px_16px_rgba(14,147,132,0.08)]" : "border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] hover:border-[#0E938433]"}`}
                     >
                       <p className="text-sm font-semibold">{PILLAR_LABEL[item.p]}</p>{item.p === activePillar ? <p className="mt-1 text-[11px] font-medium text-[#0E9384]">Pilar em foco</p> : null}
-                      <p className="mt-2 text-[13px] font-medium text-[#0F172A]">{item.winner.ticker} leva vantagem.</p><p className="mt-1 text-xs text-[#334155]">{pillarInsight(item.p, item.winner.ticker)}</p>
-                      <p className="mt-1 text-xs text-[#475569]">
+                      <p className="mt-2 text-[13px] font-medium text-[#0F172A] dark:text-[#E5E7EB]">{item.winner.ticker} leva vantagem.</p><p className="mt-1 text-xs text-[#334155]">{pillarInsight(item.p, item.winner.ticker)}</p>
+                      <p className="mt-1 text-xs text-[#475569] dark:text-slate-400">
                         Score: {n(item.da.score, 1)} ({a?.ticker}) vs {n(item.db.score, 1)} ({b?.ticker}) | Delta {n(item.delta, 1)}
                       </p>
                       <p className="mt-2 text-xs text-[#334155]">
                         {trendContext(item.winnerTrend)}.
                       </p>
-                      <div className="mt-2 inline-flex items-center gap-1 rounded-lg border border-[#E7EAEE] bg-[#F8FAFC] px-2 py-1 text-[11px] text-[#475569]">
+                      <div className="mt-2 inline-flex items-center gap-1 rounded-lg border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-2 py-1 text-[11px] text-[#475569] dark:text-slate-400">
                         {trendIcon(item.winnerTrend)} {trendLabel[item.winnerTrend]}
                       </div>
                     </button>
@@ -987,19 +987,19 @@ export function ComparePage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-[#E7EAEE] bg-white p-6">
+              <section className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6">
                 <h2 className="text-[20px] font-semibold">Todos os pilares</h2>
-                <p className="mt-1 text-sm text-[#475569]">Veja quem vence, quanto separa e por que isso importa na tese.</p>
+                <p className="mt-1 text-sm text-[#475569] dark:text-slate-400">Veja quem vence, quanto separa e por que isso importa na tese.</p>
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                   {otherPillarDiffs.map((item) => (
                     <button
                       key={item.p}
                       onClick={() => selectPillar(item.p)}
-                      className={`group rounded-xl border px-4 py-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0E938433] ${item.p === activePillar ? "border-[#0E9384] bg-[#ECFDF6] shadow-[0_12px_24px_rgba(14,147,132,0.14)]" : "border-[#D8E1E9] bg-white hover:-translate-y-1 hover:border-[#0E9384] hover:shadow-[0_14px_24px_rgba(15,23,42,0.12)]"}`}
+                      className={`group rounded-xl border px-4 py-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0E938433] ${item.p === activePillar ? "border-[#0E9384] bg-[#ECFDF6] shadow-[0_12px_24px_rgba(14,147,132,0.14)]" : "border-[#D8E1E9] bg-white dark:bg-[#0B1220] hover:-translate-y-1 hover:border-[#0E9384] hover:shadow-[0_14px_24px_rgba(15,23,42,0.12)]"}`}
                     >
-                      <p className={`text-sm ${item.p === activePillar ? "font-bold text-[#0B7A6E]" : "font-semibold text-[#0F172A]"}`}>{PILLAR_LABEL[item.p]}</p>{item.p === activePillar ? <p className="mt-1 text-[11px] font-semibold text-[#0E9384]">Pilar em foco</p> : null}
-                      <p className="mt-1 text-xs text-[#475569]">Vence: {item.winner.ticker}</p>
-                      <p className="mt-2 text-xs font-semibold text-[#0F172A]">Delta {n(item.delta, 1)}/10</p>
+                      <p className={`text-sm ${item.p === activePillar ? "font-bold text-[#0B7A6E]" : "font-semibold text-[#0F172A] dark:text-[#E5E7EB]"}`}>{PILLAR_LABEL[item.p]}</p>{item.p === activePillar ? <p className="mt-1 text-[11px] font-semibold text-[#0E9384]">Pilar em foco</p> : null}
+                      <p className="mt-1 text-xs text-[#475569] dark:text-slate-400">Vence: {item.winner.ticker}</p>
+                      <p className="mt-2 text-xs font-semibold text-[#0F172A] dark:text-[#E5E7EB]">Delta {n(item.delta, 1)}/10</p>
                       <p className="mt-2 text-[11px] text-[#334155]">{pillarConsequence(item.p, item.delta, item.winner.ticker)}</p>
                       <p className="mt-2 text-[11px] font-semibold text-[#0B7A6E] transition-colors group-hover:text-[#0E9384]">Ver detalhe</p>
                     </button>
@@ -1007,7 +1007,7 @@ export function ComparePage() {
                 </div>
               </section>
 
-              <section ref={detailRef} className="scroll-mt-[160px] rounded-2xl border border-[#E7EAEE] bg-white p-6">
+              <section ref={detailRef} className="scroll-mt-[160px] rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <h2 className="text-[22px] font-semibold">Detalhe guiado do pilar: {PILLAR_LABEL[activePillar]}</h2>
                   {a && b ? (
@@ -1015,7 +1015,7 @@ export function ComparePage() {
                       const m = a.pillars[activePillar].metrics[0];
                       const mb = b.pillars[activePillar].metrics.find((x) => x.name === m.name);
                       setEvidence({ metricName: m.name, definition: m.definition, unit: m.unit, source: m.source, aTicker: a.ticker, bTicker: b.ticker, aValue: m.value, bValue: mb?.value ?? null });
-                    }} className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7EAEE] px-2.5 py-1.5 text-[11px] font-medium text-[#475569]">
+                    }} className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7EAEE] dark:border-[#1F2937] px-2.5 py-1.5 text-[11px] font-medium text-[#475569] dark:text-slate-400">
                       <FileText className="h-3.5 w-3.5" />Confirmar na fonte
                     </button>
                   ) : null}
@@ -1025,42 +1025,42 @@ export function ComparePage() {
                     <div className="space-y-4 text-sm">
                       {a && b ? (
                         <div>
-                          <p className="text-[12px] font-semibold text-[#475569]">Resumo do pilar</p>
-                          <p className="mt-1.5 text-[#0F172A]">
+                          <p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Resumo do pilar</p>
+                          <p className="mt-1.5 text-[#0F172A] dark:text-[#E5E7EB]">
                             {a.pillars[activePillar].score >= b.pillars[activePillar].score ? a.ticker : b.ticker} esta melhor neste pilar hoje.
                           </p>
                         </div>
                       ) : null}
-                      <div><p className="text-[12px] font-semibold text-[#475569]">O que isso quer dizer</p><p className="mt-1.5 text-[#0F172A]">{pillarCopy[activePillar].what}</p></div>
-                      <div><p className="text-[12px] font-semibold text-[#475569]">Por que isso pesa na analise</p><p className="mt-1.5 text-[#0F172A]">{pillarCopy[activePillar].why}</p></div>
-                      <div><p className="text-[12px] font-semibold text-[#475569]">O que observar com atencao</p><p className="mt-1.5 text-[#0F172A]">{pillarCopy[activePillar].how}</p></div>
-                      <div className="flex flex-wrap gap-2">{pillarCopy[activePillar].ranges.map((r) => <span key={r} className="rounded-xl border border-[#E7EAEE] bg-white px-2 py-1 text-[11px]">{r}</span>)}</div>
+                      <div><p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">O que isso quer dizer</p><p className="mt-1.5 text-[#0F172A] dark:text-[#E5E7EB]">{pillarCopy[activePillar].what}</p></div>
+                      <div><p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">Por que isso pesa na analise</p><p className="mt-1.5 text-[#0F172A] dark:text-[#E5E7EB]">{pillarCopy[activePillar].why}</p></div>
+                      <div><p className="text-[12px] font-semibold text-[#475569] dark:text-slate-400">O que observar com atencao</p><p className="mt-1.5 text-[#0F172A] dark:text-[#E5E7EB]">{pillarCopy[activePillar].how}</p></div>
+                      <div className="flex flex-wrap gap-2">{pillarCopy[activePillar].ranges.map((r) => <span key={r} className="rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2 py-1 text-[11px]">{r}</span>)}</div>
                     </div>
                   </article>
-                  <article className="rounded-2xl border border-[#E7EAEE] bg-[#F8FAFC] p-5 xl:col-span-8">
+                  <article className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] p-5 xl:col-span-8">
                     {a && b ? (
                       <>
                         <div className="mb-3 rounded-xl border border-[#E3E8EF] bg-[#F1F5F9] px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B]">Leitura do periodo</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B] dark:text-slate-400">Leitura do periodo</p>
                           <p className="mt-1 text-sm font-medium text-[#334155]">
                             {a.pillars[activePillar].score >= b.pillars[activePillar].score ? a.ticker : b.ticker} mostra trajetoria mais favoravel, enquanto{" "}
                             {a.pillars[activePillar].score >= b.pillars[activePillar].score ? b.ticker : a.ticker} perdeu tracao relativa.
                           </p>
                           <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                            <span className="rounded-lg border border-[#D9E2EC] bg-white px-2 py-1 text-[#334155]">Regra: {a.pillars[activePillar].thresholdLabel}</span>
-                            <span className="rounded-lg border border-[#D9E2EC] bg-white px-2 py-1 text-[#334155]">Direcao desejavel: {a.pillars[activePillar].thresholdLabel.toLowerCase().includes("menor") ? "linha descendente" : "linha ascendente"}</span>
+                            <span className="rounded-lg border border-[#D9E2EC] bg-white dark:bg-[#0B1220] px-2 py-1 text-[#334155]">Regra: {a.pillars[activePillar].thresholdLabel}</span>
+                            <span className="rounded-lg border border-[#D9E2EC] bg-white dark:bg-[#0B1220] px-2 py-1 text-[#334155]">Direcao desejavel: {a.pillars[activePillar].thresholdLabel.toLowerCase().includes("menor") ? "linha descendente" : "linha ascendente"}</span>
                             {latestChartLeader ? <span className="rounded-lg border border-[#BFE7DF] bg-[#ECFDF6] px-2 py-1 font-medium text-[#0B7A6E]">Vantagem atual: {latestChartLeader}</span> : null}
-                            {latestChartDelta !== null ? <span className="rounded-lg border border-[#D9E2EC] bg-white px-2 py-1 text-[#334155]">Delta final: {n(latestChartDelta, 1)}</span> : null}
+                            {latestChartDelta !== null ? <span className="rounded-lg border border-[#D9E2EC] bg-white dark:bg-[#0B1220] px-2 py-1 text-[#334155]">Delta final: {n(latestChartDelta, 1)}</span> : null}
                           </div>
                           {scoreVsChartContext ? (
                             <p className="mt-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-2 text-[12px] text-[#92400E]">{scoreVsChartContext}</p>
                           ) : null}
                         </div>
-                        <div className="mb-2 flex items-center gap-4 text-xs text-[#475569]">
+                        <div className="mb-2 flex items-center gap-4 text-xs text-[#475569] dark:text-slate-400">
                           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[#0E9384]" />{a.ticker}</span>
                           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[#3F5F7D]" />{b.ticker}</span>
                         </div>
-                        <div className="h-[280px] rounded-xl border border-[#E7EAEE] bg-white p-3">
+                        <div className="h-[280px] rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-3">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
                               <CartesianGrid stroke="#EDF2F7" strokeDasharray="2 3" vertical={false} />
@@ -1069,7 +1069,7 @@ export function ComparePage() {
                               <ReferenceArea y1={a.pillars[activePillar].bands.risk[0]} y2={a.pillars[activePillar].bands.risk[1]} fill="#FEE2E2" fillOpacity={0.18} />
                               <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
                               <YAxis domain={a.pillars[activePillar].domain} tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} width={30} />
-                              <Tooltip content={({ active, payload, label }) => !active || !payload?.length ? null : <div className="rounded-lg border border-[#E7EAEE] bg-white p-2 text-xs shadow-lg"><p className="font-semibold">Ano: {label}</p>{payload.map((item) => <p key={`${item.name}-${label}`} style={{ color: item.color as string }}>{item.name}: {n(Number(item.value), 2)}</p>)}</div>} />
+                              <Tooltip content={({ active, payload, label }) => !active || !payload?.length ? null : <div className="rounded-lg border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-2 text-xs shadow-lg"><p className="font-semibold">Ano: {label}</p>{payload.map((item) => <p key={`${item.name}-${label}`} style={{ color: item.color as string }}>{item.name}: {n(Number(item.value), 2)}</p>)}</div>} />
                               <Line type="monotone" dataKey="a" name={a.ticker} stroke={TOKENS.companyA} strokeWidth={2.6} dot={{ r: 2 }} />
                               <Line type="monotone" dataKey="b" name={b.ticker} stroke={TOKENS.companyB} strokeWidth={2.2} dot={{ r: 2 }} />
                             </LineChart>
@@ -1081,12 +1081,12 @@ export function ComparePage() {
                 </div>
               </section>
 
-              <section className="scroll-mt-[160px] rounded-2xl border border-[#E7EAEE] bg-white p-6">
+              <section className="scroll-mt-[160px] rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6">
                 <h2 className="text-[20px] font-semibold">Evidencias por metrica</h2>
-                <p className="mt-1 text-sm text-[#475569]">Compare numeros completos, tendencia e winner por item.</p>
+                <p className="mt-1 text-sm text-[#475569] dark:text-slate-400">Compare numeros completos, tendencia e winner por item.</p>
                 {activePillarWinnerSummary ? <p className="mt-2 text-sm font-medium text-[#334155]">{activePillarWinnerSummary}</p> : null}
                 {a && b ? (
-                  <div className="mt-4 overflow-x-auto rounded-2xl border border-[#E7EAEE]">
+                  <div className="mt-4 overflow-x-auto rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937]">
                     <table className="min-w-full divide-y divide-[#E7EAEE] text-sm">
                       <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#334155]"><tr><th className="px-3 py-3 text-left">Metrica</th><th className="px-3 py-3 text-left">{a.ticker}</th><th className="px-3 py-3 text-left">{b.ticker}</th><th className="px-3 py-3 text-left">Delta</th><th className="px-3 py-3 text-left">Winner</th><th className="px-3 py-3 text-left">Leitura</th><th className="px-3 py-3 text-left">Fonte</th></tr></thead>
                       <tbody className="divide-y divide-[#E7EAEE]">
@@ -1095,13 +1095,13 @@ export function ComparePage() {
                           const d = metricDelta(row.a?.value ?? null, row.b?.value ?? null);
                           return (
                             <tr key={row.name}>
-                              <td className="px-3 py-3 align-top"><p className="font-medium">{row.name}</p><p className="mt-1 text-[11px] text-[#475569]">{row.definition}</p></td>
-                              <td className="px-3 py-3 align-top"><p className={`text-[#0E9384] ${w === "a" ? "font-semibold" : "font-medium"}`}>{formatMetric(row.a?.value ?? null, row.unit)}</p>{row.a ? <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B]">{trendIcon(row.a.trend)}{trendLabel[row.a.trend]}</p> : <p className="mt-1 text-[11px] text-[#EF4444]">Dados indisponiveis</p>}</td>
-                              <td className="px-3 py-3 align-top"><p className={`text-[#3F5F7D] ${w === "b" ? "font-semibold" : "font-medium"}`}>{formatMetric(row.b?.value ?? null, row.unit)}</p>{row.b ? <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B]">{trendIcon(row.b.trend)}{trendLabel[row.b.trend]}</p> : <p className="mt-1 text-[11px] text-[#EF4444]">Dados indisponiveis</p>}</td>
-                              <td className="px-3 py-3 align-top"><span className="inline-flex rounded-md border border-[#D5DEE7] bg-[#F8FAFC] px-2 py-1 text-xs font-semibold text-[#0F172A]">{d === null ? "Dados indisponiveis" : `${n(d, row.unit === "x" ? 2 : 1)} ${row.unit}`}</span></td>
-                              <td className="px-3 py-3 align-top">{w === "a" ? <span className="inline-flex items-center gap-1 rounded-lg border border-[#9FE3CF] bg-[#D9FBEF] px-2 py-1 text-xs font-semibold text-[#0E9384]"><Crown className="h-3 w-3" />{a.ticker}</span> : w === "b" ? <span className="inline-flex items-center gap-1 rounded-lg border border-[#C9DDF0] bg-[#ECF3F9] px-2 py-1 text-xs font-semibold text-[#3F5F7D]"><Check className="h-3 w-3" />{b.ticker}</span> : <span className="inline-flex rounded-md border border-[#D5DEE7] bg-[#F8FAFC] px-2 py-1 text-[12px] font-semibold text-[#475569]">Empate</span>}</td>
-                              <td className="px-3 py-3 align-top"><p className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${d !== null && d >= 1.2 ? "bg-[#ECFDF6] text-[#0B7A6E]" : "bg-[#F8FAFC] text-[#334155]"}`}>{evidenceReadLabel(d)}</p><p className="mt-1 text-[11px] text-[#64748B]">{w === "tie" ? "Sem separacao decisiva." : `${w === "a" ? a.ticker : b.ticker} com leitura mais favoravel neste item.`}</p></td>
-                              <td className="px-3 py-3 align-top"><button title="Ver fonte" onClick={() => openEvidence(row)} className="inline-flex items-center gap-1 rounded-lg border border-[#E7EAEE] px-2 py-1.5 text-[11px] text-[#475569] hover:bg-[#F8FAFC]"><FileText className="h-3.5 w-3.5" />Fonte</button></td>
+                              <td className="px-3 py-3 align-top"><p className="font-medium">{row.name}</p><p className="mt-1 text-[11px] text-[#475569] dark:text-slate-400">{row.definition}</p></td>
+                              <td className="px-3 py-3 align-top"><p className={`text-[#0E9384] ${w === "a" ? "font-semibold" : "font-medium"}`}>{formatMetric(row.a?.value ?? null, row.unit)}</p>{row.a ? <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B] dark:text-slate-400">{trendIcon(row.a.trend)}{trendLabel[row.a.trend]}</p> : <p className="mt-1 text-[11px] text-[#EF4444]">Dados indisponiveis</p>}</td>
+                              <td className="px-3 py-3 align-top"><p className={`text-[#3F5F7D] ${w === "b" ? "font-semibold" : "font-medium"}`}>{formatMetric(row.b?.value ?? null, row.unit)}</p>{row.b ? <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B] dark:text-slate-400">{trendIcon(row.b.trend)}{trendLabel[row.b.trend]}</p> : <p className="mt-1 text-[11px] text-[#EF4444]">Dados indisponiveis</p>}</td>
+                              <td className="px-3 py-3 align-top"><span className="inline-flex rounded-md border border-[#D5DEE7] dark:border-[#1F2937] bg-[#F8FAFC] px-2 py-1 text-xs font-semibold text-[#0F172A] dark:text-[#E5E7EB]">{d === null ? "Dados indisponiveis" : `${n(d, row.unit === "x" ? 2 : 1)} ${row.unit}`}</span></td>
+                              <td className="px-3 py-3 align-top">{w === "a" ? <span className="inline-flex items-center gap-1 rounded-lg border border-[#9FE3CF] bg-[#D9FBEF] px-2 py-1 text-xs font-semibold text-[#0E9384]"><Crown className="h-3 w-3" />{a.ticker}</span> : w === "b" ? <span className="inline-flex items-center gap-1 rounded-lg border border-[#C9DDF0] bg-[#ECF3F9] px-2 py-1 text-xs font-semibold text-[#3F5F7D]"><Check className="h-3 w-3" />{b.ticker}</span> : <span className="inline-flex rounded-md border border-[#D5DEE7] dark:border-[#1F2937] bg-[#F8FAFC] px-2 py-1 text-[12px] font-semibold text-[#475569] dark:text-slate-400">Empate</span>}</td>
+                              <td className="px-3 py-3 align-top"><p className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${d !== null && d >= 1.2 ? "bg-[#ECFDF6] text-[#0B7A6E]" : "bg-[#F8FAFC] text-[#334155]"}`}>{evidenceReadLabel(d)}</p><p className="mt-1 text-[11px] text-[#64748B] dark:text-slate-400">{w === "tie" ? "Sem separacao decisiva." : `${w === "a" ? a.ticker : b.ticker} com leitura mais favoravel neste item.`}</p></td>
+                              <td className="px-3 py-3 align-top"><button title="Ver fonte" onClick={() => openEvidence(row)} className="inline-flex items-center gap-1 rounded-lg border border-[#E7EAEE] dark:border-[#1F2937] px-2 py-1.5 text-[11px] text-[#475569] dark:text-slate-400 hover:bg-[#F8FAFC]"><FileText className="h-3.5 w-3.5" />Fonte</button></td>
                             </tr>
                           );
                         })}
@@ -1110,30 +1110,30 @@ export function ComparePage() {
                   </div>
                 ) : null}
               </section>
-              <section className="rounded-2xl border border-[#E7EAEE] bg-white p-6">
+              <section className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-6">
                 <h2 className="text-[20px] font-semibold">O que pode explicar essa diferenca</h2>
-                <p className="mt-1 text-sm text-[#475569]">Contexto recente + como verificamos os dados.</p>
+                <p className="mt-1 text-sm text-[#475569] dark:text-slate-400">Contexto recente + como verificamos os dados.</p>
                 <div className="mt-3 rounded-xl border border-[#BFE7DF] bg-[#ECFDF6] px-3.5 py-3 shadow-[0_6px_14px_rgba(14,147,132,0.08)]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B]">Sintese principal (90 dias)</p>
-                  <p className="mt-1 text-sm text-[#0F172A]">{mainExplainer}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B] dark:text-slate-400">Sintese principal (90 dias)</p>
+                  <p className="mt-1 text-sm text-[#0F172A] dark:text-[#E5E7EB]">{mainExplainer}</p>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E7EAEE] bg-[#F8FAFC] px-3 py-2 text-[12px] text-[#475569]">
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-3 py-2 text-[12px] text-[#475569] dark:text-slate-400">
                   <span>Atualizado em {pair.map((c) => c.updatedAt).sort((x, y) => parseDate(y) - parseDate(x))[0] ?? "-"}</span>
                   <span>| Fontes CVM/B3/RI</span>
                   <span>| {recentEvents.length} eventos recentes</span>
                   <span>| {eventsOnActivePillar} impactam {PILLAR_LABEL[activePillar]}</span>
                 </div>
                 <div className="mt-4 space-y-3">
-                  <button onClick={() => setEventsOpen((v) => !v)} className="flex w-full items-center justify-between rounded-2xl border border-[#E7EAEE] bg-[#F8FAFC] px-4 py-3 text-left"><span className="text-sm font-semibold">Eventos recentes (90 dias) <span className="font-normal text-[#475569]">- {recentEvents.length} eventos - {eventsOnActivePillar} impactam {PILLAR_LABEL[activePillar]}</span></span>{eventsOpen ? <ChevronUp className="h-4 w-4 text-[#475569]" /> : <ChevronDown className="h-4 w-4 text-[#475569]" />}</button>
-                  {eventsOpen ? <div className="space-y-2">{recentEvents.length ? recentEvents.map((e) => <article key={e.id} className="rounded-2xl border border-[#E7EAEE] bg-white p-4"><div className="flex flex-wrap items-center gap-2 text-xs text-[#475569]"><span>{e.date}</span><span className={`rounded-xl px-2 py-0.5 ${e.type === "Fato relevante" ? "bg-[#FFEDD5] text-[#B45309]" : "border border-[#E7EAEE]"}`}>{e.type}</span><span className="rounded-xl border border-[#E7EAEE] px-2 py-0.5">{PILLAR_LABEL[e.impact]}</span><span className="rounded-xl border border-[#E7EAEE] px-2 py-0.5">{e.ticker}</span></div><p className="mt-2 text-sm">{e.summary}</p><button onClick={() => setEvidence({ metricName: `Evento: ${e.type}`, definition: e.summary, unit: "", source: e.source, aTicker: a?.ticker ?? "A", bTicker: b?.ticker ?? "B", aValue: null, bValue: null })} className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] px-2.5 py-1.5 text-xs text-[#475569]"><FileText className="h-3.5 w-3.5" />Ver fonte</button></article>) : <div className="rounded-2xl border border-[#E7EAEE] bg-white p-4 text-sm text-[#475569]">Nenhum evento relevante encontrado para as empresas selecionadas.</div>}</div> : null}
-                  <button onClick={() => setQualityOpen((v) => !v)} className="flex w-full items-center justify-between rounded-2xl border border-[#E7EAEE] bg-[#F8FAFC] px-4 py-3 text-left"><span className="text-sm font-semibold inline-flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${qualityTone.dot}`} />Como verificamos os dados <span className="font-normal text-[#475569]">- Atualizado em {pair.map((c) => c.updatedAt).sort((x, y) => parseDate(y) - parseDate(x))[0] ?? "-"} - Fontes: CVM/B3/RI</span></span>{qualityOpen ? <ChevronUp className="h-4 w-4 text-[#475569]" /> : <ChevronDown className="h-4 w-4 text-[#475569]" />}</button>
-                  {qualityOpen ? <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{pair.map((c, i) => <article key={c.ticker} className="rounded-2xl border border-[#E7EAEE] bg-white p-4 text-sm"><p className="font-semibold">{i === 0 ? "Empresa A" : "Empresa B"}: {c.ticker}</p><p className="mt-1 text-[#475569]">Fonte primaria: {c.primarySource}</p><p className="mt-1 text-[#475569]">Ultima atualizacao: {c.updatedAt}</p><p className="mt-2 text-xs text-[#475569]" title="Confiabilidade baseada em cobertura, recorrencia e completude">Confianca: {c.confidence}</p>{c.gaps.length ? <div className="mt-2 rounded-xl border border-[#FDE68A] bg-[#FFF7ED] px-3 py-2 text-xs text-[#B45309]"><p className="inline-flex items-center gap-1 font-medium"><TriangleAlert className="h-3.5 w-3.5" />Gap identificado</p><p className="mt-1.5 text-[#0F172A]">{c.gaps.join(" ")}</p></div> : <div className="mt-2 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-2 text-xs text-[#166534]">Nenhum gap relevante reportado.</div>}</article>)}</div> : null}
+                  <button onClick={() => setEventsOpen((v) => !v)} className="flex w-full items-center justify-between rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-4 py-3 text-left"><span className="text-sm font-semibold">Eventos recentes (90 dias) <span className="font-normal text-[#475569] dark:text-slate-400">- {recentEvents.length} eventos - {eventsOnActivePillar} impactam {PILLAR_LABEL[activePillar]}</span></span>{eventsOpen ? <ChevronUp className="h-4 w-4 text-[#475569] dark:text-slate-400" /> : <ChevronDown className="h-4 w-4 text-[#475569] dark:text-slate-400" />}</button>
+                  {eventsOpen ? <div className="space-y-2">{recentEvents.length ? recentEvents.map((e) => <article key={e.id} className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-4"><div className="flex flex-wrap items-center gap-2 text-xs text-[#475569] dark:text-slate-400"><span>{e.date}</span><span className={`rounded-xl px-2 py-0.5 ${e.type === "Fato relevante" ? "bg-[#FFEDD5] text-[#B45309]" : "border border-[#E7EAEE] dark:border-[#1F2937]"}`}>{e.type}</span><span className="rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] px-2 py-0.5">{PILLAR_LABEL[e.impact]}</span><span className="rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] px-2 py-0.5">{e.ticker}</span></div><p className="mt-2 text-sm">{e.summary}</p><button onClick={() => setEvidence({ metricName: `Evento: ${e.type}`, definition: e.summary, unit: "", source: e.source, aTicker: a?.ticker ?? "A", bTicker: b?.ticker ?? "B", aValue: null, bValue: null })} className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#E7EAEE] dark:border-[#1F2937] px-2.5 py-1.5 text-xs text-[#475569] dark:text-slate-400"><FileText className="h-3.5 w-3.5" />Ver fonte</button></article>) : <div className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-4 text-sm text-[#475569] dark:text-slate-400">Nenhum evento relevante encontrado para as empresas selecionadas.</div>}</div> : null}
+                  <button onClick={() => setQualityOpen((v) => !v)} className="flex w-full items-center justify-between rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-[#F8FAFC] px-4 py-3 text-left"><span className="text-sm font-semibold inline-flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${qualityTone.dot}`} />Como verificamos os dados <span className="font-normal text-[#475569] dark:text-slate-400">- Atualizado em {pair.map((c) => c.updatedAt).sort((x, y) => parseDate(y) - parseDate(x))[0] ?? "-"} - Fontes: CVM/B3/RI</span></span>{qualityOpen ? <ChevronUp className="h-4 w-4 text-[#475569] dark:text-slate-400" /> : <ChevronDown className="h-4 w-4 text-[#475569] dark:text-slate-400" />}</button>
+                  {qualityOpen ? <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{pair.map((c, i) => <article key={c.ticker} className="rounded-2xl border border-[#E7EAEE] dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-4 text-sm"><p className="font-semibold">{i === 0 ? "Empresa A" : "Empresa B"}: {c.ticker}</p><p className="mt-1 text-[#475569] dark:text-slate-400">Fonte primaria: {c.primarySource}</p><p className="mt-1 text-[#475569] dark:text-slate-400">Ultima atualizacao: {c.updatedAt}</p><p className="mt-2 text-xs text-[#475569] dark:text-slate-400" title="Confiabilidade baseada em cobertura, recorrencia e completude">Confianca: {c.confidence}</p>{c.gaps.length ? <div className="mt-2 rounded-xl border border-[#FDE68A] bg-[#FFF7ED] px-3 py-2 text-xs text-[#B45309]"><p className="inline-flex items-center gap-1 font-medium"><TriangleAlert className="h-3.5 w-3.5" />Gap identificado</p><p className="mt-1.5 text-[#0F172A] dark:text-[#E5E7EB]">{c.gaps.join(" ")}</p></div> : <div className="mt-2 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-2 text-xs text-[#166534]">Nenhum gap relevante reportado.</div>}</article>)}</div> : null}
                 </div>
               </section>
             </div>
           )}
 
-          <p className="mt-8 text-xs text-[#64748B]">Conteudo educacional. Nao constitui recomendacao de compra ou venda.</p>
+          <p className="mt-8 text-xs text-[#64748B] dark:text-slate-400">Conteudo educacional. Nao constitui recomendacao de compra ou venda.</p>
         </div>
       </main>
       {toast ? <div className="fixed bottom-5 right-5 z-50 rounded-xl border border-[#0E938433] bg-[#D9FBEF] px-3 py-2 text-xs font-medium text-[#0B7A6E] shadow-lg">{toast}</div> : null}
