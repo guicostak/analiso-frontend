@@ -1,7 +1,7 @@
 "use client";
 
-import { ComparePage } from "../../src/components/compare";
-import { ProtectedRoute } from "../../src/components/shared";
+import { ComparePage } from "../../src/features/compare/components";
+import { ProtectedRoute } from "@/src/components/layout";
 
 export default function Comparar() {
   return (

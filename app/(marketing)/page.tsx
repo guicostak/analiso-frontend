@@ -1,4 +1,4 @@
-﻿import { LandingPage } from "../../src/components/landing/LandingPage";
+﻿import { LandingPage } from "../../src/features/landing/components";
 
 export default function MarketingPage() {
   return <LandingPage />;

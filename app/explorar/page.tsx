@@ -1,7 +1,7 @@
 "use client";
 
-import { ExplorePage } from "../../src/components/explore";
-import { ProtectedRoute } from "../../src/components/shared";
+import { ExplorePage } from "../../src/features/explore/components";
+import { ProtectedRoute } from "@/src/components/layout";
 
 export default function Explorar() {
   return (

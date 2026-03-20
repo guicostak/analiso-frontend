@@ -1,7 +1,7 @@
 "use client";
 
-import { CompanyAnalysis } from "../../../src/components/empresa";
-import { ProtectedRoute } from "../../../src/components/shared";
+import { CompanyAnalysis } from "../../../src/features/empresa/components";
+import { ProtectedRoute } from "@/src/components/layout";
 
 export default function EmpresaPage() {
   return (

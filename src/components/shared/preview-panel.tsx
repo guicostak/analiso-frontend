@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Company } from '../../data/mock-companies';
-import { PillarRadar } from '../pillar-radar';
+import { PillarRadar } from './PillarRadar';
 import { CheckCircle2, AlertCircle, TrendingUp, TrendingDown, Minus, Bookmark, Bell, GitCompare, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
