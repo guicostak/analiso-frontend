@@ -12,8 +12,8 @@ import {
   FileText,
 } from "lucide-react";
 
-import { useDashboardInbox } from "../hooks/useDashboardInbox";
-import type { InboxItem, Status, Pillar } from "../types/dashboard";
+import { useDashboardInbox, allStatuses, allPillars, allSources } from "../hooks/useDashboardInbox";
+import type { InboxItem, Status, Pillar, WindowRange } from "../types/dashboard";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -423,7 +423,7 @@ export function Dashboard() {
                       </button>
                     ))}
                     <button
-                      onClick={() => setFiltersOpen((prev) => !prev)}
+                      onClick={() => setFiltersOpen(!filtersOpen)}
                       className={cn(
                         "ml-auto rounded-lg border px-3 py-1.5 text-[12px] font-medium",
                         "border-border bg-card text-dim hover:bg-hover",
@@ -449,7 +449,7 @@ export function Dashboard() {
                         {allStatuses.map((status) => (
                           <button
                             key={status}
-                            onClick={() => setInboxFilters((prev) => ({ ...prev, severities: toggleInArray(prev.severities, status) }))}
+                            onClick={() => toggleFilterSeverity(status)}
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activeSeverities.includes(status)
@@ -467,7 +467,7 @@ export function Dashboard() {
                         {allPillars.map((pillar) => (
                           <button
                             key={pillar}
-                            onClick={() => setInboxFilters((prev) => ({ ...prev, pillars: toggleInArray(prev.pillars, pillar) }))}
+                            onClick={() => toggleFilterPillar(pillar)}
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activePillars.includes(pillar)
@@ -485,7 +485,7 @@ export function Dashboard() {
                         {allSources.map((source) => (
                           <button
                             key={source}
-                            onClick={() => setInboxFilters((prev) => ({ ...prev, sources: toggleInArray(prev.sources, source) }))}
+                            onClick={() => toggleFilterSource(source)}
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activeSources.includes(source)

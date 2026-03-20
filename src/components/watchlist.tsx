@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 import { useWatchlist } from "../hooks/useWatchlist";
 import { getStatusFromScores, watchlistCompanies, suggestedCompanies } from "../services/watchlist";
-import type { Pillar, FeedItem, PriorityItem, WatchlistCompany, AlertItem } from "../types/watchlist";
+import type { Pillar, FeedItem, PriorityItem, WatchlistCompany, AlertItem, WatchlistSortBy } from "../types/watchlist";
 
 const pillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
 
@@ -385,7 +385,7 @@ export function WatchlistPage() {
                           </button>
                         </div>
                         <button
-                          onClick={() => setShowAdvancedFeedFilters((prev) => !prev)}
+                          onClick={() => setShowAdvancedFeedFilters(!showAdvancedFeedFilters)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             showAdvancedFeedFilters
                               ? "border-brand-border bg-brand-surface text-brand-text"
@@ -524,7 +524,7 @@ export function WatchlistPage() {
                       <div className="relative flex-1">
                         <select
                           value={sortBy}
-                          onChange={(event) => setSortBy(event.target.value)}
+                          onChange={(event) => setSortBy(event.target.value as WatchlistSortBy)}
                           className="w-full px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                         >
                           {[
@@ -554,7 +554,7 @@ export function WatchlistPage() {
                           </button>
                         ))}
                         <button
-                          onClick={() => setShowListFilters((prev) => !prev)}
+                          onClick={() => setShowListFilters(!showListFilters)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             showListFilters
                               ? "border-neutral-300 bg-hover text-dim"
@@ -564,7 +564,7 @@ export function WatchlistPage() {
                           Filtros ({activeListFiltersCount})
                         </button>
                         <button
-                          onClick={() => setUnseenOnly((prev) => !prev)}
+                          onClick={() => setUnseenOnly(!unseenOnly)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             unseenOnly
                               ? "border-neutral-300 bg-hover text-dim"
@@ -599,7 +599,7 @@ export function WatchlistPage() {
                             <select
                               value={filters[filter.key as keyof typeof filters]}
                               onChange={(event) =>
-                                setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))
+                                setFilters({ ...filters, [filter.key]: event.target.value })
                               }
                               className="w-full px-3 py-2 rounded-xl border border-border text-xs text-dim bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                             >
@@ -755,7 +755,7 @@ export function WatchlistPage() {
                                 aria-label="Mais ações"
                                 onClick={(event) => {
                                   event.stopPropagation();
-                                  setQuickActionsTicker((prev) => (prev === company.ticker ? null : company.ticker));
+                                  setQuickActionsTicker(quickActionsTicker === company.ticker ? null : company.ticker);
                                 }}
                                 className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground hover:bg-hover hover:text-muted-foreground"
                               >
@@ -788,7 +788,7 @@ export function WatchlistPage() {
                                     title={isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
                                     onClick={() => {
                                       setQuickActionsTicker(null);
-                                      setExpandedTicker((prev) => (prev === company.ticker ? null : company.ticker));
+                                      setExpandedTicker(expandedTicker === company.ticker ? null : company.ticker);
                                     }}
                                     className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                                   >
@@ -898,7 +898,7 @@ export function WatchlistPage() {
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-foreground">Alertas</h3>
                   <button
-                    onClick={() => setShowAlertActionOnly((prev) => !prev)}
+                    onClick={() => setShowAlertActionOnly(!showAlertActionOnly)}
                   className={`text-xs px-2 py-1 rounded-full border ${
                     showAlertActionOnly
                       ? "border-brand-border bg-brand-surface text-brand-text"
