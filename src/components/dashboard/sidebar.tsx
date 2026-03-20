@@ -7,7 +7,6 @@ import {
   Home,
   LayoutGrid,
   NotebookPen,
-  UserCircle2,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -67,7 +66,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
     });
 
   return (
-    <aside className="dash-side fixed left-0 top-0 z-30 h-screen w-[88px] border-r border-border bg-background">
+    <aside className="fixed left-0 top-0 z-30 h-screen w-[88px] border-r border-border bg-background">
       <div className="flex h-full flex-col items-center px-3 py-4">
         <img src={logo.src} alt="Analiso" className="h-11 w-11 object-contain" />
 
@@ -79,15 +78,6 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
 
         <div className="my-4 h-px w-10 bg-border" />
 
-        <div className="mt-auto">
-          <button
-            title="Perfil"
-            aria-label="Perfil"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground"
-          >
-            <UserCircle2 className="h-5 w-5" />
-          </button>
-        </div>
       </div>
     </aside>
   );
