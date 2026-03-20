@@ -722,7 +722,7 @@ export function ExplorePage() {
               setShowAllMovements(false);
             }}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              selectedTab === tab.value ? "bg-mint-50 text-mint-700" : "text-muted-foreground hover:text-foreground/80 hover:bg-accent"
+              selectedTab === tab.value ? "bg-brand-surface text-brand-text" : "text-muted-foreground hover:text-foreground hover:bg-hover"
             }`}
           >
             {tab.label}
@@ -971,8 +971,8 @@ export function ExplorePage() {
                       onClick={() => toggleEntryPoint(entry)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                         selectedEntryPoints.includes(entry)
-                          ? "border-mint-200 bg-mint-50 text-mint-700"
-                          : "border-border text-foreground/70 hover:text-foreground hover:bg-accent"
+                          ? "border-brand-border bg-brand-surface text-brand-text"
+                          : "border-border text-muted-foreground hover:text-foreground hover:bg-hover"
                       }`}
                     >
                       {entry}
@@ -1051,7 +1051,7 @@ export function ExplorePage() {
 
                   <button
                     onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                    className="px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 hover:bg-accent"
+                    className="px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 hover:bg-hover"
                   >
                     {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
                   </button>
@@ -1118,7 +1118,7 @@ export function ExplorePage() {
                   <div className="bg-card rounded-2xl border border-border shadow-sm p-8 text-center">
                     <p className="text-sm text-foreground/70 mb-3">Nenhuma empresa encontrada com esses filtros.</p>
                     <div className="flex items-center justify-center gap-3">
-                      <button onClick={resetFilters} className="px-4 py-2 rounded-xl border border-border text-sm text-foreground/70 hover:bg-accent">
+                      <button onClick={resetFilters} className="px-4 py-2 rounded-xl border border-border text-sm text-foreground/70 hover:bg-hover">
                         Limpar filtros
                       </button>
                       <button

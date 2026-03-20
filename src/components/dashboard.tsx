@@ -393,7 +393,7 @@ function SegmentedHealthBar({ healthy, attention, risk }: { healthy: number; att
   const riskW = (risk / total) * 100;
 
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-[#F2F4F7]">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
       <div className="h-full bg-emerald-500" style={{ width: `${healthyW}%`, float: "left" }} />
       <div className="h-full bg-amber-400" style={{ width: `${attentionW}%`, float: "left" }} />
       <div className="h-full bg-rose-500" style={{ width: `${riskW}%`, float: "left" }} />
@@ -415,16 +415,10 @@ function ReadingProgressStep({
       className={cn(
         "rounded-xl border px-3 py-2",
         status === "current"
-          ? isDarkMode
-            ? "border-[#2DD4BF]/40 bg-[#0F2B2A]"
-            : "border-mint-200 bg-mint-50"
+          ? "border-brand-border bg-brand-surface"
           : status === "done"
-            ? isDarkMode
-              ? "border-[#334155] bg-[#111827]"
-              : "border-slate-200 bg-slate-50"
-            : isDarkMode
-              ? "border-[#1F2937] bg-[#0B1220]"
-              : "border-slate-200 bg-white",
+            ? "border-border-strong bg-muted"
+            : "border-border bg-card",
       )}
     >
       <div className="flex items-center gap-2">
@@ -434,12 +428,8 @@ function ReadingProgressStep({
             status === "current"
               ? "border-mint-600 bg-mint-600 text-white"
               : status === "done"
-                ? isDarkMode
-                  ? "border-[#475467] bg-[#0F172A] text-[#CCFBF1]"
-                  : "border-mint-200 bg-white text-mint-600"
-                : isDarkMode
-                  ? "border-[#334155] bg-[#0F172A] text-slate-400"
-                  : "border-slate-200 bg-slate-50 text-slate-500",
+                ? "border-brand-border bg-card text-brand-text"
+                : "border-border bg-muted text-muted-foreground",
           )}
         >
           {status === "done" ? "OK" : ""}
@@ -447,13 +437,7 @@ function ReadingProgressStep({
         <p
           className={cn(
             "text-[12px] font-medium",
-            status === "current"
-              ? isDarkMode
-                ? "text-[#F3F4F6]"
-                : "text-slate-900"
-              : isDarkMode
-                ? "text-slate-400"
-                : "text-slate-600",
+            status === "current" ? "text-foreground" : "text-muted-foreground",
           )}
         >
           {label}
@@ -853,7 +837,7 @@ export function Dashboard() {
 
   return (
     <div
-      className={cn("min-h-screen", isDarkMode ? "bg-[#020617] text-[#E5E7EB]" : "bg-slate-50 text-slate-900")}
+      className="min-h-screen bg-background text-foreground"
       style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
       <div className="hidden md:fixed md:inset-y-0 md:left-0 md:z-30 md:block md:w-[88px]">
@@ -868,38 +852,38 @@ export function Dashboard() {
           <section className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h1 className={cn("text-[24px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>Sua watchlist hoje</h1>
-                <span className={cn("rounded-full border px-2.5 py-1 text-[12px]", isDarkMode ? "border-[#374151] bg-[#111827] text-slate-400" : "border-slate-200 bg-white text-slate-500")}>Atualizado {refreshLabel}</span>
+                <h1 className={cn("text-[24px] font-semibold", "text-foreground")}>Sua watchlist hoje</h1>
+                <span className={cn("rounded-full border px-2.5 py-1 text-[12px]", "border-border bg-card text-muted-foreground")}>Atualizado {refreshLabel}</span>
               </div>
-              <p className={cn("text-[13px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>Leitura das últimas 24h</p>
+              <p className={cn("text-[13px]", "text-muted-foreground")}>Leitura das últimas 24h</p>
             </div>
-            <Button variant="ghost" className={cn("h-8 rounded-lg px-2 text-[12px] font-medium", isDarkMode ? "text-slate-400 hover:bg-[#0F172A]" : "text-slate-600 hover:bg-slate-100")}>
+            <Button variant="ghost" className={cn("h-8 rounded-lg px-2 text-[12px] font-medium", "text-muted-foreground hover:bg-hover")}>
               + Criar alerta
             </Button>
           </section>
 
           <section>
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#134E48] bg-[#0B2A2A]" : "border-mint-200 bg-gradient-to-r from-[#ECFDF9] to-white")}>
+            <Card className={cn("rounded-2xl border", isDarkMode ? "border-brand-border bg-brand-surface" : "border-mint-200 bg-gradient-to-r from-[#ECFDF9] to-white")}>
               <CardContent className="p-4">
                 {dashboardLoading ? (
                   /* Skeleton while API loads */
                   <div className="space-y-2 animate-pulse">
-                    <div className={cn("h-3 w-24 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
-                    <div className={cn("h-6 w-3/4 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
-                    <div className={cn("h-4 w-1/2 rounded", isDarkMode ? "bg-[#134E48]" : "bg-mint-100")} />
+                    <div className={cn("h-3 w-24 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
+                    <div className={cn("h-6 w-3/4 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
+                    <div className={cn("h-4 w-1/2 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
                   </div>
                 ) : dashboardError === "not_ready" ? (
                   <div className="space-y-2">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo de hoje</p>
-                    <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
+                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>Resumo de hoje</p>
+                    <p className={cn("text-[20px] font-semibold leading-tight", "text-foreground")}>
                       Preparando seu dashboard...
                     </p>
-                    <p className={cn("text-[14px] leading-relaxed", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
+                    <p className={cn("text-[14px] leading-relaxed", "text-dim")}>
                       Estamos analisando sua watchlist pela primeira vez. Isso leva menos de um minuto.
                     </p>
                     <div className="flex items-center gap-2 pt-1">
-                      <div className="w-4 h-4 border-2 border-[#0E9384] border-t-transparent rounded-full animate-spin" />
-                      <span className={cn("text-[13px]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>
+                      <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                      <span className={cn("text-[13px]", "text-brand-text")}>
                         Atualizando automaticamente...
                       </span>
                     </div>
@@ -907,14 +891,14 @@ export function Dashboard() {
                 ) : (
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-3xl space-y-1.5">
-                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Resumo de hoje</p>
-                      <p className={cn("text-[20px] font-semibold leading-tight", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
+                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>Resumo de hoje</p>
+                      <p className={cn("text-[20px] font-semibold leading-tight", "text-foreground")}>
                         {dashboardData?.summary.headline ??
                           (todayRiskCount > 0 || todayAttentionCount > 0
                             ? `Hoje sua watchlist teve ${pluralize(todayRiskCount, "mudança de risco", "mudanças de risco")} e ${pluralize(todayHealthyCount, "melhora importante", "melhoras importantes")}.`
                             : "Sua watchlist está estável hoje, sem pioras críticas novas.")}
                       </p>
-                      <p className={cn("text-[14px] leading-relaxed", isDarkMode ? "text-[#C5D4D4]" : "text-slate-600")}>
+                      <p className={cn("text-[14px] leading-relaxed", "text-dim")}>
                         {dashboardData?.summary.body ??
                           dashboardData?.nextStep.headline ??
                           (priorityItem
@@ -926,13 +910,13 @@ export function Dashboard() {
                       <Button onClick={focusInboxRecentImpact} className="h-9 rounded-lg bg-mint-600 px-3 text-[12px] font-semibold text-white hover:bg-mint-700">
                         {dashboardData?.summary.ctaPrimary ?? "Abrir prioridade 1"}
                       </Button>
-                      <button onClick={focusInboxRecentImpact} className={cn("text-[12px] font-medium", isDarkMode ? "text-[#CCFBF1] hover:text-white" : "text-mint-700 hover:text-mint-800")}>
+                      <button onClick={focusInboxRecentImpact} className={cn("text-[12px] font-medium", "text-brand-text hover:text-foreground")}>
                         Ver todas as atualizações
                       </button>
                       <span
                         className={cn(
                           "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px]",
-                          isDarkMode ? "border-[#334155] bg-[#0F172A] text-slate-400" : "border-white/70 bg-white/70 text-slate-500",
+                          "border-border bg-card/60 text-muted-foreground",
                         )}
                       >
                         <Database className="h-3 w-3" />
@@ -946,13 +930,13 @@ export function Dashboard() {
           </section>
 
           <section ref={inboxRef} className="space-y-3">
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
+            <Card className={cn("rounded-2xl border", "border-border bg-card")}>
               <CardContent className="space-y-3 p-4">
                 <div className="flex flex-col gap-1">
-                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>
+                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>
                     Leitura de hoje: {progressHeadlineStep} de {progressStates.length} etapas
                   </p>
-                  <p className={cn("text-[13px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                  <p className={cn("text-[13px]", "text-muted-foreground")}>
                     {completedSteps === progressStates.length
                       ? "Fluxo principal concluido. Se quiser, revise os blocos de apoio antes de encerrar."
                       : "Siga a ordem sugerida para reduzir ruido e concluir a sessao com mais contexto."}
@@ -971,22 +955,22 @@ export function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0F172A]" : "border-slate-200 bg-white")}>
+            <Card className={cn("rounded-2xl border", "border-border bg-muted")}>
               <CardHeader className="space-y-3 px-4 pt-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="max-w-2xl">
-                    <CardTitle className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>Atualizações da watchlist</CardTitle>
-                    <CardDescription className={cn("text-[14px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                    <CardTitle className={cn("text-[16px] font-semibold", "text-foreground")}>Atualizações da watchlist</CardTitle>
+                    <CardDescription className={cn("text-[14px]", "text-muted-foreground")}>
                       Fluxo guiado: comece pelo primeiro item, avance nos relevantes e finalize nos estaveis.
                     </CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                    <div className={cn("inline-flex rounded-lg border p-0.5", isDarkMode ? "border-[#374151] bg-[#0F172A]" : "border-slate-300 bg-white")}>
+                    <div className={cn("inline-flex rounded-lg border p-0.5", "border-border bg-muted")}>
                       <button
                         onClick={setImpactMode}
                         className={cn(
                           "rounded-md px-2.5 py-1.5 text-[12px] font-semibold transition",
-                          inboxMode === "top-impacto" ? "bg-mint-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-[#1F2937]" : "text-slate-500 hover:bg-slate-100",
+                          inboxMode === "top-impacto" ? "bg-mint-600 text-white" : "text-muted-foreground hover:bg-hover",
                         )}
                       >
                         Top impacto
@@ -995,7 +979,7 @@ export function Dashboard() {
                         onClick={setRealTimeMode}
                         className={cn(
                           "rounded-md px-2.5 py-1.5 text-[12px] font-semibold transition",
-                          inboxMode === "tempo-real" ? "bg-mint-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-[#1F2937]" : "text-slate-500 hover:bg-slate-100",
+                          inboxMode === "tempo-real" ? "bg-mint-600 text-white" : "text-muted-foreground hover:bg-hover",
                         )}
                       >
                         Tempo real
@@ -1003,7 +987,7 @@ export function Dashboard() {
                     </div>
                     <button
                       onClick={refreshInboxNow}
-                      className={cn("font-medium", isDarkMode ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-700")}
+                      className={cn("font-medium", "text-muted-foreground hover:text-foreground")}
                       disabled={isRefreshing}
                     >
                       {isRefreshing ? "Atualizando..." : "Atualizar agora"}
@@ -1011,9 +995,9 @@ export function Dashboard() {
                   </div>
                 </div>
 
-                <div className={cn("rounded-xl border p-3", isDarkMode ? "border-[#1F2937] bg-[#111827]" : "border-slate-200 bg-slate-50")}>
+                <div className={cn("rounded-xl border p-3", "border-border bg-muted")}>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className={cn("text-[12px] font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>Período</p>
+                    <p className={cn("text-[12px] font-medium", "text-muted-foreground")}>Período</p>
                     {(["24h", "7d", "30d"] as WindowRange[]).map((range) => (
                       <button
                         key={range}
@@ -1021,10 +1005,8 @@ export function Dashboard() {
                         className={cn(
                           "h-7 rounded-full border px-3 text-[11px] font-medium",
                           inboxFilters.period === range
-                            ? "border-[#0E9384] bg-mint-600 text-white"
-                            : isDarkMode
-                              ? "border-[#374151] bg-[#0F172A] text-slate-400 hover:bg-[#1F2937]"
-                              : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+                            ? "border-brand bg-brand text-white"
+                            : "border-border bg-card text-muted-foreground hover:bg-hover",
                         )}
                       >
                         {range}
@@ -1034,7 +1016,7 @@ export function Dashboard() {
                       onClick={() => setFiltersOpen((prev) => !prev)}
                       className={cn(
                         "ml-auto rounded-lg border px-3 py-1.5 text-[12px] font-medium",
-                        isDarkMode ? "border-[#374151] bg-[#0F172A] text-[#D1D5DB] hover:bg-[#1F2937]" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
+                        "border-border bg-card text-dim hover:bg-hover",
                       )}
                     >
                       {showFiltersCount ? `Filtros (${advancedFiltersCount})` : "Filtros"}
@@ -1042,16 +1024,16 @@ export function Dashboard() {
                   </div>
 
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px]">
-                    <p className={cn(isDarkMode ? "text-slate-400" : "text-slate-500")}>
+                    <p className={cn("text-muted-foreground")}>
                       {inboxRows.length} atualizações · ordenado por {orderLabel}
                     </p>
-                    <p className={cn(isDarkMode ? "text-slate-400" : "text-slate-500")}>Última leitura sincronizada {refreshLabel}</p>
+                    <p className={cn("text-muted-foreground")}>Última leitura sincronizada {refreshLabel}</p>
                   </div>
 
-                  {refreshError && <p className="mt-2 text-[12px] font-medium text-[#B42318]">{refreshError}</p>}
+                  {refreshError && <p className="mt-2 text-[12px] font-medium text-danger-text">{refreshError}</p>}
 
                   {filtersOpen && (
-                    <div className={cn("mt-3 space-y-2 rounded-lg border p-3", isDarkMode ? "border-[#374151] bg-[#0F172A]" : "border-slate-200 bg-white")}>
+                    <div className={cn("mt-3 space-y-2 rounded-lg border p-3", "border-border bg-muted")}>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-[12px] font-medium text-slate-500">Severidade</p>
                         {allStatuses.map((status) => (
@@ -1061,8 +1043,8 @@ export function Dashboard() {
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activeSeverities.includes(status)
-                                ? "border-[#0E9384] bg-mint-50 text-mint-600"
-                                : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+                                ? "border-brand bg-brand-surface text-brand-text"
+                                : "border-border bg-card text-muted-foreground hover:bg-hover",
                             )}
                           >
                             {status}
@@ -1079,8 +1061,8 @@ export function Dashboard() {
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activePillars.includes(pillar)
-                                ? "border-[#0E9384] bg-mint-50 text-mint-600"
-                                : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+                                ? "border-brand bg-brand-surface text-brand-text"
+                                : "border-border bg-card text-muted-foreground hover:bg-hover",
                             )}
                           >
                             {pillar}
@@ -1097,8 +1079,8 @@ export function Dashboard() {
                             className={cn(
                               "h-7 rounded-full border px-3 text-[11px] font-medium",
                               activeSources.includes(source)
-                                ? "border-[#0E9384] bg-mint-50 text-mint-600"
-                                : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+                                ? "border-brand bg-brand-surface text-brand-text"
+                                : "border-border bg-card text-muted-foreground hover:bg-hover",
                             )}
                           >
                             {source}
@@ -1118,10 +1100,10 @@ export function Dashboard() {
 
               <CardContent className="space-y-2 px-4 pb-4">
                 {hasAnyFilterOverride && (
-                  <div className={cn("rounded-xl border px-3 py-2", isDarkMode ? "border-[#374151] bg-[#111827]" : "border-slate-200 bg-slate-50")}>
+                  <div className={cn("rounded-xl border px-3 py-2", "border-border bg-muted")}>
                     <div className="flex flex-wrap items-center gap-2">
                       {activeFilterChips.map((chip) => (
-                        <span key={chip} className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", isDarkMode ? "border-[#475467] bg-[#0F172A] text-[#CBD5E1]" : "border-slate-200 bg-white text-slate-600")}>
+                        <span key={chip} className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", "border-border bg-card text-dim")}>
                           {chip}
                         </span>
                       ))}
@@ -1139,9 +1121,9 @@ export function Dashboard() {
                     ))}
                   </div>
                 ) : inboxError ? (
-                  <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-3 py-4">
-                    <p className="text-[14px] font-medium text-[#B42318]">Não foi possível carregar atualizações.</p>
-                    <button onClick={() => setInboxError(false)} className="mt-2 text-[12px] font-medium text-[#B42318] underline">
+                  <div className="rounded-xl border border-danger-border bg-danger-surface px-3 py-4">
+                    <p className="text-[14px] font-medium text-danger-text">Não foi possível carregar atualizações.</p>
+                    <button onClick={() => setInboxError(false)} className="mt-2 text-[12px] font-medium text-danger-text underline">
                       Tentar novamente
                     </button>
                   </div>
@@ -1158,8 +1140,8 @@ export function Dashboard() {
                 ) : (
                   <>
                     {inboxMode === "top-impacto" && priorityItem && (
-                      <div className={cn("rounded-xl border px-3 py-2", isDarkMode ? "border-[#134E48] bg-[#0F2B2A]" : "border-mint-200 bg-mint-50")}>
-                        <p className={cn("text-[12px] font-semibold", isDarkMode ? "text-[#99F6E4]" : "text-mint-700")}>
+                      <div className={cn("rounded-xl border px-3 py-2", "border-brand-border bg-brand-surface")}>
+                        <p className={cn("text-[12px] font-semibold", "text-brand-text")}>
                           Comece por aqui: {priorityItem.ticker}
                           {priorityItem.pillarKey ? ` em ${priorityItem.pillarKey}` : ""}
                         </p>
@@ -1175,10 +1157,10 @@ export function Dashboard() {
                           key={item.id}
                         onClick={() => openInboxItem(item)}
                         className={cn(
-                          "w-full cursor-default rounded-xl border border-transparent text-left transition hover:border-slate-300 hover:bg-slate-100 hover:shadow-[inset_3px_0_0_#0E9384]",
+                          "w-full cursor-default rounded-xl border border-transparent text-left transition hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
                           isStablePositive ? "p-1.5" : "p-3",
-                          isNew && (isDarkMode ? "border-[#1D4ED8] bg-[#0F172A]" : "border-[#B2DDFF] bg-[#F0F9FF]"),
-                          isPriority && (isDarkMode ? "border-mint-500/40 bg-[#0F2B2A] hover:bg-[#0F3A39] hover:border-mint-500/60" : "border-mint-200 bg-mint-50 hover:bg-[#ECFDF9] hover:border-[#6ED4C7]"),
+                          isNew && (isDarkMode ? "border-blue-700 bg-muted" : "border-blue-200 bg-blue-50"),
+                          isPriority && ("border-brand-border bg-brand-surface hover:bg-brand-surface hover:border-brand/60"),
                         )}
                       >
                         <div className={cn("flex items-start justify-between", isStablePositive ? "gap-1" : "gap-3")}>
@@ -1189,34 +1171,34 @@ export function Dashboard() {
                               </Avatar>
                               <div className="min-w-0">
                                 {isPriority && (
-                                  <span className={cn("mb-1 inline-flex h-[22px] items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em]", isDarkMode ? "border-[#2DD4BF]/40 bg-[#134E48] text-[#CCFBF1]" : "border-mint-200 bg-mint-50 text-mint-700")}>
+                                  <span className={cn("mb-1 inline-flex h-[22px] items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em]", "border-brand-border bg-brand-surface text-brand-text")}>
                                     Comece por aqui
                                   </span>
                                 )}
                                 {!isPriority && !isStablePositive && (
-                                  <span className={cn("mb-1 inline-flex h-[20px] items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em]", isDarkMode ? "border-[#334155] bg-[#111827] text-slate-300" : "border-slate-200 bg-slate-50 text-slate-600")}>
+                                  <span className={cn("mb-1 inline-flex h-[20px] items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em]", "border-border bg-muted text-dim")}>
                                     {sectionLabel}
                                   </span>
                                 )}
-                                <p className={cn("truncate font-semibold", isStablePositive ? "text-[12px]" : "text-[13px]", isDarkMode ? "text-slate-300" : "text-slate-700")}>
+                                <p className={cn("truncate font-semibold", isStablePositive ? "text-[12px]" : "text-[13px]", "text-dim")}>
                                   {isStablePositive ? item.ticker : `${item.ticker} · ${item.companyName}`}
                                 </p>
-                                <p className={cn(isStablePositive ? "text-[12px]" : "text-[14px]", "truncate font-semibold", isDarkMode ? "text-slate-100" : "text-slate-900")}>{item.title}</p>
+                                <p className={cn(isStablePositive ? "text-[12px]" : "text-[14px]", "truncate font-semibold", "text-foreground")}>{item.title}</p>
                                 {!isStablePositive && (
-                                  <p className={cn("mt-1 line-clamp-1 text-[12px]", isDarkMode ? "text-slate-400" : "text-slate-600")}>Por que isso importa: {item.whyItMatters}</p>
+                                  <p className={cn("mt-1 line-clamp-1 text-[12px]", "text-muted-foreground")}>Por que isso importa: {item.whyItMatters}</p>
                                 )}
                                 <div className={cn("flex flex-wrap gap-1", isStablePositive ? "mt-0" : "mt-1")}>
                                   {item.pillarKey && (
-                                    <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", isDarkMode ? "border-[#374151] bg-[#111827] text-slate-300" : "border-slate-200 bg-slate-50 text-slate-600")}>
+                                    <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", "border-border bg-muted text-dim")}>
                                       {item.pillarKey}
                                     </span>
                                   )}
                                   {item.source && (
-                                    <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", isDarkMode ? "border-[#374151] bg-[#111827] text-slate-300" : "border-slate-200 bg-slate-50 text-slate-600")}>
+                                    <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", "border-border bg-muted text-dim")}>
                                       {item.source}
                                     </span>
                                   )}
-                                  <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", isDarkMode ? "border-[#374151] bg-[#111827] text-slate-300" : "border-slate-200 bg-slate-50 text-slate-600")}>
+                                  <span className={cn("inline-flex h-[22px] items-center rounded-full border px-2 text-[11px]", "border-border bg-muted text-dim")}>
                                     {item.relativeTime}
                                   </span>
                                   {isNew && <span className="inline-flex h-[22px] items-center rounded-full border border-sky-300 bg-sky-100 px-2 text-[11px] font-semibold text-sky-900">Novo</span>}
@@ -1228,7 +1210,7 @@ export function Dashboard() {
                               {!isStablePositive && <StatusBadge status={item.severity} />}
                               <div className="flex items-center gap-1.5">
                                 <span className={cn("font-semibold text-mint-600", isStablePositive ? "text-[11px]" : "text-[12px]")}>{feedCtaLabel(item, isPriority)}</span>
-                                <ChevronRight className={cn("h-4 w-4", isDarkMode ? "text-slate-500" : "text-slate-400")} />
+                                <ChevronRight className={cn("h-4 w-4", "text-muted-foreground")} />
                               </div>
                             </div>
                           </div>
@@ -1245,8 +1227,8 @@ export function Dashboard() {
           <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.8fr)]">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className={cn("text-[14px] font-semibold", isDarkMode ? "text-slate-300" : "text-slate-700")}>Blocos de apoio</h2>
-                <p className={cn("text-[12px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>Apoiam a leitura, mas nao substituem o fluxo principal.</p>
+                <h2 className={cn("text-[14px] font-semibold", "text-dim")}>Blocos de apoio</h2>
+                <p className={cn("text-[12px]", "text-muted-foreground")}>Apoiam a leitura, mas nao substituem o fluxo principal.</p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 {supportCards.map((card) => (
@@ -1256,11 +1238,11 @@ export function Dashboard() {
                     className={cn(
                       "group rounded-2xl border p-3 text-left transition-all duration-150",
                       isDarkMode
-                        ? "border-[#1F2937] bg-[#0F172A] hover:border-[#334155] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-[0_2px_10px_rgba(16,24,40,0.05)]",
+                        ? "border-border bg-muted hover:border-border-strong hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+                        : "border-border bg-card hover:border-border-strong hover:shadow-[0_2px_10px_rgba(16,24,40,0.05)]",
                     )}
                   >
-                    <p className={cn("mb-2 text-[11px] font-medium", isDarkMode ? "text-slate-400" : "text-slate-500")}>{card.title}</p>
+                    <p className="mb-2 text-[11px] font-medium text-muted-foreground">{card.title}</p>
                     <div className="flex min-h-[36px] items-center gap-2">
                       {card.logoTicker && logoByTicker[card.logoTicker] ? (
                         <Avatar className="h-7 w-7 rounded-md">
@@ -1268,23 +1250,23 @@ export function Dashboard() {
                           <AvatarFallback className="rounded-md text-[10px]">{card.logoTicker.slice(0, 2)}</AvatarFallback>
                         </Avatar>
                       ) : null}
-                      <p className={cn("text-[16px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>{card.value}</p>
+                      <p className={cn("text-[16px] font-semibold", "text-foreground")}>{card.value}</p>
                     </div>
-                    <p className={cn("mt-1.5 line-clamp-2 min-h-[34px] text-[12px] leading-snug", isDarkMode ? "text-[#CBD5E1]" : "text-slate-700")}>{card.subtitle}</p>
+                    <p className={cn("mt-1.5 line-clamp-2 min-h-[34px] text-[12px] leading-snug", "text-dim")}>{card.subtitle}</p>
                     <p className={cn("mt-2.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium", card.accent)}>{card.delta}</p>
                     <div className="mt-2.5 flex items-center justify-between">
                       <span className="text-[12px] font-semibold text-mint-600">{card.ctaLabel}</span>
-                      <ChevronRight className={cn("h-4 w-4", isDarkMode ? "text-[#94A3B8]" : "text-slate-400")} />
+                      <ChevronRight className={cn("h-4 w-4", "text-muted-foreground")} />
                     </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
+            <Card className={cn("rounded-2xl border", "border-border bg-card")}>
               <CardHeader className="space-y-1 px-4 pt-4">
-                <CardTitle className={cn("text-[14px] font-semibold", isDarkMode ? "text-[#E5E7EB]" : "text-slate-800")}>Pilares em movimento</CardTitle>
-                <CardDescription className={cn("text-[12px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>
+                <CardTitle className={cn("text-[14px] font-semibold", "text-foreground")}>Pilares em movimento</CardTitle>
+                <CardDescription className={cn("text-[12px]", "text-muted-foreground")}>
                   Apoio de leitura. Use depois da prioridade e do feed principal.
                 </CardDescription>
               </CardHeader>
@@ -1303,33 +1285,33 @@ export function Dashboard() {
                       onClick={() => applySinglePillarFilter(item.pillar)}
                       className={cn(
                         "w-full rounded-xl border border-transparent p-2 text-left transition",
-                        isDarkMode ? "hover:border-[#334155] hover:bg-[#111827]" : "hover:border-slate-200 hover:bg-slate-50",
+                        "hover:border-border hover:bg-hover",
                         idx > 0 && "border-t border-t-[#F2F4F7]",
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className={cn("text-[13px] font-medium", isDarkMode ? "text-slate-200" : "text-slate-900")}>{item.pillar}</p>
-                          <p className={cn("mt-0.5 text-[11px]", isDarkMode ? "text-slate-400" : "text-slate-600")}>{item.pillar} {pillarInsight[item.pillar]}.</p>
+                          <p className={cn("text-[13px] font-medium", "text-foreground")}>{item.pillar}</p>
+                          <p className={cn("mt-0.5 text-[11px]", "text-muted-foreground")}>{item.pillar} {pillarInsight[item.pillar]}.</p>
                           <div className="mt-1.5">
                             <SegmentedHealthBar healthy={item.healthy} attention={item.attention} risk={item.risk} />
                             <div className="mt-1 flex flex-wrap items-center gap-3 text-[10px]">
-                              <span className={cn(isDarkMode ? "text-slate-500" : "text-slate-500")}>{item.events} eventos</span>
+                              <span className={cn("text-muted-foreground")}>{item.events} eventos</span>
                               <span className="text-rose-600">Risco {item.risk}</span>
                               <span className="text-amber-600">Atenção {item.attention}</span>
                               <span className="text-emerald-600">Saudável {item.healthy}</span>
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className={cn("h-4 w-4", isDarkMode ? "text-slate-500" : "text-slate-400")} />
+                        <ChevronRight className={cn("h-4 w-4", "text-muted-foreground")} />
                       </div>
                     </button>
                   ))
                 )}
               </CardContent>
 
-              <CardFooter className={cn("flex items-center justify-between border-t px-4 py-3", isDarkMode ? "border-[#1F2937]" : "border-[#F2F4F7]")}>
-                <p className={cn("text-[11px]", isDarkMode ? "text-slate-500" : "text-slate-500")}>Fontes: CVM / B3 / RI</p>
+              <CardFooter className={cn("flex items-center justify-between border-t px-4 py-3", "border-border")}>
+                <p className={cn("text-[11px]", "text-muted-foreground")}>Fontes: CVM / B3 / RI</p>
                 <button onClick={() => applySinglePillarFilter(focusedPillar)} className="text-[12px] font-semibold text-mint-600 hover:text-mint-700">
                   Filtrar pilar
                 </button>
@@ -1339,15 +1321,15 @@ export function Dashboard() {
 
           {showSessionClosing && (
             <section>
-              <Card className={cn("rounded-2xl border", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
+              <Card className={cn("rounded-2xl border", "border-border bg-card")}>
                 <CardContent className="space-y-2 p-4">
-                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", isDarkMode ? "text-[#5EEAD4]" : "text-mint-600")}>Fechamento da sessao</p>
-                  <p className={cn("text-[14px] font-semibold", isDarkMode ? "text-[#F3F4F6]" : "text-slate-900")}>
+                  <p className={cn("text-[12px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>Fechamento da sessao</p>
+                  <p className={cn("text-[14px] font-semibold", "text-foreground")}>
                     {priorityItem
                       ? `Nas proximas horas, acompanhe ${priorityItem.ticker} e os sinais em ${leadingPillarMovement.pillar} para confirmar se a pressao persiste.`
                       : `O pilar ${leadingPillarMovement.pillar} segue como principal frente de monitoramento nas proximas horas.`}
                   </p>
-                  <p className={cn("text-[12px]", isDarkMode ? "text-slate-400" : "text-slate-500")}>Reveja o feed por impacto antes de encerrar sua leitura.</p>
+                  <p className={cn("text-[12px]", "text-muted-foreground")}>Reveja o feed por impacto antes de encerrar sua leitura.</p>
                 </CardContent>
               </Card>
             </section>

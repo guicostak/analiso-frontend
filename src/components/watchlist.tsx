@@ -367,9 +367,9 @@ const badgeStyles: Record<PriorityItem["badge"], string> = {
 };
 
 const clickableItemStyles: Record<PriorityItem["badge"], string> = {
-  Risco: "border-l-rose-400 hover:bg-rose-50/40",
-  Atenção: "border-l-amber-400 hover:bg-amber-50/40",
-  Saudável: "border-l-emerald-400 hover:bg-emerald-50/40",
+  Risco: "border-l-rose-400 hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
+  Atenção: "border-l-amber-400 hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
+  Saudável: "border-l-emerald-400 hover:border-border-strong hover:bg-hover hover:shadow-[inset_3px_0_0_var(--brand)]",
 };
 
 const alertStyles: Record<AlertItem["severity"], string> = {
@@ -381,7 +381,7 @@ const alertStyles: Record<AlertItem["severity"], string> = {
 const freshnessBadgeStyles: Record<"Atualizado" | "Dados pendentes" | "Sem dados", string> = {
   Atualizado: "bg-emerald-50 text-emerald-700 border-emerald-100",
   "Dados pendentes": "bg-amber-50 text-amber-700 border-amber-100",
-  "Sem dados": "bg-neutral-100 dark:bg-[#1F2937] text-neutral-700 dark:text-[#D1D5DB] border-neutral-200 dark:border-[#1F2937]",
+  "Sem dados": "bg-hover text-dim border-border",
 };
 
 const pillarTagStyles: Record<Pillar, string> = {
@@ -568,7 +568,7 @@ export function WatchlistPage() {
   const getFeedCTA = (item: FeedItem | PriorityItem) => ('source' in item && item.source === "CVM" ? "Ver evidência" : "Ver análise");
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] dark:text-[#E5E7EB]">
+    <div className="min-h-screen bg-background text-foreground">
       <Sidebar currentPage="watchlist" />
       <AppTopBar />
 
@@ -576,19 +576,19 @@ export function WatchlistPage() {
         <div className="px-8 py-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-0.5">
-              <h1 className="text-2xl font-semibold text-neutral-900 dark:text-[#E5E7EB] dark:text-[#E5E7EB]">Watchlist</h1>
-              <p className="text-sm text-neutral-500 dark:text-slate-400 dark:text-slate-400">
+              <h1 className="text-2xl font-semibold text-foreground">Watchlist</h1>
+              <p className="text-sm text-muted-foreground">
                 {activeTab === "updates"
                   ? "Triagem primeiro, organização depois. Foque no que mudou."
                   : "Organize sua watchlist e acompanhe o estado atual de cada empresa."}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <button className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] dark:border-[#334155] bg-white dark:bg-[#0B1220] dark:bg-[#0B1220] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#D1D5DB] dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A] dark:hover:bg-[#0F172A] transition-colors">
+              <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-dim hover:bg-hover transition-colors">
                 <Plus className="w-4 h-4" />
                 Adicionar empresa
               </button>
-              <button className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] dark:border-[#334155] bg-white dark:bg-[#0B1220] dark:bg-[#0B1220] px-4 py-2 text-sm text-neutral-600 dark:text-slate-400 dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A] dark:hover:bg-[#0F172A] transition-colors">
+              <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted-foreground hover:bg-hover transition-colors">
                 <GitCompare className="w-4 h-4" />
                 Comparar
               </button>
@@ -607,8 +607,8 @@ export function WatchlistPage() {
                     onClick={() => setActiveTab(tab.key as "updates" | "list")}
                     className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
                       activeTab === tab.key
-                        ? "border-mint-200 bg-mint-50 text-mint-700"
-                        : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-[#0F172A]"
+                        ? "border-brand-border bg-brand-surface text-brand-text"
+                        : "border-border text-muted-foreground hover:bg-hover"
                     }`}
                   >
                     {tab.label}
@@ -617,18 +617,18 @@ export function WatchlistPage() {
               </div>
 
               {uiState === "empty" ? (
-                <div className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-8">
-                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-[#E5E7EB]">Comece pela sua primeira watchlist</h2>
-                  <p className="text-sm text-neutral-500 dark:text-slate-400 mt-2">
+                <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
+                  <h2 className="text-lg font-semibold text-foreground">Comece pela sua primeira watchlist</h2>
+                  <p className="text-sm text-muted-foreground mt-2">
                     Escolha 3 empresas para acompanhar mudanças sem ruído.
                   </p>
                   <div className="mt-6 flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-slate-500" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="text"
                         placeholder="Buscar empresa ou ticker..."
-                        className="w-full pl-10 pr-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-sm text-neutral-700 dark:text-[#D1D5DB] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                        className="w-full pl-10 pr-3 py-2 rounded-xl border border-border text-sm text-dim focus:outline-none focus:ring-2 focus:ring-mint-100"
                       />
                     </div>
                     <Link
@@ -642,7 +642,7 @@ export function WatchlistPage() {
                     {suggestedCompanies.map((ticker) => (
                       <button
                         key={ticker}
-                        className="px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-[#0F172A]"
+                        className="px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground hover:bg-hover"
                       >
                         {ticker}
                       </button>
@@ -651,46 +651,46 @@ export function WatchlistPage() {
                 </div>
               ) : uiState === "loading" ? (
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-5 space-y-3">
-                    <div className="h-4 w-32 bg-neutral-100 dark:bg-[#1F2937] rounded" />
-                    <div className="h-3 w-full bg-neutral-100 dark:bg-[#1F2937] rounded" />
-                    <div className="h-3 w-3/4 bg-neutral-100 dark:bg-[#1F2937] rounded" />
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
+                    <div className="h-4 w-32 bg-hover rounded" />
+                    <div className="h-3 w-full bg-hover rounded" />
+                    <div className="h-3 w-3/4 bg-hover rounded" />
                   </div>
-                  <div className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-5 space-y-3">
-                    <div className="h-4 w-40 bg-neutral-100 dark:bg-[#1F2937] rounded" />
-                    <div className="h-3 w-full bg-neutral-100 dark:bg-[#1F2937] rounded" />
-                    <div className="h-3 w-2/3 bg-neutral-100 dark:bg-[#1F2937] rounded" />
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
+                    <div className="h-4 w-40 bg-hover rounded" />
+                    <div className="h-3 w-full bg-hover rounded" />
+                    <div className="h-3 w-2/3 bg-hover rounded" />
                   </div>
-                  <div className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-5">
-                    <div className="h-10 w-full bg-neutral-100 dark:bg-[#1F2937] rounded" />
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
+                    <div className="h-10 w-full bg-hover rounded" />
                   </div>
                 </div>
               ) : activeTab === "updates" ? (
                 <div className="space-y-5">
-                  <section className="rounded-2xl border border-mint-200 bg-mint-50/60 p-3.5">
+                  <section className="rounded-2xl border border-brand-border bg-brand-surface p-3.5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-mint-800">Estado da watchlist hoje</p>
-                        <p className="mt-1 text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">{watchlistExecutiveSummary}</p>
-                        <p className="mt-1 text-xs text-neutral-700 dark:text-[#D1D5DB]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-text">Estado da watchlist hoje</p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">{watchlistExecutiveSummary}</p>
+                        <p className="mt-1 text-xs text-dim">
                           {summaryRiskCount} em risco, {summaryAttentionCount - summaryRiskCount} em atenção e {summaryHealthyCount} saudáveis.
                         </p>
                       </div>
-                      <span className="rounded-full border border-mint-300 bg-white dark:bg-[#0B1220] px-2 py-1 text-[11px] font-medium text-mint-800">
+                      <span className="rounded-full border border-brand-border bg-card px-2 py-1 text-[11px] font-medium text-brand-text">
                         {summaryChanges30dCount} mudanças em 30d
                       </span>
                     </div>
                   </section>
 
-                  <section className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-5">
+                  <section className="bg-card rounded-2xl border border-border shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h2 className="text-base font-semibold text-neutral-900 dark:text-[#E5E7EB]">Prioridade</h2>
-                        <p className="text-xs text-neutral-500 dark:text-slate-400">
+                        <h2 className="text-base font-semibold text-foreground">Prioridade</h2>
+                        <p className="text-xs text-muted-foreground">
                           Ordenado pelo que mais merece sua atenção agora: severidade, recência e impacto potencial.
                         </p>
                       </div>
-                      <span className="text-xs text-neutral-400 dark:text-slate-500">{Math.min(priorityItems.length, 3)} itens</span>
+                      <span className="text-xs text-muted-foreground">{Math.min(priorityItems.length, 3)} itens</span>
                     </div>
 
                     <div className="space-y-2">
@@ -706,23 +706,23 @@ export function WatchlistPage() {
                               router.push(buildCompanyDeepLink(item.ticker, item.pillar));
                             }
                           }}
-                          className={`rounded-xl border border-neutral-200 dark:border-[#1F2937] border-l-4 bg-neutral-50 dark:bg-[#0F172A] p-3 flex flex-col gap-2 cursor-pointer transition-colors ${clickableItemStyles[item.badge]} ${
-                            index === 0 ? "border-mint-200 bg-white dark:bg-[#0B1220] shadow-[0_6px_16px_rgba(16,185,129,0.08)]" : ""
+                          className={`rounded-xl border border-border border-l-4 bg-muted p-3 flex flex-col gap-2 cursor-pointer transition-colors ${clickableItemStyles[item.badge]} ${
+                            index === 0 ? "border-brand-border bg-brand-surface shadow-[0_6px_16px_rgba(16,185,129,0.08)]" : ""
                           }`}
                         >
                           {index === 0 && (
-                            <div className="mb-1 flex items-center justify-between rounded-lg border border-mint-200 bg-mint-50 px-2 py-1 text-[11px] text-mint-800">
+                            <div className="mb-1 flex items-center justify-between rounded-lg border border-brand-border bg-brand-surface px-2 py-1 text-[11px] text-brand-text">
                               <span className="font-semibold">Comece por aqui</span>
-                              <span className="rounded-full border border-mint-300 bg-white dark:bg-[#0B1220] px-2 py-0.5 font-semibold">Prioridade 1</span>
+                              <span className="rounded-full border border-brand-border bg-card px-2 py-0.5 font-semibold text-foreground">Prioridade 1</span>
                             </div>
                           )}
                           <div className="flex items-center justify-between gap-3">
                             <div>
-                              <p className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">
-                                {item.company} <span className="text-neutral-400 dark:text-slate-500">({item.ticker})</span>
+                              <p className="text-sm font-semibold text-foreground">
+                                {item.company} <span className="text-muted-foreground">({item.ticker})</span>
                               </p>
-                              <p className="text-xs text-neutral-500 dark:text-slate-400">{item.sector}</p>
-                              <p className="mt-1 text-[11px] font-medium text-neutral-700 dark:text-[#D1D5DB]">{priorityRankingLabels[index]}</p>
+                              <p className="text-xs text-muted-foreground">{item.sector}</p>
+                              <p className="mt-1 text-[11px] font-medium text-dim">{priorityRankingLabels[index]}</p>
                             </div>
                             <span
                               className={`px-2 py-1 rounded-full border text-[11px] font-medium ${badgeStyles[item.badge]}`}
@@ -732,19 +732,19 @@ export function WatchlistPage() {
                           </div>
                           <div className="grid gap-1">
                             <div>
-                              <p className="text-[11px] text-neutral-600 dark:text-slate-400">O que mudou</p>
-                              <p className="text-sm text-neutral-900 dark:text-[#E5E7EB]">{item.change}</p>
+                              <p className="text-[11px] text-muted-foreground">O que mudou</p>
+                              <p className="text-sm text-foreground">{item.change}</p>
                             </div>
-                            <p className="text-xs text-neutral-700 dark:text-[#D1D5DB]">
+                            <p className="text-xs text-dim">
                               <span className="font-medium">Por que importa:</span> {item.why}
                             </p>
                           </div>
-                          <div className="flex items-center justify-between gap-3 text-[11px] text-neutral-600 dark:text-slate-400">
+                          <div className="flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
                             <span>{item.evidence}</span>
                             <Link
                               href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
-                              className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900 dark:text-[#E5E7EB]"
+                              className="inline-flex items-center rounded-md border border-brand-border bg-brand-surface px-2 py-1 text-xs font-medium text-brand-text hover:text-foreground"
                             >
                               {getFeedCTA(item)}
                             </Link>
@@ -754,27 +754,27 @@ export function WatchlistPage() {
                     </div>
                   </section>
 
-                  <section className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-5">
+                  <section className="bg-card rounded-2xl border border-border shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h2 className="text-base font-semibold text-neutral-900 dark:text-[#E5E7EB]">Atualizações</h2>
-                        <p className="text-xs text-neutral-500 dark:text-slate-400">Feed contínuo com foco no que pede ação agora.</p>
+                        <h2 className="text-base font-semibold text-foreground">Atualizações</h2>
+                        <p className="text-xs text-muted-foreground">Feed contínuo com foco no que pede ação agora.</p>
                       </div>
-                      <span className="text-xs text-neutral-400 dark:text-slate-500">{filteredFeedItems.length} atualizações</span>
+                      <span className="text-xs text-muted-foreground">{filteredFeedItems.length} atualizações</span>
                     </div>
 
-                    <div className="sticky top-12 z-0 bg-white dark:bg-[#0B1220]">
+                    <div className="sticky top-12 z-0 bg-card">
                       <div className="flex flex-wrap items-center gap-2 pb-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-medium text-neutral-500 dark:text-slate-400">Período:</span>
+                          <span className="text-[11px] font-medium text-muted-foreground">Período:</span>
                           {rangeOptions.map((range) => (
                             <button
                               key={range}
                               onClick={() => setActiveRange(range)}
                               className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                                 activeRange === range
-                                  ? "border-mint-200 bg-mint-50 text-mint-700"
-                                  : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                                  ? "border-brand-border bg-brand-surface text-brand-text"
+                                  : "border-border text-muted-foreground"
                               }`}
                             >
                               {range === "Todos" ? "Todos" : range}
@@ -783,15 +783,15 @@ export function WatchlistPage() {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-medium text-neutral-500 dark:text-slate-400">Severidade:</span>
+                          <span className="text-[11px] font-medium text-muted-foreground">Severidade:</span>
                           {(["Risco", "Atenção", "Saudável"] as const).map((option) => (
                             <button
                               key={option}
                               onClick={() => setSeverityFilter(option)}
                               className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                                 severityFilter === option
-                                  ? "border-mint-200 bg-mint-50 text-mint-700"
-                                  : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                                  ? "border-brand-border bg-brand-surface text-brand-text"
+                                  : "border-border text-muted-foreground"
                               }`}
                             >
                               {option}
@@ -801,8 +801,8 @@ export function WatchlistPage() {
                             onClick={() => setSeverityFilter("Todos")}
                             className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                               severityFilter === "Todos"
-                                ? "border-mint-200 bg-mint-50 text-mint-700"
-                                : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                                ? "border-brand-border bg-brand-surface text-brand-text"
+                                : "border-border text-muted-foreground"
                             }`}
                           >
                             Todas
@@ -812,31 +812,31 @@ export function WatchlistPage() {
                           onClick={() => setShowAdvancedFeedFilters((prev) => !prev)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             showAdvancedFeedFilters
-                              ? "border-mint-200 bg-mint-50 text-mint-700"
-                              : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                              ? "border-brand-border bg-brand-surface text-brand-text"
+                              : "border-border text-muted-foreground"
                           }`}
                         >
                           Filtros avançados: {showAdvancedFeedFilters ? "ON" : "OFF"}
                         </button>
                       </div>
 
-                      <div className="border-y border-neutral-200 dark:border-[#1F2937] py-2 text-xs text-neutral-600 dark:text-slate-400">
+                      <div className="border-y border-border py-2 text-xs text-muted-foreground">
                         {filteredFeedItems.length} atualizações · Fonte: {sourceFilter.toLowerCase()}
                       </div>
 
                       {showAdvancedFeedFilters && (
-                        <div className="mt-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] p-2.5">
+                        <div className="mt-2 rounded-xl border border-border bg-muted p-2.5">
                           <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-medium text-neutral-500 dark:text-slate-400">Fonte:</span>
+                            <span className="text-[11px] font-medium text-muted-foreground">Fonte:</span>
                             {(["Todas", "CVM", "B3", "RI"] as const).map((option) => (
                               <button
                                 key={option}
                                 onClick={() => setSourceFilter(option)}
                                 className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                                   sourceFilter === option
-                                    ? "border-mint-200 bg-mint-50 text-mint-700"
-                                    : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                                    ? "border-brand-border bg-brand-surface text-brand-text"
+                                    : "border-border text-muted-foreground"
                                 }`}
                               >
                                 {option}
@@ -845,15 +845,15 @@ export function WatchlistPage() {
                           </div>
 
                           <div className="flex flex-wrap gap-2">
-                            <span className="self-center text-[11px] font-medium text-neutral-500 dark:text-slate-400">Pilar:</span>
+                            <span className="self-center text-[11px] font-medium text-muted-foreground">Pilar:</span>
                             {pillars.map((pillar) => (
                               <button
                                 key={pillar}
                                 onClick={() => togglePillar(pillar)}
                                 className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                                   activePillars.includes(pillar)
-                                    ? "border-mint-200 bg-mint-50 text-mint-700"
-                                    : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-[#0F172A]"
+                                    ? "border-brand-border bg-brand-surface text-brand-text"
+                                    : "border-border text-muted-foreground hover:bg-hover"
                                 }`}
                               >
                                 {pillar}
@@ -878,7 +878,7 @@ export function WatchlistPage() {
                               router.push(buildCompanyDeepLink(item.ticker, item.pillar));
                             }
                           }}
-                          className={`rounded-xl border border-neutral-200 dark:border-[#1F2937] border-l-4 bg-neutral-50 dark:bg-[#0F172A] cursor-pointer transition-colors ${clickableItemStyles[item.severity]} ${
+                          className={`rounded-xl border border-border border-l-4 bg-muted cursor-pointer transition-colors ${clickableItemStyles[item.severity]} ${
                             item.severity === "Risco"
                               ? "p-3 space-y-2"
                               : item.severity === "Atenção"
@@ -887,7 +887,7 @@ export function WatchlistPage() {
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-neutral-950">{item.headline}</h3>
+                            <h3 className="text-sm font-semibold text-foreground">{item.headline}</h3>
                             <div className="flex items-center gap-2">
                               <span
                                 className={`px-2 py-1 rounded-full border text-[11px] font-medium ${badgeStyles[item.severity]}`}
@@ -901,20 +901,20 @@ export function WatchlistPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="text-sm text-neutral-800 dark:text-[#E5E7EB]">
+                          <div className="text-sm text-foreground">
                             <GlossaryText text={item.detail} />
                             {item.severity !== "Saudável" && (
-                              <p className="mt-1 text-neutral-700 dark:text-[#D1D5DB]">
+                              <p className="mt-1 text-dim">
                                 <GlossaryText text={item.detailTwo} />
                               </p>
                             )}
                           </div>
-                          <div className="flex items-center justify-between text-[11px] text-neutral-600 dark:text-slate-400">
+                          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                             <span>{item.evidence}</span>
                             <Link
                               href={buildCompanyDeepLink(item.ticker, item.pillar, item.evidenceId)}
                               onClick={(event) => event.stopPropagation()}
-                              className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900 dark:text-[#E5E7EB]"
+                              className="inline-flex items-center rounded-md border border-brand-border bg-brand-surface px-2 py-1 text-xs font-medium text-brand-text hover:text-foreground"
                             >
                               Ver análise
                             </Link>
@@ -923,9 +923,9 @@ export function WatchlistPage() {
                       ))}
                     </div>
 
-                    <div className="mt-4 rounded-xl border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] p-3">
-                      <p className="text-xs font-medium text-neutral-900 dark:text-[#E5E7EB]">Fechamento da sessão</p>
-                      <p className="mt-1 text-xs text-neutral-700 dark:text-[#D1D5DB]">
+                    <div className="mt-4 rounded-xl border border-border bg-muted p-3">
+                      <p className="text-xs font-medium text-foreground">Fechamento da sessão</p>
+                      <p className="mt-1 text-xs text-dim">
                         Nas próximas horas, acompanhe CSAN3 e MRVE3 para confirmar se a pressão em dívida e margens persiste.
                       </p>
                     </div>
@@ -933,23 +933,23 @@ export function WatchlistPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] shadow-sm p-4">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
                     <div className="flex flex-col lg:flex-row lg:items-center gap-3">
                       <div className="relative flex-[1.8]">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-slate-500" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input
                           type="text"
                           placeholder="Buscar empresa ou ticker..."
                           value={listSearch}
                           onChange={(event) => setListSearch(event.target.value)}
-                          className="w-full pl-10 pr-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-sm text-neutral-700 dark:text-[#D1D5DB] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                          className="w-full pl-10 pr-3 py-2 rounded-xl border border-border text-sm text-dim focus:outline-none focus:ring-2 focus:ring-mint-100"
                         />
                       </div>
                       <div className="relative flex-1">
                         <select
                           value={sortBy}
                           onChange={(event) => setSortBy(event.target.value)}
-                          className="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-600 dark:text-slate-400 bg-white dark:bg-[#0B1220] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                          className="w-full px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                         >
                           {[
                             "Mudou recentemente",
@@ -961,7 +961,7 @@ export function WatchlistPage() {
                             </option>
                           ))}
                         </select>
-                        <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
                         {(["Compacto", "Detalhado"] as const).map((mode) => (
@@ -970,8 +970,8 @@ export function WatchlistPage() {
                             onClick={() => setListDensity(mode)}
                             className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                               listDensity === mode
-                                ? "border-mint-200 bg-mint-50 text-mint-700"
-                                : "border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] text-neutral-600 dark:text-slate-400"
+                                ? "border-brand-border bg-brand-surface text-brand-text"
+                                : "border-border bg-card text-muted-foreground"
                             }`}
                           >
                             {mode}
@@ -981,8 +981,8 @@ export function WatchlistPage() {
                           onClick={() => setShowListFilters((prev) => !prev)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             showListFilters
-                              ? "border-neutral-300 bg-neutral-100 dark:bg-[#1F2937] text-neutral-700 dark:text-[#D1D5DB]"
-                              : "border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] text-neutral-600 dark:text-slate-400"
+                              ? "border-neutral-300 bg-hover text-dim"
+                              : "border-border bg-card text-muted-foreground"
                           }`}
                         >
                           Filtros ({activeListFiltersCount})
@@ -991,8 +991,8 @@ export function WatchlistPage() {
                           onClick={() => setUnseenOnly((prev) => !prev)}
                           className={`px-3 py-2 rounded-xl text-xs font-medium border ${
                             unseenOnly
-                              ? "border-neutral-300 bg-neutral-100 dark:bg-[#1F2937] text-neutral-700 dark:text-[#D1D5DB]"
-                              : "border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] text-neutral-600 dark:text-slate-400"
+                              ? "border-neutral-300 bg-hover text-dim"
+                              : "border-border bg-card text-muted-foreground"
                           }`}
                         >
                           Não vistos
@@ -1025,7 +1025,7 @@ export function WatchlistPage() {
                               onChange={(event) =>
                                 setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))
                               }
-                              className="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-700 dark:text-[#D1D5DB] bg-white dark:bg-[#0B1220] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                              className="w-full px-3 py-2 rounded-xl border border-border text-xs text-dim bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                             >
                               {filter.options.map((option) => (
                                 <option key={option} value={option}>
@@ -1033,14 +1033,14 @@ export function WatchlistPage() {
                                 </option>
                               ))}
                             </select>
-                            <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                           </div>
                         ))}
                         <div className="relative">
                           <select
                             value={listSeverityFilter}
                             onChange={(event) => setListSeverityFilter(event.target.value as typeof listSeverityFilter)}
-                            className="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-700 dark:text-[#D1D5DB] bg-white dark:bg-[#0B1220] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                            className="w-full px-3 py-2 rounded-xl border border-border text-xs text-dim bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                           >
                             {["Todos", "Risco", "Atenção", "Saudável"].map((option) => (
                               <option key={option} value={option}>
@@ -1048,13 +1048,13 @@ export function WatchlistPage() {
                               </option>
                             ))}
                           </select>
-                          <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                         <div className="relative">
                           <select
                             value={listSourceFilter}
                             onChange={(event) => setListSourceFilter(event.target.value as typeof listSourceFilter)}
-                            className="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-700 dark:text-[#D1D5DB] bg-white dark:bg-[#0B1220] focus:outline-none focus:ring-2 focus:ring-mint-100"
+                            className="w-full px-3 py-2 rounded-xl border border-border text-xs text-dim bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
                           >
                             {["Todas", "CVM", "B3", "RI"].map((option) => (
                               <option key={option} value={option}>
@@ -1062,7 +1062,7 @@ export function WatchlistPage() {
                               </option>
                             ))}
                           </select>
-                          <ChevronDown className="w-3.5 h-3.5 text-neutral-400 dark:text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                       </div>
                     )}
@@ -1099,29 +1099,29 @@ export function WatchlistPage() {
                               router.push(buildCompanyDeepLink(company.ticker, company.attentionPillar));
                             }
                           }}
-                          className={`bg-white dark:bg-[#0B1220] rounded-2xl border border-neutral-200 dark:border-[#1F2937] border-l-4 shadow-sm cursor-pointer transition-colors ${clickableItemStyles[status]} ${
+                          className={`bg-card rounded-2xl border border-border border-l-4 shadow-sm cursor-pointer transition-colors ${clickableItemStyles[status]} ${
                             isCompactCard ? "p-2.5" : "p-3.5"
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start gap-3">
-                                <div className="h-9 w-9 rounded-full border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] text-xs font-semibold text-neutral-600 dark:text-slate-400 flex items-center justify-center">
+                                <div className="h-9 w-9 rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground flex items-center justify-center">
                                   {company.ticker.slice(0, 2)}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB] truncate">
-                                    {company.name} <span className="text-neutral-400 dark:text-slate-500">({company.ticker})</span>
+                                  <p className="text-sm font-semibold text-foreground truncate">
+                                    {company.name} <span className="text-muted-foreground">({company.ticker})</span>
                                   </p>
-                                  <p className="text-xs text-neutral-500 dark:text-slate-400">{company.sector}</p>
+                                  <p className="text-xs text-muted-foreground">{company.sector}</p>
                                   <div className="mt-1.5 flex items-center gap-2">
                                     <span className={`px-2 py-1 rounded-full border text-[11px] font-medium ${badgeStyles[status]}`}>
                                       {status}
                                     </span>
                                   </div>
-                                  <p className="mt-1 text-sm font-medium text-neutral-900 dark:text-[#E5E7EB]">
+                                  <p className="mt-1 text-sm font-medium text-foreground">
                                     {minScore >= 70 ? "Sem pilar crítico no momento" : `${keyPillar} em atenção`}{" "}
-                                    <span className="text-neutral-500 dark:text-slate-400">({minScore}/100)</span>
+                                    <span className="text-muted-foreground">({minScore}/100)</span>
                                   </p>
                                 </div>
                               </div>
@@ -1130,8 +1130,8 @@ export function WatchlistPage() {
 
                           <div className="mt-2.5 flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              {!isCompactCard && <p className="text-xs text-neutral-600 dark:text-slate-400">{whyItMatters}</p>}
-                              <p className="mt-1 text-[11px] text-neutral-500 dark:text-slate-400">
+                              {!isCompactCard && <p className="text-xs text-muted-foreground">{whyItMatters}</p>}
+                              <p className="mt-1 text-[11px] text-muted-foreground">
                                 Fonte: {sourceByTicker[company.ticker] ?? "CVM"} • Última mudança: {company.lastChangeDays}d
                                 <span
                                   className={`ml-2 inline-flex px-1.5 py-0.5 rounded-full border text-[10px] font-medium align-middle ${freshnessBadgeStyles[freshnessBadge]}`}
@@ -1154,7 +1154,7 @@ export function WatchlistPage() {
                                 <Link
                                   href={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
                                   onClick={(event) => event.stopPropagation()}
-                                  className="inline-flex items-center rounded-md border border-mint-200 bg-mint-50 px-2 py-1 text-xs font-medium text-mint-700 hover:text-neutral-900 dark:text-[#E5E7EB] whitespace-nowrap"
+                                  className="inline-flex items-center rounded-md border border-brand-border bg-brand-surface px-2 py-1 text-xs font-medium text-brand-text hover:text-foreground whitespace-nowrap"
                                 >
                                   Ver evidência
                                 </Link>
@@ -1168,7 +1168,7 @@ export function WatchlistPage() {
                                 className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs whitespace-nowrap ${
                                   seenTickers.includes(company.ticker)
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                    : "border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] text-neutral-500 dark:text-slate-400 hover:text-neutral-800 dark:text-[#E5E7EB]"
+                                    : "border-border bg-muted text-muted-foreground hover:text-foreground"
                                 }`}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -1181,21 +1181,21 @@ export function WatchlistPage() {
                                   event.stopPropagation();
                                   setQuickActionsTicker((prev) => (prev === company.ticker ? null : company.ticker));
                                 }}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] text-neutral-400 dark:text-slate-500 hover:bg-neutral-100 dark:bg-[#1F2937] hover:text-neutral-600 dark:text-slate-400"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground hover:bg-hover hover:text-muted-foreground"
                               >
                                 <MoreHorizontal className="h-3.5 w-3.5" />
                               </button>
                               {quickActionsTicker === company.ticker && (
                                 <div
                                   onClick={(event) => event.stopPropagation()}
-                                  className="absolute right-0 top-8 z-10 w-44 rounded-lg border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1.5 shadow-lg"
+                                  className="absolute right-0 top-8 z-10 w-44 rounded-lg border border-border bg-card p-1.5 shadow-lg"
                                 >
                                   <button
                                     title="Favoritar"
                                     onClick={() => {
                                       setQuickActionsTicker(null);
                                     }}
-                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-neutral-700 dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A]"
+                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                                   >
                                     Favoritar
                                   </button>
@@ -1204,7 +1204,7 @@ export function WatchlistPage() {
                                     onClick={() => {
                                       setQuickActionsTicker(null);
                                     }}
-                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-neutral-700 dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A]"
+                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                                   >
                                     Criar alerta
                                   </button>
@@ -1214,7 +1214,7 @@ export function WatchlistPage() {
                                       setQuickActionsTicker(null);
                                       setExpandedTicker((prev) => (prev === company.ticker ? null : company.ticker));
                                     }}
-                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-neutral-700 dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A]"
+                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                                   >
                                     {isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
                                   </button>
@@ -1224,14 +1224,14 @@ export function WatchlistPage() {
                                       setQuickActionsTicker(null);
                                       toggleSeenTicker(company.ticker);
                                     }}
-                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-neutral-700 dark:text-[#D1D5DB] hover:bg-neutral-50 dark:bg-[#0F172A]"
+                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                                   >
                                     {seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
                                   </button>
                                   <button
                                     title="Remover da watchlist"
                                     onClick={() => setQuickActionsTicker(null)}
-                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-rose-600 hover:bg-rose-50"
+                                    className="w-full rounded-md px-2 py-1.5 text-left text-xs text-rose-600 hover:bg-hover"
                                   >
                                     Remover da watchlist
                                   </button>
@@ -1241,8 +1241,8 @@ export function WatchlistPage() {
                           </div>
 
                           {showDetails && (
-                            <div className="mt-4 rounded-xl border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] p-3 space-y-3">
-                              <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-slate-400">
+                            <div className="mt-4 rounded-xl border border-border bg-muted p-3 space-y-3">
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span>Diagnóstico por pilar</span>
                                 <span>Score geral: {scoreTotal}</span>
                               </div>
@@ -1254,20 +1254,20 @@ export function WatchlistPage() {
                                         score >= 70 ? "bg-emerald-400" : score >= 50 ? "bg-amber-400" : "bg-rose-400"
                                       }`}
                                     />
-                                    <div className="mt-1 text-[10px] text-neutral-500 dark:text-slate-400 flex items-center justify-between">
+                                    <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between">
                                       <span>{pillars[index]}</span>
                                       <span>{score}</span>
                                     </div>
                                   </div>
                                 ))}
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-600 dark:text-slate-400">
-                                <div className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2 py-1.5">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center justify-between rounded-lg border border-border bg-card px-2 py-1.5">
                                   <span>Última mudança</span>
                                   <span>{company.lastChangeDays} dias</span>
                                 </div>
                                 {company.volatility && (
-                                  <div className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] px-2 py-1.5 sm:col-span-2">
+                                  <div className="flex items-center justify-between rounded-lg border border-border bg-card px-2 py-1.5 sm:col-span-2">
                                     <span>Volatilidade</span>
                                     <span>{company.volatility}</span>
                                   </div>
@@ -1285,48 +1285,48 @@ export function WatchlistPage() {
 
             <aside className="lg:col-span-3 space-y-3">
               <div className="lg:sticky lg:top-16 space-y-4">
-              <div className="rounded-2xl border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] p-3">
+              <div className="rounded-2xl border border-border bg-muted p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-600 dark:text-slate-400">Panorama rápido</h3>
-                  <span className="text-[11px] text-neutral-400 dark:text-slate-500">Hoje</span>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Panorama rápido</h3>
+                  <span className="text-[11px] text-muted-foreground">Hoje</span>
                 </div>
-                <p className="text-[11px] text-neutral-700 dark:text-[#D1D5DB]">
+                <p className="text-[11px] text-dim">
                   Hoje a watchlist segue mais carregada em atenção do que em estabilidade.
                 </p>
-                <div className="mt-1.5 grid grid-cols-3 gap-1 text-[11px] text-neutral-600 dark:text-slate-400">
+                <div className="mt-1.5 grid grid-cols-3 gap-1 text-[11px] text-muted-foreground">
                   <button
                     onClick={applySummaryAttentionFilter}
-                    className="rounded-md border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1 text-center hover:bg-neutral-100 dark:bg-[#1F2937] transition-colors"
+                    className="rounded-md border border-border bg-card p-1 text-center hover:bg-hover transition-colors"
                   >
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">{summaryAttentionCount}</p>
+                    <p className="text-sm font-semibold text-foreground">{summaryAttentionCount}</p>
                     <p>em atenção</p>
                   </button>
                   <button
                     onClick={applySummaryRiskFilter}
-                    className="rounded-md border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1 text-center hover:bg-neutral-100 dark:bg-[#1F2937] transition-colors"
+                    className="rounded-md border border-border bg-card p-1 text-center hover:bg-hover transition-colors"
                   >
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">{summaryRiskCount}</p>
+                    <p className="text-sm font-semibold text-foreground">{summaryRiskCount}</p>
                     <p>em risco</p>
                   </button>
                   <button
                     onClick={applySummaryChangesWindow}
-                    className="rounded-md border border-neutral-200 dark:border-[#1F2937] bg-white dark:bg-[#0B1220] p-1 text-center hover:bg-neutral-100 dark:bg-[#1F2937] transition-colors"
+                    className="rounded-md border border-border bg-card p-1 text-center hover:bg-hover transition-colors"
                   >
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">{summaryChanges30dCount}</p>
+                    <p className="text-sm font-semibold text-foreground">{summaryChanges30dCount}</p>
                     <p>mudanças 30d</p>
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A] p-3.5">
+              <div className="rounded-2xl border border-border bg-muted p-3.5">
                 <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-neutral-900 dark:text-[#E5E7EB]">Alertas</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Alertas</h3>
                   <button
                     onClick={() => setShowAlertActionOnly((prev) => !prev)}
                   className={`text-xs px-2 py-1 rounded-full border ${
                     showAlertActionOnly
-                      ? "border-mint-200 bg-mint-50 text-mint-700"
-                      : "border-neutral-200 dark:border-[#1F2937] text-neutral-600 dark:text-slate-400"
+                      ? "border-brand-border bg-brand-surface text-brand-text"
+                      : "border-border text-muted-foreground"
                   }`}
                 >
                     {showAlertActionOnly ? "Filtro ativo · Ação agora" : "Mostrando todos"}
@@ -1334,19 +1334,19 @@ export function WatchlistPage() {
                 </div>
                 <div className="space-y-2">
                   {alertsToShow.map((alert) => (
-                    <div key={alert.id} className={`rounded-xl border p-3 ${alert.severity === "Risco" ? "border-rose-200 bg-rose-50/40" : "border-neutral-200 dark:border-[#1F2937] bg-neutral-50 dark:bg-[#0F172A]"}`}>
+                    <div key={alert.id} className={`rounded-xl border p-3 ${alert.severity === "Risco" ? "border-rose-200 bg-rose-50/40" : "border-border bg-muted"}`}>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-semibold text-neutral-900 dark:text-[#E5E7EB]">{alert.title}</p>
+                        <p className="text-xs font-semibold text-foreground">{alert.title}</p>
                         <span className={`px-2 py-0.5 rounded-full border text-[10px] ${alertStyles[alert.severity]}`}>
                           {alert.severity}
                         </span>
                       </div>
-                      <p className="text-xs text-neutral-600 dark:text-slate-400 mt-1">{alert.summary}</p>
-                      <p className="text-[11px] text-neutral-400 dark:text-slate-500 mt-2">{alert.time}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{alert.summary}</p>
+                      <p className="text-[11px] text-muted-foreground mt-2">{alert.time}</p>
                     </div>
                   ))}
                 </div>
-                <button className="mt-3 w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#1F2937] text-xs text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-[#0F172A]">
+                <button className="mt-3 w-full px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground hover:bg-hover">
                   Configurar alertas
                 </button>
               </div>
