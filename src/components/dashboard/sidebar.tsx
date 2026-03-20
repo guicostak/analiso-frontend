@@ -47,7 +47,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
       const className = `group relative grid h-10 w-10 place-items-center rounded-xl border transition-colors ${
         isActive
           ? "border-mint-200 bg-mint-50 text-mint-700"
-          : "border-transparent text-slate-400 hover:border-slate-200 hover:bg-white hover:text-slate-700"
+          : "border-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground"
       }`;
 
       if (item.href.startsWith("/")) {
@@ -67,23 +67,23 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
     });
 
   return (
-    <aside className="dash-side fixed left-0 top-0 z-30 h-screen w-[88px] border-r border-slate-200 bg-slate-50">
+    <aside className="dash-side fixed left-0 top-0 z-30 h-screen w-[88px] border-r border-border bg-background">
       <div className="flex h-full flex-col items-center px-3 py-4">
         <img src={logo.src} alt="Analiso" className="h-11 w-11 object-contain" />
 
         <nav className="mt-5 flex w-full flex-col items-center gap-3">{renderItems(primaryItems)}</nav>
 
-        <div className="my-4 h-px w-10 bg-slate-200" />
+        <div className="my-4 h-px w-10 bg-border" />
 
         <nav className="flex w-full flex-col items-center gap-3">{renderItems(secondaryItems)}</nav>
 
-        <div className="my-4 h-px w-10 bg-slate-200" />
+        <div className="my-4 h-px w-10 bg-border" />
 
         <div className="mt-auto">
           <button
             title="Perfil"
             aria-label="Perfil"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:text-slate-700"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground"
           >
             <UserCircle2 className="h-5 w-5" />
           </button>

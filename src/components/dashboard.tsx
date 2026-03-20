@@ -1,10 +1,12 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { getDashboard, type DashboardResponse } from "../services/dashboard";
 import { ApiError } from "../services/api";
+import { AppTopBar } from "./app-top-bar";
 import {
   Activity,
   Bell,
@@ -538,7 +540,8 @@ export function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [clockTick, setClockTick] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
   const [realtimeItems, setRealtimeItems] = useState<InboxSeedItem[]>([]);
   const [newBadgeUntil, setNewBadgeUntil] = useState<Record<string, number>>({});
   const [viewedInboxItemIds, setViewedInboxItemIds] = useState<string[]>(() => loadViewedInboxItemIds());
@@ -595,27 +598,6 @@ export function Dashboard() {
     }
   }, [viewedInboxItemIds]);
 
-  useEffect(() => {
-    try {
-      const savedTheme = window.localStorage.getItem("analiso-theme");
-      const shouldUseDark =
-        savedTheme === "dark" ||
-        (!savedTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-      setIsDarkMode(shouldUseDark);
-      document.documentElement.classList.toggle("dark", shouldUseDark);
-    } catch {
-      // ignore theme storage errors
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
-    try {
-      window.localStorage.setItem("analiso-theme", isDarkMode ? "dark" : "light");
-    } catch {
-      // ignore theme storage errors
-    }
-  }, [isDarkMode]);
 
   useEffect(() => {
     setInboxFilters((prev) => {
@@ -879,51 +861,8 @@ export function Dashboard() {
       </div>
 
       <div className="md:pl-[88px]">
-        <header className={cn("sticky top-0 z-20 h-12 border-b", isDarkMode ? "border-[#1F2937] bg-[#0B1220]" : "border-slate-200 bg-white")}>
-          <div className="flex h-full items-center justify-between px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <div className="md:hidden" />
-              <div className={cn("hidden h-8 w-full max-w-[430px] items-center rounded-lg border px-3 md:flex", isDarkMode ? "border-[#334155] bg-[#0F172A]" : "border-slate-200 bg-slate-50")}>
-                <Search className={cn("h-4 w-4", isDarkMode ? "text-slate-400" : "text-slate-400")} />
-                <Input
-                  className={cn("h-7 border-0 bg-transparent px-2 text-[13px] shadow-none ring-0 focus-visible:ring-0", isDarkMode ? "text-[#E5E7EB] placeholder:text-slate-400" : "")}
-                  placeholder="Busque empresa ou ticker..."
-                />
-              </div>
-            </div>
+              <AppTopBar />
 
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full">
-                <Bell className={cn("h-[30px] w-[30px]", isDarkMode ? "text-slate-400" : "text-slate-500")} />
-                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#DC2626]" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <Settings className={cn("h-[30px] w-[30px]", isDarkMode ? "text-slate-400" : "text-slate-500")} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full"
-                onClick={() => setIsDarkMode((prev) => !prev)}
-                aria-label={isDarkMode ? "Ativar modo claro" : "Ativar modo escuro"}
-                title={isDarkMode ? "Modo claro" : "Modo escuro"}
-              >
-                {isDarkMode ? <Sun className="h-5 w-5 text-[#FBBF24]" /> : <Moon className="h-5 w-5 text-slate-500" />}
-              </Button>
-              <button
-                onClick={logout}
-                title="Sair"
-                className="h-8 w-8 rounded-full overflow-hidden border border-slate-200 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40"
-              >
-                {user?.picture ? (
-                  <img src={user.picture} alt={user.name} className="h-full w-full object-cover" />
-                ) : (
-                  <UserCircle2 className={cn("h-5 w-5 m-auto", isDarkMode ? "text-slate-400" : "text-slate-500")} />
-                )}
-              </button>
-            </div>
-          </div>
-        </header>
 
         <main className="space-y-5 px-6 pb-10 pt-5">
           <section className="flex flex-wrap items-start justify-between gap-3">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeProvider } from "next-themes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { GlossaryProvider } from "../src/components/glossary/glossary-context";
@@ -10,12 +11,19 @@ const GOOGLE_CLIENT_ID =
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthProvider>
-        <GlossaryProvider>
-          {children}
-        </GlossaryProvider>
-      </AuthProvider>
-    </GoogleOAuthProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      storageKey="analiso-theme"
+    >
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <AuthProvider>
+          <GlossaryProvider>
+            {children}
+          </GlossaryProvider>
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </ThemeProvider>
   );
 }
