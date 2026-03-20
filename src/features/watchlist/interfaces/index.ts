@@ -18,11 +18,31 @@ export interface PriorityItem {
   id: string;
   company: string;
   ticker: string;
-  sector: string;
-  badge: PriorityBadge;
+  /** null quando o backend retorna sectorLabel: null — não renderizar a linha do setor */
+  sector: string | null;
+  /** Badge display do endpoint — pode ser "Prioridade 1", "Risco", "Atenção", etc. */
+  badge: string;
+  /** topTag do endpoint — null quando o item não é o primeiro da lista */
+  topTag: string | null;
+  /** contextLine do endpoint */
+  contextLine: string;
+  /** whatChangedLabel do endpoint */
+  changeLabel: string;
+  /** whatChanged do endpoint */
   change: string;
+  /** whyMattersLabel do endpoint */
+  whyLabel: string;
+  /** whyMatters do endpoint */
   why: string;
+  /** metaLine do endpoint */
   evidence: string;
+  /** ctaLabel do endpoint */
+  ctaLabel: string;
+  /**
+   * Pilar para navegação deep-link.
+   * O endpoint priorityItems não envia pillar — valor padrão "Dívida" é usado
+   * até que o backend exponha esse campo.
+   */
   pillar: Pillar;
   evidenceId?: string;
 }
@@ -38,6 +58,8 @@ export interface FeedItem {
   severity: FeedSeverity;
   source: FeedSource;
   range: FeedRange;
+  /** ctaLabel do endpoint updatesSection.items[i].ctaLabel */
+  ctaLabel: string;
   evidenceId?: string;
 }
 
