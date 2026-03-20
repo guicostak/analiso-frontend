@@ -1,31 +1,19 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useTheme } from "next-themes";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../contexts/AuthContext";
-import { getDashboard, type DashboardResponse } from "../services/dashboard";
-import { ApiError } from "../services/api";
 import { AppTopBar } from "./app-top-bar";
 import {
   Activity,
-  Bell,
-  Bookmark,
   ChevronDown,
   ChevronRight,
-  Compass,
   Database,
   Ellipsis,
   FileText,
-  LayoutGrid,
-  Menu,
-  Moon,
-  PanelLeft,
-  Search,
-  Settings,
-  Sun,
-  UserCircle2,
 } from "lucide-react";
+
+import { useDashboardInbox } from "../hooks/useDashboardInbox";
+import type { InboxItem, Status, Pillar } from "../types/dashboard";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -43,61 +31,6 @@ import logoTaesa from "../assets/logos/taesa.png";
 import logoVale from "../assets/logos/vale.png";
 import logoWeg from "../assets/logos/weg.jpeg";
 
-type Status = "Saudável" | "Atenção" | "Risco";
-type Pillar = "Dívida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
-type WindowRange = "24h" | "7d" | "30d";
-type InboxSource = "CVM" | "B3" | "RI";
-type InboxSort = "Impacto" | "Mais recente";
-type InboxEventType = "mudanca" | "evento_futuro";
-type InboxMode = "top-impacto" | "tempo-real";
-
-type PillarMovement = {
-  pillar: Pillar;
-  events: number;
-  trendLabel: string;
-  trendUp: boolean;
-  risk: number;
-  attention: number;
-  healthy: number;
-};
-
-type InboxSeedItem = {
-  id: string;
-  companyId: string;
-  ticker: string;
-  companyName: string;
-  title: string;
-  whyItMatters: string;
-  severity: Status;
-  pillarKey?: Pillar;
-  source?: InboxSource;
-  ageMinutes: number;
-  impactScore: number;
-  eventType: InboxEventType;
-};
-
-type InboxItem = Omit<InboxSeedItem, "ageMinutes"> & {
-  timestamp: string;
-  relativeTime: string;
-  ageMinutes: number;
-};
-
-type InboxFilters = {
-  period: WindowRange;
-  severities: Status[];
-  pillars: Pillar[];
-  sources: InboxSource[];
-  sortBy: InboxSort;
-};
-
-const INBOX_FILTERS_STORAGE_KEY = "dashboard-inbox-filters:v1";
-const INBOX_MODE_STORAGE_KEY = "dashboard-inbox-mode:v1";
-const READING_PROGRESS_STORAGE_KEY = "dashboard-reading-progress:v1";
-const NEW_ITEM_HIGHLIGHT_MS = 10_000;
-
-const allStatuses: Status[] = ["Risco", "Atenção", "Saudável"];
-const allPillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
-const allSources: InboxSource[] = ["CVM", "B3", "RI"];
 
 const logoByTicker: Record<string, string> = {
   VALE3: logoVale.src,
@@ -108,36 +41,6 @@ const logoByTicker: Record<string, string> = {
   WEGE3: logoWeg.src,
 };
 
-// -------------------------------------------------------
-// API → Dashboard mappings
-// -------------------------------------------------------
-
-const companyNameByTicker: Record<string, string> = {
-  VALE3: "Vale", PETR4: "Petrobras", PETR3: "Petrobras",
-  ITUB4: "Itaú Unibanco", ITUB3: "Itaú Unibanco",
-  BBAS3: "Banco do Brasil", BBDC4: "Bradesco", BBDC3: "Bradesco",
-  ABEV3: "Ambev", WEGE3: "WEG", RENT3: "Localiza",
-  LREN3: "Lojas Renner", MGLU3: "Magazine Luiza",
-  MRVE3: "MRV Engenharia", TAEE11: "Taesa",
-  FLRY3: "Fleury", CSAN3: "Cosan",
-};
-
-function apiPillarToDashboard(apiPillar: string): Pillar | undefined {
-  const map: Record<string, Pillar> = {
-    debt: "Dívida",
-    cash: "Caixa",
-    profitability: "Margens",
-    growth: "Retorno",
-    dividends: "Proventos",
-  };
-  return map[apiPillar];
-}
-
-function apiTemplateToSeverity(template: string): Status {
-  if (template === "ITEM_HIGH_RISK_ACTIONABLE" || template === "ITEM_HIGH_RISK_VALIDATE") return "Risco";
-  if (template === "ITEM_MEDIUM_RISK_MONITOR" || template === "ITEM_EVENT_AHEAD" || template === "ITEM_MIXED_SIGNALS") return "Atenção";
-  return "Saudável";
-}
 
 const statusClasses: Record<Status, string> = {
   Saudável: "border-emerald-300 bg-emerald-100 text-emerald-900",
@@ -145,237 +48,8 @@ const statusClasses: Record<Status, string> = {
   Risco: "border-rose-300 bg-rose-100 text-rose-900",
 };
 
-const inboxSeed: InboxSeedItem[] = [
-  {
-    id: "evt-vale-divida-1",
-    companyId: "VALE3",
-    ticker: "VALE3",
-    companyName: "Vale",
-    title: "Dívida líquida/EBITDA acima do limite interno",
-    whyItMatters: "Aumento da alavancagem pode reduzir flexibilidade financeira.",
-    severity: "Risco",
-    pillarKey: "Dívida",
-    source: "CVM",
-    ageMinutes: 3,
-    impactScore: 99,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-lren-margens-1",
-    companyId: "LREN3",
-    ticker: "LREN3",
-    companyName: "Lojas Renner",
-    title: "Margens pressionadas no trimestre",
-    whyItMatters: "Compressão de margem pode limitar revisão positiva de lucro.",
-    severity: "Atenção",
-    pillarKey: "Margens",
-    source: "RI",
-    ageMinutes: 11,
-    impactScore: 84,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-mrve-caixa-1",
-    companyId: "MRVE3",
-    ticker: "MRVE3",
-    companyName: "MRV Engenharia",
-    title: "Queda em caixa livre no período",
-    whyItMatters: "Menor geração de caixa aumenta risco de execução no curto prazo.",
-    severity: "Atenção",
-    pillarKey: "Caixa",
-    source: "B3",
-    ageMinutes: 17,
-    impactScore: 81,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-taee-retorno-1",
-    companyId: "TAEE11",
-    ticker: "TAEE11",
-    companyName: "Taesa",
-    title: "Retorno segue resiliente",
-    whyItMatters: "Indicadores estáveis sinalizam consistência operacional.",
-    severity: "Saudável",
-    pillarKey: "Retorno",
-    source: "RI",
-    ageMinutes: 44,
-    impactScore: 58,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-itub-proventos-1",
-    companyId: "ITUB4",
-    ticker: "ITUB4",
-    companyName: "Itaú Unibanco",
-    title: "Proventos em trajetória estável",
-    whyItMatters: "Consistência em distribuição reforça previsibilidade de retorno.",
-    severity: "Saudável",
-    pillarKey: "Proventos",
-    source: "RI",
-    ageMinutes: 130,
-    impactScore: 49,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-weg-evento-1",
-    companyId: "WEGE3",
-    ticker: "WEGE3",
-    companyName: "WEG",
-    title: "Resultado 4T25 agendado para esta semana",
-    whyItMatters: "Evento futuro pode alterar diagnóstico de Margens e Retorno.",
-    severity: "Atenção",
-    pillarKey: "Margens",
-    source: "RI",
-    ageMinutes: 260,
-    impactScore: 76,
-    eventType: "evento_futuro",
-  },
-  {
-    id: "evt-vale-caixa-2",
-    companyId: "VALE3",
-    ticker: "VALE3",
-    companyName: "Vale",
-    title: "Geração de caixa abaixo da referência",
-    whyItMatters: "Pode elevar dependência de financiamento no curto prazo.",
-    severity: "Risco",
-    pillarKey: "Caixa",
-    source: "CVM",
-    ageMinutes: 1220,
-    impactScore: 90,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-weg-margens-2",
-    companyId: "WEGE3",
-    ticker: "WEGE3",
-    companyName: "WEG",
-    title: "Margem bruta cedeu no trimestre",
-    whyItMatters: "Pode reduzir ganho operacional se o mix piorar.",
-    severity: "Atenção",
-    pillarKey: "Margens",
-    source: "CVM",
-    ageMinutes: 3160,
-    impactScore: 73,
-    eventType: "mudanca",
-  },
-  {
-    id: "evt-itub-retorno-2",
-    companyId: "ITUB4",
-    ticker: "ITUB4",
-    companyName: "Itaú Unibanco",
-    title: "ROE mantém acima da referência",
-    whyItMatters: "Sinaliza eficiência de alocação de capital no ciclo.",
-    severity: "Saudável",
-    pillarKey: "Retorno",
-    source: "B3",
-    ageMinutes: 7420,
-    impactScore: 52,
-    eventType: "mudanca",
-  },
-];
-
-const pillarMovements: PillarMovement[] = [
-  { pillar: "Dívida", events: 12, trendLabel: "up 18%", trendUp: true, risk: 3, attention: 7, healthy: 2 },
-  { pillar: "Margens", events: 9, trendLabel: "up 10%", trendUp: true, risk: 2, attention: 6, healthy: 1 },
-  { pillar: "Caixa", events: 7, trendLabel: "down 6%", trendUp: false, risk: 1, attention: 2, healthy: 4 },
-  { pillar: "Proventos", events: 5, trendLabel: "up 4%", trendUp: true, risk: 0, attention: 2, healthy: 3 },
-  { pillar: "Retorno", events: 4, trendLabel: "up 3%", trendUp: true, risk: 0, attention: 1, healthy: 3 },
-];
-
-function toggleInArray<T>(arr: T[], value: T) {
-  return arr.includes(value) ? arr.filter((entry) => entry !== value) : [...arr, value];
-}
-
-function includesAll<T>(selected: T[], all: T[]) {
-  if (selected.length === 0) return true;
-  return selected.length === all.length && all.every((item) => selected.includes(item));
-}
-
-function defaultInboxFilters(): InboxFilters {
-  return {
-    period: "24h",
-    severities: allStatuses,
-    pillars: allPillars,
-    sources: allSources,
-    sortBy: "Impacto",
-  };
-}
-
-function loadInboxFilters(): InboxFilters {
-  const fallback = defaultInboxFilters();
-  try {
-    const raw = window.localStorage.getItem(INBOX_FILTERS_STORAGE_KEY);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw) as Partial<InboxFilters>;
-    return {
-      period: parsed.period ?? fallback.period,
-      severities: parsed.severities?.length ? parsed.severities : fallback.severities,
-      pillars: parsed.pillars?.length ? parsed.pillars : fallback.pillars,
-      sources: parsed.sources?.length ? parsed.sources : fallback.sources,
-      sortBy: parsed.sortBy ?? fallback.sortBy,
-    };
-  } catch {
-    return fallback;
-  }
-}
-
-function loadInboxMode(): InboxMode {
-  try {
-    const raw = window.localStorage.getItem(INBOX_MODE_STORAGE_KEY);
-    if (raw === "tempo-real" || raw === "top-impacto") return raw;
-  } catch {
-    // ignore storage errors
-  }
-  return loadInboxFilters().sortBy === "Mais recente" ? "tempo-real" : "top-impacto";
-}
-
-function loadViewedInboxItemIds() {
-  try {
-    const raw = window.localStorage.getItem(READING_PROGRESS_STORAGE_KEY);
-    if (!raw) return [] as string[];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function getPeriodLimitMinutes(period: WindowRange) {
-  if (period === "24h") return 24 * 60;
-  if (period === "7d") return 7 * 24 * 60;
-  return 30 * 24 * 60;
-}
-
-function relativeFromMinutes(minutes: number) {
-  if (minutes < 60) return `há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours} h`;
-  const days = Math.floor(hours / 24);
-  return `há ${days} d`;
-}
-
-function relativeFromTimestamp(timestamp: number) {
-  const deltaMs = Date.now() - timestamp;
-  const minutes = Math.max(0, Math.floor(deltaMs / 60_000));
-  if (minutes < 1) return "há 0 min";
-  if (minutes < 60) return `há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours} h`;
-  const days = Math.floor(hours / 24);
-  return `há ${days} d`;
-}
-
 function pluralize(value: number, singular: string, plural: string) {
   return `${value} ${value === 1 ? singular : plural}`;
-}
-
-function toPillarQueryKey(pillar?: Pillar) {
-  if (!pillar) return "";
-  if (pillar === "Dívida") return "divida";
-  if (pillar === "Caixa") return "caixa";
-  if (pillar === "Margens") return "margens";
-  if (pillar === "Retorno") return "retorno";
-  return "proventos";
 }
 
 function StatusBadge({ status }: { status: Status }) {
@@ -449,296 +123,33 @@ function ReadingProgressStep({
 
 export function Dashboard() {
   const router = useRouter();
-  const { token, user, logout } = useAuth();
 
-  // API state
-  const [dashboardData, setDashboardData]       = useState<DashboardResponse | null>(null);
-  const [dashboardLoading, setDashboardLoading] = useState(true);
-  const [dashboardError, setDashboardError]     = useState<string | null>(null);
-  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const {
+    dashboardData, dashboardLoading, dashboardError,
+    inboxFilters, inboxMode, filtersOpen, isRefreshing, refreshError, inboxError,
+    realtimeItems, newBadgeUntil, viewedInboxItemIds, clockTick, isDarkMode,
+    inboxRows, inboxItems, todayItems, priorityItem,
+    todayRiskCount, todayAttentionCount, todayHealthyCount,
+    topRiskItem, topImproveItem, focusedPillar,
+    leadingPillarMovement, visiblePillarMovements,
+    pillarMovements: pillarMovementsData,
+    hasAnyFilterOverride, showFiltersCount, advancedFiltersCount,
+    healthyWatchlistCount, totalWatchlistCount,
+    activeSeverities, activePillars, activeSources,
+    hasSeverityFilter, hasPillarFilter, hasSourceFilter, hasPeriodFilter,
+    refreshLabel,
+    setInboxFilters, setInboxMode, setFiltersOpen,
+    toggleFilterSeverity, toggleFilterPillar, toggleFilterSource,
+    setFilterPeriod, setFilterSortBy,
+    refreshInboxNow, openInboxItem, markItemViewed,
+    applySinglePillarFilter, focusInboxRecentImpact,
+    setImpactMode, setRealTimeMode, clearInboxFilters,
+    inboxRef,
+  } = useDashboardInbox();
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchDashboard = () => {
-      setDashboardLoading(true);
-      setDashboardError(null);
-
-      getDashboard(token)
-        .then((data) => {
-          if (!cancelled) {
-            setDashboardData(data);
-            setDashboardLoading(false);
-          }
-        })
-        .catch((err: unknown) => {
-          if (cancelled) return;
-          setDashboardLoading(false);
-          if (err instanceof ApiError && err.code === "dashboard_not_ready") {
-            setDashboardError("not_ready");
-            // Worker ainda processando — tenta de novo em 5s
-            retryTimeoutRef.current = setTimeout(() => {
-              if (!cancelled) fetchDashboard();
-            }, 5000);
-          } else if (err instanceof ApiError && err.status === 401) {
-            logout();
-          } else {
-            setDashboardError("error");
-          }
-        });
-    };
-
-    fetchDashboard();
-
-    return () => {
-      cancelled = true;
-      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
-    };
-  }, [token]);
-
-  // Map API items → InboxSeedItem[] to feed the existing UI
-  const apiInboxItems = useMemo<InboxSeedItem[]>(() => {
-    if (!dashboardData) return [];
-    return dashboardData.items.map((item, idx) => ({
-      id: `api-${item.ticker}-${item.pillar}-${item.priorityRank}`,
-      companyId: item.ticker,
-      ticker: item.ticker,
-      companyName: companyNameByTicker[item.ticker] ?? item.ticker,
-      title: item.card.title,
-      whyItMatters: item.card.whyItMatters,
-      severity: apiTemplateToSeverity(item.primaryTemplate),
-      pillarKey: apiPillarToDashboard(item.pillar),
-      source: undefined,
-      // rank 1 = most recent feel: rank * 8 minutes ago
-      ageMinutes: (item.priorityRank - 1) * 8 + 1,
-      impactScore: Math.max(1, 100 - idx * 7),
-      eventType: "mudanca" as const,
-    }));
-  }, [dashboardData]);
-
-  const [inboxError, setInboxError] = useState(false);
-  const [inboxFilters, setInboxFilters] = useState<InboxFilters>(() => loadInboxFilters());
-  const [inboxMode, setInboxMode] = useState<InboxMode>(() => loadInboxMode());
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [lastRefreshAt, setLastRefreshAt] = useState(() => Date.now());
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
-  const [clockTick, setClockTick] = useState(0);
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
-  const [realtimeItems, setRealtimeItems] = useState<InboxSeedItem[]>([]);
-  const [newBadgeUntil, setNewBadgeUntil] = useState<Record<string, number>>({});
-  const [viewedInboxItemIds, setViewedInboxItemIds] = useState<string[]>(() => loadViewedInboxItemIds());
-  const inboxRef = useRef<HTMLElement | null>(null);
-  const refreshSequenceRef = useRef(0);
-
-  const isLoading = false;
-  const activeSeverities = inboxFilters.severities.length ? inboxFilters.severities : allStatuses;
-  const activePillars = inboxFilters.pillars.length ? inboxFilters.pillars : allPillars;
-  const activeSources = inboxFilters.sources.length ? inboxFilters.sources : allSources;
-  const hasSeverityFilter = !includesAll(inboxFilters.severities, allStatuses);
-  const hasPillarFilter = !includesAll(inboxFilters.pillars, allPillars);
-  const hasSourceFilter = !includesAll(inboxFilters.sources, allSources);
-  const hasPeriodFilter = inboxFilters.period !== "24h";
-  const hasAnyFilterOverride = hasSeverityFilter || hasPillarFilter || hasSourceFilter || hasPeriodFilter;
-  const advancedFiltersCount = Number(hasSeverityFilter) + Number(hasPillarFilter) + Number(hasSourceFilter);
-  const showFiltersCount = advancedFiltersCount > 0;
-
-  // Use API items when available; fall back to mock seed while loading or on error
-  const baseInboxItems = apiInboxItems.length > 0 ? apiInboxItems : inboxSeed;
-
-  const inboxItems = useMemo<InboxItem[]>(
-    () =>
-      [...realtimeItems, ...baseInboxItems].map((item) => ({
-        ...item,
-        ageMinutes: item.ageMinutes,
-        timestamp: new Date(lastRefreshAt - item.ageMinutes * 60_000).toISOString(),
-        relativeTime: relativeFromMinutes(item.ageMinutes),
-      })),
-    [lastRefreshAt, realtimeItems, baseInboxItems],
-  );
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(INBOX_FILTERS_STORAGE_KEY, JSON.stringify(inboxFilters));
-    } catch {
-      // ignore storage errors
-    }
-  }, [inboxFilters]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(INBOX_MODE_STORAGE_KEY, inboxMode);
-    } catch {
-      // ignore storage errors
-    }
-  }, [inboxMode]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(READING_PROGRESS_STORAGE_KEY, JSON.stringify(viewedInboxItemIds));
-    } catch {
-      // ignore storage errors
-    }
-  }, [viewedInboxItemIds]);
-
-
-  useEffect(() => {
-    setInboxFilters((prev) => {
-      const expectedSort: InboxSort = inboxMode === "tempo-real" ? "Mais recente" : "Impacto";
-      if (prev.sortBy === expectedSort) return prev;
-      return { ...prev, sortBy: expectedSort };
-    });
-  }, [inboxMode]);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setClockTick((prev) => prev + 1), 1_000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const now = Date.now();
-    setNewBadgeUntil((prev) => {
-      const next = Object.fromEntries(Object.entries(prev).filter(([, expiresAt]) => expiresAt > now));
-      return Object.keys(next).length === Object.keys(prev).length ? prev : next;
-    });
-  }, [clockTick]);
-
-  useEffect(() => {
-    const clearNewBadgesOnInteraction = () => {
-      setNewBadgeUntil((prev) => (Object.keys(prev).length ? {} : prev));
-    };
-
-    window.addEventListener("scroll", clearNewBadgesOnInteraction, { passive: true });
-    window.addEventListener("pointerdown", clearNewBadgesOnInteraction, { passive: true });
-    window.addEventListener("keydown", clearNewBadgesOnInteraction);
-    window.addEventListener("touchstart", clearNewBadgesOnInteraction, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", clearNewBadgesOnInteraction);
-      window.removeEventListener("pointerdown", clearNewBadgesOnInteraction);
-      window.removeEventListener("keydown", clearNewBadgesOnInteraction);
-      window.removeEventListener("touchstart", clearNewBadgesOnInteraction);
-    };
-  }, []);
-
-  const inboxRows = useMemo(() => {
-    const limit = getPeriodLimitMinutes(inboxFilters.period);
-    return inboxItems
-      .filter((item) => item.ageMinutes <= limit)
-      .filter((item) => activeSeverities.includes(item.severity))
-      .filter((item) => (item.pillarKey ? activePillars.includes(item.pillarKey) : true))
-      .filter((item) => (item.source ? activeSources.includes(item.source) : true))
-      .sort((a, b) => {
-        if (inboxFilters.sortBy === "Impacto") {
-          return b.impactScore - a.impactScore;
-        }
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-      });
-  }, [activePillars, activeSeverities, activeSources, inboxFilters, inboxItems]);
-
-  const refreshInboxNow = () => {
-    try {
-      setIsRefreshing(true);
-      const now = Date.now();
-      setLastRefreshAt(now);
-      if (inboxMode === "tempo-real") {
-        const template = inboxSeed[refreshSequenceRef.current % inboxSeed.length];
-        refreshSequenceRef.current += 1;
-        const realtimeItem: InboxSeedItem = {
-          ...template,
-          id: `${template.id}-rt-${now}`,
-          ageMinutes: 0,
-          impactScore: Math.min(100, template.impactScore + 3),
-        };
-        setRealtimeItems((prev) => [realtimeItem, ...prev].slice(0, 12));
-        setNewBadgeUntil((prev) => ({ ...prev, [realtimeItem.id]: now + NEW_ITEM_HIGHLIGHT_MS }));
-      }
-      setRefreshError(null);
-      setInboxError(false);
-    } catch {
-      setRefreshError("Falha ao atualizar. Tentar novamente.");
-      setInboxError(true);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    if (inboxMode !== "tempo-real") return;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      refreshInboxNow();
-    }, 30_000);
-    return () => window.clearInterval(timer);
-  }, [inboxMode]);
-
-  const openInboxItem = (item: InboxItem) => {
-    setViewedInboxItemIds((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
-    const params = new URLSearchParams();
-    if (item.pillarKey) {
-      params.set("pilar", toPillarQueryKey(item.pillarKey));
-      params.set("expand", toPillarQueryKey(item.pillarKey));
-    }
-
-    if (item.eventType === "evento_futuro") {
-      params.set("tab", "eventos");
-      params.set("foco", "agenda");
-    } else if (item.pillarKey) {
-      params.set("tab", "pilares");
-      params.set("foco", "pilar");
-    } else {
-      params.set("tab", "mudancas");
-      params.set("foco", "mudancas");
-    }
-
-    router.push(`/empresa/${item.ticker}?${params.toString()}`);
-  };
-
-  const applySinglePillarFilter = (pillar: Pillar) => {
-    setInboxFilters((prev) => ({ ...prev, pillars: [pillar] }));
-    inboxRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const focusInboxRecentImpact = () => {
-    setInboxMode("top-impacto");
-    setInboxFilters((prev) => ({ ...prev, period: "24h", sortBy: "Impacto" }));
-    inboxRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const setImpactMode = () => {
-    setInboxMode("top-impacto");
-    setInboxFilters((prev) => ({ ...prev, period: "24h", sortBy: "Impacto" }));
-  };
-
-  const setRealTimeMode = () => {
-    setInboxMode("tempo-real");
-    setInboxFilters((prev) => ({ ...prev, period: "24h", sortBy: "Mais recente" }));
-    refreshInboxNow();
-  };
-
-  const clearInboxFilters = () => {
-    setInboxMode("top-impacto");
-    setInboxFilters(defaultInboxFilters());
-    setRealtimeItems([]);
-    setNewBadgeUntil({});
-  };
-
-  const focusedPillar = inboxFilters.pillars.length === 1 ? inboxFilters.pillars[0] : pillarMovements[0].pillar;
-  const todayItems = useMemo(() => inboxItems.filter((item) => item.ageMinutes <= 24 * 60), [inboxItems]);
-  const priorityItem = inboxRows[0];
-  const leadingPillarMovement = [...pillarMovements].sort((a, b) => b.events - a.events)[0];
-  const visiblePillarMovements = [...pillarMovements].sort((a, b) => b.events - a.events).slice(0, 2);
+  // pillarMovements renomeado para evitar shadowing com a variável local
+  const pillarMovements = pillarMovementsData;
   const secondPillarMovement = [...pillarMovements].sort((a, b) => b.events - a.events)[1];
-
-  const todayRiskCount = todayItems.filter((item) => item.severity === "Risco").length;
-  const todayAttentionCount = todayItems.filter((item) => item.severity === "Atenção").length;
-  const todayHealthyCount = todayItems.filter((item) => item.severity === "Saudável").length;
-
-  const topRiskItem = todayItems.filter((item) => item.severity === "Risco").sort((a, b) => b.impactScore - a.impactScore)[0];
-  const topImproveItem = todayItems.filter((item) => item.severity === "Saudável").sort((a, b) => b.impactScore - a.impactScore)[0];
-  const healthyWatchlistCount = 12;
-  const totalWatchlistCount = 20;
 
   const pillarInsight: Record<Pillar, string> = {
     Dívida: "concentrou mais sinais de pressão hoje",
@@ -832,7 +243,6 @@ export function Dashboard() {
     hasPeriodFilter ? [`${inboxFilters.period}`] : [],
   ].flat();
 
-  const refreshLabel = useMemo(() => relativeFromTimestamp(lastRefreshAt), [lastRefreshAt, clockTick]);
   const orderLabel = inboxMode === "tempo-real" ? "tempo real" : "impacto";
 
   return (
@@ -1114,7 +524,7 @@ export function Dashboard() {
                   </div>
                 )}
 
-                {isLoading ? (
+                {isRefreshing ? (
                   <div className="space-y-2">
                     {[1, 2, 3, 4].map((item) => (
                       <div key={item} className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
@@ -1123,7 +533,7 @@ export function Dashboard() {
                 ) : inboxError ? (
                   <div className="rounded-xl border border-danger-border bg-danger-surface px-3 py-4">
                     <p className="text-[14px] font-medium text-danger-text">Não foi possível carregar atualizações.</p>
-                    <button onClick={() => setInboxError(false)} className="mt-2 text-[12px] font-medium text-danger-text underline">
+                    <button onClick={refreshInboxNow} className="mt-2 text-[12px] font-medium text-danger-text underline">
                       Tentar novamente
                     </button>
                   </div>
@@ -1272,7 +682,7 @@ export function Dashboard() {
               </CardHeader>
 
               <CardContent className="space-y-1 px-4 pb-3">
-                {isLoading ? (
+                {isRefreshing ? (
                   <div className="space-y-2">
                     {[1, 2].map((item) => (
                       <div key={item} className="h-12 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />

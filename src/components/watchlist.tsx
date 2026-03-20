@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
 import {
   CheckCircle2,
   ChevronDown,
@@ -11,354 +10,17 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { GlossaryText } from "./glossary/glossary-text";
-
 import { Sidebar } from "./dashboard/sidebar";
 import { AppTopBar } from "./app-top-bar";
 
-type Pillar = "Dívida" | "Caixa" | "Margens" | "Retorno" | "Proventos";
+import { useRouter } from "next/navigation";
 
-type PriorityItem = {
-  id: string;
-  company: string;
-  ticker: string;
-  sector: string;
-  badge: "Risco" | "Atenção" | "Saudável";
-  change: string;
-  why: string;
-  evidence: string;
-  pillar: Pillar;
-  evidenceId?: string;
-};
-
-type FeedItem = {
-  id: string;
-  headline: string;
-  detail: string;
-  detailTwo: string;
-  pillar: Pillar;
-  evidence: string;
-  ticker: string;
-  severity: "Risco" | "Atenção" | "Saudável";
-  source: "CVM" | "RI";
-  range: "7d" | "30d" | "90d";
-  evidenceId?: string;
-};
-
-type WatchlistCompany = {
-  name: string;
-  ticker: string;
-  sector: string;
-  scores: number[];
-  lastChangeDays: number;
-  freshness: "Atual" | "Falha" | "Sem dados";
-  volatility?: "Baixa" | "Moderada" | "Alta";
-  attentionPillar: Pillar;
-  tags: string[];
-};
-
-type AlertItem = {
-  id: string;
-  title: string;
-  summary: string;
-  time: string;
-  severity: "Risco" | "Atenção" | "Saudável";
-};
+import { useWatchlist } from "../hooks/useWatchlist";
+import { getStatusFromScores, watchlistCompanies, suggestedCompanies } from "../services/watchlist";
+import type { Pillar, FeedItem, PriorityItem, WatchlistCompany, AlertItem } from "../types/watchlist";
 
 const pillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
-
-const priorityItems: PriorityItem[] = [
-  {
-    id: "p1",
-    company: "Cosan",
-    ticker: "CSAN3",
-    sector: "Consumo",
-    badge: "Risco",
-    change: "Dívida líquida subiu 18% em 90 dias.",
-    why: "Aumenta pressão sobre caixa e pode limitar investimento.",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    pillar: "Dívida",
-    evidenceId: "divida-1",
-  },
-  {
-    id: "p2",
-    company: "MRV",
-    ticker: "MRVE3",
-    sector: "Construção",
-    badge: "Atenção",
-    change: "Margens pressionadas no último trimestre reportado.",
-    why: "Pode limitar recuperação de resultado e pede monitoramento de custos.",
-    evidence: "Fonte: CVM • ITR 2T25 • 12/11",
-    pillar: "Margens",
-    evidenceId: "margens-1",
-  },
-  {
-    id: "p3",
-    company: "Taesa",
-    ticker: "TAEE11",
-    sector: "Energia",
-    badge: "Atenção",
-    change: "Proventos abaixo do histórico de 12 meses.",
-    why: "Reduz previsibilidade de renda no curto prazo.",
-    evidence: "Fonte: RI • Comunicado • 02/02",
-    pillar: "Proventos",
-    evidenceId: "proventos-1",
-  },
-  {
-    id: "p4",
-    company: "Azul",
-    ticker: "AZUL4",
-    sector: "Transportes",
-    badge: "Atenção",
-    change: "Caixa líquido caiu para o menor nível em 4 trimestres.",
-    why: "Menos flexibilidade para atravessar períodos de alta de custos.",
-    evidence: "Fonte: CVM • ITR 3T25 • 03/02",
-    pillar: "Caixa",
-    evidenceId: "caixa-1",
-  },
-];
-
-const feedItems: FeedItem[] = [
-  {
-    id: "f1",
-    headline: "Dívida subiu acima da média setorial.",
-    detail: "Comparado ao setor, a alavancagem ficou 1,3x acima.",
-    detailTwo: "O que observar: renegociação e cronograma de amortização.",
-    pillar: "Dívida",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "CSAN3",
-    severity: "Risco",
-    source: "CVM",
-    range: "30d",
-    evidenceId: "divida-1",
-  },
-  {
-    id: "f2",
-    headline: "Caixa voltou para faixa confortável.",
-    detail: "Liquidez recuperou após duas captações recentes.",
-    detailTwo: "O que observar: manutenção do ritmo de geração de caixa.",
-    pillar: "Caixa",
-    evidence: "Fonte: RI • 05/02",
-    ticker: "WEGE3",
-    severity: "Saudável",
-    source: "RI",
-    range: "7d",
-    evidenceId: "caixa-1",
-  },
-  {
-    id: "f3",
-    headline: "Margens operacionais melhoraram 0,8 p.p.",
-    detail: "Recuperação gradual de custos de insumos.",
-    detailTwo: "O que observar: impacto em fluxo de caixa livre.",
-    pillar: "Margens",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "FLRY3",
-    severity: "Atenção",
-    source: "CVM",
-    range: "30d",
-    evidenceId: "margens-1",
-  },
-  {
-    id: "f4",
-    headline: "Retorno sobre capital ficou abaixo do histórico.",
-    detail: "ROIC caiu pelo segundo trimestre consecutivo.",
-    detailTwo: "O que observar: eficiência operacional e reinvestimento.",
-    pillar: "Retorno",
-    evidence: "Fonte: CVM • ITR 3T25 • 02/02",
-    ticker: "ABEV3",
-    severity: "Atenção",
-    source: "CVM",
-    range: "90d",
-    evidenceId: "retorno-1",
-  },
-  {
-    id: "f5",
-    headline: "Proventos mais estáveis após 2 trimestres.",
-    detail: "Payout normalizado acima do mínimo histórico.",
-    detailTwo: "O que observar: guidance de distribuição.",
-    pillar: "Proventos",
-    evidence: "Fonte: RI • 01/02",
-    ticker: "ITUB4",
-    severity: "Saudável",
-    source: "RI",
-    range: "30d",
-    evidenceId: "proventos-1",
-  },
-  {
-    id: "f6",
-    headline: "Dívida em moeda estrangeira aumentou.",
-    detail: "Mais exposição cambial no curto prazo.",
-    detailTwo: "O que observar: hedge e sensibilidade ao câmbio.",
-    pillar: "Dívida",
-    evidence: "Fonte: CVM • ITR 3T25 • 04/02",
-    ticker: "GGBR4",
-    severity: "Risco",
-    source: "CVM",
-    range: "90d",
-    evidenceId: "divida-2",
-  },
-];
-
-const watchlistCompanies: WatchlistCompany[] = [
-  {
-    name: "WEG",
-    ticker: "WEGE3",
-    sector: "Indústria",
-    scores: [78, 84, 72, 80, 64],
-    lastChangeDays: 2,
-    freshness: "Atual",
-    volatility: "Baixa",
-    attentionPillar: "Margens",
-    tags: ["Qualidade", "Defensiva"],
-  },
-  {
-    name: "Itaú Unibanco",
-    ticker: "ITUB4",
-    sector: "Bancos",
-    scores: [72, 78, 70, 76, 74],
-    lastChangeDays: 4,
-    freshness: "Atual",
-    volatility: "Baixa",
-    attentionPillar: "Retorno",
-    tags: ["Dividendos"],
-  },
-  {
-    name: "Taesa",
-    ticker: "TAEE11",
-    sector: "Energia",
-    scores: [56, 62, 60, 64, 82],
-    lastChangeDays: 6,
-    freshness: "Atual",
-    volatility: "Moderada",
-    attentionPillar: "Proventos",
-    tags: ["Renda"],
-  },
-  {
-    name: "Cosan",
-    ticker: "CSAN3",
-    sector: "Consumo",
-    scores: [42, 58, 46, 52, 48],
-    lastChangeDays: 1,
-    freshness: "Falha",
-    volatility: "Alta",
-    attentionPillar: "Dívida",
-    tags: ["Cíclica"],
-  },
-  {
-    name: "Fleury",
-    ticker: "FLRY3",
-    sector: "Saúde",
-    scores: [70, 74, 68, 72, 58],
-    lastChangeDays: 3,
-    freshness: "Atual",
-    volatility: "Baixa",
-    attentionPillar: "Margens",
-    tags: ["Qualidade"],
-  },
-  {
-    name: "MRV",
-    ticker: "MRVE3",
-    sector: "Construção",
-    scores: [32, 44, 30, 36, 40],
-    lastChangeDays: 12,
-    freshness: "Falha",
-    volatility: "Alta",
-    attentionPillar: "Dívida",
-    tags: ["Risco"],
-  },
-  {
-    name: "Petrobras",
-    ticker: "PETR4",
-    sector: "Energia",
-    scores: [60, 66, 58, 64, 70],
-    lastChangeDays: 5,
-    freshness: "Atual",
-    volatility: "Moderada",
-    attentionPillar: "Proventos",
-    tags: ["Dividendos"],
-  },
-  {
-    name: "Ambev",
-    ticker: "ABEV3",
-    sector: "Consumo",
-    scores: [68, 72, 54, 50, 62],
-    lastChangeDays: 9,
-    freshness: "Atual",
-    volatility: "Baixa",
-    attentionPillar: "Retorno",
-    tags: ["Defensiva"],
-  },
-  {
-    name: "Gerdau",
-    ticker: "GGBR4",
-    sector: "Siderurgia",
-    scores: [50, 60, 56, 58, 52],
-    lastChangeDays: 7,
-    freshness: "Atual",
-    volatility: "Moderada",
-    attentionPillar: "Dívida",
-    tags: ["Cíclica"],
-  },
-  {
-    name: "Magazine Luiza",
-    ticker: "MGLU3",
-    sector: "Varejo",
-    scores: [38, 48, 40, 34, 30],
-    lastChangeDays: 14,
-    freshness: "Falha",
-    volatility: "Alta",
-    attentionPillar: "Caixa",
-    tags: ["Risco"],
-  },
-  {
-    name: "RaiaDrogasil",
-    ticker: "RADL3",
-    sector: "Saúde",
-    scores: [66, 70, 62, 68, 54],
-    lastChangeDays: 4,
-    freshness: "Atual",
-    volatility: "Baixa",
-    attentionPillar: "Margens",
-    tags: ["Qualidade"],
-  },
-  {
-    name: "Vibra",
-    ticker: "VBBR3",
-    sector: "Energia",
-    scores: [48, 54, 50, 52, 46],
-    lastChangeDays: 8,
-    freshness: "Sem dados",
-    attentionPillar: "Caixa",
-    tags: ["Atenção"],
-  },
-];
-
-const alerts: AlertItem[] = [
-  {
-    id: "a1",
-    title: "Dívida em atenção (CSAN3)",
-    summary: "Alavancagem acima do limite definido na watchlist.",
-    time: "Hoje • 10:12",
-    severity: "Risco",
-  },
-  {
-    id: "a2",
-    title: "Margens em atenção (MRVE3)",
-    summary: "Pressão de custos manteve margens abaixo da média setorial.",
-    time: "Ontem • 19:40",
-    severity: "Atenção",
-  },
-  {
-    id: "a3",
-    title: "Proventos abaixo do esperado (TAEE11)",
-    summary: "Distribuição ficou 12% abaixo da média 12m.",
-    time: "02/02 • 08:30",
-    severity: "Atenção",
-  },
-];
-
-const suggestedCompanies = ["BBAS3", "SUZB3", "EQTL3", "LREN3", "RAIL3", "RADL3"];
 
 const badgeStyles: Record<PriorityItem["badge"], string> = {
   Risco: "bg-rose-100 text-rose-900 border-rose-300",
@@ -397,125 +59,57 @@ const priorityRankingLabels = ["Maior piora relativa do dia", "Maior pressão es
 
 export function WatchlistPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"updates" | "list">("updates");
-  const [activeRange, setActiveRange] = useState<"7d" | "30d" | "90d" | "Todos">("30d");
-  const [activePillars, setActivePillars] = useState<Pillar[]>([]);
-  const [severityFilter, setSeverityFilter] = useState<"Todos" | "Risco" | "Atenção" | "Saudável">("Todos");
-  const [sourceFilter, setSourceFilter] = useState<"Todas" | "CVM" | "B3" | "RI">("Todas");
-  const [showAdvancedFeedFilters, setShowAdvancedFeedFilters] = useState(false);
-  const [listSearch, setListSearch] = useState("");
-  const [sortBy, setSortBy] = useState("Mudou recentemente");
-  const [filters, setFilters] = useState({
-    sector: "Todos",
-    tags: "Todos",
-    pillar: "Todos",
-  });
-  const [showListFilters, setShowListFilters] = useState(false);
-  const [listSeverityFilter, setListSeverityFilter] = useState<"Todos" | "Risco" | "Atenção" | "Saudável">("Todos");
-  const [listSourceFilter, setListSourceFilter] = useState<"Todas" | "CVM" | "B3" | "RI">("Todas");
-  const [listDensity, setListDensity] = useState<"Compacto" | "Detalhado">("Compacto");
-  const [unseenOnly, setUnseenOnly] = useState(true);
-  const [seenTickers, setSeenTickers] = useState<string[]>([]);
-  const [showAlertActionOnly, setShowAlertActionOnly] = useState(true);
-  const [expandedTicker, setExpandedTicker] = useState<string | null>(null);
-  const [quickActionsTicker, setQuickActionsTicker] = useState<string | null>(null);
+  const {
+    activeTab, setActiveTab,
+    activeRange, setActiveRange,
+    activePillars, togglePillar,
+    severityFilter, setSeverityFilter,
+    sourceFilter, setSourceFilter,
+    showAdvancedFeedFilters, setShowAdvancedFeedFilters,
+    listSearch, setListSearch,
+    sortBy, setSortBy,
+    filters, setFilters,
+    showListFilters, setShowListFilters,
+    listSeverityFilter, setListSeverityFilter,
+    listSourceFilter, setListSourceFilter,
+    listDensity, setListDensity,
+    unseenOnly, setUnseenOnly,
+    seenTickers, toggleSeenTicker,
+    showAlertActionOnly, setShowAlertActionOnly,
+    expandedTicker, setExpandedTicker,
+    quickActionsTicker, setQuickActionsTicker,
+    uiState,
+    filteredFeedItems,
+    filteredCompanies,
+    priorityItems,
+    alerts,
+    sourceByTicker,
+  } = useWatchlist();
 
-  const [uiState] = useState<"ready" | "loading" | "empty">("ready");
+  // UI-derived computed values
+  const activeListFiltersCount =
+    (filters.sector !== "Todos" ? 1 : 0) +
+    (filters.tags !== "Todos" ? 1 : 0) +
+    (filters.pillar !== "Todos" ? 1 : 0) +
+    (listSeverityFilter !== "Todos" ? 1 : 0) +
+    (listSourceFilter !== "Todas" ? 1 : 0);
 
-  const getStatusFromScores = (scores: number[]): "Risco" | "Atenção" | "Saudável" => {
-    const minScore = Math.min(...scores);
-    if (minScore < 50) return "Risco";
-    if (minScore < 70) return "Atenção";
-    return "Saudável";
-  };
-
-  const sourceByTicker: Record<string, "CVM" | "B3" | "RI"> = {
-    WEGE3: "CVM",
-    ITUB4: "B3",
-    TAEE11: "RI",
-    CSAN3: "CVM",
-    FLRY3: "CVM",
-    MRVE3: "CVM",
-    PETR4: "B3",
-    ABEV3: "CVM",
-    GGBR4: "CVM",
-    MGLU3: "B3",
-    RADL3: "RI",
-    VBBR3: "RI",
-  };
-
-  const filteredFeedItems = useMemo(() => {
-    return feedItems.filter((item) => {
-      if (activeRange !== "Todos" && item.range !== activeRange) return false;
-      if (activePillars.length > 0 && !activePillars.includes(item.pillar)) return false;
-      if (severityFilter !== "Todos" && item.severity !== severityFilter) return false;
-      if (sourceFilter !== "Todas" && item.source !== sourceFilter) return false;
-      return true;
-    });
-  }, [activePillars, activeRange, severityFilter, sourceFilter]);
-
-  const filteredCompanies = useMemo(() => {
-    return watchlistCompanies
-      .filter((company) => {
-        const companyStatus = getStatusFromScores(company.scores);
-        const companySource = sourceByTicker[company.ticker] ?? "CVM";
-        const query = listSearch.toLowerCase();
-        if (query && !company.name.toLowerCase().includes(query) && !company.ticker.toLowerCase().includes(query)) {
-          return false;
-        }
-        if (unseenOnly && seenTickers.includes(company.ticker)) return false;
-        if (filters.sector !== "Todos" && company.sector !== filters.sector) return false;
-        if (filters.tags !== "Todos" && !company.tags.includes(filters.tags)) return false;
-        if (filters.pillar !== "Todos" && company.attentionPillar !== filters.pillar) return false;
-        if (listSeverityFilter !== "Todos" && companyStatus !== listSeverityFilter) return false;
-        if (listSourceFilter !== "Todas" && companySource !== listSourceFilter) return false;
-        return true;
-      })
-      .sort((a, b) => {
-        const statusWeight = { Risco: 0, Atenção: 1, Saudável: 2 } as const;
-        const statusA = getStatusFromScores(a.scores);
-        const statusB = getStatusFromScores(b.scores);
-        if (sortBy === "Mudou recentemente") return a.lastChangeDays - b.lastChangeDays;
-        if (sortBy === "Atenção primeiro") return statusWeight[statusA] - statusWeight[statusB];
-        if (sortBy === "Melhor qualidade (score geral)") {
-          const scoreA = a.scores.reduce((sum, value) => sum + value, 0);
-          const scoreB = b.scores.reduce((sum, value) => sum + value, 0);
-          return scoreB - scoreA;
-        }
-        return 0;
-      });
-  }, [filters, listSearch, listSeverityFilter, listSourceFilter, seenTickers, sortBy, unseenOnly]);
-
-  const activeListFiltersCount = useMemo(() => {
-    let count = 0;
-    if (filters.sector !== "Todos") count += 1;
-    if (filters.tags !== "Todos") count += 1;
-    if (filters.pillar !== "Todos") count += 1;
-    if (listSeverityFilter !== "Todos") count += 1;
-    if (listSourceFilter !== "Todas") count += 1;
-    return count;
-  }, [filters, listSeverityFilter, listSourceFilter]);
-
-  const summaryAttentionCount = watchlistCompanies.filter((company) => {
-    const status = getStatusFromScores(company.scores);
-    return status === "Risco" || status === "Atenção";
+  const summaryAttentionCount = watchlistCompanies.filter((c) => {
+    const s = getStatusFromScores(c.scores);
+    return s === "Risco" || s === "Atenção";
   }).length;
-  const summaryRiskCount = watchlistCompanies.filter((company) => getStatusFromScores(company.scores) === "Risco").length;
-  const summaryHealthyCount = watchlistCompanies.filter((company) => getStatusFromScores(company.scores) === "Saudável").length;
-  const summaryChanges30dCount = watchlistCompanies.filter((company) => company.lastChangeDays <= 30).length;
-  const alertsToShow = showAlertActionOnly ? alerts.filter((alert) => alert.severity !== "Saudável") : alerts;
+  const summaryRiskCount = watchlistCompanies.filter((c) => getStatusFromScores(c.scores) === "Risco").length;
+  const summaryHealthyCount = watchlistCompanies.filter((c) => getStatusFromScores(c.scores) === "Saudável").length;
+  const summaryChanges30dCount = watchlistCompanies.filter((c) => c.lastChangeDays <= 30).length;
+
+  const alertsToShow = showAlertActionOnly ? alerts.filter((a) => a.severity !== "Saudável") : alerts;
   const watchlistExecutiveSummary =
     summaryAttentionCount > summaryHealthyCount
       ? "Hoje sua watchlist concentra mais sinais de atenção do que de estabilidade."
       : "Hoje sua watchlist está mais estável, com menos sinais críticos na triagem.";
 
-  const pillarToSlug = (pillar: Pillar) => {
-    if (pillar === "Dívida") return "divida";
-    if (pillar === "Caixa") return "caixa";
-    if (pillar === "Margens") return "margens";
-    if (pillar === "Retorno") return "retorno";
-    return "proventos";
-  };
+  const pillarToSlug = (pillar: Pillar) =>
+    pillar.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   const buildCompanyDeepLink = (ticker: string, pillar: Pillar, evidenceId?: string) => {
     const params = new URLSearchParams({ pilar: pillarToSlug(pillar) });
@@ -540,32 +134,12 @@ export function WatchlistPage() {
     return "Sem sinais críticos no momento; mantenha o acompanhamento periódico.";
   };
 
-  const togglePillar = (pillar: Pillar) => {
-    setActivePillars((prev) =>
-      prev.includes(pillar) ? prev.filter((item) => item !== pillar) : [...prev, pillar]
-    );
-  };
+  const applySummaryAttentionFilter = () => { setActiveTab("list"); setListSeverityFilter("Atenção"); };
+  const applySummaryRiskFilter = () => { setActiveTab("list"); setListSeverityFilter("Risco"); };
+  const applySummaryChangesWindow = () => { setActiveTab("updates"); setActiveRange("30d"); };
 
-  const applySummaryAttentionFilter = () => {
-    setActiveTab("list");
-    setListSeverityFilter("Atenção");
-  };
-
-  const applySummaryRiskFilter = () => {
-    setActiveTab("list");
-    setListSeverityFilter("Risco");
-  };
-
-  const applySummaryChangesWindow = () => {
-    setActiveTab("updates");
-    setActiveRange("30d");
-  };
-
-  const toggleSeenTicker = (ticker: string) => {
-    setSeenTickers((prev) => (prev.includes(ticker) ? prev.filter((item) => item !== ticker) : [...prev, ticker]));
-  };
-
-  const getFeedCTA = (item: FeedItem | PriorityItem) => ('source' in item && item.source === "CVM" ? "Ver evidência" : "Ver análise");
+  const getFeedCTA = (item: FeedItem | PriorityItem) =>
+    ("source" in item && item.source === "CVM" ? "Ver evidência" : "Ver análise");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
