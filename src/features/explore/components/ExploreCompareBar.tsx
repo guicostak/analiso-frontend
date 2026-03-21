@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { Button } from "@/src/components/ui/button";
 
 interface ExploreCompareBarProps {
   compareTickers: string[];
@@ -17,15 +18,19 @@ export function ExploreCompareBar({ compareTickers, toggleCompare }: ExploreComp
         {compareTickers.map((ticker) => (
           <span key={ticker} className="flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-xs text-foreground/80">
             {ticker}
-            <button onClick={() => toggleCompare(ticker)}>
-              <X className="w-3 h-3" />
-            </button>
+            <Button
+              variant="ghost"
+              onClick={() => toggleCompare(ticker)}
+              className="h-auto w-auto p-0 [&_svg]:size-3"
+            >
+              <X />
+            </Button>
           </span>
         ))}
       </div>
-      <button className="px-3 py-2 rounded-xl bg-mint-500 text-white text-xs font-medium hover:bg-mint-600">
+      <Button variant="mint" size="xs" className="rounded-xl">
         Comparar ({compareTickers.length}/4)
-      </button>
+      </Button>
     </div>
   );
 }

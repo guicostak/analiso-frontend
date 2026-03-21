@@ -2,6 +2,7 @@
 
 import { Share2, X } from "lucide-react";
 import type { CompareEvidence } from "../interfaces";
+import { Button } from "@/src/components/ui/button";
 
 interface CompareEvidenceDrawerProps {
   data: CompareEvidence | null;
@@ -22,12 +23,9 @@ export function CompareEvidenceDrawer({ data, onClose, formatMetric }: CompareEv
             </p>
             <h3 className="mt-1 text-lg font-semibold text-foreground">{data.metricName}</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-border p-1.5 text-muted-foreground"
-          >
+          <Button variant="ghost" size="icon-round" onClick={onClose}>
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         <div className="space-y-4 text-sm">
           <div className="rounded-xl border border-border bg-muted p-4">
@@ -71,14 +69,11 @@ export function CompareEvidenceDrawer({ data, onClose, formatMetric }: CompareEv
               <p className="mt-1 text-foreground">{data.source.reference}</p>
             </div>
           ) : null}
-          <a
-            href={data.source.link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-hover"
-          >
-            Abrir documento <Share2 className="h-3.5 w-3.5" />
-          </a>
+          <Button asChild variant="outline" className="rounded-xl">
+            <a href={data.source.link} target="_blank" rel="noreferrer">
+              Abrir documento <Share2 className="h-3.5 w-3.5" />
+            </a>
+          </Button>
         </div>
       </aside>
     </div>

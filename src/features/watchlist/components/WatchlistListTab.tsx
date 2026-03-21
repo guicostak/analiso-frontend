@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
 import type { Pillar, WatchlistCompany, WatchlistSortBy, WatchlistStatus, FeedSource } from "../interfaces";
 import { getStatusFromScores } from "../services";
+import { Button } from "@/src/components/ui/button";
+import { cn } from "@/src/components/ui/utils";
 
 const badgeStyles: Record<"Risco" | "Atenção" | "Saudável", string> = {
   Risco: "bg-rose-100 text-rose-900 border-rose-300",
@@ -123,38 +125,42 @@ export function WatchlistListTab({
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {(["Compacto", "Detalhado"] as const).map((mode) => (
-              <button
+              <Button
                 key={mode}
                 onClick={() => setListDensity(mode)}
-                className={`px-3 py-2 rounded-xl text-xs font-medium border ${
-                  listDensity === mode
-                    ? "border-brand-border bg-brand-surface text-brand-text"
-                    : "border-border bg-card text-muted-foreground"
-                }`}
+                size="xs"
+                variant={listDensity === mode ? "brand" : "outline"}
+                className="rounded-xl"
               >
                 {mode}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button
               onClick={() => setShowListFilters(!showListFilters)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium border ${
+              size="xs"
+              variant="ghost"
+              className={cn(
+                "rounded-xl border",
                 showListFilters
                   ? "border-neutral-300 bg-hover text-dim"
                   : "border-border bg-card text-muted-foreground"
-              }`}
+              )}
             >
               Filtros ({activeListFiltersCount})
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setUnseenOnly(!unseenOnly)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium border ${
+              size="xs"
+              variant="ghost"
+              className={cn(
+                "rounded-xl border",
                 unseenOnly
                   ? "border-neutral-300 bg-hover text-dim"
                   : "border-border bg-card text-muted-foreground"
-              }`}
+              )}
             >
               Não vistos
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -299,96 +305,103 @@ export function WatchlistListTab({
                   </p>
                 </div>
                 <div className="relative flex items-center gap-1.5 flex-wrap justify-end">
-                  <button
+                  <Button
+                    variant="mint"
+                    size="xs"
                     onClick={(event) => {
                       event.stopPropagation();
                       router.push(buildCompanyDeepLink(company.ticker, company.attentionPillar));
                     }}
-                    className="inline-flex items-center rounded-lg bg-mint-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-mint-600 whitespace-nowrap"
+                    className="rounded-lg whitespace-nowrap"
                   >
                     Ver detalhes
-                  </button>
+                  </Button>
                   {!isCompactCard && (
-                    <Link
-                      href={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
-                      onClick={(event) => event.stopPropagation()}
-                      className="inline-flex items-center rounded-md border border-brand-border bg-brand-surface px-2 py-1 text-xs font-medium text-brand-text hover:text-foreground whitespace-nowrap"
-                    >
-                      Ver evidência
-                    </Link>
+                    <Button asChild variant="brand" size="xs" className="rounded-md whitespace-nowrap">
+                      <Link
+                        href={buildCompanyDeepLink(company.ticker, company.attentionPillar, defaultEvidenceByPillar[company.attentionPillar])}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        Ver evidência
+                      </Link>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     title={seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
                     onClick={(event) => {
                       event.stopPropagation();
                       toggleSeenTicker(company.ticker);
                     }}
-                    className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs whitespace-nowrap ${
+                    size="xs"
+                    variant="ghost"
+                    className={cn(
+                      "rounded-md border gap-1 whitespace-nowrap",
                       seenTickers.includes(company.ticker)
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
                         : "border-border bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
+                    )}
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {seenTickers.includes(company.ticker) ? "Visto" : isCompactCard ? "Marcar" : "Marcar visto"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     title="Mais ações"
                     aria-label="Mais ações"
                     onClick={(event) => {
                       event.stopPropagation();
                       setQuickActionsTicker(quickActionsTicker === company.ticker ? null : company.ticker);
                     }}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground hover:bg-hover hover:text-muted-foreground"
+                    variant="outline"
+                    size="icon-sm"
                   >
                     <MoreHorizontal className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                   {quickActionsTicker === company.ticker && (
                     <div
                       onClick={(event) => event.stopPropagation()}
                       className="absolute right-0 top-8 z-10 w-44 rounded-lg border border-border bg-card p-1.5 shadow-lg"
                     >
-                      <button
-                        title="Favoritar"
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => { setQuickActionsTicker(null); }}
-                        className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                       >
                         Favoritar
-                      </button>
-                      <button
-                        title="Criar alerta"
+                      </Button>
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => { setQuickActionsTicker(null); }}
-                        className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                       >
                         Criar alerta
-                      </button>
-                      <button
-                        title={isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
+                      </Button>
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => {
                           setQuickActionsTicker(null);
                           setExpandedTicker(expandedTicker === company.ticker ? null : company.ticker);
                         }}
-                        className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                       >
                         {isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
-                      </button>
-                      <button
-                        title="Marcar visto"
+                      </Button>
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => {
                           setQuickActionsTicker(null);
                           toggleSeenTicker(company.ticker);
                         }}
-                        className="w-full rounded-md px-2 py-1.5 text-left text-xs text-dim hover:bg-hover"
                       >
                         {seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
-                      </button>
-                      <button
-                        title="Remover da watchlist"
+                      </Button>
+                      <Button
+                        variant="menu-item-destructive"
+                        size="xs"
                         onClick={() => setQuickActionsTicker(null)}
-                        className="w-full rounded-md px-2 py-1.5 text-left text-xs text-rose-600 hover:bg-hover"
                       >
                         Remover da watchlist
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
