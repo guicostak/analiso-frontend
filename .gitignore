@@ -4,3 +4,8 @@ node_modules
 .next/
 next-env.d.ts
 out/
+
+# Variáveis de ambiente — nunca commitar
+.env
+.env.local
+.env.*.local
