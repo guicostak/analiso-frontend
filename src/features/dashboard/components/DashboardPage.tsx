@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,6 @@ import { useDashboardInbox, allStatuses, allPillars, allSources } from "../hooks
 import type { InboxItem, Status, Pillar, WindowRange } from "../interfaces";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
@@ -43,9 +42,9 @@ const logoByTicker: Record<string, string> = {
 
 
 const statusClasses: Record<Status, string> = {
-  Saudável: "border-emerald-300 bg-emerald-100 text-emerald-900",
-  Atenção: "border-amber-300 bg-amber-100 text-amber-900",
-  Risco: "border-rose-300 bg-rose-100 text-rose-900",
+  Saudável: "border-emerald-200 bg-emerald-50 text-[#16A34A]",
+  Atenção: "border-amber-200 bg-amber-50 text-[#C27A0A]",
+  Risco: "border-rose-200 bg-rose-50 text-[#C02067]",
 };
 
 function pluralize(value: number, singular: string, plural: string) {
@@ -54,9 +53,14 @@ function pluralize(value: number, singular: string, plural: string) {
 
 function StatusBadge({ status }: { status: Status }) {
   return (
-    <Badge className={cn("inline-flex h-7 min-w-[82px] items-center justify-center rounded-full border px-3 text-xs font-semibold", statusClasses[status])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium leading-5 tracking-[-0.01em]",
+        statusClasses[status],
+      )}
+    >
       {status}
-    </Badge>
+    </span>
   );
 }
 
@@ -74,6 +78,54 @@ function SegmentedHealthBar({ healthy, attention, risk }: { healthy: number; att
     </div>
   );
 }
+
+type SummaryTone = "balanced" | "positive" | "pressure";
+
+function getSummaryTone({
+  riskCount,
+  attentionCount,
+  healthyCount,
+}: {
+  riskCount: number;
+  attentionCount: number;
+  healthyCount: number;
+}): SummaryTone {
+  const negativeScore = riskCount * 2 + attentionCount;
+  const positiveScore = healthyCount * 1.5;
+
+  if (negativeScore >= positiveScore + 2) return "pressure";
+  if (positiveScore >= negativeScore + 2) return "positive";
+  return "balanced";
+}
+
+const summaryToneStyles: Record<
+  SummaryTone,
+  {
+    card: string;
+    strip: string;
+    icon: string;
+    label: string;
+  }
+> = {
+  balanced: {
+    card: "border-[#cfe0f7] bg-[linear-gradient(180deg,#f3f7ff_0%,#fbfdff_100%)]",
+    strip: "border-b border-[#cfe0f7] bg-[linear-gradient(180deg,#eef5ff_0%,#e5f0ff_100%)]",
+    icon: "text-[#0B62CC]",
+    label: "text-[#0B62CC]",
+  },
+  positive: {
+    card: "border-[#bfe8d6] bg-[linear-gradient(180deg,#eefaf5_0%,#f9fdfb_100%)]",
+    strip: "border-b border-[#cae7db] bg-[linear-gradient(180deg,#eefaf5_0%,#dcf4e8_100%)]",
+    icon: "text-[#16A34A]",
+    label: "text-[#16A34A]",
+  },
+  pressure: {
+    card: "border-[#f2cadd] bg-[linear-gradient(180deg,#fdf4f8_0%,#fffafb_100%)]",
+    strip: "border-b border-[#f2cadd] bg-[linear-gradient(180deg,#fdf1f6_0%,#f9e4ee_100%)]",
+    icon: "text-[#C02067]",
+    label: "text-[#C02067]",
+  },
+};
 
 function ReadingProgressStep({
   label,
@@ -243,6 +295,12 @@ export function Dashboard() {
   ].flat();
 
   const orderLabel = inboxMode === "tempo-real" ? "tempo real" : "impacto";
+  const summaryTone = getSummaryTone({
+    riskCount: todayRiskCount,
+    attentionCount: todayAttentionCount,
+    healthyCount: todayHealthyCount,
+  });
+  const summaryToneStyle = summaryToneStyles[summaryTone];
 
   return (
     <div
@@ -256,7 +314,7 @@ export function Dashboard() {
       <div className="md:pl-[88px]">
         <AppTopBar />
 
-        <main className="space-y-5 px-6 pb-10 pt-5">
+        <main className="space-y-5 px-6 pb-10 pt-[72px]">
           {/* Page header */}
           <section className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
@@ -273,8 +331,23 @@ export function Dashboard() {
 
           {/* Watchlist summary card */}
           <section>
-            <Card className={cn("rounded-2xl border", isDarkMode ? "border-brand-border bg-brand-surface" : "border-mint-200 bg-gradient-to-r from-[#ECFDF9] to-white")}>
-              <CardContent className="p-4">
+            <Card
+              className={cn(
+                "overflow-hidden rounded-[24px] border shadow-[0_10px_30px_rgba(16,24,40,0.04)]",
+                isDarkMode ? "border-brand-border bg-brand-surface" : summaryToneStyle.card,
+              )}
+            >
+              {!isDarkMode ? (
+                <div className={cn("px-6 py-4 max-md:flex max-md:justify-center", summaryToneStyle.strip)}>
+                  <div className="flex items-center gap-2 transition-opacity duration-500">
+                    <Activity className={cn("h-[14px] w-[14px]", summaryToneStyle.icon)} />
+                    <span className={cn("text-sm font-medium leading-5 tracking-[-0.01em]", summaryToneStyle.label)}>
+                      Resumo de hoje
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              <CardContent className={cn("px-4 pb-4 pt-3", !isDarkMode && "bg-white")}>
                 {dashboardLoading ? (
                   <div className="space-y-2 animate-pulse">
                     <div className={cn("h-3 w-24 rounded", isDarkMode ? "bg-brand-border" : "bg-mint-100")} />
@@ -283,11 +356,10 @@ export function Dashboard() {
                   </div>
                 ) : dashboardError === "not_ready" ? (
                   <div className="space-y-2">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>Resumo de hoje</p>
-                    <p className={cn("text-[20px] font-semibold leading-tight", "text-foreground")}>
+                    <p className={cn("text-[20px] font-semibold leading-7 tracking-[-0.2px]", "text-foreground")}>
                       Preparando seu dashboard...
                     </p>
-                    <p className={cn("text-[14px] leading-relaxed", "text-dim")}>
+                    <p className={cn("text-base leading-6", "text-dim")}>
                       Estamos analisando sua watchlist pela primeira vez. Isso leva menos de um minuto.
                     </p>
                     <div className="flex items-center gap-2 pt-1">
@@ -300,14 +372,13 @@ export function Dashboard() {
                 ) : (
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-3xl space-y-1.5">
-                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", "text-brand-text")}>Resumo de hoje</p>
-                      <p className={cn("text-[20px] font-semibold leading-tight", "text-foreground")}>
+                      <p className={cn("text-[20px] font-semibold leading-7 tracking-[-0.2px]", "text-foreground")}>
                         {dashboardData?.summary.headline ??
                           (todayRiskCount > 0 || todayAttentionCount > 0
                             ? `Hoje sua watchlist teve ${pluralize(todayRiskCount, "mudança de risco", "mudanças de risco")} e ${pluralize(todayHealthyCount, "melhora importante", "melhoras importantes")}.`
                             : "Sua watchlist está estável hoje, sem pioras críticas novas.")}
                       </p>
-                      <p className={cn("text-[14px] leading-relaxed", "text-dim")}>
+                      <p className={cn("text-base leading-6", "text-dim")}>
                         {dashboardData?.summary.body ??
                           dashboardData?.nextStep.headline ??
                           (priorityItem
@@ -365,7 +436,7 @@ export function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className={cn("rounded-2xl border", "border-border bg-muted")}>
+            <Card className={cn("rounded-2xl border", "border-border bg-white")}>
               <CardHeader className="space-y-3 px-4 pt-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="max-w-2xl">
@@ -445,7 +516,7 @@ export function Dashboard() {
                   {filtersOpen && (
                     <div className={cn("mt-3 space-y-2 rounded-lg border p-3", "border-border bg-muted")}>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[12px] font-medium text-slate-500">Severidade</p>
+                        <p className="text-[12px] font-medium text-muted-foreground">Severidade</p>
                         {allStatuses.map((status) => (
                           <button
                             key={status}
@@ -463,7 +534,7 @@ export function Dashboard() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[12px] font-medium text-slate-500">Pilar</p>
+                        <p className="text-[12px] font-medium text-muted-foreground">Pilar</p>
                         {allPillars.map((pillar) => (
                           <button
                             key={pillar}
@@ -481,7 +552,7 @@ export function Dashboard() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[12px] font-medium text-slate-500">Fonte</p>
+                        <p className="text-[12px] font-medium text-muted-foreground">Fonte</p>
                         {allSources.map((source) => (
                           <button
                             key={source}
@@ -527,7 +598,7 @@ export function Dashboard() {
                 {isRefreshing ? (
                   <div className="space-y-2">
                     {[1, 2, 3, 4].map((item) => (
-                      <div key={item} className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
+                      <div key={item} className="h-16 animate-pulse rounded-xl border border-border bg-muted" />
                     ))}
                   </div>
                 ) : inboxError ? (
@@ -538,8 +609,8 @@ export function Dashboard() {
                     </button>
                   </div>
                 ) : inboxRows.length === 0 ? (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4">
-                    <p className="text-[14px] text-slate-500">Nenhuma atualização relevante no período.</p>
+                  <div className="rounded-xl border border-border bg-muted px-3 py-4">
+                    <p className="text-[14px] text-muted-foreground">Nenhuma atualização relevante no período.</p>
                     <button
                       onClick={() => setInboxFilters((prev) => ({ ...prev, period: "7d" }))}
                       className="mt-2 text-[12px] font-medium text-mint-600 hover:text-mint-700"
@@ -647,7 +718,7 @@ export function Dashboard() {
                     key={card.title}
                     onClick={card.action}
                     className={cn(
-                      "group rounded-2xl border p-3 text-left transition-all duration-150",
+                      "group rounded-xl border p-3 text-left transition-all duration-150",
                       isDarkMode
                         ? "border-border bg-muted hover:border-border-strong hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
                         : "border-border bg-card hover:border-border-strong hover:shadow-[0_2px_10px_rgba(16,24,40,0.05)]",
@@ -687,7 +758,7 @@ export function Dashboard() {
                 {isRefreshing ? (
                   <div className="space-y-2">
                     {[1, 2].map((item) => (
-                      <div key={item} className="h-12 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
+                      <div key={item} className="h-12 animate-pulse rounded-xl border border-border bg-muted" />
                     ))}
                   </div>
                 ) : (
