@@ -48,13 +48,13 @@ export function QuickActionCards() {
             key={index}
             href={action.href}
             onClick={action.href === '#' ? (e) => e.preventDefault() : undefined}
-            className="bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-all text-left group block"
+            className="bg-card border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-all text-left group block"
           >
-            <div className={`w-10 h-10 rounded-xl ${action.iconBg} flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
-              <Icon className={`w-5 h-5 ${action.iconColor}`} />
+            <div className={`w-9 h-9 rounded-lg ${action.iconBg} flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
+              <Icon className={`w-4 h-4 ${action.iconColor}`} />
             </div>
-            <h3 className="font-medium text-neutral-900 mb-1">{action.title}</h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">{action.description}</p>
+            <h3 className="font-medium text-foreground mb-1 text-sm">{action.title}</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">{action.description}</p>
           </Link>
         );
       })}
@@ -99,17 +99,17 @@ export function KPICards() {
       {kpis.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
-          <div key={index} className="bg-white border border-neutral-200 rounded-2xl p-5">
+          <div key={index} className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-neutral-500">{kpi.title}</span>
-              <Icon className="w-4 h-4 text-neutral-400" />
+              <span className="text-sm text-muted-foreground">{kpi.title}</span>
+              <Icon className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="mb-1">
-              <span className="text-2xl font-semibold text-neutral-900">{kpi.value}</span>
+              <span className="text-2xl font-semibold text-foreground">{kpi.value}</span>
             </div>
-            <p className="text-xs text-neutral-500 mb-2">{kpi.context}</p>
+            <p className="text-xs text-muted-foreground mb-2">{kpi.context}</p>
             {kpi.trend && (
-              <div className="flex items-center gap-1 text-xs text-emerald-600">
+              <div className="flex items-center gap-1 text-xs text-success-text">
                 <ArrowRight className="w-3 h-3" />
                 <span>{kpi.trend}</span>
               </div>

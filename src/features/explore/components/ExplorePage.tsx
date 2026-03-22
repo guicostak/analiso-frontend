@@ -40,6 +40,8 @@ export function ExplorePage() {
     indexCards,
     movers,
     movementInsights,
+    movementSummary,
+    movementDominant,
     volatility,
     thesisCollections,
     sectorCollections,
@@ -67,24 +69,32 @@ export function ExplorePage() {
   } = useExplore();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F6FAFC] text-[#0F1728]">
       <div className="fixed inset-y-0 left-0 z-30 w-[88px]">
         <Sidebar currentPage="explorar" />
       </div>
 
       <AppTopBar />
 
-      <main className="ml-[88px] pt-12">
-        <div className="p-8">
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-2xl font-semibold text-foreground">Explorar</h1>
-              <p className="text-sm text-muted-foreground">Descubra e acompanhe empresas do mercado.</p>
-            </div>
-          </div>
+      <main className="relative ml-[88px] overflow-hidden pt-20">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[18%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.10)_0%,rgba(91,141,239,0)_72%)]" />
+          <div className="absolute right-[10%] top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
+        </div>
 
-          <div className="max-w-[1560px] space-y-5">
-            <div className="grid grid-cols-1">
+        <div className="relative px-8 pb-10 pt-6">
+          <div className="mx-auto max-w-[1560px]">
+            <header className="mb-6 space-y-3">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Explorar mercado</p>
+              <div className="max-w-[780px] space-y-3">
+                <h1 className="text-[40px] font-semibold leading-[44px] tracking-[-0.04em] text-[#0F1728]">Explorar</h1>
+                <p className="text-[15px] leading-7 text-[#667085]">
+                  Descubra empresas e movimentos com uma leitura guiada, priorizando o que merece abertura agora e deixando a exploração mais leve ao longo da página.
+                </p>
+              </div>
+            </header>
+
+            <div className="space-y-6">
               <ExploreHighlightsSection
                 summaryScope={summaryScope}
                 summaryState={summaryState}
@@ -100,10 +110,8 @@ export function ExplorePage() {
                 setShowAllHighlights={setShowAllHighlights}
                 applyHighlightPreset={applyHighlightPreset}
               />
-            </div>
 
-            <div className="grid grid-cols-1">
-              <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-6">
                 <ExploreCompanyCatalog
                   isLoading={isLoading}
                   filteredCompanies={filteredCompanies}
@@ -140,17 +148,17 @@ export function ExplorePage() {
                   setShowVolatilityDetails={setShowVolatilityDetails}
                 />
 
-                <section>
-                  <ExploreMovementsPanel
-                    selectedTab={selectedTab}
-                    movers={movers}
-                    movementInsights={movementInsights}
-                    showAllMovements={showAllMovements}
-                    getCompanyLogo={getCompanyLogo}
-                    setSelectedTab={setSelectedTab}
-                    setShowAllMovements={setShowAllMovements}
-                  />
-                </section>
+                <ExploreMovementsPanel
+                  selectedTab={selectedTab}
+                  movers={movers}
+                  movementInsights={movementInsights}
+                  showAllMovements={showAllMovements}
+                  movementSummary={movementSummary}
+                  movementDominant={movementDominant}
+                  getCompanyLogo={getCompanyLogo}
+                  setSelectedTab={setSelectedTab}
+                  setShowAllMovements={setShowAllMovements}
+                />
               </div>
             </div>
           </div>

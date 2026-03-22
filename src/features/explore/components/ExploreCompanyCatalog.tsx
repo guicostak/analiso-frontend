@@ -5,19 +5,55 @@ import Link from "next/link";
 import type { CompanyCard, FilterKey, Filters, HighlightPreset } from "../interfaces";
 
 const statusColors: Record<CompanyCard["status"], string> = {
-  Saudável: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  Atenção:  "bg-amber-50 text-amber-700 border-amber-100",
-  Risco:    "bg-rose-50 text-rose-700 border-rose-100",
+  Saudável: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
+  Atenção: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
+  Risco: "border-[#F3D8DF] bg-[#FDEFF2] text-[#B54768]",
 };
 
 const freshnessColors: Record<CompanyCard["freshnessStatus"], string> = {
-  Atualizado: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  Antigo:     "bg-amber-50 text-amber-700 border-amber-100",
+  Atualizado: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
+  Antigo: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
 };
+
+function getCardShellColor(status: CompanyCard["status"]) {
+  const statusText = String(status);
+  if (statusText.startsWith("R")) return "bg-[linear-gradient(180deg,#FFF7F9_0%,#FFFFFF_34%)]";
+  if (statusText.startsWith("S")) return "bg-[linear-gradient(180deg,#F7FCFA_0%,#FFFFFF_34%)]";
+  return "bg-[linear-gradient(180deg,#FFF9F1_0%,#FFFFFF_34%)]";
+}
+
+function getCardAccentColor(status: CompanyCard["status"]) {
+  const statusText = String(status);
+  if (statusText.startsWith("R")) return "bg-[linear-gradient(90deg,#FADCE5_0%,rgba(250,220,229,0)_88%)]";
+  if (statusText.startsWith("S")) return "bg-[linear-gradient(90deg,#DDF6EC_0%,rgba(221,246,236,0)_88%)]";
+  return "bg-[linear-gradient(90deg,#FFEACC_0%,rgba(255,234,204,0)_88%)]";
+}
+
+function getCardAccentVariant(index: number) {
+  if (index % 3 === 0) {
+    return {
+      band: "h-[78px]",
+      shape: "left-5 top-3 h-10 w-24 rounded-[28px_18px_22px_16px/18px_22px_16px_20px]",
+      divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.18),rgba(152,162,179,0))]",
+    };
+  }
+  if (index % 3 === 1) {
+    return {
+      band: "h-[64px]",
+      shape: "left-8 top-4 h-8 w-20 rounded-[18px_28px_16px_24px/20px_18px_22px_16px]",
+      divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.14),rgba(152,162,179,0))]",
+    };
+  }
+  return {
+    band: "h-[72px]",
+    shape: "left-6 top-2 h-9 w-16 rounded-[22px_16px_24px_18px/16px_20px_18px_22px]",
+    divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.16),rgba(152,162,179,0))]",
+  };
+}
 
 const freshnessLabelMap: Record<CompanyCard["freshnessStatus"], string> = {
   Atualizado: "Fonte atualizada",
-  Antigo:     "Fonte atrasada",
+  Antigo: "Fonte atrasada",
 };
 
 const pillars = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
@@ -70,251 +106,297 @@ export function ExploreCompanyCatalog({
   resetFilters,
 }: ExploreCompanyCatalogProps) {
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Empresas para você analisar</h3>
-          <p className="text-xs text-muted-foreground">Catálogo explorável para aprofundar após abrir os destaques do dia.</p>
+          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descoberta guiada</p>
+          <h2 className="mt-2 text-[28px] font-semibold leading-8 tracking-[-0.03em] text-[#0F1728]">
+            Empresas para você analisar
+          </h2>
+          <p className="mt-3 max-w-[760px] text-[15px] leading-7 text-[#667085]">
+            Catálogo para aprofundar a leitura depois da curadoria principal, mantendo foco em tese, qualidade de fonte e pilar mais relevante.
+          </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Filter className="w-4 h-4" />
+        <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]">
+          <Filter className="h-4 w-4" />
           {filteredCompanies.length} empresas
         </div>
       </div>
 
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Descobrir por tese</p>
-      <div className="flex flex-wrap items-center gap-2">
-        {thesisCollections.map((entry) => (
-          <button
-            key={entry}
-            onClick={() => toggleEntryPoint(entry)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              selectedEntryPoints.includes(entry)
-                ? "border-brand-border bg-brand-surface text-brand-text"
-                : "border-border text-muted-foreground hover:text-foreground hover:bg-hover"
-            }`}
-          >
-            {entry}
-          </button>
-        ))}
-        {selectedEntryPoints.length > 0 ? (
-          <button onClick={clearEntryPoints} className="ml-auto text-xs text-muted-foreground hover:text-foreground/80">
-            Limpar seleção
-          </button>
-        ) : null}
+      <div className="space-y-3">
+        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descobrir por tese</p>
+        <div className="flex flex-wrap items-center gap-3">
+          {thesisCollections.map((entry) => (
+            <button
+              key={entry}
+              onClick={() => toggleEntryPoint(entry)}
+              className={`rounded-full border px-5 py-3 text-[13px] font-medium transition ${
+                selectedEntryPoints.includes(entry)
+                  ? "border-[#CDECDD] bg-[#EFFAF6] text-[#0E9384] shadow-[0_10px_24px_rgba(15,23,40,0.05)]"
+                  : "border-[#E7EEF5] bg-white text-[#667085] hover:border-[#D7E3EE] hover:text-[#0F1728]"
+              }`}
+            >
+              {entry}
+            </button>
+          ))}
+          {selectedEntryPoints.length > 0 ? (
+            <button onClick={clearEntryPoints} className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
+              Limpar seleção
+            </button>
+          ) : null}
+        </div>
       </div>
+
       {activePreset && (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground/80">
+        <div className="flex flex-wrap items-center gap-2 rounded-[24px] border border-[#E7EEF5] bg-white px-4 py-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
           {appliedChips.map((chip) => (
-            <span key={chip} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[11px] text-foreground/80">
+            <span
+              key={chip}
+              className="inline-flex items-center gap-2 rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-4 py-2 text-[12px] font-medium text-[#3965B8]"
+            >
               {chip}
-              <button onClick={clearPreset} className="text-muted-foreground/60 hover:text-foreground/80">
-                <X className="h-3 w-3" />
+              <button onClick={clearPreset} className="text-[#667085] transition hover:text-[#0F1728]" aria-label={`Remover ${chip}`}>
+                <X className="h-3.5 w-3.5" />
               </button>
             </span>
           ))}
-          <button onClick={clearPreset} className="ml-auto text-[11px] text-[#0E9384] hover:text-foreground">
+          <button onClick={clearPreset} className="ml-auto text-[12px] font-semibold text-[#0E9384] transition hover:text-[#0F1728]">
             Limpar
           </button>
         </div>
       )}
 
       {showStaleBanner && (
-        <div className="flex flex-wrap items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-700">
-          <span>Qualidade dos dados: {staleCount} empresas com fonte atrasada.</span>
-          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="font-semibold hover:text-amber-900">
+        <div className="flex flex-col gap-3 rounded-[18px] border border-[#F0D7A8] bg-[#FFF7E8] px-5 py-4 text-[13px] leading-6 text-[#8A5A00] lg:flex-row lg:items-center lg:justify-between">
+          <p>Qualidade dos dados: {staleCount} empresas com fonte atrasada. Vale confirmar antes de comparar decisões recentes.</p>
+          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="text-left font-semibold transition hover:text-[#6E4700]">
             Ver apenas antigas
           </button>
         </div>
       )}
 
-      <p className="pt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Refinar catálogo</p>
-      <div className="bg-card rounded-2xl border border-border shadow-sm p-3 flex flex-wrap gap-3 items-center">
-        <div className="relative w-full sm:hidden">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-          <input
-            type="text"
-            placeholder="Buscar dentro dos resultados"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full pl-10 pr-3 py-2 rounded-xl border border-border text-sm text-foreground/80 focus:outline-none focus:ring-2 focus:ring-mint-100"
-          />
-        </div>
+      <div className="rounded-[24px] border border-[#E7EEF5] bg-white p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+            <label className="relative block xl:min-w-[280px] xl:flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <input
+                type="text"
+                placeholder="Buscar empresa ou ticker"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="h-12 w-full rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] pl-11 pr-4 text-[14px] text-[#0F1728] outline-none transition placeholder:text-[#98A2B3] focus:border-[#D9E8FF]"
+              />
+            </label>
 
-        {(
-          [
-            {
-              label: "Setor",
-              key: "sector",
-              options: ["Todos", "Bancos", "Energia", "Indústria", "Saúde", "Consumo", "Construção"],
-            },
-            { label: "Status", key: "status", options: ["Todos", "Saudável", "Atenção", "Risco"] },
-            { label: "Pilar em destaque", key: "pillar", options: ["Todos", ...pillars] },
-          ] as Array<{ label: string; key: FilterKey; options: string[] }>
-        ).map((filter) => (
-          <div key={filter.key} className="relative">
-            <select
-              value={filters[filter.key]}
-              onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-              className="appearance-none px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
-            >
-              {filter.options.map((option) => (
-                <option key={option} value={option}>
-                  {filter.label}: {option}
-                </option>
+            <div className="flex flex-1 flex-wrap items-center gap-3">
+              {(
+                [
+                  {
+                    label: "Setor",
+                    key: "sector",
+                    options: ["Todos", "Bancos", "Energia", "Indústria", "Saúde", "Consumo", "Construção"],
+                  },
+                  { label: "Status", key: "status", options: ["Todos", "Saudável", "Atenção", "Risco"] },
+                  { label: "Pilar em destaque", key: "pillar", options: ["Todos", ...pillars] },
+                ] as Array<{ label: string; key: FilterKey; options: string[] }>
+              ).map((filter) => (
+                <div key={filter.key} className="relative min-w-[168px] flex-1">
+                  <select
+                    value={filters[filter.key]}
+                    onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
+                    className="h-12 w-full appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                  >
+                    {filter.options.map((option) => (
+                      <option key={option} value={option}>
+                        {filter.label}: {option}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                </div>
               ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/60 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
-        ))}
 
-        <button
-          onClick={() => setShowAdvancedFilters((prev) => !prev)}
-          className="px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 hover:bg-hover"
-        >
-          {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
-        </button>
+          <div className="flex flex-col gap-3 border-t border-[#EEF3F7] pt-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                className="inline-flex h-11 items-center rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 text-[13px] font-medium text-[#0F1728] transition hover:bg-[#F1F6FA]"
+              >
+                {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
+              </button>
 
-        <div className="flex items-center gap-2">
-          <ListFilter className="w-4 h-4 text-muted-foreground/60" />
-          <select
-            value={filters.sort}
-            onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
-            className="appearance-none px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
-          >
-            {[
-              ...(activePreset ? ["Mais relevantes para este destaque"] : []),
-              "Mais atualizadas",
-              "Mudanças recentes",
-              "Maior consistência",
-            ].map((option) => (
-              <option key={option} value={option}>
-                Ordenar: {option}
-              </option>
-            ))}
-          </select>
-        </div>
+              {showAdvancedFilters && (
+                <>
+                  {(
+                    [
+                      { label: "Tamanho", key: "size", options: ["Todos", "Grande", "Média", "Pequena"] },
+                      { label: "Frescor", key: "freshness", options: ["Todos", "Atualizado", "Antigo"] },
+                    ] as Array<{ label: string; key: FilterKey; options: string[] }>
+                  ).map((filter) => (
+                    <div key={filter.key} className="relative min-w-[168px]">
+                      <select
+                        value={filters[filter.key]}
+                        onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
+                        className="h-11 appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                      >
+                        {filter.options.map((option) => (
+                          <option key={option} value={option}>
+                            {filter.label}: {option}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
 
-        {showAdvancedFilters && (
-          <div className="w-full flex flex-wrap gap-3 border-t border-border pt-3">
-            {(
-              [
-                { label: "Tamanho", key: "size", options: ["Todos", "Grande", "Média", "Pequena"] },
-                { label: "Frescor", key: "freshness", options: ["Todos", "Atualizado", "Antigo"] },
-              ] as Array<{ label: string; key: FilterKey; options: string[] }>
-            ).map((filter) => (
-              <div key={filter.key} className="relative">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-px bg-[#EEF3F7]" />
+              <div className="relative min-w-[220px]">
+                <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
                 <select
-                  value={filters[filter.key]}
-                  onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                  className="appearance-none px-3 py-2 rounded-xl border border-border text-xs text-foreground/70 bg-card focus:outline-none focus:ring-2 focus:ring-mint-100"
+                  value={filters.sort}
+                  onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
+                  className="h-11 w-full appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-11 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
                 >
-                  {filter.options.map((option) => (
+                  {[
+                    ...(activePreset ? ["Mais relevantes para este destaque"] : []),
+                    "Mais atualizadas",
+                    "Mudanças recentes",
+                    "Maior consistência",
+                  ].map((option) => (
                     <option key={option} value={option}>
-                      {filter.label}: {option}
+                      Ordenar: {option}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/60 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
               </div>
-            ))}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="bg-card rounded-2xl border border-border shadow-sm p-5">
-              <div className="h-4 w-32 bg-muted rounded mb-3" />
-              <div className="h-3 w-24 bg-muted rounded mb-4" />
-              <div className="h-16 bg-muted rounded mb-4" />
-              <div className="h-3 w-40 bg-muted rounded" />
+            <div key={item} className="min-h-[232px] rounded-[24px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+              <div className="h-4 w-32 rounded bg-[#EAF1F7]" />
+              <div className="mt-4 h-3 w-28 rounded bg-[#EEF3F7]" />
+              <div className="mt-6 h-20 rounded-[18px] bg-[#F4F8FB]" />
+              <div className="mt-6 h-3 w-40 rounded bg-[#EEF3F7]" />
             </div>
           ))}
         </div>
       ) : filteredCompanies.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border shadow-sm p-8 text-center">
-          <p className="text-sm text-foreground/70 mb-3">Nenhuma empresa encontrada com esses filtros.</p>
-          <div className="flex items-center justify-center gap-3">
-            <button onClick={resetFilters} className="px-4 py-2 rounded-xl border border-border text-sm text-foreground/70 hover:bg-hover">
+        <div className="rounded-[28px] border border-[#E7EEF5] bg-white px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+          <p className="text-[15px] leading-7 text-[#475467]">Nenhuma empresa encontrada com esses filtros.</p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button onClick={resetFilters} className="rounded-[16px] border border-[#E7EEF5] bg-[#F8FBFD] px-4 py-2.5 text-[14px] font-medium text-[#0F1728]">
               Limpar filtros
             </button>
             <button
               onClick={() => setFilters((p) => ({ ...p, sector: "Bancos" }))}
-              className="px-4 py-2 rounded-xl bg-mint-500 text-white text-sm hover:bg-mint-600"
+              className="rounded-[16px] bg-[#0E9384] px-4 py-2.5 text-[14px] font-semibold text-white"
             >
               Explorar por setor
             </button>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filteredCompanies.map((company) => (
-            <div key={company.ticker} className="group bg-card rounded-2xl border border-border shadow-sm p-4 hover:shadow-md transition-shadow">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex items-center gap-3">
-                  {getCompanyLogo(company.ticker) && (
-                    <img
-                      src={getCompanyLogo(company.ticker)}
-                      alt={`Logo ${company.ticker}`}
-                      className="h-10 w-10 rounded-full border border-border object-cover bg-card"
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <h4 className="truncate text-sm font-semibold text-foreground">
-                      {company.name} <span className="text-muted-foreground/60">•</span> {company.ticker}
-                    </h4>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-border text-muted-foreground">
-                      {company.sector}
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+          {filteredCompanies.map((company, index) => {
+            const accentVariant = getCardAccentVariant(index);
+
+            return (
+            <article
+              key={company.ticker}
+              className={`group relative flex min-h-[232px] flex-col justify-between overflow-hidden rounded-[24px] border border-[#E7EEF5] p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] ${getCardShellColor(company.status)}`}
+            >
+              <div className={`pointer-events-none absolute inset-x-0 top-0 ${accentVariant.band} ${getCardAccentColor(company.status)} opacity-90`} />
+              <div className={`pointer-events-none absolute ${accentVariant.shape} ${getCardAccentColor(company.status)} opacity-45`} />
+              <div className={`pointer-events-none absolute inset-x-6 top-[86px] h-px ${accentVariant.divider}`} />
+              <div className="relative">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-4">
+                    {getCompanyLogo(company.ticker) && (
+                      <img
+                        src={getCompanyLogo(company.ticker)}
+                        alt={`Logo ${company.ticker}`}
+                        className="h-12 w-12 rounded-[18px] border border-[#EEF3F7] bg-[#F8FBFD] object-cover p-1"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <h3 className="truncate text-[20px] font-semibold leading-7 text-[#0F1728]">
+                        {company.name} <span className="text-[#98A2B3]">{company.ticker}</span>
+                      </h3>
+                      <p className="mt-1 text-[13px] font-medium text-[#98A2B3]">{company.sector}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 flex-col items-end gap-2 pt-1">
+                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] ${statusColors[company.status]}`}>
+                      {company.status}
+                    </span>
+                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] ${freshnessColors[company.freshnessStatus]}`}>
+                      {freshnessLabelMap[company.freshnessStatus]}
                     </span>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <span className={`px-2 py-1 rounded-full text-xs border ${statusColors[company.status]}`}>{company.status}</span>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] ${freshnessColors[company.freshnessStatus]}`}>
-                    {freshnessLabelMap[company.freshnessStatus]}
+
+                <p className="mt-6 text-[15px] leading-7 text-[#475467]">{company.shortDiagnosis}</p>
+
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-3 py-1 text-[11px] font-medium text-[#3965B8]">
+                    Pilar em foco: {company.highlightPillar}
+                  </span>
+                  <span className="inline-flex rounded-full border border-[#EEF3F7] bg-[#F8FBFD] px-3 py-1 text-[11px] font-medium text-[#667085]">
+                    Porte: {company.size}
                   </span>
                 </div>
               </div>
 
-              <p className="text-sm text-foreground/70 mb-3">{company.shortDiagnosis}</p>
+              <div className="relative mt-7 flex flex-col gap-4 border-t border-[#EEF3F7] pt-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#98A2B3]">
+                  <span>
+                    Fonte: {company.source} . Atualizado em {company.updatedAt}
+                  </span>
+                </div>
 
-              <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="rounded-full border border-border px-2 py-0.5 text-foreground/70">Pilar em foco: {company.highlightPillar}</span>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground/60 mb-4">
-                <span>Fonte: {company.source} • Atualizado em {company.updatedAt}</span>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Link
-                  href={`/empresa/${company.ticker}`}
-                  className="px-4 py-2 rounded-xl bg-[#0E9384] text-white text-xs font-medium hover:opacity-90 w-fit"
-                >
-                  Abrir análise
-                </Link>
-                <div className="flex items-center gap-3 text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-                  <Link href={`/empresa/${company.ticker}`} className="hover:text-foreground/80">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/empresa/${company.ticker}`}
+                    className="inline-flex h-11 items-center rounded-[16px] bg-[#0E9384] px-4 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition group-hover:-translate-y-0.5 group-hover:px-5 group-hover:shadow-[0_18px_36px_rgba(14,147,132,0.22)] hover:opacity-90"
+                  >
+                    Abrir análise
+                  </Link>
+                  <Link
+                    href={`/empresa/${company.ticker}`}
+                    className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]"
+                  >
                     Ver pilares
                   </Link>
                   <button
                     onClick={() => toggleCompare(company.ticker)}
-                    className={`transition-colors ${
-                      compareTickers.includes(company.ticker) ? "text-[#0E9384] font-medium" : "text-muted-foreground hover:text-foreground/80"
+                    className={`text-[13px] font-medium transition ${
+                      compareTickers.includes(company.ticker) ? "text-[#0E9384]" : "text-[#667085] hover:text-[#0F1728]"
                     }`}
                   >
                     Comparar
                   </button>
-                  <button className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground/80">
-                    <Star className="w-3.5 h-3.5" />
+                  <button className="inline-flex items-center gap-1 text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
+                    <Star className="h-3.5 w-3.5" />
                     Favoritar
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            </article>
+          )})}
         </div>
       )}
     </section>

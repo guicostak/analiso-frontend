@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
+import { WorkspaceSidebar } from "@/src/components/layout/WorkspaceSidebar";
 import { useWatchlist } from "../hooks/useWatchlist";
-import { getStatusFromScores, suggestedCompanies } from "../services";
-import type { Pillar, WatchlistCompany } from "../interfaces";
+import { suggestedCompanies } from "../services";
+import type { Pillar, WatchlistCompany, WatchlistStatus } from "../interfaces";
 import { WatchlistHeader } from "./WatchlistHeader";
 import { WatchlistUpdatesTab } from "./WatchlistUpdatesTab";
 import { WatchlistListTab } from "./WatchlistListTab";
 import { WatchlistSidebar } from "./WatchlistSidebar";
 
-const pillars: Pillar[] = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
+const pillars = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"] as Pillar[];
+const attentionStatus = "Atenção" as WatchlistStatus;
 
 export function WatchlistPage() {
   const {
@@ -37,9 +38,9 @@ export function WatchlistPage() {
     uiState,
     filteredFeedItems,
     filteredCompanies,
-    companies,
     priorityItems,
     alerts,
+    pageHeader,
     stateBlock,
     prioritySection,
     updatesSectionHeader,
@@ -67,12 +68,12 @@ export function WatchlistPage() {
     return `/empresa/${ticker}?${params.toString()}`;
   };
 
-  const defaultEvidenceByPillar: Record<Pillar, string> = {
-    Dívida: "divida-1",
-    Caixa: "caixa-1",
-    Margens: "margens-1",
-    Retorno: "retorno-1",
-    Proventos: "proventos-1",
+  const getDefaultEvidenceId = (pillar: Pillar) => {
+    if (pillar === pillars[0]) return "divida-1";
+    if (pillar === "Caixa") return "caixa-1";
+    if (pillar === "Margens") return "margens-1";
+    if (pillar === "Retorno") return "retorno-1";
+    return "proventos-1";
   };
 
   const getWhyItMatters = (company: WatchlistCompany) => {
@@ -84,153 +85,176 @@ export function WatchlistPage() {
     return "Sem sinais críticos no momento; mantenha o acompanhamento periódico.";
   };
 
-  const applySummaryAttentionFilter = () => { setActiveTab("list"); setListSeverityFilter("Atenção"); };
-  const applySummaryRiskFilter = () => { setActiveTab("list"); setListSeverityFilter("Risco"); };
-  const applySummaryChangesWindow = () => { setActiveTab("updates"); setActiveRange("30d"); };
+  const applySummaryAttentionFilter = () => {
+    setActiveTab("list");
+    setListSeverityFilter(attentionStatus);
+  };
+
+  const applySummaryRiskFilter = () => {
+    setActiveTab("list");
+    setListSeverityFilter("Risco");
+  };
+
+  const applySummaryChangesWindow = () => {
+    setActiveTab("updates");
+    setActiveRange("30d");
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Sidebar currentPage="watchlist" />
-      <AppTopBar />
+    <div className="min-h-screen bg-[#F6FAFC] text-[#0F1728]">
+      <WorkspaceSidebar currentPage="watchlist" contextLabel="Minha watchlist" />
+      <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
-      <main className="ml-[88px] pt-12">
-        <div className="px-8 py-6">
-          <WatchlistHeader activeTab={activeTab} />
+      <main className="relative overflow-hidden pt-20 xl:ml-[240px]">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[14%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.09)_0%,rgba(91,141,239,0)_72%)]" />
+          <div className="absolute right-[10%] top-44 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
+        </div>
 
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <section className="lg:col-span-9 space-y-3">
-              <div className="flex items-center gap-2">
-                {[
-                  { key: "updates", label: "Atualizações" },
-                  { key: "list", label: "Lista" },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key as "updates" | "list")}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                      activeTab === tab.key
-                        ? "border-brand-border bg-brand-surface text-brand-text"
-                        : "border-border text-muted-foreground hover:bg-hover"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {uiState === "empty" ? (
-                <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
-                  <h2 className="text-lg font-semibold text-foreground">Comece pela sua primeira watchlist</h2>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Escolha 3 empresas para acompanhar mudanças sem ruído.
-                  </p>
-                  <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Buscar empresa ou ticker..."
-                        className="w-full pl-10 pr-3 py-2 rounded-xl border border-border text-sm text-dim focus:outline-none focus:ring-2 focus:ring-mint-100"
-                      />
-                    </div>
-                    <Link
-                      href="/explorar"
-                      className="px-4 py-2 rounded-xl bg-mint-500 text-white text-sm font-medium text-center"
-                    >
-                      Explorar mercado
-                    </Link>
-                  </div>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {suggestedCompanies.map((ticker) => (
-                      <button
-                        key={ticker}
-                        className="px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground hover:bg-hover"
-                      >
-                        {ticker}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : uiState === "loading" ? (
-                <div className="space-y-4">
-                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
-                    <div className="h-4 w-32 bg-hover rounded" />
-                    <div className="h-3 w-full bg-hover rounded" />
-                    <div className="h-3 w-3/4 bg-hover rounded" />
-                  </div>
-                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
-                    <div className="h-4 w-40 bg-hover rounded" />
-                    <div className="h-3 w-full bg-hover rounded" />
-                    <div className="h-3 w-2/3 bg-hover rounded" />
-                  </div>
-                  <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
-                    <div className="h-10 w-full bg-hover rounded" />
-                  </div>
-                </div>
-              ) : activeTab === "updates" ? (
-                <WatchlistUpdatesTab
-                  stateBlock={stateBlock}
-                  prioritySection={prioritySection}
-                  updatesSectionHeader={updatesSectionHeader}
-                  priorityItems={priorityItems}
-                  filteredFeedItems={filteredFeedItems}
-                  sessionClosing={sessionClosing}
-                  activeRange={activeRange}
-                  severityFilter={severityFilter}
-                  sourceFilter={sourceFilter}
-                  showAdvancedFeedFilters={showAdvancedFeedFilters}
-                  activePillars={activePillars}
-                  buildCompanyDeepLink={buildCompanyDeepLink}
-                  setActiveRange={setActiveRange}
-                  setSeverityFilter={setSeverityFilter}
-                  setSourceFilter={setSourceFilter}
-                  setShowAdvancedFeedFilters={setShowAdvancedFeedFilters}
-                  togglePillar={togglePillar}
-                />
-              ) : (
-                <WatchlistListTab
-                  filteredCompanies={filteredCompanies}
-                  listSearch={listSearch}
-                  sortBy={sortBy}
-                  listDensity={listDensity}
-                  showListFilters={showListFilters}
-                  activeListFiltersCount={activeListFiltersCount}
-                  unseenOnly={unseenOnly}
-                  seenTickers={seenTickers}
-                  expandedTicker={expandedTicker}
-                  quickActionsTicker={quickActionsTicker}
-                  listSeverityFilter={listSeverityFilter}
-                  listSourceFilter={listSourceFilter}
-                  filters={filters}
-                  sourceByTicker={sourceByTicker}
-                  getWhyItMatters={getWhyItMatters}
-                  buildCompanyDeepLink={buildCompanyDeepLink}
-                  defaultEvidenceByPillar={defaultEvidenceByPillar}
-                  setListSearch={setListSearch}
-                  setSortBy={setSortBy}
-                  setListDensity={setListDensity}
-                  setShowListFilters={setShowListFilters}
-                  setUnseenOnly={setUnseenOnly}
-                  setListSeverityFilter={setListSeverityFilter}
-                  setListSourceFilter={setListSourceFilter}
-                  setFilters={setFilters}
-                  toggleSeenTicker={toggleSeenTicker}
-                  setExpandedTicker={setExpandedTicker}
-                  setQuickActionsTicker={setQuickActionsTicker}
-                />
-              )}
-            </section>
-
-            <WatchlistSidebar
-              quickOverview={quickOverview}
-              alertsPanelHeader={alertsPanelHeader}
-              alertsToShow={alertsToShow}
-              showAlertActionOnly={showAlertActionOnly}
-              applySummaryAttentionFilter={applySummaryAttentionFilter}
-              applySummaryRiskFilter={applySummaryRiskFilter}
-              applySummaryChangesWindow={applySummaryChangesWindow}
-              setShowAlertActionOnly={setShowAlertActionOnly}
+        <div className="relative px-8 pb-10 pt-6">
+          <div className="mx-auto max-w-[1560px]">
+            <WatchlistHeader
+              activeTab={activeTab}
+              title={pageHeader?.title ?? "Monitorados"}
+              subtitle={pageHeader?.subtitle}
             />
+
+            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+              <section className="space-y-6 lg:col-span-8">
+                <div className="flex flex-wrap items-center gap-3">
+                  {[
+                    { key: "updates", label: "Atualizações" },
+                    { key: "list", label: "Lista" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key as "updates" | "list")}
+                      className={`rounded-full border px-5 py-2.5 text-[13px] font-semibold transition ${
+                        activeTab === tab.key
+                          ? "border-[#D9E8FF] bg-[#EEF6FF] text-[#3965B8] shadow-[0_10px_24px_rgba(15,23,40,0.04)]"
+                          : "border-[#E7EEF5] bg-white text-[#667085] hover:bg-[#F8FBFD] hover:text-[#0F1728]"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {uiState === "empty" ? (
+                  <div className="rounded-[28px] border border-[#E7EEF5] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+                    <h2 className="text-[28px] font-semibold leading-[32px] tracking-[-0.02em] text-[#0F1728]">
+                      Comece pela sua primeira watchlist
+                    </h2>
+                    <p className="mt-3 text-[15px] leading-7 text-[#667085]">
+                      Escolha 3 empresas para acompanhar mudanças sem ruído.
+                    </p>
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                        <input
+                          type="text"
+                          placeholder="Buscar empresa ou ticker..."
+                          className="h-12 w-full rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] pl-10 pr-3 text-[14px] text-[#0F1728] outline-none transition focus:ring-2 focus:ring-[#DDF6F0]"
+                        />
+                      </div>
+                      <Link
+                        href="/explorar"
+                        className="inline-flex h-12 items-center justify-center rounded-[18px] bg-[#12A594] px-5 text-[14px] font-semibold text-white shadow-[0_14px_30px_rgba(18,165,148,0.18)]"
+                      >
+                        Explorar mercado
+                      </Link>
+                    </div>
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {suggestedCompanies.map((ticker) => (
+                        <button
+                          key={ticker}
+                          className="rounded-full border border-[#E7EEF5] bg-[#F8FBFD] px-4 py-2 text-[12px] font-medium text-[#667085] transition hover:bg-white"
+                        >
+                          {ticker}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : uiState === "loading" ? (
+                  <div className="space-y-4">
+                    <div className="space-y-4 rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+                      <div className="h-4 w-32 rounded bg-[#EDF2F7]" />
+                      <div className="h-10 w-4/5 rounded-full bg-[#EDF2F7]" />
+                      <div className="h-4 w-3/4 rounded-full bg-[#EDF2F7]" />
+                    </div>
+                    <div className="space-y-4 rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+                      <div className="h-4 w-40 rounded bg-[#EDF2F7]" />
+                      <div className="h-24 w-full rounded-[24px] bg-[#EDF2F7]" />
+                    </div>
+                    <div className="rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+                      <div className="h-16 w-full rounded-[20px] bg-[#EDF2F7]" />
+                    </div>
+                  </div>
+                ) : activeTab === "updates" ? (
+                  <WatchlistUpdatesTab
+                    stateBlock={stateBlock}
+                    prioritySection={prioritySection}
+                    updatesSectionHeader={updatesSectionHeader}
+                    priorityItems={priorityItems}
+                    filteredFeedItems={filteredFeedItems}
+                    sessionClosing={sessionClosing}
+                    activeRange={activeRange}
+                    severityFilter={severityFilter}
+                    sourceFilter={sourceFilter}
+                    showAdvancedFeedFilters={showAdvancedFeedFilters}
+                    activePillars={activePillars}
+                    buildCompanyDeepLink={buildCompanyDeepLink}
+                    setActiveRange={setActiveRange}
+                    setSeverityFilter={setSeverityFilter}
+                    setSourceFilter={setSourceFilter}
+                    setShowAdvancedFeedFilters={setShowAdvancedFeedFilters}
+                    togglePillar={togglePillar}
+                  />
+                ) : (
+                  <WatchlistListTab
+                    filteredCompanies={filteredCompanies}
+                    listSearch={listSearch}
+                    sortBy={sortBy}
+                    listDensity={listDensity}
+                    showListFilters={showListFilters}
+                    activeListFiltersCount={activeListFiltersCount}
+                    unseenOnly={unseenOnly}
+                    seenTickers={seenTickers}
+                    expandedTicker={expandedTicker}
+                    quickActionsTicker={quickActionsTicker}
+                    listSeverityFilter={listSeverityFilter}
+                    listSourceFilter={listSourceFilter}
+                    filters={filters}
+                    sourceByTicker={sourceByTicker}
+                    getWhyItMatters={getWhyItMatters}
+                    buildCompanyDeepLink={buildCompanyDeepLink}
+                    getDefaultEvidenceId={getDefaultEvidenceId}
+                    setListSearch={setListSearch}
+                    setSortBy={setSortBy}
+                    setListDensity={setListDensity}
+                    setShowListFilters={setShowListFilters}
+                    setUnseenOnly={setUnseenOnly}
+                    setListSeverityFilter={setListSeverityFilter}
+                    setListSourceFilter={setListSourceFilter}
+                    setFilters={setFilters}
+                    toggleSeenTicker={toggleSeenTicker}
+                    setExpandedTicker={setExpandedTicker}
+                    setQuickActionsTicker={setQuickActionsTicker}
+                  />
+                )}
+              </section>
+
+              <WatchlistSidebar
+                quickOverview={quickOverview}
+                alertsPanelHeader={alertsPanelHeader}
+                alertsToShow={alertsToShow}
+                showAlertActionOnly={showAlertActionOnly}
+                applySummaryAttentionFilter={applySummaryAttentionFilter}
+                applySummaryRiskFilter={applySummaryRiskFilter}
+                applySummaryChangesWindow={applySummaryChangesWindow}
+                setShowAlertActionOnly={setShowAlertActionOnly}
+              />
+            </div>
           </div>
         </div>
       </main>

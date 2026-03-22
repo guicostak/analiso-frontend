@@ -43,17 +43,16 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
     items.map((item) => {
       const Icon = item.icon;
       const isActive = currentPage === item.id;
-      const className = `group relative grid h-10 w-10 place-items-center rounded-xl border ${
+      const className = `group relative grid h-10 w-10 place-items-center rounded-lg ${
         isActive
-          ? "border-brand-border bg-brand-surface text-brand-text"
-          : "border-transparent text-muted-foreground hover:border-border hover:bg-hover hover:text-foreground"
+          ? "bg-brand-surface text-brand-text"
+          : "text-muted-foreground hover:bg-hover hover:text-foreground"
       }`;
 
       if (item.href.startsWith("/")) {
         return (
           <Link key={item.id} href={item.href} className={className} title={item.label} aria-label={item.label}>
             <Icon className="h-[18px] w-[18px]" />
-            {isActive ? <span className="pointer-events-none absolute -right-[14px] h-1.5 w-1.5 rounded-full bg-mint-500" /> : null}
           </Link>
         );
       }

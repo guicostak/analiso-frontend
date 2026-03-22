@@ -383,7 +383,7 @@ function HeroDashboard() {
           <div className="border-r border-[#eef2f8] bg-white/90 px-3 py-4 md:px-4">
             <div className="flex items-center gap-2 text-[11px] font-semibold text-[#1b1b1b]">
               <div className="h-6 w-6 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-              Clinic Up
+              Workspace
               <ChevronDown className="h-3.5 w-3.5 text-[#8f8f8f]" />
             </div>
             <div className="mt-7 text-[10px] font-medium uppercase tracking-[0.08em] text-[#c0c0c0]">
@@ -1053,7 +1053,7 @@ export function SolutionSection() {
                   <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
                     <div className="flex items-center gap-2 font-semibold text-[#191919]">
                       <div className="h-5 w-5 rounded-full bg-[#d9d9d9]" />
-                      Clinic Up
+                      Workspace
                     </div>
                     <div className="mt-7 space-y-3">
                       {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque", "Conversas", "Documentos"].map(
@@ -1121,7 +1121,7 @@ export function SolutionSection() {
                       <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
                         <div className="flex items-center gap-2 font-semibold text-[#191919]">
                           <div className="h-5 w-5 rounded-full bg-[#d9d9d9]" />
-                          Clinic Up
+                          Workspace
                         </div>
                         <div className="mt-7 space-y-3">
                           {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque", "Conversas", "Documentos"].map(
@@ -3097,7 +3097,7 @@ export function AudienceSection() {
       <div className="mx-auto max-w-[1430px]">
         <div className="flex flex-col items-center gap-6">
           <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
-            Para quem Ã©
+            Para quem é
           </span>
           <h2
             className="max-w-[560px] bg-clip-text text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-transparent max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]"
@@ -3108,10 +3108,10 @@ export function AudienceSection() {
           >
             Clareza para diferentes
             <br />
-            momentos da anÃ¡lise.
+            momentos da análise.
           </h2>
           <p className="max-w-[525px] text-center text-lg leading-6 text-[#7a7a7a]">
-            Da primeira leitura ao acompanhamento contÃ­nuo, a Analiso ajuda vocÃª a entender empresas sem se perder no ruÃ­do.
+            Da primeira leitura ao acompanhamento contínuo, a Analiso ajuda você a entender empresas sem se perder no ruído.
           </p>
         </div>
 
@@ -3150,7 +3150,7 @@ export function StepsSection() {
                 Da primeira leitura ao acompanhamento.
               </h2>
               <p className="text-lg leading-6 text-[#7a7a7a]">
-                Veja como a Analiso guia sua anÃ¡lise.
+                Veja como a Analiso guia sua análise.
               </p>
             </div>
 
@@ -3178,7 +3178,7 @@ export function FaqSection() {
         <div className="flex flex-col items-center gap-6">
           <div className="flex h-[26px] items-center justify-center rounded-[8px] bg-primary-bluebrand-50 px-2 py-1">
             <span className="text-xs font-semibold leading-[18px] text-primary-bluebrand-600">
-              DÃºvidas
+              Dúvidas
             </span>
           </div>
           <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-black max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
@@ -3279,21 +3279,21 @@ export function CtaSection() {
         <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-white via-white to-transparent" />
         <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
           <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-black max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
-            Pronto para transformar sua anÃ¡lise?
+            Pronto para transformar sua análise?
           </h2>
           <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
-            Entre na lista de espera e receba acesso antecipado Ã  plataforma.
+            Entre na lista de espera e receba acesso antecipado à plataforma.
           </p>
           <button
             type="button"
             className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-white focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
           >
-            ComeÃ§ar grÃ¡tis
+            Começar grátis
           </button>
         </div>
       </div>
       <div className="py-6 text-center text-[13px] text-[#8f8f8f]">
-        Â© 2026 Analiso. Todos os direitos reservados.
+        © 2026 Analiso. Todos os direitos reservados.
       </div>
     </section>
   );

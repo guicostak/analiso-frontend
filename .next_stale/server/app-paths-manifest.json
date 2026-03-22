@@ -1,0 +1,5 @@
+{
+  "/explorar/page": "app/explorar/page.js",
+  "/watchlist/page": "app/watchlist/page.js",
+  "/salte-v2/page": "app/salte-v2/page.js"
+}

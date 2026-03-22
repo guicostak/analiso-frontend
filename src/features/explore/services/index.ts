@@ -26,15 +26,69 @@ import logoWeg from "@/src/assets/logos/weg.jpeg";
 
 import type {
   IndexCard,
+  IndexCardTrend,
   MoverRow,
+  MoverType,
   MovementInsight,
   Volatility,
   HighlightItem,
   HighlightPreset,
   HighlightPillarKey,
   HighlightPillar,
+  HighlightSeverity,
+  HighlightScopeLabel,
   CompanyCard,
+  CompanyStatus,
+  CompanySize,
 } from "../interfaces";
+
+// ─── DTOs do backend (/api/explore) ──────────────────────────────────────────
+
+export interface ExploreMovementItemDto {
+  template:     string;
+  badge:        string;
+  headline:     string;
+  supportLine:  string;
+  whyItMatters: string;
+  metaLine:     string;
+  ctaLabel:     string;
+}
+
+export interface ExploreMovementGroupDto {
+  title: string;
+  items: ExploreMovementItemDto[];
+}
+
+export interface ExploreMovementGroupsDto {
+  highs:       ExploreMovementGroupDto;
+  lows:        ExploreMovementGroupDto;
+  mostTraded:  ExploreMovementGroupDto;
+}
+
+export interface ExploreMovementInsightsSummaryDto {
+  template:  string;
+  title:     string;
+  body:      string;
+  ctaLabel:  string;
+}
+
+export interface ExploreMovementInsightsDominantDto {
+  template:  string;
+  title:     string;
+  body:      string;
+  ctaLabel:  string;
+}
+
+export interface ExploreMovementInsightsDto {
+  summary:         ExploreMovementInsightsSummaryDto  | null;
+  dominantInsight: ExploreMovementInsightsDominantDto | null;
+  groups:          ExploreMovementGroupsDto           | null;
+  emptyState:      unknown;
+}
+
+export interface ExploreResponse {
+  movementInsights: ExploreMovementInsightsDto | null;
+}
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────
 
@@ -123,6 +177,35 @@ export function getPresetChipLabels(preset: HighlightPreset): string[] {
 export function getSortedHighlights(items: HighlightItem[]): HighlightItem[] {
   const rank: Record<HighlightItem["severity"], number> = { Forte: 0, Moderada: 1, Leve: 2 };
   return [...items].sort((a, b) => rank[a.severity] - rank[b.severity]);
+}
+
+export function mapMovementItemToMoverRow(item: ExploreMovementItemDto): MoverRow {
+  return {
+    ticker:    item.headline,
+    name:      item.headline,
+    price:     '—',
+    changePct: '—',
+    note:      item.whyItMatters,
+    updatedAt: '',
+    source:    'B3',
+    type:      'altas',
+  };
+}
+
+export function mapMoversFromInsights(
+  dto: ExploreMovementInsightsDto | null,
+  bucket: 'highs' | 'lows' | 'mostTraded',
+): MoverRow[] {
+  if (!dto?.groups) return [];
+  const typeMap: Record<'highs' | 'lows' | 'mostTraded', MoverType> = {
+    highs:      'altas',
+    lows:       'baixas',
+    mostTraded: 'negociadas',
+  };
+  return (dto.groups[bucket]?.items ?? []).map(item => ({
+    ...mapMovementItemToMoverRow(item),
+    type: typeMap[bucket],
+  }));
 }
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────

@@ -77,6 +77,15 @@ export interface InboxSeedItem {
   companyName: string;
   title: string;
   whyItMatters: string;
+  badge?: string;
+  ctaLabel?: string;
+  entryReason?: string;
+  benefitNow?: string;
+  extraBadge?: string | null;
+  extraLine?: string | null;
+  overlays?: string[];
+  primaryTemplate?: string;
+  priorityRank?: number;
   severity: Status;
   pillarKey?: Pillar;
   source?: InboxSource;
