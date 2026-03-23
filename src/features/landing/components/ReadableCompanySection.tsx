@@ -206,7 +206,7 @@ export function ReadableCompanySection() {
         </p>
 
         <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
-          Entrar na lista de espera
+          Ver como funciona
         </button>
       </div>
 

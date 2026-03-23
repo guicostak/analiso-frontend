@@ -45,7 +45,7 @@ import { CompanyAnalysisSummaryMock } from "./CompanyAnalysisSummaryMock";
 import { ReadableCompanySection } from "./ReadableCompanySection";
 import { HeroDashboardMock } from "./HeroDashboardMock";
 
-const navItems = ["Início", "Atuação", "Solução", "Assistentes IA", "FAQ"] as const;
+const navItems = ["Início", "Como funciona", "Para quem é", "FAQ"] as const;
 
 const heroChips = [
   "Leitura guiada",
@@ -269,22 +269,16 @@ function Header() {
             Início
           </a>
           <a
-            href="#atuacao"
+            href="#como-funciona"
             className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-[#5f5f5f] max-md:px-1.5 max-md:py-1.5 max-md:text-[11px]"
           >
-            Atuação
+            Como funciona
           </a>
           <a
-            href="#solucao"
+            href="#para-quem-e"
             className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-[#5f5f5f] max-md:px-1.5 max-md:py-1.5 max-md:text-[11px]"
           >
-            Solução
-          </a>
-          <a
-            href="#assistentes"
-            className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-[#5f5f5f] max-md:px-1.5 max-md:py-1.5 max-md:text-[11px]"
-          >
-            Assistentes IA
+            Para quem é
           </a>
           <a
             href="#faq"
@@ -830,13 +824,13 @@ export function SolutionSection() {
         }
       `}</style>
       <section
-        id="solucao"
+        id="como-funciona"
         className="px-20 pb-16 pt-16 max-lg:px-10 max-md:px-6 max-sm:px-4"
       >
         <div className="mx-auto max-w-[1430px]">
         <div className="flex flex-col items-center gap-6">
           <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
-            Solução
+            Como funciona
           </span>
           <h2
             className="max-w-[589px] bg-clip-text text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-transparent max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]"
@@ -1451,7 +1445,7 @@ function AIAgentsHero() {
         </p>
 
         <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
-          Conhecer a Analiso
+          Ver como funciona
         </button>
       </div>
 
@@ -2887,9 +2881,9 @@ export function HeroSection() {
           </a>
           <div className="absolute left-1/2 order-2 flex -translate-x-1/2 items-center gap-0.5 max-md:hidden">
             <a href="/" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Início</a>
-            <a href="#atuacao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Atuação</a>
-            <a href="#solucao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Solução</a>
-            <a href="#assistentes" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Assistentes IA</a>
+            <a href="#como-funciona" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Como funciona</a>
+            <a href="#para-quem-e" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Para quem é</a>
+            
             <a href="#faq" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">FAQ</a>
           </div>
           <a
@@ -3259,7 +3253,7 @@ export function HeroMarqueeSection() {
 export function AnalysisMomentsSection() {
   return (
     <section
-      id="atuacao"
+      id="para-quem-e"
       className="px-20 pb-16 pt-24 max-lg:px-10 max-md:px-6 max-md:pb-10 max-md:pt-12 max-sm:px-4"
     >
       <div className="mx-auto max-w-[1430px]">
@@ -3480,7 +3474,7 @@ export function LandingSections() {
 
         <ScrollReveal delay={0.03}>
         <section
-          id="atuacao"
+          id="para-quem-e"
           className="px-20 pb-16 pt-24 max-lg:px-10 max-md:px-6 max-md:pb-10 max-md:pt-12 max-sm:px-4"
         >
           <div className="mx-auto max-w-[1430px]">
@@ -3776,4 +3770,10 @@ export function LandingSections() {
     </div>
   );
 }
+
+
+
+
+
+
 
