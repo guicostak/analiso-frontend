@@ -18,13 +18,13 @@ const severityTone: Record<
     cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)]",
   },
   Moderada: {
-    shell: "bg-[linear-gradient(180deg,#FFF4E4_0%,#FFF9F1_56%,#FFFFFF_100%)] border-[#C9DFFA]",
+    shell: "bg-white border-[#F2D5A6]",
     pill: "bg-[#FFF1DD] text-[#B36A11] border-[#F2D5A6]",
-    accent: "bg-[#FFE8C7]",
-    glow: "bg-[radial-gradient(circle,rgba(243,183,70,0.18)_0%,rgba(243,183,70,0)_72%)]",
-    topBand: "bg-[linear-gradient(180deg,rgba(255,232,199,0.88),rgba(255,244,225,0.22))]",
-    topShape: "rounded-[30px_20px_26px_16px/22px_18px_26px_20px] bg-[linear-gradient(135deg,rgba(255,255,255,0.62),rgba(255,248,235,0.18))]",
-    cardShadow: "shadow-[0_16px_34px_rgba(15,23,40,0.05)]",
+    accent: "bg-transparent",
+    glow: "bg-[rgba(243,183,70,0.08)] blur-2xl",
+    topBand: "bg-[linear-gradient(180deg,#FFE4BE_0%,#FFF3E1_100%)]",
+    topShape: "hidden",
+    cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)]",
   },
   Forte: {
     shell: "bg-[linear-gradient(180deg,#FDEFF2_0%,#FFF9FB_100%)] border-[#F2D8DE]",
@@ -51,6 +51,7 @@ interface ExploreHighlightsSectionProps {
   summaryState: SummaryState;
   hasSectorSelected: boolean;
   hasWatchlist: boolean;
+  hideSummaryCard?: boolean;
   sortedHighlights: HighlightItem[];
   highlights: HighlightItem[];
   showAllHighlights: boolean;
@@ -133,6 +134,7 @@ export function ExploreHighlightsSection({
   summaryState,
   hasSectorSelected,
   hasWatchlist,
+  hideSummaryCard = false,
   sortedHighlights,
   highlights,
   showAllHighlights,
@@ -187,8 +189,8 @@ export function ExploreHighlightsSection({
 
       {summaryState === "ready" && featuredHighlight && (
         <>
-          <div className="grid gap-5 xl:grid-cols-12">
-            <article className="relative overflow-hidden rounded-[26px] border border-[#DDE9F5] bg-[linear-gradient(140deg,#EAF4FF_0%,#EDF6FF_24%,#F4F9FF_54%,#FBFDFF_78%,#FFFFFF_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] xl:col-span-8 xl:min-h-[312px]">
+          <div className={`grid gap-5 ${hideSummaryCard ? "" : "xl:grid-cols-12"}`}>
+            <article className={`relative overflow-hidden rounded-[26px] border border-[#DDE9F5] bg-[linear-gradient(140deg,#EAF4FF_0%,#EDF6FF_24%,#F4F9FF_54%,#FBFDFF_78%,#FFFFFF_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] ${hideSummaryCard ? "" : "xl:col-span-8 xl:min-h-[312px]"}`}>
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -left-12 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.24)_0%,rgba(91,141,239,0.10)_28%,rgba(91,141,239,0)_72%)] blur-3xl" />
                 <div className="absolute left-10 top-8 h-32 w-52 rounded-[55%_45%_58%_42%/48%_35%_65%_52%] bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(255,255,255,0.08))]" />
@@ -295,7 +297,7 @@ export function ExploreHighlightsSection({
               </div>
             </article>
 
-            <aside className="relative overflow-hidden rounded-[28px] border border-[#E7EEF5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBFDFE_100%)] p-7 shadow-[0_18px_40px_rgba(15,23,40,0.05)] xl:col-span-4 xl:min-h-[340px]">
+            {!hideSummaryCard && <aside className="relative overflow-hidden rounded-[28px] border border-[#E7EEF5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBFDFE_100%)] p-7 shadow-[0_18px_40px_rgba(15,23,40,0.05)] xl:col-span-4 xl:min-h-[340px]">
               <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.10)_0%,rgba(18,165,148,0)_68%)]" />
               <div className="absolute inset-x-0 top-0 h-20 bg-[linear-gradient(180deg,rgba(239,250,246,0.72),rgba(239,250,246,0))]" />
 
@@ -344,11 +346,11 @@ export function ExploreHighlightsSection({
                   </div>
                 </div>
               </div>
-            </aside>
+            </aside>}
           </div>
 
           {priorityHighlights.length > 0 && (
-            <div className="grid gap-5 xl:grid-cols-3">
+            <div className={`grid gap-5 ${hideSummaryCard ? "md:grid-cols-2" : "xl:grid-cols-3"}`}>
               {priorityHighlights.map((item) => (
                 <HighlightPriorityCard
                   key={item.id}
@@ -362,7 +364,7 @@ export function ExploreHighlightsSection({
           )}
 
           {overflowHighlights.length > 0 && showAllHighlights && (
-            <div className="grid gap-5 xl:grid-cols-3">
+            <div className={`grid gap-5 ${hideSummaryCard ? "md:grid-cols-2" : "xl:grid-cols-3"}`}>
               {overflowHighlights.map((item) => (
                 <HighlightPriorityCard
                   key={item.id}

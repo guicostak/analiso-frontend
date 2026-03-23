@@ -9,6 +9,7 @@ import {
   Circle,
   CreditCard,
   Bell,
+  Bookmark,
   FileText,
   ClipboardList,
   Boxes,
@@ -31,7 +32,16 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import logoImage from "@/src/assets/logos/logo.png";
+import { CompanyAnalysisAgendaMock } from "./CompanyAnalysisAgendaMock";
+import { CompanyAnalysisChangesMock } from "./CompanyAnalysisChangesMock";
+import { CompanyCompareMock } from "./CompanyCompareMock";
+import { CompanyDashboardMock } from "./CompanyDashboardMock";
+import { CompanyExploreMock } from "./CompanyExploreMock";
+import { CompanyAnalysisPillarsMock } from "./CompanyAnalysisPillarsMock";
+import { CompanyAnalysisPriceMock } from "./CompanyAnalysisPriceMock";
+import { CompanyWatchlistMock } from "./CompanyWatchlistMock";
 import { AnalysisFlowSection } from "./AnalysisFlowSection";
+import { CompanyAnalysisSummaryMock } from "./CompanyAnalysisSummaryMock";
 import { ReadableCompanySection } from "./ReadableCompanySection";
 import { HeroDashboardMock } from "./HeroDashboardMock";
 
@@ -139,44 +149,44 @@ const steps = [
 ] as const;
 
 const faqs = [
-  "Quando a Analiso será lançada?",
-  "Quem pode usar a Analiso?",
-  "A Analiso funciona para qualquer especialidade?",
-  "O que são os Assistentes IA?",
-  "Preciso instalar algo?",
-  "Como funciona a lista de espera?",
+  "O que a Analiso entrega na prática?",
+  "A Analiso recomenda compra ou venda?",
+  "Como a análise é construída e como eu verifico as fontes?",
+  "Como a Analiso mostra o que mudou em uma empresa?",
+  "Qual a diferença entre Dashboard, Watchlist, Explorar e Comparação?",
+  "Para quem a Analiso foi feita?",
 ] as const;
 
 const faqItems = [
   {
-    question: "Quando a Analiso será lançada?",
+    question: "O que a Analiso entrega na prática?",
     answer:
-      "A Analiso está em desenvolvimento. Usuários da lista de espera receberão acesso antecipado antes do lançamento oficial.",
+      "A Analiso organiza dados financeiros em uma leitura guiada para você entender o que importa, o que mudou, onde olhar primeiro e como confirmar cada ponto com fonte e contexto.",
   },
   {
-    question: "Quem pode usar a Analiso?",
+    question: "A Analiso recomenda compra ou venda?",
     answer:
-      "A plataforma foi criada para profissionais de saúde, clínicas particulares e clínicas com múltiplas unidades.",
+      "Não. A Analiso não dá recomendação de compra ou venda. O papel do produto é ajudar você a ler melhor uma empresa, reduzir ruído e tomar decisões com mais clareza e confiança.",
   },
   {
-    question: "A Analiso funciona para qualquer especialidade?",
+    question: "Como a análise é construída e como eu verifico as fontes?",
     answer:
-      "Sim. A plataforma foi pensada para atender diferentes especialidades médicas e áreas da saúde.",
+      "A leitura combina indicadores financeiros, contexto histórico, comparação e sinais recentes da empresa. Sempre que possível, a análise aponta de onde veio a informação, a data e como você pode verificar o dado na fonte.",
   },
   {
-    question: "O que são os Assistentes IA?",
+    question: "Como a Analiso mostra o que mudou em uma empresa?",
     answer:
-      "Os Assistentes IA são agentes que automatizam tarefas da clínica, como transcrição de consultas, análises financeiras e agendamentos. Você também pode criar seus próprios assistentes, personalizados para a rotina da sua clínica.",
+      "A Analiso destaca mudanças relevantes, separa o que é rotina do que realmente altera a leitura e indica por que aquilo importa para o diagnóstico da empresa e para o acompanhamento daqui para frente.",
   },
   {
-    question: "Preciso instalar algo?",
+    question: "Qual a diferença entre Dashboard, Watchlist, Explorar e Comparação?",
     answer:
-      "Não. A Analiso é uma plataforma online e pode ser acessada diretamente pelo navegador.",
+      "O Dashboard ajuda a começar pelo que merece atenção no dia. A Watchlist organiza o acompanhamento das empresas que você já monitora. Explorar ajuda a descobrir novas empresas com mais critério. Comparação mostra quem está melhor hoje, onde está a maior diferença e o que vale confirmar.",
   },
   {
-    question: "Como funciona a lista de espera?",
+    question: "Para quem a Analiso foi feita?",
     answer:
-      "Ao entrar na lista, você receberá novidades sobre o produto e poderá ser convidado para testar a plataforma antes do lançamento.",
+      "A Analiso foi pensada para quem quer entender empresas com mais clareza, tenha você mais experiência ou esteja começando. O foco é reduzir sobrecarga, ensinar enquanto mostra e dar contexto verificável para acompanhar melhor cada caso.",
   },
 ] as const;
 
@@ -755,12 +765,62 @@ function SegmentCard({
 }
 
 export function SolutionSection() {
+  const [solutionMode, setSolutionMode] = useState<"analisar" | "acompanhar">("analisar");
+  const analysisFeatures = [
+    "Visão geral guiada",
+    "Leitura por pilares",
+    "Mudanças relevantes",
+    "Agenda relevante",
+    "Leitura de preço",
+  ] as const;
+  const accompanyFeatures = [
+    "Resumo do dia",
+    "Watchlist com contexto",
+    "Descobrir empresas",
+    "Comparação guiada",
+  ] as const;
+  const reducedMotion = useReducedMotion();
+  const analysisFeatureCycleMs = reducedMotion ? 9200 : 7600;
+  const [activeAnalysisFeature, setActiveAnalysisFeature] = useState(0);
+  const [activeAccompanyFeature, setActiveAccompanyFeature] = useState(0);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (solutionMode === "analisar") {
+        setActiveAnalysisFeature((current) => (current + 1) % analysisFeatures.length);
+        return;
+      }
+
+      setActiveAccompanyFeature((current) => (current + 1) % accompanyFeatures.length);
+    }, analysisFeatureCycleMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    activeAccompanyFeature,
+    activeAnalysisFeature,
+    analysisFeatureCycleMs,
+    accompanyFeatures.length,
+    analysisFeatures.length,
+    solutionMode,
+  ]);
+
   return (
-    <section
-      id="solucao"
-      className="px-20 pb-16 pt-16 max-lg:px-10 max-md:px-6 max-sm:px-4"
-    >
-      <div className="mx-auto max-w-[1430px]">
+    <>
+      <style jsx>{`
+        @keyframes analysis-feature-progress {
+          from {
+            stroke-dashoffset: 50.27;
+          }
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
+      <section
+        id="solucao"
+        className="px-20 pb-16 pt-16 max-lg:px-10 max-md:px-6 max-sm:px-4"
+      >
+        <div className="mx-auto max-w-[1430px]">
         <div className="flex flex-col items-center gap-6">
           <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
             Solução
@@ -785,10 +845,22 @@ export function SolutionSection() {
             </div>
             <div className="h-[68px] w-[360px] overflow-hidden bg-white max-md:h-auto max-md:w-auto max-md:bg-transparent">
               <div className="mx-auto flex h-10 w-[359px] items-start gap-[2px] rounded-xl border border-[#f0f0f0] bg-[#fafafa] p-[2px]">
-                <button className="solucao-tab solucao-tab-active flex h-full flex-1 cursor-pointer items-center justify-center rounded-[10px] px-4 py-1 text-sm font-medium leading-5 transition-all duration-200 hover:text-[#171717]">
+                <button
+                  type="button"
+                  onClick={() => setSolutionMode("analisar")}
+                  className={`solucao-tab flex h-full flex-1 cursor-pointer items-center justify-center rounded-[10px] px-4 py-1 text-sm font-medium leading-5 transition-all duration-200 hover:text-[#171717] ${
+                    solutionMode === "analisar" ? "solucao-tab-active" : "text-[#8d8d8d]"
+                  }`}
+                >
                   Analisar
                 </button>
-                <button className="flex h-full flex-1 cursor-pointer items-center justify-center rounded-[10px] px-4 py-1 text-sm font-medium leading-5 text-[#8d8d8d] transition-all duration-200 hover:text-[#171717]">
+                <button
+                  type="button"
+                  onClick={() => setSolutionMode("acompanhar")}
+                  className={`flex h-full flex-1 cursor-pointer items-center justify-center rounded-[10px] px-4 py-1 text-sm font-medium leading-5 transition-all duration-200 hover:text-[#171717] ${
+                    solutionMode === "acompanhar" ? "solucao-tab-active" : "text-[#8d8d8d]"
+                  }`}
+                >
                   Acompanhar
                 </button>
               </div>
@@ -805,14 +877,20 @@ export function SolutionSection() {
               <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:hidden">
                 <div className="flex w-full flex-col items-start gap-6">
                     <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#dbecff] to-white">
-                      <Sparkles className="h-5 w-5 text-[#0f9f8f]" />
+                      {solutionMode === "analisar" ? (
+                        <Sparkles className="h-5 w-5 text-[#0f9f8f]" />
+                      ) : (
+                        <Bookmark className="h-5 w-5 text-[#0f9f8f]" />
+                      )}
                   </div>
                   <div className="flex w-full flex-col items-start gap-[9px]">
                     <h3 className="text-[20px] font-semibold leading-7 tracking-[-0.2px] text-[#171717]">
-                      Analisar
+                      {solutionMode === "analisar" ? "Analisar" : "Acompanhar"}
                     </h3>
                     <p className="max-w-[315px] text-lg leading-6 text-[#7a7a7a]">
-                      Leia a empresa com contexto, sequência e menos ruído em cada etapa da análise.
+                      {solutionMode === "analisar"
+                        ? "Leia a empresa com contexto, sequência e menos ruído em cada etapa da análise."
+                        : "Veja o que mudou nas empresas que você acompanha e volte direto para o que merece atenção."}
                     </p>
                   </div>
                 </div>
@@ -860,22 +938,49 @@ export function SolutionSection() {
                 </div>}
 
                 <div className="flex w-full flex-col items-start gap-2">
-                  {[
-                    "Visão geral guiada",
-                    "Resultados com contexto",
-                    "Resultados com contexto",
-                    "Pontos de atenção",
-                    "Contexto histórico e setorial",
-                  ].map((item, index) => (
-                    <div
+                  {(solutionMode === "analisar"
+                    ? analysisFeatures
+                    : accompanyFeatures
+                  ).map((item, index) => (
+                    <button
+                      type="button"
                       key={item + index}
+                      onClick={() =>
+                        solutionMode === "analisar"
+                          ? setActiveAnalysisFeature(index)
+                          : setActiveAccompanyFeature(index)
+                      }
                       className={`features-item flex w-full cursor-pointer items-center gap-[10px] transition-all duration-300 ${
-                        index === 3 ? "features-item-active" : ""
+                        (
+                          solutionMode === "analisar"
+                            ? index === activeAnalysisFeature
+                            : index === activeAccompanyFeature
+                        )
+                          ? "features-item-active"
+                          : ""
                       }`}
                     >
-                      <Check className="features-check h-5 w-5 shrink-0 text-[#0f9f8f]" />
+                      <Check
+                        className={`features-check h-5 w-5 shrink-0 text-[#0f9f8f] ${
+                          (
+                            solutionMode === "analisar"
+                              ? index === activeAnalysisFeature
+                              : index === activeAccompanyFeature
+                          )
+                            ? "hidden"
+                            : ""
+                        }`}
+                      />
                       <svg
-                        className="features-progress hidden h-5 w-5 shrink-0 -rotate-90"
+                        className={`features-progress h-5 w-5 shrink-0 -rotate-90 ${
+                          (
+                            solutionMode === "analisar"
+                              ? index === activeAnalysisFeature
+                              : index === activeAccompanyFeature
+                          )
+                            ? "block"
+                            : "hidden"
+                        }`}
                         viewBox="0 0 20 20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -886,16 +991,37 @@ export function SolutionSection() {
                           cx="10"
                           cy="10"
                           r="8"
-                          stroke="#0E7AFF"
+                          stroke="#0f9f8f"
                           strokeWidth="2.5"
                           strokeLinecap="round"
-                          style={{ strokeDasharray: "50.27", strokeDashoffset: "50.27" }}
+                          style={{
+                            strokeDasharray: "50.27",
+                            strokeDashoffset: "50.27",
+                            animation:
+                              (
+                                solutionMode === "analisar"
+                                  ? index === activeAnalysisFeature
+                                  : index === activeAccompanyFeature
+                              )
+                                ? `analysis-feature-progress ${analysisFeatureCycleMs}ms linear forwards`
+                                : "none",
+                          }}
                         />
                       </svg>
-                      <span className="features-label text-base font-medium leading-6 text-[#9a9a9a] transition-all duration-300">
+                      <span
+                        className={`features-label text-base leading-6 transition-all duration-300 ${
+                          (
+                            solutionMode === "analisar"
+                              ? index === activeAnalysisFeature
+                              : index === activeAccompanyFeature
+                          )
+                            ? "font-semibold text-[#171717]"
+                            : "font-medium text-[#9a9a9a]"
+                        }`}
+                      >
                         {item}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -961,77 +1087,209 @@ export function SolutionSection() {
               </div>}
 
               <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
-                {[0, 1, 2, 3, 4].map((featureIndex) => (
-                  <div
-                    key={featureIndex}
-                    className={`features-bg pointer-events-none absolute left-0 top-0 h-full w-full max-w-none transition-opacity duration-500 ${
-                      featureIndex === 0 ? "opacity-100" : "opacity-0"
-                    }`}
-                    style={{ opacity: featureIndex === 0 ? 1 : 0 }}
-                  >
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.4))]" />
-                    <div className="absolute left-0 top-0 grid h-full w-full grid-cols-[48px_120px_1fr]">
-                      <div className="flex flex-col items-center gap-4 border-r border-[#eef2f8] py-4">
-                        <div className="h-7 w-7 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-                        <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
-                        <div className="h-7 w-7 rounded-full bg-[radial-gradient(circle,#9df0d8,#0f9f8f)] opacity-80" />
+                <AnimatePresence mode="wait" initial={false}>
+                  {solutionMode === "acompanhar" && activeAccompanyFeature === 0 ? (
+                    <motion.div
+                      key="dashboard-summary"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyDashboardMock />
                       </div>
-                      <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
-                        <div className="flex items-center gap-2 font-semibold text-[#191919]">
-                          <div className="h-5 w-5 rounded-full bg-[#d9d9d9]" />
-                          Workspace
-                        </div>
-                        <div className="mt-7 space-y-3">
-                          {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque", "Conversas", "Documentos"].map(
-                            (item, itemIndex) => (
-                              <div key={item} className="flex items-center gap-2">
-                                <span
-                                  className={`h-3 w-3 rounded-full border ${
-                                    itemIndex === featureIndex
-                                      ? "border-[#0f9f8f] bg-[#0f9f8f]"
-                                      : "border-[#d6d6d6]"
-                                  }`}
-                                />
-                                {item}
-                              </div>
-                            ),
-                          )}
+                    </motion.div>
+                  ) : solutionMode === "acompanhar" && activeAccompanyFeature === 1 ? (
+                    <motion.div
+                      key="watchlist-context"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyWatchlistMock />
+                      </div>
+                    </motion.div>
+                  ) : solutionMode === "acompanhar" && activeAccompanyFeature === 2 ? (
+                    <motion.div
+                      key="discover-companies"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyExploreMock />
+                      </div>
+                    </motion.div>
+                  ) : solutionMode === "acompanhar" && activeAccompanyFeature === 3 ? (
+                    <motion.div
+                      key="compare-guided"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyCompareMock />
+                      </div>
+                    </motion.div>
+                  ) : activeAnalysisFeature === 0 ? (
+                    <motion.div
+                      key="analysis-summary"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyAnalysisSummaryMock />
+                      </div>
+                    </motion.div>
+                  ) : activeAnalysisFeature === 1 ? (
+                    <motion.div
+                      key="analysis-pillars"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyAnalysisPillarsMock />
+                      </div>
+                    </motion.div>
+                  ) : activeAnalysisFeature === 2 ? (
+                    <motion.div
+                      key="analysis-changes"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyAnalysisChangesMock />
+                      </div>
+                    </motion.div>
+                  ) : activeAnalysisFeature === 3 ? (
+                    <motion.div
+                      key="analysis-agenda"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyAnalysisAgendaMock />
+                      </div>
+                    </motion.div>
+                  ) : activeAnalysisFeature === 4 ? (
+                    <motion.div
+                      key="analysis-price"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      <div className="h-full w-[108.7%] origin-top-left scale-[0.92]">
+                        <CompanyAnalysisPriceMock />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={`analysis-feature-${activeAnalysisFeature}`}
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.6 }}
+                      transition={{ duration: 0.38, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                  <>
+                    {[0, 1, 2, 3, 4].map((featureIndex) => (
+                      <div
+                        key={featureIndex}
+                        className={`features-bg pointer-events-none absolute left-0 top-0 h-full w-full max-w-none transition-opacity duration-500 ${
+                          featureIndex === activeAnalysisFeature ? "opacity-100" : "opacity-0"
+                        }`}
+                        style={{ opacity: featureIndex === activeAnalysisFeature ? 1 : 0 }}
+                      >
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.4))]" />
+                        <div className="absolute left-0 top-0 grid h-full w-full grid-cols-[48px_120px_1fr]">
+                          <div className="flex flex-col items-center gap-4 border-r border-[#eef2f8] py-4">
+                            <div className="h-7 w-7 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
+                            <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
+                            <div className="h-7 w-7 rounded-full bg-[radial-gradient(circle,#9df0d8,#0f9f8f)] opacity-80" />
+                          </div>
+                          <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
+                            <div className="flex items-center gap-2 font-semibold text-[#191919]">
+                              <div className="h-5 w-5 rounded-full bg-[#d9d9d9]" />
+                              Workspace
+                            </div>
+                            <div className="mt-7 space-y-3">
+                              {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque", "Conversas", "Documentos"].map(
+                                (item, itemIndex) => (
+                                  <div key={item} className="flex items-center gap-2">
+                                    <span
+                                      className={`h-3 w-3 rounded-full border ${
+                                        itemIndex === featureIndex
+                                          ? "border-[#0f9f8f] bg-[#0f9f8f]"
+                                          : "border-[#d6d6d6]"
+                                      }`}
+                                    />
+                                    {item}
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                          <div className="px-5 py-4">
+                            <div className="text-[14px] font-semibold text-[#1b1b1b]">
+                              {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque"][featureIndex] ?? "Documentos"}
+                            </div>
+                            <div className="mt-7 h-[230px] rounded-[18px] border border-[#eef2f8] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,247,252,0.9))]" />
+                          </div>
                         </div>
                       </div>
-                      <div className="px-5 py-4">
-                        <div className="text-[14px] font-semibold text-[#1b1b1b]">
-                          {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque"][featureIndex] ?? "Documentos"}
-                        </div>
-                        <div className="mt-7 h-[230px] rounded-[18px] border border-[#eef2f8] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,247,252,0.9))]" />
-                      </div>
+                    ))}
+
+                    <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-white to-transparent" />
+                    <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-white to-transparent" />
+
+                    <div className="absolute bottom-[17px] right-[17px] z-[2] h-[195px] w-[198px] overflow-hidden rounded-[16px] border-4 border-white shadow-[0px_4px_28px_0px_rgba(0,0,0,0.05)]">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_22%,#dff8f3,#7bd8cb_18%,#edf6f4_19%,#edf6f4_60%,#7ba29a_61%,#21433f_100%)]" />
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(to bottom, rgba(0,34,75,0) 52%, rgba(0,14,31,0.7) 90%)",
+                          backdropFilter: "blur(1.2px)",
+                          WebkitBackdropFilter: "blur(1.2px)",
+                          maskImage: "linear-gradient(to bottom, transparent 50%, black 85%)",
+                          WebkitMaskImage:
+                            "linear-gradient(to bottom, transparent 50%, black 85%)",
+                        }}
+                      />
+                      <p
+                        className="absolute bottom-4 left-4 w-[166px] text-base font-semibold leading-4 text-white"
+                        style={{ textShadow: "0px 1.2px 5px rgba(0,0,0,0.19)" }}
+                      >
+                        Soluções que acompanham seu crescimento
+                      </p>
                     </div>
-                  </div>
-                ))}
-
-                <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-white to-transparent" />
-                <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-white to-transparent" />
-
-                <div className="absolute bottom-[17px] right-[17px] z-[2] h-[195px] w-[198px] overflow-hidden rounded-[16px] border-4 border-white shadow-[0px_4px_28px_0px_rgba(0,0,0,0.05)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_22%,#dff8f3,#7bd8cb_18%,#edf6f4_19%,#edf6f4_60%,#7ba29a_61%,#21433f_100%)]" />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, rgba(0,34,75,0) 52%, rgba(0,14,31,0.7) 90%)",
-                      backdropFilter: "blur(1.2px)",
-                      WebkitBackdropFilter: "blur(1.2px)",
-                      maskImage: "linear-gradient(to bottom, transparent 50%, black 85%)",
-                      WebkitMaskImage:
-                        "linear-gradient(to bottom, transparent 50%, black 85%)",
-                    }}
-                  />
-                  <p
-                    className="absolute bottom-4 left-4 w-[166px] text-base font-semibold leading-4 text-white"
-                    style={{ textShadow: "0px 1.2px 5px rgba(0,0,0,0.19)" }}
-                  >
-                    Soluções que acompanham seu crescimento
-                  </p>
-                </div>
+                  </>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="pointer-events-none absolute inset-0 opacity-0">
@@ -1090,8 +1348,9 @@ export function SolutionSection() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 }
 
@@ -3050,16 +3309,16 @@ export function FaqSection() {
     >
       <div className="mx-auto flex max-w-[1430px] flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-6">
-          <div className="flex h-[26px] items-center justify-center rounded-[8px] bg-primary-bluebrand-50 px-2 py-1">
-            <span className="text-xs font-semibold leading-[18px] text-primary-bluebrand-600">
+          <div className="flex h-[26px] items-center justify-center rounded-[8px] bg-[#e7fbf7] px-2 py-1">
+            <span className="text-xs font-semibold leading-[18px] text-[#0f9f8f]">
               Dúvidas
             </span>
           </div>
           <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-black max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
             Perguntas frequentes
           </h2>
-          <p className="max-w-[279px] text-center text-lg leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-base">
-            Algumas respostas sobre a Analiso e o acesso antecipado.
+          <p className="max-w-[420px] text-center text-lg leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-base">
+            Entenda como a Analiso funciona e o que ela entrega.
           </p>
         </div>
 
@@ -3111,7 +3370,7 @@ export function FaqSection() {
                   >
                     <div className="faq-answer-inner">
                       <div className="pt-2">
-                        <p className="max-w-[561px] text-base font-normal leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-sm max-md:leading-5">
+                        <p className="max-w-[561px] max-md:max-w-full text-base max-md:text-sm font-normal leading-6 max-md:leading-5 text-primary-gray-500">
                           {faq.answer}
                         </p>
                       </div>
