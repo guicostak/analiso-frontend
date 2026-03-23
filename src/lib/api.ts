@@ -5,9 +5,7 @@
  * - Attaches Authorization: Bearer <token> when a token is provided
  * - Throws ApiError for non-2xx responses with the backend error code
  */
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+import { API_BASE_URL } from "@/src/lib/api-base";
 
 export class ApiError extends Error {
   constructor(
@@ -34,7 +32,7 @@ export async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
   if (!response.ok) {
     let code = "unknown_error";

@@ -10,6 +10,7 @@
  * Preparado para substituição por chamadas HTTP reais.
  */
 
+import { API_BASE_URL } from "@/src/lib/api-base";
 import type {
   Status,
   MainTab,
@@ -74,9 +75,6 @@ export const pillarFilterOptions: Array<ChangePillarTag | 'Todos'> = [
   'Proventos',
   'A classificar',
 ];
-
-const RAW_API_BASE_URL = String(process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080').trim();
-export const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 // ─── Dados mock: fila de empresas ─────────────────────────────────────────────
 

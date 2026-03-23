@@ -1,9 +1,7 @@
 "use client";
 
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+import { API_BASE_URL } from "@/src/lib/api-base";
 
 // -------------------------------------------------------
 // Types — espelham exatamente os DTOs do backend
@@ -53,7 +51,7 @@ export function GoogleButton({ onSuccess, onError }: GoogleButtonProps) {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/auth/google`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: idToken }),

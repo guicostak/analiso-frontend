@@ -34,6 +34,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/src/components/layout/Sidebar';
 import logoWeg from '@/src/assets/logos/weg.jpeg';
 import logoVale from '@/src/assets/logos/vale.png';
+import { API_BASE_URL } from '@/src/lib/api-base';
 import logoRenner from '@/src/assets/logos/renner.png';
 import logoMrv from '@/src/assets/logos/mrv.jpg';
 import logoTaesa from '@/src/assets/logos/taesa.png';
@@ -564,9 +565,6 @@ type CompanyPreferences = {
  eventsWindow: FeedWindow;
  lastOpenPillar: 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos' | null;
 };
-
-const RAW_API_BASE_URL = String(process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080').trim();
-const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 function contextualize<T>(items: T[], companyId: string, ticker: string): Array<Contextual<T>> {
  return items.map((item) => ({ ...item, companyId, ticker }));
