@@ -1751,13 +1751,13 @@ const pillarMapStatusTone: Record<PillarMapStatus, { stroke: string; fill: strin
  stroke: '#C78D21',
  fill: '#C78D21',
  label: 'Atenção',
- chip: 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]',
+ chip: 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]',
  },
  saudavel: {
  stroke: '#168E7D',
  fill: '#168E7D',
  label: 'Saudável',
- chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0F6F61]',
+ chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0E9384]',
  },
 };
 
@@ -1804,7 +1804,7 @@ function hexToRgba(hex: string, alpha: number) {
 
 function QueueLogo({ company }: { company: CompanyQueueItem }) {
  if (company.logo) {
- return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-[#E5E7EB] object-cover" />;
+ return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-[#E2EDF5] object-cover" />;
  }
  return (
  <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">
@@ -1820,7 +1820,7 @@ function PillarMapTooltip({ datum }: { datum: PillarMapDatum }) {
  const deltaText = hasDelta ? `${deltaArrow} ${Math.abs(datum.delta!)} vs trimestre anterior` : null;
 
  return (
- <div className="max-w-[240px] rounded-xl border border-[#E5E7EB] bg-white p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
+ <div className="max-w-[240px] rounded-xl border border-[#E2EDF5] bg-white p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
  <p className="text-[13px] font-semibold text-[#111827]">{datum.pillarLabel}</p>
  <p className="mt-1 text-[15px] font-semibold" style={{ color: '#1F2937' }}>{datum.score}/100 {tone.label}</p>
  {deltaText && <p className="mt-1 text-[12px] text-[#4B5563]">{deltaText}</p>}
@@ -2241,7 +2241,7 @@ function median(values: number[]) {
 }
 
 function SkeletonBlock({ className }: { className: string }) {
- return <div className={cx('rounded-md bg-[#F3F4F6] skeleton-shimmer', className)} />;
+ return <div className={cx('rounded-md bg-[#F6FAFC] skeleton-shimmer', className)} />;
 }
 
 export function CompanyAnalysis() {
@@ -2423,12 +2423,12 @@ export function CompanyAnalysis() {
  const valuationStateChipLabel = safeMeta(activeData?.priceData.valuationStateChip?.label);
  const valuationStateChipToneRaw = safeMeta(activeData?.priceData.valuationStateChip?.tone).toLowerCase();
  const valuationStateChipTone = valuationStateChipToneRaw.includes('coral')
- ? 'border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]'
+ ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]'
  : valuationStateChipToneRaw.includes('amber')
- ? 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]'
+ ? 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]'
  : valuationStateChipToneRaw.includes('teal')
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0F766E]'
- : 'border-[#DDE3EA] bg-[#F8FAFC] text-[#475569]';
+ : 'border-[#E2EDF5] bg-[#F8FAFC] text-[#475569]';
 const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
 const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
 const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
@@ -2496,7 +2496,7 @@ const valuationBullet = activeData?.priceData.bulletChart ?? null;
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
  : sourceConfidenceLabel === 'Moderada'
  ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]'
- : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]';
+ : 'border-[#E2EDF5] bg-[#F6FAFC] text-[#64748B]';
  const sourceConfidenceSummary = outdatedPrimarySources > 0
  ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnóstico.`
  : `A leitura atual está apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Há ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Não há alerta de desatualização relevante no conjunto principal.'}`;
@@ -2841,20 +2841,20 @@ const changesCount = changesBySelectedWindow.length;
  };
 
  const renderChangeCard = (change: (typeof enrichedChanges)[number], nested = false) => (
- <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E5E7EB]' : 'border-[#E2EDF5]')}>
+ <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
   <div className="p-4">
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{change.pillar}</span>
     <span className="text-[#D1D5DB]">·</span>
     <span className="text-[#94A3B8]">{change.date}</span>
     <span className="text-[#D1D5DB]">·</span>
-    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : change.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : change.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
      {change.severityLabel}
     </span>
    </div>
    <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{change.title}</h3>
    <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{change.interpretation}</p>
-   <div className="mt-3 rounded-xl border border-[#EEF2F6] bg-[#F9FAFB] px-3 py-2.5">
+   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
     <p className="mt-1 text-[13px] text-[#475569]">{change.whyItMatters}</p>
    </div>
@@ -2890,20 +2890,20 @@ const changesCount = changesBySelectedWindow.length;
  );
 
  const renderAgendaEventCard = (timelineEvent: (typeof enrichedTimelineEvents)[number], nested = false) => (
- <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E5E7EB]' : 'border-[#E2EDF5]')}>
+ <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
   <div className="p-4">
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{timelineEvent.mainPillar}</span>
     <span className="text-[#D1D5DB]">·</span>
     <span className="text-[#94A3B8]">{timelineEvent.date}</span>
     <span className="text-[#D1D5DB]">·</span>
-    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : timelineEvent.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : timelineEvent.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
      {timelineEvent.severityLabel}
     </span>
    </div>
    <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{timelineEvent.title}</h3>
    <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{timelineEvent.interpretation}</p>
-   <div className="mt-3 rounded-xl border border-[#EEF2F6] bg-[#F9FAFB] px-3 py-2.5">
+   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
     <p className="mt-1 text-[13px] text-[#475569]">{timelineEvent.whyItMatters}</p>
    </div>
@@ -3033,12 +3033,12 @@ const changesCount = changesBySelectedWindow.length;
  <aside
  className={cx(
  'relative h-full flex-shrink-0 overflow-hidden bg-[#FCFDFC] transition-all duration-200',
- watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-[#F3F4F6] p-3.5'
+ watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-[#E2EDF5] p-3.5'
  )}
  >
  {!watchlistCollapsed && (
  <button
- className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB]"
+ className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC]"
  onClick={() => setWatchlistCollapsed(true)}
  aria-label="Retrair watchlist"
  title="Retrair watchlist"
@@ -3062,7 +3062,7 @@ const changesCount = changesBySelectedWindow.length;
  onClick={() => setQueueFilter(filter)}
  className={cx(
  'h-7 rounded-full px-3.5 text-[13px]',
- queueFilter === filter ? 'border border-[#E5E7EB] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
+ queueFilter === filter ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
  )}
  >
  {filter === 'Atencao' ? 'Atenção' : filter}
@@ -3099,7 +3099,7 @@ const changesCount = changesBySelectedWindow.length;
 
  {watchlistCollapsed && (
  <button
- className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB] xl:grid xl:left-[240px]"
+ className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC] xl:grid xl:left-[240px]"
  onClick={() => setWatchlistCollapsed(false)}
  aria-label="Expandir watchlist"
  title="Expandir watchlist"
@@ -3126,7 +3126,7 @@ const changesCount = changesBySelectedWindow.length;
  {statusLabel(companyStatus)} · {scoreAverage}/100
  </span>
  {safeMeta(activeData?.priceData.current) && (
- <span className="rounded-full border border-[#DDE5EE] bg-[#F6FAFC] px-2.5 py-1 text-[11px] font-medium text-[#374151]">
+ <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[11px] font-medium text-[#374151]">
  {safeMeta(activeData?.priceData.current)}
  </span>
  )}
@@ -3151,17 +3151,17 @@ const changesCount = changesBySelectedWindow.length;
 
  <div className="relative flex flex-wrap items-center gap-2">
  <button
- className={cx('inline-flex items-center gap-1.5 rounded-lg border border-[#0E9384] bg-[#EBF9F6] px-3.5 py-2 text-[12px] font-semibold text-[#0E9384] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#D6F5EE]')}
+ className={cx('inline-flex items-center gap-1.5 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[12px] font-semibold text-white transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:opacity-90')}
  disabled={actionsDisabled}
  onClick={(event) => guardAction(event)}
  >
  <Check className="h-3.5 w-3.5" />
  Na Watchlist
  </button>
- <button className={cx('rounded-lg border border-[#DDE5EE] bg-white px-3.5 py-2 text-[12px] font-medium text-[#374151] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
- <button className={cx('rounded-lg border border-[#DDE5EE] bg-white px-3.5 py-2 text-[12px] text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
+ <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] font-medium text-[#374151] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
+ <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
  <button
- className={cx('grid h-9 w-9 place-items-center rounded-full border border-[#DDE5EE] bg-white text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')}
+ className={cx('grid h-9 w-9 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')}
  disabled={actionsDisabled}
  onClick={() => setShowHeaderMenu((prev) => !prev)}
  >
@@ -3184,13 +3184,13 @@ const changesCount = changesBySelectedWindow.length;
  </div>
 
  {/* Tab bar */}
- <div className="flex items-center gap-1 px-6 overflow-x-auto">
+ <div className="flex items-center gap-0 px-6 overflow-x-auto">
  {mainTabs.map((tab) => (
  <button
  key={tab}
  onClick={() => setActiveTab(tab)}
  className={cx(
- 'flex-shrink-0 py-3 px-1 text-[13px] font-medium border-b-2 transition-all duration-150',
+ 'flex-shrink-0 py-3.5 px-4 text-[13px] font-medium border-b-2 transition-all duration-150',
  activeTab === tab
  ? 'border-[#0E9384] text-[#0B1220]'
  : 'border-transparent text-[#8494A9] hover:text-[#374151] hover:border-[#D0DDE8]'
@@ -3215,13 +3215,13 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  )}
  {showScoreInfo && (
- <div className="mb-4 rounded-2xl border border-[#EEF2F6] bg-white p-5 shadow-sm">
+ <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Metodologia</p>
  <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Como calculamos o placar</h3>
  </div>
- <button className="rounded-lg border border-[#EEF2F6] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setShowScoreInfo(false)}>Fechar</button>
+ <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setShowScoreInfo(false)}>Fechar</button>
  </div>
  <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
  <p>Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
@@ -3231,13 +3231,13 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  )}
  {evidenceModal && (
- <div className="mb-4 rounded-2xl border border-[#EEF2F6] bg-white p-5 shadow-sm">
+ <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Evidência</p>
  <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Painel de fonte · {evidenceModal.pillarName}</h3>
  </div>
- <button className="rounded-lg border border-[#EEF2F6] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setEvidenceModal(null)}>Fechar</button>
+ <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setEvidenceModal(null)}>Fechar</button>
  </div>
  <div className="mt-3 inline-flex rounded-xl bg-[#F6FAFC] p-1">
  {(['Fonte', 'Trecho', 'Como calculamos'] as EvidenceTab[]).map((tab) => (
@@ -3261,7 +3261,7 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  )}
  {evidenceTab === 'Trecho' && (
- <div className="mt-3 rounded-xl border border-[#EEF2F6] bg-[#F6FAFC] p-3.5 text-[13px] text-[#6B7280] italic">
+ <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3.5 text-[13px] text-[#6B7280] italic">
  "{evidenceModal.evidence.why}"
  </div>
  )}
@@ -3276,15 +3276,15 @@ const changesCount = changesBySelectedWindow.length;
  )}
  {showSkeleton ? (
  <div className="space-y-4">
- <div className="rounded-2xl border border-[#EEF2F6] bg-white p-6"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-3 h-8 w-full" /><SkeletonBlock className="mt-2 h-5 w-4/5" /><SkeletonBlock className="mt-5 h-10 w-48" /></div>
+ <div className="rounded-2xl border border-[#E2EDF5] bg-white p-6"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-3 h-8 w-full" /><SkeletonBlock className="mt-2 h-5 w-4/5" /><SkeletonBlock className="mt-5 h-10 w-48" /></div>
  <div className="grid grid-cols-12 gap-4">
- <div className="col-span-6 rounded-2xl border border-[#EEF2F6] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
- <div className="col-span-6 rounded-2xl border border-[#EEF2F6] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
  </div>
- <div className="rounded-2xl border border-[#EEF2F6] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /></div>
+ <div className="rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /></div>
  </div>
  ) : activePayload?.status === 'empty' ? (
- <article className="rounded-2xl border border-[#EEF2F6] bg-white p-8 text-center">
+ <article className="rounded-2xl border border-[#E2EDF5] bg-white p-8 text-center">
  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F6FAFC]">
  <Database className="h-5 w-5 text-[#A0AEC0]" />
  </div>
@@ -3310,7 +3310,7 @@ const changesCount = changesBySelectedWindow.length;
    Ver principal força
   </button>
   <button
-   className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-[#9A6A0F] transition-opacity hover:opacity-80"
+   className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-[#D97706] transition-opacity hover:opacity-80"
    onClick={() => goToPillar(activeData?.watchout.title ?? 'Margens')}
   >
    Ver principal atenção
@@ -3332,15 +3332,15 @@ const changesCount = changesBySelectedWindow.length;
      {strongestHumanLine}
     </p>
     <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-     <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.strongest.score ?? '95/100'}</span>
+     <span className="rounded-full border border-[#C7F5EE] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.score ?? '95/100'}</span>
      <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.badge ?? ''}</span>
-     <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
+     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
     </div>
     <div className="mt-3 flex items-center gap-2">
-     <button className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F9FAFB]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
       Ver pilar
      </button>
-     <button className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F9FAFB]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
       Ver fonte
      </button>
     </div>
@@ -3358,15 +3358,15 @@ const changesCount = changesBySelectedWindow.length;
      {watchoutHumanLine}
     </p>
     <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-     <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.watchout.score ?? '61/100'}</span>
+     <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{activeData?.watchout.score ?? '61/100'}</span>
      <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{watchoutBadgeLabel}</span>
-     <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
+     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
     </div>
     <div className="mt-3 flex items-center gap-2">
-     <button className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F9FAFB]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
       Ver pilar
      </button>
-     <button className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F9FAFB]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
       Ver fonte
      </button>
     </div>
@@ -3390,7 +3390,7 @@ const changesCount = changesBySelectedWindow.length;
     onSelectPillar={(pillar) => goToPillar(pillar)}
    />
   </div>
-  <p className="mt-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2.5 text-[12px] text-[#475467]">
+  <p className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5 text-[12px] text-[#475467]">
    Atenção principal em {activeData?.watchout.title ?? 'Margens'}; força relativa em {activeData?.strongest.title ?? 'Dívida'}.
   </p>
  </article>
@@ -3408,27 +3408,27 @@ const changesCount = changesBySelectedWindow.length;
   {summaryNarrative}
  </p>
  <div className="mt-4 grid grid-cols-3 gap-3">
-  <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Força principal</p>
    <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
   </div>
-  <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Atenção principal</p>
    <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
   </div>
-  <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">O que monitorar</p>
    <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
   </div>
  </div>
  <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
-  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
-  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
+  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
+  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
   <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
  </div>
 </article>
 
-<article className="rounded-2xl border border-[#C3EDE4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-6">
+<article className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-6">
  <div className="flex items-center justify-between gap-3">
   <div>
    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0E9384]">Próximas ações</p>
@@ -3462,14 +3462,14 @@ const changesCount = changesBySelectedWindow.length;
     <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Diagnóstico por pilares</h2>
    </div>
    <div className="flex flex-wrap items-center gap-2 text-[12px]">
-    {healthyPillars.length > 0 && <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-3 py-1 font-semibold text-[#0E9384]">{healthyPillars.length} saudável{healthyPillars.length !== 1 ? 's' : ''}</span>}
+    {healthyPillars.length > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-3 py-1 text-[12px] font-semibold text-[#0E9384]">{healthyPillars.length} saudável{healthyPillars.length !== 1 ? 's' : ''}</span>}
     {attentionPillars.length > 0 && <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-3 py-1 font-semibold text-[#D97706]">{attentionPillars.length} atenção</span>}
     {riskPillars.length > 0 && <span className="rounded-full border border-[#FECACA] bg-[#FEF2F2] px-3 py-1 font-semibold text-[#DC2626]">{riskPillars.length} risco</span>}
    </div>
   </div>
   <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#374151]">
-   <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : '—'}</span>
-   <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : '—'}</span>
+   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : '—'}</span>
+   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : '—'}</span>
   </div>
  </article>
 
@@ -3559,16 +3559,16 @@ const changesCount = changesBySelectedWindow.length;
   </button>
 
   <div className={cx('overflow-hidden transition-all duration-300', expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0')}>
-   <div className="border-t border-[#EEF2F6]" />
+   <div className="border-t border-[#E2EDF5]" />
    <div className="grid gap-0 lg:grid-cols-12">
 
     {/* Left: meaning + monitor */}
-    <div className="space-y-0 border-b border-[#EEF2F6] p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
+    <div className="space-y-0 border-b border-[#E2EDF5] p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
      <div>
       <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que isso significa</p>
       <p className="mt-2 text-[14px] leading-relaxed text-[#1F2937]">{whatItMeans}</p>
      </div>
-     <div className="mt-4 pt-4 border-t border-[#EEF2F6]">
+     <div className="mt-4 pt-4 border-t border-[#E2EDF5]">
       <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que monitorar</p>
       <ul className="mt-2 space-y-2">
        {monitorItems.map((item) => (
@@ -3584,7 +3584,7 @@ const changesCount = changesBySelectedWindow.length;
 
     {/* Right: evidence + chart + signal */}
     <div className="p-5 lg:col-span-8">
-     <section className="rounded-xl border border-[#E8EAED] bg-[#FCFDFD] p-4">
+     <section className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
       <div className="grid gap-4 lg:grid-cols-2">
        <div>
         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Evidência principal</p>
@@ -3598,7 +3598,7 @@ const changesCount = changesBySelectedWindow.length;
        </div>
        <div>
         <div className="mb-2 flex justify-end">
-         <div className="inline-flex rounded-full bg-[#F3F4F6] p-0.5">
+         <div className="inline-flex rounded-full bg-[#F6FAFC] p-0.5">
           {(['5a', '10a'] as WindowSize[]).map((windowOption) => (
            <button
             key={windowOption}
@@ -3624,11 +3624,11 @@ const changesCount = changesBySelectedWindow.length;
      </section>
 
      {mainEvidence && (
-      <section className={cx('mt-3 rounded-xl border p-4', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB]' : 'border-[#D6F5EE] bg-[#F4FFFC]')}>
+      <section className={cx('mt-3 rounded-xl border p-4', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB]' : 'border-[#99F6E4] bg-[#F0FDFA]')}>
        <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
          {signalCopy.badgeLabel && (
-          <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', signalCopy.badgeTone === 'risk' ? 'border-[#DC2626] bg-[#DC2626] text-white' : signalCopy.badgeTone === 'attention' ? 'border-[#F59E0B] bg-[#F59E0B] text-white' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+          <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
            {signalCopy.badgeLabel}
           </span>
          )}
@@ -3653,7 +3653,7 @@ const changesCount = changesBySelectedWindow.length;
      )}
 
      {(ctaCopy.title || ctaCopy.button) && (
-      <section className="mt-3 rounded-xl border border-[#C3EDE4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-4">
+      <section className="mt-3 rounded-xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-4">
        <p className="text-[13px] text-[#374151]">{ctaCopy.title}</p>
        <button className={cx('mt-2 rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
         {ctaCopy.button}
@@ -3678,18 +3678,18 @@ const changesCount = changesBySelectedWindow.length;
    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">O que mudou ({changesWindow})</p>
    <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Mudanças do período</h2>
    <p className="mt-1 text-[13px] text-[#64748B]">Veja o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
-   <div className="mt-4 border-t border-[#EEF2F6] pt-4">
+   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
     <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">{changesSummaryText}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais afetado</p>
       <p className="mt-1 font-semibold text-[#0F766E]">{periodMostAffected}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Estruturais</p>
       <p className="mt-1 font-semibold text-[#111827]">{structuralCount}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
       <p className="mt-1 font-semibold text-[#111827]">{routineCount}</p>
      </div>
@@ -3732,10 +3732,10 @@ const changesCount = changesBySelectedWindow.length;
   </div>
 
   {principalChange && (
-   <section className="rounded-2xl border border-[#F6C9BF] bg-[#FFF7F5] p-5">
+   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
     <div className="flex items-start justify-between gap-3">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9F4636]">Principal mudança do período</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal mudança do período</p>
       <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalChange.title}</p>
       <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalChange.pillar} nos próximos fechamentos.</p>
      </div>
@@ -3765,21 +3765,21 @@ const changesCount = changesBySelectedWindow.length;
 
    {displayedStructural.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9F4636]">Mudanças estruturais</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Mudanças estruturais</p>
      {displayedStructural.map((change) => renderChangeCard(change))}
     </section>
    )}
 
    {displayedRelevant.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9A6A0F]">Mudanças relevantes</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Mudanças relevantes</p>
      {displayedRelevant.map((change) => renderChangeCard(change))}
     </section>
    )}
 
    {displayedRoutine.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F6F61]">Rotina</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
      {displayedRoutine.map((item) => {
       if (item.type === 'single') return renderChangeCard(item.payload);
       const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
@@ -3824,22 +3824,22 @@ const changesCount = changesBySelectedWindow.length;
    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Agenda ({eventsWindow})</p>
    <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Próximos eventos</h2>
    <p className="mt-1 text-[13px] text-[#64748B]">Veja o que pode ter impacto real, o que é rotina e quais pilares podem ser mais afetados.</p>
-   <div className="mt-4 border-t border-[#EEF2F6] pt-4">
+   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
     <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
      {principalTimelineChange
       ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o período traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
       : `Nos próximos ${eventsWindow.replace(' dias', '')} dias, a agenda está concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
     </p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais sensível</p>
       <p className="mt-1 font-semibold text-[#0F766E]">{timelineMostAffectedPillar}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Gatilhos principais</p>
       <p className="mt-1 font-semibold text-[#111827]">{timelineStructuralCount}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
       <p className="mt-1 font-semibold text-[#111827]">{timelineRoutineCount}</p>
      </div>
@@ -3882,10 +3882,10 @@ const changesCount = changesBySelectedWindow.length;
   </div>
 
   {principalTimelineChange && (
-   <section className="rounded-2xl border border-[#F6C9BF] bg-[#FFF7F5] p-5">
+   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
     <div className="flex items-start justify-between gap-3">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9F4636]">Principal gatilho do período</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal gatilho do período</p>
       <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalTimelineChange.title}</p>
       <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalTimelineChange.mainPillar} nos próximos fechamentos.</p>
      </div>
@@ -3915,21 +3915,21 @@ const changesCount = changesBySelectedWindow.length;
 
    {displayedTimelineStructural.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9F4636]">Gatilhos principais</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Gatilhos principais</p>
      {displayedTimelineStructural.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
     </section>
    )}
 
    {displayedTimelineRelevant.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9A6A0F]">Eventos relevantes</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Eventos relevantes</p>
      {displayedTimelineRelevant.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
     </section>
    )}
 
    {displayedTimelineRoutine.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F6F61]">Rotina</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
      {displayedTimelineRoutine.map((item) => {
       if (item.type === 'single') return renderAgendaEventCard(item.payload);
       const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
@@ -3965,7 +3965,7 @@ const changesCount = changesBySelectedWindow.length;
    )}
 
    {hasVisibleTimelineEvents && (
-    <section className="rounded-2xl border border-[#C3EDE4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-5">
+    <section className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-5">
      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Fechar a leitura</p>
      <p className="mt-1 text-[14px] text-[#1F2937]">Acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
      <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -4036,7 +4036,7 @@ const changesCount = changesBySelectedWindow.length;
    </div>
 
    {valuationSummaryLine && (
-    <div className="mt-4 rounded-xl border border-[#D6F5EE] bg-[#F4FFFC] p-4">
+    <div className="mt-4 rounded-xl border border-[#99F6E4] bg-[#F0FDFA] p-4">
      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F766E]">Por que isso importa</p>
      <p className="mt-1 text-[14px] text-[#334155]">{valuationSummaryLine}</p>
     </div>
@@ -4050,7 +4050,7 @@ const changesCount = changesBySelectedWindow.length;
    )}
    {hasSemanticDomain && (
    <>
-    <div className="mt-3 rounded-xl border border-[#E6ECF2] bg-[#F8FAFD] p-4">
+    <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F8FAFD] p-4">
      <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-[#94A3B8]">
       <span>{formatCurrencyBRL(rulerMin)}</span>
       <span>Posição do preço atual vs. preço justo estimado</span>
@@ -4108,14 +4108,14 @@ const changesCount = changesBySelectedWindow.length;
 
   <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Cenários do valuation</p>
-   <div className="mt-3 grid grid-cols-4 border-b border-[#EEF2F6] pb-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+   <div className="mt-3 grid grid-cols-4 border-b border-[#E2EDF5] pb-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
     <span>Cenário</span>
     <span>Valor estimado</span>
     <span>Diferença vs atual</span>
     <span>Leitura</span>
    </div>
    {valuationScenarios.map((scenario, index) => (
-    <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#EEF2F6] py-3 text-[13px] text-[#334155]">
+    <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#E2EDF5] py-3.5 text-[13px] text-[#334155]">
      <span className="font-medium">{scenario.scenario || '—'}</span>
      <span>{scenario.estimatedValue || '—'}</span>
      <span>{scenario.differenceVsCurrent || '—'}</span>
@@ -4130,7 +4130,7 @@ const changesCount = changesBySelectedWindow.length;
    <p className="mt-1 text-[13px] text-[#64748B]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
    <div className="mt-3 grid gap-3 sm:grid-cols-2">
     {sensitivityDrivers.map((driver, index) => (
-     <div key={`${driver.driver}-${index}`} className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div key={`${driver.driver}-${index}`} className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[13px] font-semibold text-[#0F172A]">{driver.driver || '—'}</p>
       <p className="mt-1 text-[13px] text-[#475569]">{driver.value || '—'}</p>
       <p className="mt-1 text-[12px] text-[#6B7280]">{driver.impact || '—'}</p>
@@ -4141,10 +4141,10 @@ const changesCount = changesBySelectedWindow.length;
   </section>
 
   <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-   <div className="border-b border-[#EEF2F6] bg-[#F6FAFC] px-5 py-3">
+   <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Múltiplos de apoio</p>
    </div>
-   <div className="grid grid-cols-5 border-b border-[#EEF2F6] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+   <div className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
     <span>Métrica</span>
     <span>Atual</span>
     <span>Setor</span>
@@ -4152,7 +4152,7 @@ const changesCount = changesBySelectedWindow.length;
     <span>Leitura</span>
    </div>
    {companyPriceRows.map((row) => (
-    <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#EEF2F6] px-5 py-3 text-[13px] text-[#334155] hover:bg-[#F9FAFB]">
+    <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-3 text-[13px] text-[#334155] hover:bg-[#F6FAFC]">
      <span className="font-medium">{row.metric}</span>
      <span>{row.current}</span>
      <span>{row.sector}</span>
@@ -4161,7 +4161,7 @@ const changesCount = changesBySelectedWindow.length;
     </div>
    ))}
    {companyPriceRows.length === 0 && <div className="px-5 py-4 text-center text-[13px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
-   <div className="border-t border-[#EEF2F6] px-5 py-3">
+   <div className="border-t border-[#E2EDF5] px-5 py-3">
     <p className="text-[12px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
    </div>
   </section>
@@ -4202,15 +4202,15 @@ const changesCount = changesBySelectedWindow.length;
     </div>
     <p className="mt-2 text-[13px] text-[#475569]">{resolvedSourceConfidenceSummary}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes atualizadas</p>
       <p className="mt-1 font-semibold text-[#111827]">{updatedPrimarySources}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes complementares antigas</p>
       <p className="mt-1 font-semibold text-[#111827]">{outdatedComplementarySources}</p>
      </div>
-     <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Última atualização</p>
       <p className="mt-1 font-semibold text-[#111827]">{safeMeta(latestSourceDate)}</p>
      </div>
@@ -4218,10 +4218,10 @@ const changesCount = changesBySelectedWindow.length;
    </section>
 
    <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-    <div className="border-b border-[#EEF2F6] bg-[#F6FAFC] px-5 py-3">
+    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes principais da leitura</p>
     </div>
-    <div className="grid grid-cols-9 border-b border-[#EEF2F6] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
      <span>Categoria</span>
      <span>Fonte</span>
      <span>Documento</span>
@@ -4231,7 +4231,7 @@ const changesCount = changesBySelectedWindow.length;
      <span className="col-span-2">Link</span>
     </div>
     {primarySourceRows.map((row) => (
-    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#EEF2F6] px-5 py-3 text-[12px] text-[#334155] hover:bg-[#F9FAFB]">
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
      <span className="font-medium">{row.category}</span>
      <span className="text-[#64748B]">{safeMeta(row.source)}</span>
      <span>{row.doc}</span>
@@ -4259,10 +4259,10 @@ const changesCount = changesBySelectedWindow.length;
    </section>
 
    <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-    <div className="border-b border-[#EEF2F6] bg-[#F6FAFC] px-5 py-3">
+    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes complementares</p>
     </div>
-    <div className="grid grid-cols-9 border-b border-[#EEF2F6] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
      <span>Categoria</span>
      <span>Fonte</span>
      <span>Documento</span>
@@ -4272,7 +4272,7 @@ const changesCount = changesBySelectedWindow.length;
      <span className="col-span-2">Link</span>
     </div>
     {complementarySourceRows.map((row) => (
-    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#EEF2F6] px-5 py-3 text-[12px] text-[#334155] hover:bg-[#F9FAFB]">
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
      <span className="font-medium">{row.category}</span>
      <span className="text-[#64748B]">{safeMeta(row.source)}</span>
      <span>{row.doc}</span>
@@ -4331,7 +4331,7 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  <button
  type="button"
- className="rounded-md border border-[#E5E7EB] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
+ className="rounded-md border border-[#E2EDF5] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
  onClick={() => setShowValuationMethodologyDrawer(false)}
  >
  Fechar
@@ -4341,17 +4341,17 @@ const changesCount = changesBySelectedWindow.length;
  <p>Nosso valuation busca responder uma pergunta simples: quanto uma empresa vale hoje com base no caixa que ela pode gerar no futuro?</p>
  <p>Para isso, usamos um modelo de Fluxo de Caixa Descontado (DCF).</p>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">Em termos simples</p>
  <p className="mt-1">Projetamos a geração de caixa futura da empresa, trazemos esses valores para o presente com uma taxa de desconto e chegamos a uma estimativa de valor por ação.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">A lógica central</p>
  <p className="mt-1">Uma empresa vale o quanto consegue gerar de caixa ao longo do tempo. Como o dinheiro no futuro vale menos do que hoje, descontamos esses fluxos usando uma taxa que reflete risco, custo de capital e estrutura financeira.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">Como fazemos isso</p>
  <ul className="mt-2 list-disc space-y-1 pl-5">
  <li>Partimos dos dados atuais da empresa, como receita, EBIT, imposto, dívida, caixa e número de ações.</li>
@@ -4363,18 +4363,18 @@ const changesCount = changesBySelectedWindow.length;
  </ul>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que mais influencia o resultado</p>
  <p className="mt-1">O valuation depende principalmente de crescimento da receita, margem operacional, reinvestimento, WACC, crescimento terminal e número de ações.</p>
  <p className="mt-1">Pequenas mudanças nessas premissas podem alterar de forma relevante o preço justo estimado.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que esse cálculo faz bem</p>
  <p className="mt-1">Ele ajuda a enxergar o valor econômico do negócio, comparar preço de mercado com valor estimado e entender quais premissas sustentam a tese.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que esse cálculo não faz</p>
  <p className="mt-1">Ele não prevê o preço da ação no curto prazo, não garante retorno e não substitui a análise qualitativa do negócio.</p>
  </section>
