@@ -373,34 +373,38 @@ function HeroDashboard() {
       <div className="absolute inset-x-0 bottom-0 h-[55%] bg-[linear-gradient(180deg,rgba(224,237,255,0)_0%,rgba(170,205,255,0.9)_100%)]" />
       <div className="absolute inset-x-0 top-0 h-[42%] bg-[linear-gradient(180deg,#ffffff_0%,#f7fbff_100%)]" />
       <div className="relative grid min-h-[320px] grid-cols-[42px_1fr] md:min-h-[420px] md:grid-cols-[42px_1fr_190px]">
+        {/* Icon bar */}
         <div className="flex flex-col items-center gap-4 border-r border-[#eef2f8] bg-white/95 py-4">
           <div className="h-7 w-7 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-          <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
-          <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
-          <div className="h-7 w-7 rounded-full bg-[radial-gradient(circle,#9df0d8,#0f9f8f)] opacity-80" />
+          <div className="h-6 w-6 rounded-lg border border-[#e4e7eb] bg-white" />
+          <div className="h-6 w-6 rounded-lg border border-[#0e9384]/20 bg-[#f0fdf9]" />
+          <div className="h-6 w-6 rounded-lg border border-[#e4e7eb] bg-white" />
+          <div className="h-6 w-6 rounded-lg border border-[#e4e7eb] bg-white" />
         </div>
+        {/* Nav sidebar + Main */}
         <div className="grid grid-cols-[120px_1fr] md:grid-cols-[156px_1fr]">
+          {/* Nav sidebar */}
           <div className="border-r border-[#eef2f8] bg-white/90 px-3 py-4 md:px-4">
-            <div className="flex items-center gap-2 text-[11px] font-semibold text-[#1b1b1b]">
-              <div className="h-6 w-6 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-              Workspace
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#1b1b1b]">
+              <div className="h-6 w-6 shrink-0 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
+              Analiso
               <ChevronDown className="h-3.5 w-3.5 text-[#8f8f8f]" />
             </div>
             <div className="mt-7 text-[10px] font-medium uppercase tracking-[0.08em] text-[#c0c0c0]">
-              Geral
+              Navegar
             </div>
             <div className="mt-3 space-y-3 text-[11px] text-[#6f6f6f]">
-              {["Resumo", "Agenda", "Em espera", "Prontuários", "Estoque", "Conversas", "Documentos"].map(
+              {["Painel", "Watchlist", "Explorer", "Portfolio", "Alertas", "Relatorios", "Ajustes"].map(
                 (item, index) => (
                   <div key={item} className="flex items-center gap-2">
                     <span
-                      className={`h-3.5 w-3.5 rounded-full border ${
-                        index === 0
+                      className={`h-3.5 w-3.5 rounded-[4px] border ${
+                        index === 1
                           ? "border-[#0f9f8f] bg-[#0f9f8f]"
                           : "border-[#cfcfcf] bg-white"
                       }`}
                     />
-                    <span className={index === 0 ? "font-semibold text-[#111111]" : ""}>
+                    <span className={index === 1 ? "font-semibold text-[#111111]" : ""}>
                       {item}
                     </span>
                   </div>
@@ -408,101 +412,165 @@ function HeroDashboard() {
               )}
             </div>
           </div>
+          {/* Main content */}
           <div className="bg-white/88 px-4 py-4 md:px-5">
             <div className="flex items-center justify-between">
-              <div className="text-[14px] font-semibold text-[#141414]">Resumo</div>
+              <div className="text-[14px] font-semibold text-[#141414]">Watchlist</div>
               <div className="hidden gap-2 md:flex">
                 <div className="h-8 w-8 rounded-[10px] border border-[#ebedf0] bg-white" />
                 <div className="h-8 w-8 rounded-[10px] border border-[#ebedf0] bg-white" />
                 <div className="h-8 w-8 rounded-[10px] border border-[#ebedf0] bg-white" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-3 text-[11px] text-[#9b9b9b]">
-              <div className="rounded-[10px] border border-[#ececec] bg-white px-3 py-2 text-[#4a4a4a]">
-                Hoje
-              </div>
-              <span>13 de nov / 2025</span>
+            {/* Market context strip */}
+            <div className="mt-3 flex items-center gap-2">
+              {[
+                { label: "IBOV", value: "127.840", change: "+0,8%", up: true },
+                { label: "USD", value: "R$ 5,21", change: "-0,3%", up: false },
+                { label: "SELIC", value: "10,5% a.a.", change: "", up: true },
+              ].map(({ label, value, change, up }) => (
+                <div key={label} className="rounded-full border border-[#e2edf5] bg-[#f6fafc] px-2.5 py-1 text-[10px] text-[#334155]">
+                  <span className="font-medium">{label}</span>
+                  <span className="mx-1 text-[#94a3b8]">{value}</span>
+                  {change && (
+                    <span className={up ? "font-semibold text-[#16a34a]" : "font-semibold text-[#dc2626]"}>
+                      {change}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr_1.3fr]">
+            {/* 3-col cards */}
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1.3fr]">
               <div className="rounded-[18px] border border-[#eef0f4] bg-white p-3 shadow-[0_6px_20px_rgba(0,0,0,0.03)]">
-                <div className="text-[10px] text-[#aaaaaa]">Consultas hoje</div>
-                <div className="mt-2 text-[28px] font-semibold text-[#171717]">15</div>
-                <div className="mt-3 text-[10px] text-[#4bb369]">4 realizadas | 5 pendentes</div>
+                <div className="text-[10px] text-[#aaaaaa]">Score medio — Watchlist</div>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="text-[28px] font-semibold text-[#0e9384]">74</span>
+                  <span className="text-[13px] text-[#aaa]">/100</span>
+                </div>
+                <div className="mt-2 text-[10px] text-[#0e9384]">8 empresas monitoradas</div>
                 <div className="mt-3 inline-flex rounded-[10px] border border-[#ececec] px-3 py-2 text-[10px] font-semibold text-[#242424]">
-                  Ir para agenda
+                  Ver watchlist
                 </div>
               </div>
               <div className="rounded-[18px] border border-[#eef0f4] bg-white p-3 shadow-[0_6px_20px_rgba(0,0,0,0.03)]">
-                <div className="text-[10px] text-[#aaaaaa]">Pacientes</div>
-                <div className="mt-2 text-[28px] font-semibold text-[#171717]">31</div>
-                <div className="mt-3 text-[10px] text-[#4bb369]">5 adicionados hoje</div>
+                <div className="text-[10px] text-[#aaaaaa]">Novos resultados</div>
+                <div className="mt-2 text-[28px] font-semibold text-[#171717]">12</div>
+                <div className="mt-2 text-[10px] text-[#d97706]">3 com mudancas relevantes</div>
                 <div className="mt-3 inline-flex rounded-[10px] border border-[#ececec] px-3 py-2 text-[10px] font-semibold text-[#242424]">
-                  Mais detalhes
+                  Analisar
                 </div>
               </div>
               <div className="rounded-[18px] border border-[#eef0f4] bg-white p-3 shadow-[0_6px_20px_rgba(0,0,0,0.03)]">
                 <div className="flex items-center justify-between text-[10px] text-[#aaaaaa]">
-                  <span>Agendamentos de hoje</span>
-                  <span>10/10</span>
+                  <span>Watchlist</span>
+                  <span>8 empresas</span>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 space-y-2">
                   {[
-                    ["#8e67ff", "Diogo Martins", "Consulta 10:00 - 11:00"],
-                    ["#0f9f8f", "Diogo Martins", "Consulta 10:00 - 11:00"],
-                    ["#ff5ea9", "Marcelo Melo", "Consulta 10:00 - 11:00"],
-                  ].map(([color, title, subtitle]) => (
-                    <div
-                      key={`${title}-${color}`}
-                      className="flex items-start gap-3 rounded-[14px] bg-[#fafcff] px-3 py-3"
-                    >
-                      <span
-                        className="mt-1 h-8 w-[3px] rounded-full"
-                        style={{ backgroundColor: color }}
-                      />
-                      <div>
-                        <div className="text-[11px] font-semibold text-[#1a1a1a]">{title}</div>
-                        <div className="text-[10px] text-[#6e7b95]">{subtitle}</div>
-                      </div>
+                    { ticker: "WEGE3", sector: "Industrial", score: 85, change: "+2,1%", up: true },
+                    { ticker: "VALE3", sector: "Mineracao", score: 72, change: "+1,2%", up: true },
+                    { ticker: "ITUB4", sector: "Financeiro", score: 68, change: "+0,4%", up: true },
+                    { ticker: "PETR4", sector: "Energia", score: 61, change: "-0,7%", up: false },
+                  ].map(({ ticker, score, change, up }) => (
+                    <div key={ticker} className="flex items-center gap-2 rounded-[10px] bg-[#f6fafc] px-2.5 py-2">
+                      <span className="w-10 text-[10px] font-bold text-[#1a1a1a]">{ticker}</span>
+                      <span className="flex-1 rounded-full bg-[#e2edf5] px-1.5 py-0.5 text-center text-[9px] text-[#334155]">{score}</span>
+                      <span className={`text-[10px] font-semibold ${up ? "text-[#16a34a]" : "text-[#dc2626]"}`}>{change}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-[18px] border border-[#e2f4ef] bg-[linear-gradient(180deg,#ecfbf8,#d7f5ee)] p-4">
-              <div className="text-[10px] text-[#4f8f85]">Taxa de comparecimento</div>
-              <div className="mt-2 flex items-center gap-2 text-[27px] font-semibold text-[#181818]">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#0f9f8f] border-t-transparent" />
-                87%
+            {/* Mini chart area */}
+            <div className="mt-3 rounded-[18px] border border-[#e2f4ef] bg-[linear-gradient(180deg,#ecfbf8,#d7f5ee)] p-3">
+              <div className="text-[10px] text-[#4f8f85]">Score historico — WEGE3</div>
+              <div className="mt-2 flex items-end gap-[3px]">
+                {[55, 58, 60, 62, 65, 68, 67, 70, 72, 75, 80, 85].map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-sm"
+                    style={{
+                      height: `${h * 0.38}px`,
+                      backgroundColor: i === 11 ? '#0f9f8f' : `rgba(15,159,143,${0.15 + i * 0.06})`,
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
         </div>
+        {/* Right panel */}
         <div className="relative hidden bg-transparent md:block">
-          <div className="absolute right-6 top-16 w-[160px] rounded-[18px] border border-[#eaeaf0] bg-white p-4 shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
-            <div className="text-[11px] font-semibold text-[#222]">Gestor operacional</div>
-            <div className="text-[10px] text-[#939393]">Super Agente</div>
-            <div className="mt-4 h-[130px] rounded-[18px] bg-[radial-gradient(circle_at_50%_30%,#d8e7ff_0%,#c2d8ff_18%,#8f9cc4_19%,#f5f5f5_20%,#f5f5f5_47%,#d9b79f_48%,#7f5b45_57%,#f5f5f5_58%,#f5f5f5_100%)]" />
+          <div className="absolute right-5 top-12 w-[162px] rounded-[18px] border border-[#eaeaf0] bg-white p-4 shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-[#0f9f8f]" />
+              <div className="text-[11px] font-semibold text-[#222]">Analise IA</div>
+            </div>
+            <div className="mt-0.5 text-[10px] text-[#939393]">WEGE3 — Weg S.A.</div>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-[28px] font-bold text-[#0e9384]">85</span>
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] text-[#aaa]">Score /100</span>
+                <div className="h-1.5 w-16 overflow-hidden rounded-full bg-[#e2edf5]">
+                  <div className="h-full rounded-full bg-[#0e9384]" style={{ width: '85%' }} />
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1">
+              <span className="rounded-full border border-[#99f6e4] bg-[#f0fdfa] px-1.5 py-0.5 text-[9px] font-semibold text-[#0e9384]">Forte crescimento</span>
+              <span className="rounded-full border border-[#e2edf5] bg-[#f6fafc] px-1.5 py-0.5 text-[9px] text-[#334155]">Baixo risco</span>
+            </div>
+            <div className="mt-3 overflow-hidden rounded-[12px] bg-[#f6fafc] p-2">
+              <svg viewBox="0 0 120 48" className="h-[60px] w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="hd-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0e9384" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#0e9384" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <polygon points="0,38 15,34 30,30 45,24 60,20 75,14 90,10 105,6 120,3 120,48 0,48" fill="url(#hd-grad)" />
+                <polyline points="0,38 15,34 30,30 45,24 60,20 75,14 90,10 105,6 120,3" stroke="#0e9384" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
           </div>
-          <div className="absolute bottom-6 right-6 w-[160px] rounded-[16px] border border-[#e9edf6] bg-white p-3 shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
-            <div className="h-10 rounded-[10px] bg-[linear-gradient(90deg,#67d7c9_0%,#0f9f8f_20%,#67d7c9_40%,#dff4ef_40%,#dff4ef_100%)] opacity-90" />
+          <div className="absolute bottom-5 right-5 w-[162px] rounded-[16px] border border-[#e9edf6] bg-white p-3 shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
+            <div className="mb-2 text-[10px] text-[#939393]">Distribuicao setorial</div>
+            <div className="space-y-2">
+              {[
+                { label: "Industrial", pct: 60, color: "#0e9384" },
+                { label: "Financeiro", pct: 35, color: "#7c3aed" },
+                { label: "Energia", pct: 25, color: "#d97706" },
+              ].map(({ label, pct, color }) => (
+                <div key={label}>
+                  <div className="mb-0.5 flex justify-between text-[9px] text-[#9b9b9b]">
+                    <span>{label}</span>
+                    <span>{pct}%</span>
+                  </div>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-[#f0f4f8]">
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+      {/* Bottom feature labels */}
       <div className="relative flex items-center justify-center gap-8 px-6 py-7 text-[11px] font-medium text-[#b5b5b5]">
         {[
-          "Lembretes",
-          "Receitas",
-          "Assistentes",
-          "Histórico",
-          "Despesas",
-          "Automação",
-          "Integrações",
-          "Cobranças",
+          "Analise Fundamentalista",
+          "Resultados",
+          "Mudancas",
+          "Watchlist",
           "Alertas",
-          "Relatórios",
-          "Insights",
-          "Mensagens",
-          "Agenda",
+          "Score de Saude",
+          "Explorer",
+          "Comparacao Setorial",
+          "Historico",
+          "IA Integrada",
+          "Relatorios",
+          "Portfolio",
         ].map((item) => (
           <span key={item} className="hidden items-center gap-2 sm:inline-flex">
             <Circle className="h-3.5 w-3.5" />
