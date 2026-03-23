@@ -706,19 +706,21 @@ function MockDashboardMain() {
 // ─── Hero wrapper ────────────────────────────────────────────────────────
 
 export function HeroDashboardMock() {
+  const scale = 0.8;
+  const naturalHeight = 560;
+
   return (
     <div
-      className="relative mx-auto mt-16 w-full max-w-[1080px] overflow-hidden rounded-[22px] border border-[#e6efff] bg-white shadow-[0_30px_80px_rgba(93,144,224,0.18)]"
-      style={{ height: 420 }}
+      className="relative ml-[60px] w-full max-w-[1148px] overflow-hidden rounded-[22px] border border-[#e6efff] bg-white shadow-[0_30px_80px_rgba(93,144,224,0.18)] max-xl:ml-0 max-xl:min-w-[1138px] max-xl:max-w-none max-md:ml-[5%] max-md:w-[160%] max-md:min-w-0 max-md:max-w-none"
+      style={{ height: Math.round(naturalHeight * scale) }}
     >
-
       {/* Scaled dashboard */}
       <div
         style={{
           width: 1440,
           transformOrigin: "top left",
-          transform: "scale(0.75)",
-          height: `${420 / 0.75}px`,
+          transform: `scale(${scale})`,
+          height: naturalHeight,
         }}
       >
         <div className="flex h-full bg-[#F7FAFC]" style={{ fontFamily: "Inter, sans-serif" }}>
