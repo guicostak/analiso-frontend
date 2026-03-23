@@ -2795,15 +2795,27 @@ export function HeroSection() {
               </AnimatePresence>
             </div>
 
-            <div className="flex max-w-[418px] flex-wrap items-center justify-center gap-x-1.5 gap-y-2 max-sm:max-w-full">
-              {heroChips.map((chip) => (
-                <span
-                  key={chip}
-                  className="rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
-                >
-                  {chip}
-                </span>
-              ))}
+            <div className="flex flex-col items-center gap-y-2">
+              <div className="flex items-center justify-center gap-x-1.5">
+                {heroChips.slice(0, 5).map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-x-1.5">
+                {heroChips.slice(5).map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
             </div>
           </motion.div>
         </div>
