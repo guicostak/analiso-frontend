@@ -711,8 +711,6 @@ export function HeroDashboardMock() {
       className="relative mx-auto mt-16 w-full max-w-[1080px] overflow-hidden rounded-[22px] border border-[#e6efff] bg-white shadow-[0_30px_80px_rgba(93,144,224,0.18)]"
       style={{ height: 420 }}
     >
-      {/* Bottom fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,#ffffff_100%)]" />
 
       {/* Scaled dashboard */}
       <div
