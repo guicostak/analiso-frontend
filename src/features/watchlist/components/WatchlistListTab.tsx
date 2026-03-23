@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
 import type { Pillar, WatchlistCompany, WatchlistSortBy, WatchlistStatus, FeedSource } from "../interfaces";
 import { getStatusFromScores } from "../services";
+import { Button } from "@/src/components/ui/button";
+import { cn } from "@/src/components/ui/utils";
 
 function getBadgeStyle(status: WatchlistStatus) {
   if (status === "Risco") return "border-[#F3D6DE] bg-white/72 text-[#B54768]";
@@ -146,7 +148,7 @@ export function WatchlistListTab({
 
           <div className="flex flex-wrap items-center gap-2">
             {(["Compacto", "Detalhado"] as const).map((mode) => (
-              <button
+              <Button
                 key={mode}
                 onClick={() => setListDensity(mode)}
                 className={`rounded-full border px-4 py-2 text-[12px] font-semibold transition ${
@@ -156,7 +158,7 @@ export function WatchlistListTab({
                 }`}
               >
                 {mode}
-              </button>
+              </Button>
             ))}
 
             <button
@@ -179,7 +181,7 @@ export function WatchlistListTab({
               }`}
             >
               Não vistos
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -421,9 +423,10 @@ export function WatchlistListTab({
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-[#516071] hover:bg-[#F8FBFD]"
                       >
                         Criar alerta
-                      </button>
-                      <button
-                        title={isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
+                      </Button>
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => {
                           setQuickActionsTicker(null);
                           setExpandedTicker(expandedTicker === company.ticker ? null : company.ticker);
@@ -431,9 +434,10 @@ export function WatchlistListTab({
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-[#516071] hover:bg-[#F8FBFD]"
                       >
                         {isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
-                      </button>
-                      <button
-                        title="Marcar visto"
+                      </Button>
+                      <Button
+                        variant="menu-item"
+                        size="xs"
                         onClick={() => {
                           setQuickActionsTicker(null);
                           toggleSeenTicker(company.ticker);
@@ -441,14 +445,15 @@ export function WatchlistListTab({
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-[#516071] hover:bg-[#F8FBFD]"
                       >
                         {seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
-                      </button>
-                      <button
-                        title="Remover da watchlist"
+                      </Button>
+                      <Button
+                        variant="menu-item-destructive"
+                        size="xs"
                         onClick={() => setQuickActionsTicker(null)}
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-[#B54768] hover:bg-[#FDEFF2]"
                       >
                         Remover da watchlist
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

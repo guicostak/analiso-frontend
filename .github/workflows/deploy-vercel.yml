@@ -24,10 +24,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Build do projeto React
+      # 4️⃣ Criar .env a partir dos secrets do GitHub
+      - name: Create .env file
+        run: |
+          echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env
+          echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}" >> .env
+
+      # 5️⃣ Build do projeto React
       - name: Build project
         run: npm run build
 
-      # 5️⃣ Deploy automático para Vercel via CLI
+      # 6️⃣ Deploy automático para Vercel via CLI
       - name: Deploy to Vercel
         run: npx vercel --prod --yes -t ${{ secrets.VERCEL_TOKEN }}

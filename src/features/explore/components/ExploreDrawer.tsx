@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/src/components/ui/button";
 
 export function ExploreDrawer({
   open,
@@ -26,12 +27,9 @@ export function ExploreDrawer({
       >
         <div className="flex items-center justify-between mb-6">
           <h4 className="text-base font-semibold text-foreground">{title}</h4>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:border-[#D0D5DD]"
-          >
+          <Button variant="outline" size="icon-round" onClick={onClose}>
             <X className="w-4 h-4 text-foreground/80" />
-          </button>
+          </Button>
         </div>
         {children}
       </div>

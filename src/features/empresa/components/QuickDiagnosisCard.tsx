@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { CheckCircle2, AlertCircle, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
+import { Button } from '@/src/components/ui/button';
 import { motion } from 'motion/react';
 
 interface QuickDiagnosisCardProps {
@@ -110,10 +111,10 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
                 <span className="text-sm font-semibold text-mint-700">{lastVisit.change}</span>
               </div>
               <p className="text-sm text-neutral-600 mb-3">{lastVisit.context}</p>
-              <button className="text-sm font-medium text-mint-700 hover:text-mint-800 flex items-center gap-1 transition-colors">
+              <Button variant="link-mint" className="flex items-center gap-1">
                 Ver linha do tempo completa
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
