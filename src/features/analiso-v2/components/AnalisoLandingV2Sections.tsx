@@ -2647,7 +2647,7 @@ export function HeroSection() {
           </motion.h1>
 
           <motion.div
-            className="mt-10 flex w-full max-w-[466px] flex-col items-center gap-8 max-md:mt-8 max-sm:max-w-full max-sm:px-0"
+            className="mt-10 w-full max-w-[466px] max-md:mt-8 max-sm:max-w-full max-sm:px-0"
             initial={reducedMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.85, delay: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -2795,29 +2795,30 @@ export function HeroSection() {
               </AnimatePresence>
             </div>
 
-            <div className="flex flex-col items-center gap-y-2">
-              <div className="flex items-center justify-center gap-x-1.5">
-                {heroChips.slice(0, 5).map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-              <div className="flex items-center justify-center gap-x-1.5">
-                {heroChips.slice(5).map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            </div>
           </motion.div>
+
+          <div className="mt-6 flex flex-col items-center gap-y-2">
+            <div className="flex items-center justify-center gap-x-1.5">
+              {heroChips.slice(0, 5).map((chip) => (
+                <span
+                  key={chip}
+                  className="whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center justify-center gap-x-1.5">
+              {heroChips.slice(5).map((chip) => (
+                <span
+                  key={chip}
+                  className="whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
         <motion.div
