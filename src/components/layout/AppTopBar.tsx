@@ -1,8 +1,8 @@
 "use client";
 
-import { Bell, Moon, Search, Settings, Sun, UserCircle2 } from "lucide-react";
+import { Bell, Moon, Search, Settings, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/src/features/auth/AuthContext";
+import { UserNavMenu } from "./UserNavMenu";
 
 interface AppTopBarProps {
   sidebarOffsetClassName?: string;
@@ -10,7 +10,6 @@ interface AppTopBarProps {
 
 export function AppTopBar({ sidebarOffsetClassName = "left-[88px]" }: AppTopBarProps) {
   const { setTheme, resolvedTheme } = useTheme();
-  const { user, logout } = useAuth();
 
   return (
     <header className={`fixed top-0 right-0 z-20 h-14 border-b border-border bg-card ${sidebarOffsetClassName}`}>
@@ -59,17 +58,7 @@ export function AppTopBar({ sidebarOffsetClassName = "left-[88px]" }: AppTopBarP
           </button>
 
           {/* Avatar / Sair */}
-          <button
-            onClick={logout}
-            title="Sair"
-            className="ml-1 h-8 w-8 overflow-hidden rounded-full border border-border-strong transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-brand/40"
-          >
-            {user?.picture ? (
-              <img src={user.picture} alt={user.name ?? "Perfil"} className="h-full w-full object-cover" />
-            ) : (
-              <UserCircle2 className="m-auto h-5 w-5 text-muted-foreground" />
-            )}
-          </button>
+          <UserNavMenu />
 
         </div>
       </div>

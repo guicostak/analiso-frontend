@@ -1,30 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Activity,
-  Bell,
   Bookmark,
-  Building2,
-  CalendarDays,
   ChevronRight,
-  Compass,
   Database,
-  GitCompare,
-  Home,
-  LayoutGrid,
-  NotebookPen,
-  Search,
-  Settings,
   Sparkles,
-  UserCircle2,
-  Users,
 } from "lucide-react";
-import { useAuth } from "@/src/features/auth/AuthContext";
+import { Sidebar } from "@/src/components/layout/Sidebar";
+import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/components/ui/utils";
 import { useDashboardInbox, allPillars, allSources, allStatuses } from "../hooks/useDashboardInbox";
 import type { InboxItem, Pillar, Status, WindowRange } from "../interfaces";
@@ -46,36 +33,14 @@ const logoByTicker: Record<string, string> = {
 };
 
 const surfaceBase =
-  "rounded-[28px] border border-[#E8EEF5] bg-white shadow-[0_18px_40px_rgba(15,23,40,0.04)]";
-const mediumSurface = "rounded-[24px] border border-[#E8EEF5] bg-white";
+  "rounded-[24px] border border-[#E8EEF5] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]";
+const mediumSurface = "rounded-[20px] border border-[#E8EEF5] bg-white";
 
 const statusClasses: Record<Status, string> = {
   "Saud\u00e1vel": "border-[#CDECDD] bg-[#EAF9F0] text-[#17825B]",
   "Aten\u00e7\u00e3o": "border-[#F8E1B1] bg-[#FFF4DE] text-[#B27300]",
   Risco: "border-[#F4D7DE] bg-[#FDECEF] text-[#B54768]",
 };
-
-const sidebarGroups = [
-  {
-    title: "Geral",
-    items: [
-      { id: "dashboard", label: "Painel de hoje", href: "/dashboard", icon: Home },
-      { id: "explorar", label: "Explorar mercado", href: "/explorar", icon: Compass },
-      { id: "watchlist", label: "Watchlist", href: "/watchlist", icon: LayoutGrid },
-      { id: "comparar", label: "Comparar empresas", href: "/comparar", icon: GitCompare },
-    ],
-  },
-  {
-    title: "Apoios",
-    items: [
-      { id: "agenda", label: "Agenda", href: "#", icon: CalendarDays },
-      { id: "notas", label: "Notas", href: "#", icon: NotebookPen },
-      { id: "empresas", label: "Empresas", href: "#", icon: Building2 },
-      { id: "time", label: "Time", href: "#", icon: Users },
-      { id: "bookmarks", label: "Salvos", href: "#", icon: Bookmark },
-    ],
-  },
-];
 
 function pluralize(value: number, singular: string, plural: string) {
   return `${value} ${value === 1 ? singular : plural}`;
@@ -157,111 +122,6 @@ const summaryToneStyles: Record<
     pill: "bg-[#FDECEF] text-[#B54768]",
   },
 };
-
-function DashboardShell() {
-  const { user, logout } = useAuth();
-
-  return (
-    <>
-      <div className="hidden xl:block">
-        <aside className="fixed inset-y-0 left-0 z-20 w-[240px] border-r border-[#EEF2F6] bg-white">
-          <div className="flex h-full flex-col px-5 py-6">
-            <button className="flex items-center justify-between rounded-[18px] border border-[#EEF2F6] bg-[#FAFCFD] px-4 py-3 text-left">
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Contexto</p>
-                <p className="mt-0.5 text-[15px] font-semibold text-[#0F1728]">Minha watchlist</p>
-              </div>
-              <Sparkles className="h-4 w-4 text-[#12A594]" />
-            </button>
-
-            <div className="mt-8 space-y-8">
-              {sidebarGroups.map((group) => (
-                <div key={group.title}>
-                  <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
-                    {group.title}
-                  </p>
-                  <div className="space-y-1.5">
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = item.id === "dashboard";
-                      const content = (
-                        <span
-                          className={cn(
-                            "flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[14px] transition",
-                            isActive
-                              ? "bg-[#F3FAF8] text-[#0F1728]"
-                              : "text-[#667085] hover:bg-[#F8FBFD] hover:text-[#0F1728]",
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "grid h-8 w-8 place-items-center rounded-full",
-                              isActive ? "bg-white text-[#12A594]" : "bg-[#F7FAFC] text-[#98A2B3]",
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </span>
-                          <span className={cn("font-medium", isActive && "font-semibold")}>{item.label}</span>
-                        </span>
-                      );
-
-                      if (item.href.startsWith("/")) {
-                        return (
-                          <Link key={item.id} href={item.href}>
-                            {content}
-                          </Link>
-                        );
-                      }
-
-                      return (
-                        <button key={item.id} className="w-full text-left">
-                          {content}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={logout}
-              className="mt-auto flex items-center gap-3 rounded-[18px] bg-[#F8FBFD] px-3.5 py-3 text-left transition hover:bg-[#F1F6FA]"
-            >
-              <Avatar className="h-10 w-10 border border-[#E8EEF5]">
-                <AvatarImage src={user?.picture} alt={user?.name ?? "Perfil"} className="object-cover" />
-                <AvatarFallback className="bg-white text-[#667085]">
-                  <UserCircle2 className="h-5 w-5" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="truncate text-[14px] font-semibold text-[#0F1728]">{user?.name ?? "Sua conta"}</p>
-                <p className="truncate text-[12px] text-[#98A2B3]">Sair</p>
-              </div>
-            </button>
-          </div>
-        </aside>
-      </div>
-
-      <div className="xl:hidden">
-        <div className="border-b border-[#EEF2F6] bg-white px-5 py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Dashboard</p>
-              <p className="text-[18px] font-semibold text-[#0F1728]">Minha watchlist</p>
-            </div>
-            <Avatar className="h-10 w-10 border border-[#E8EEF5]">
-              <AvatarImage src={user?.picture} alt={user?.name ?? "Perfil"} className="object-cover" />
-              <AvatarFallback className="bg-white text-[#667085]">
-                <UserCircle2 className="h-5 w-5" />
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
 
 export function Dashboard() {
   const router = useRouter();
@@ -400,75 +260,32 @@ export function Dashboard() {
       data-day-template={dashboardData?.dayTemplate ?? "fallback"}
       data-manifest-version={dashboardData?.manifestVersion ?? "fallback"}
     >
-      <DashboardShell />
+      <Sidebar currentPage="dashboard" contextLabel="Minha watchlist" />
+      <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
-      <main className="px-5 pb-10 pt-5 xl:ml-[240px] xl:px-8 xl:pt-6">
-        <div className="mx-auto max-w-[1680px] space-y-6">
-          <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex w-full max-w-[520px] items-center gap-3">
-              <div className="relative w-full">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
-                <Input
-                  className="h-12 rounded-2xl border-[#E8EEF5] bg-white pl-11 text-[15px] text-[#0F1728] placeholder:text-[#98A2B3] focus-visible:ring-[#DDF6F0]"
-                  placeholder={"Busque empresa, ticker ou um ponto da sess\u00e3o"}
-                />
-              </div>
-              <span className="hidden rounded-full bg-white px-3 py-2 text-[12px] font-medium text-[#98A2B3] lg:inline-flex">
-                Atualizado {refreshLabel}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#667085] shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition hover:text-[#0F1728]">
-                <Bell className="h-4 w-4" />
-              </button>
-              <button className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#667085] shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition hover:text-[#0F1728]">
-                <Settings className="h-4 w-4" />
-              </button>
-              <Button
-                onClick={() => router.push("/watchlist?criar-alerta=1")}
-                className="h-11 rounded-2xl bg-[#12A594] px-5 text-[14px] font-semibold text-white shadow-[0_14px_30px_rgba(18,165,148,0.18)] hover:bg-[#0F9485]"
-              >
-                Criar alerta
-              </Button>
-            </div>
-          </section>
-
-          <section className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+      <main className="px-5 pb-8 pt-20 xl:ml-[240px] xl:px-7 xl:pt-20">
+        <div className="mx-auto max-w-[1480px] space-y-5">
+          <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
             <article
               className={cn(
-                surfaceBase,
-                "relative col-span-1 min-h-[252px] overflow-hidden xl:col-span-4",
-                "bg-gradient-to-b",
-                summaryToneStyle.shell,
+                "rounded-[24px] border border-[#C9DFFA] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]",
+                "relative col-span-1 min-h-[224px] overflow-hidden bg-[linear-gradient(180deg,#F7FBFF_0%,#FFFFFF_100%)] xl:col-span-4",
               )}
             >
-              <div className="absolute inset-x-0 top-0 h-[112px] bg-[linear-gradient(135deg,rgba(91,141,239,0.24),rgba(18,165,148,0.08)_58%,transparent_100%)]" />
-              <div className={cn("absolute inset-x-0 top-0 h-[42%]", summaryToneStyle.glow)} />
-              <div className="absolute -left-6 top-4 h-28 w-28 rounded-full bg-white/50 blur-3xl" />
-              <div className="absolute right-10 top-8 h-20 w-32 rounded-full bg-[rgba(255,255,255,0.24)] blur-2xl" />
-              <div className="absolute left-7 top-7 h-16 w-24 rounded-[22px] border border-white/40 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(255,255,255,0.08))]" />
-              <div className="absolute left-20 top-12 h-[2px] w-28 bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.75),rgba(255,255,255,0))]" />
-              <div className="absolute right-6 top-6">
-                <span className={cn("inline-flex rounded-full px-3 py-1 text-[11px] font-semibold", summaryToneStyle.pill)}>
-                  {"Resumo da sess\u00e3o"}
-                </span>
-              </div>
+              <div className="absolute inset-x-0 top-0 h-[64px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)]" />
+              <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-[#2F6FD6]">Resumo do dia</span>
 
-              <div className="relative flex h-full flex-col justify-between p-7">
-                <div className="space-y-5">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/80 text-[#12A594] shadow-[0_10px_30px_rgba(18,165,148,0.08)]">
-                    <Activity className="h-5 w-5" />
-                  </div>
+              <div className="relative flex h-full flex-col justify-between p-4.5">
+                <div className="pt-[64px]">
                   {dashboardLoading ? (
                     <div className="space-y-3">
-                      <div className="h-4 w-32 animate-pulse rounded-full bg-white/80" />
-                      <div className="h-8 w-4/5 animate-pulse rounded-full bg-white/80" />
-                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-white/70" />
+                      <div className="h-4 w-32 animate-pulse rounded-full bg-[#E8F0FB]" />
+                      <div className="h-8 w-4/5 animate-pulse rounded-full bg-[#E8F0FB]" />
+                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-[#EEF4FC]" />
                     </div>
                   ) : dashboardError === "not_ready" ? (
                     <div className="space-y-2.5">
-                      <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#0F1728]">
+                      <h1 className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0F1728]">
                         Preparando seu dashboard
                       </h1>
                       <p className="max-w-[30ch] text-[15px] leading-6 text-[#667085]">
@@ -477,32 +294,23 @@ export function Dashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">{"Abertura da sess\u00e3o"}</p>
-                      <h1 className="max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.04em] text-[#0F1728]">
+                      <h1 className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-[#0F1728]">
                         {heroHeadline}
                       </h1>
-                      <p className="max-w-[31ch] text-[15px] leading-6 text-[#526070]">{heroBody}</p>
+                      <p className="max-w-[34ch] text-[14px] leading-6 text-[#526070]">{heroBody}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full bg-white/80 px-3 py-1.5 text-[12px] font-medium text-[#0F1728]">
-                      {pluralize(todayRiskCount, "risco novo", "riscos novos")}
-                    </span>
-                    <span className="inline-flex rounded-full bg-white/80 px-3 py-1.5 text-[12px] font-medium text-[#0F1728]">
-                      {pluralize(todayHealthyCount, "melhora", "melhoras")}
-                    </span>
-                    <span className="inline-flex rounded-full bg-white/80 px-3 py-1.5 text-[12px] font-medium text-[#0F1728]">
+                <div className="flex items-center justify-between gap-3 border-t border-[#EEF3F7] pt-3.5">
+                  <span className="text-[12px] font-medium text-[#98A2B3]">
                       {"Refer\u00eancia "}{dashboardData?.referenceDate ?? "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"}
                     </span>
-                  </div>
 
-                  <div className="flex items-center justify-between gap-3 rounded-[20px] bg-white/55 px-3 py-3 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
                     <Button
                       onClick={focusInboxRecentImpact}
-                      className="h-11 rounded-2xl bg-[#12A594] px-5 text-[14px] font-semibold text-white shadow-[0_14px_30px_rgba(18,165,148,0.18)] hover:bg-[#0F9485]"
+                      className="h-10 rounded-[18px] bg-[#12A594] px-4 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] hover:bg-[#0F9485]"
                     >
                       {dashboardData?.summary.ctaPrimary ?? "Abrir prioridade"}
                     </Button>
@@ -512,16 +320,17 @@ export function Dashboard() {
               </div>
             </article>
 
-            <div className="col-span-1 grid gap-6 xl:col-span-3">
+            <div className="col-span-1 grid gap-5 xl:col-span-3">
               <button
                 onClick={() => (topRiskItem ? openInboxItem(topRiskItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[128px] flex-col justify-between overflow-hidden rounded-[24px] border border-[#F0CCD7] bg-[linear-gradient(180deg,#FCECEF_0%,#FFF6F8_100%)] p-5 text-left transition hover:shadow-[0_14px_30px_rgba(181,71,104,0.10)]"
+                className="relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-white p-4.5 text-left transition hover:shadow-[0_14px_26px_rgba(181,71,104,0.10)]"
               >
+                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#F7D9E2_0%,#FCECEF_100%)]" />
+                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">Maior risco</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(181,71,104,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#B54768]">Maior risco</p>
-                    <p className="mt-1 text-[20px] font-semibold leading-[1.2] text-[#0F1728]">
+                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topRiskItem ? topRiskItem.ticker : "Sem risco novo"}
                     </p>
                   </div>
@@ -531,15 +340,12 @@ export function Dashboard() {
                     </span>
                   ) : topRiskItem ? <StatusBadge status={topRiskItem.severity} /> : null}
                 </div>
-                <p className="max-w-[25ch] text-[14px] leading-5 text-[#5F6673]">
+                <p className="max-w-[25ch] text-[13px] leading-5 text-[#5F6673]">
                   {topRiskItem
                     ? topRiskItem.benefitNow ?? topRiskItem.whyItMatters
                     : "Nenhum sinal cr\u00edtico novo entrou na watchlist nas \u00faltimas 24h."}
                 </p>
                 <div className="space-y-2">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/70">
-                    <div className="h-full w-[72%] rounded-full bg-[#C95C7A]" />
-                  </div>
                   <div className="flex items-center justify-between text-[12px]">
                     <span className="text-[#7E5A66]">{topRiskItem?.entryReason ?? "Press\u00e3o concentrada no topo da leitura"}</span>
                     <span className="font-semibold text-[#B54768]">{topRiskItem?.priorityRank ?? todayRiskCount}</span>
@@ -549,13 +355,14 @@ export function Dashboard() {
 
               <button
                 onClick={() => (topImproveItem ? openInboxItem(topImproveItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[128px] flex-col justify-between overflow-hidden rounded-[24px] border border-[#CFE9E2] bg-[linear-gradient(180deg,#ECF8F4_0%,#F8FCFB_100%)] p-5 text-left transition hover:shadow-[0_14px_30px_rgba(18,165,148,0.10)]"
+                className="relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-white p-4.5 text-left transition hover:shadow-[0_14px_26px_rgba(18,165,148,0.10)]"
               >
+                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#D9EFE8_0%,#ECF8F4_100%)]" />
+                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#0F9485]">Maior melhora</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(18,165,148,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#0F9485]">Maior melhora</p>
-                    <p className="mt-1 text-[20px] font-semibold leading-[1.2] text-[#0F1728]">
+                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topImproveItem ? topImproveItem.ticker : "Sem melhora nova"}
                     </p>
                   </div>
@@ -565,30 +372,25 @@ export function Dashboard() {
                     </span>
                   ) : topImproveItem ? <StatusBadge status={topImproveItem.severity} /> : null}
                 </div>
-                <p className="max-w-[25ch] text-[14px] leading-5 text-[#56666A]">
+                <p className="max-w-[25ch] text-[13px] leading-5 text-[#56666A]">
                   {topImproveItem
                     ? topImproveItem.benefitNow ?? topImproveItem.whyItMatters
                     : "Ainda n\u00e3o apareceu uma recupera\u00e7\u00e3o relevante suficiente para liderar a sess\u00e3o."}
                 </p>
-                <div className="space-y-2">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/75">
-                    <div className="h-full w-[64%] rounded-full bg-[#239F86]" />
-                  </div>
-                  <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-[#5F7476]">{topImproveItem?.entryReason ?? "Recupera\u00e7\u00e3o com leitura mais limpa"}</span>
-                    <span className="font-semibold text-[#0F9485]">{topImproveItem?.priorityRank ?? todayHealthyCount}</span>
-                  </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-[#5F7476]">{topImproveItem?.entryReason ?? "Recupera\u00e7\u00e3o com leitura mais limpa"}</span>
+                  <span className="font-semibold text-[#0F9485]">{topImproveItem?.priorityRank ?? todayHealthyCount}</span>
                 </div>
               </button>
             </div>
 
-            <article className={cn(surfaceBase, "col-span-1 min-h-[252px] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-7 xl:col-span-5")}>
+            <article className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-6 xl:col-span-5")}>
               <div className="flex h-full flex-col justify-between">
                 <div className="space-y-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Prioridade do dia</p>
-                      <h2 className="mt-2 max-w-[20ch] text-[20px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                      <h2 className="mt-2 max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
                         {priorityItem
                           ? `${priorityItem.ticker} \u00e9 o melhor ponto de entrada para entender o que mudou hoje.`
                           : `O pilar ${leadingPillarMovement.pillar.toLowerCase()} concentra o melhor ponto de leitura do dia.`}
@@ -597,7 +399,7 @@ export function Dashboard() {
                     <span className="rounded-full bg-[#F3FAF8] px-3 py-1 text-[11px] font-semibold text-[#0F9485]">{"Sess\u00e3o guiada"}</span>
                   </div>
 
-                  <p className="max-w-[46ch] text-[15px] leading-6 text-[#667085]">
+                  <p className="max-w-[46ch] text-[14px] leading-6 text-[#667085]">
                     {dashboardData?.nextStep.headline ??
                       (priorityItem
                         ? `Abra ${priorityItem.ticker}, confirme o impacto no pilar ${priorityItem.pillarKey ?? leadingPillarMovement.pillar} e depois avance para os acompanhamentos relevantes.`
@@ -607,7 +409,7 @@ export function Dashboard() {
                     <p className="max-w-[42ch] text-[13px] leading-5 text-[#667085]">{dashboardData.nextStep.body}</p>
                   ) : null}
 
-                  <div className="rounded-[22px] bg-[#F5F9FC] p-3">
+                  <div className="rounded-[18px] bg-[#F5F9FC] p-3">
                     <div className="grid gap-3 md:grid-cols-3">
                     {progressStates.map((step, index) => {
                       const isCurrent = index === currentProgressStep;
@@ -615,7 +417,7 @@ export function Dashboard() {
                         <div
                           key={step.label}
                           className={cn(
-                            "rounded-[20px] p-4",
+                            "rounded-[18px] p-3.5",
                             step.done
                               ? "bg-[#F7FAFC]"
                               : isCurrent
@@ -645,10 +447,10 @@ export function Dashboard() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={focusInboxRecentImpact}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-[#F7FAFC] px-4 py-3 text-[14px] font-semibold text-[#0F1728] transition hover:bg-[#EEF2F6]"
+                    className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#EEF2F6]"
                   >
                     Abrir leitura guiada
                     <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
@@ -659,7 +461,7 @@ export function Dashboard() {
             </article>
           </section>
 
-          <section className="rounded-[24px] border border-[#E8EEF5] bg-[#EEF7FF] px-6 py-5 shadow-[0_12px_24px_rgba(91,141,239,0.05)]">
+          <section className="rounded-[20px] border border-[#E8EEF5] bg-[#EEF7FF] px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-4">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#5B8DEF]">
@@ -667,7 +469,7 @@ export function Dashboard() {
                 </div>
                 <div>
                   <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">{"Por onde come\u00e7ar"}</p>
-                  <p className="mt-1 text-[16px] font-semibold leading-6 text-[#0F1728]">{editorialText}</p>
+                  <p className="mt-1 text-[15px] font-semibold leading-6 text-[#0F1728]">{editorialText}</p>
                 </div>
               </div>
 
@@ -681,16 +483,16 @@ export function Dashboard() {
             </div>
           </section>
 
-          <section ref={inboxRef} className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-            <article className={cn(surfaceBase, "col-span-1 min-h-[580px] overflow-hidden xl:col-span-7")}>
-              <div className="border-b border-[#EEF2F6] px-7 py-6">
+          <section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+            <article className={cn(surfaceBase, "col-span-1 min-h-[540px] overflow-hidden xl:col-span-7")}>
+              <div className="border-b border-[#EEF2F6] px-6 py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="max-w-[44ch]">
                     <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">{"Explora\u00e7\u00e3o principal"}</p>
-                    <h2 className="mt-2 text-[20px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                    <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
                       {"Atualiza\u00e7\u00f5es da watchlist"}
                     </h2>
-                    <p className="mt-2 text-[15px] leading-6 text-[#667085]">
+                    <p className="mt-2 text-[14px] leading-6 text-[#667085]">
                       {"Triagem primeiro. Organiza\u00e7\u00e3o depois. O item principal abre a leitura e o restante ajuda a confirmar o contexto."}
                     </p>
                   </div>
@@ -700,7 +502,7 @@ export function Dashboard() {
                       <button
                         onClick={setImpactMode}
                         className={cn(
-                          "rounded-full px-4 py-2 text-[13px] font-semibold transition",
+                          "rounded-full px-3.5 py-2 text-[12px] font-semibold transition",
                           inboxMode === "top-impacto" ? "bg-white text-[#0F1728]" : "text-[#667085] hover:text-[#0F1728]",
                         )}
                       >
@@ -719,7 +521,7 @@ export function Dashboard() {
                     <button
                       onClick={refreshInboxNow}
                       disabled={isRefreshing}
-                      className="rounded-full bg-[#F7FAFC] px-4 py-2 text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]"
+                      className="rounded-full bg-[#F7FAFC] px-3.5 py-2 text-[12px] font-medium text-[#667085] transition hover:text-[#0F1728]"
                     >
                       {isRefreshing ? "Atualizando..." : "Atualizar agora"}
                     </button>
@@ -1050,7 +852,6 @@ export function Dashboard() {
                   "min-h-[210px] overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F3FAF8_100%)] p-6",
                 )}
               >
-                <div className="pointer-events-none absolute inset-x-6 top-0 h-16 rounded-b-[24px] bg-[linear-gradient(90deg,rgba(18,165,148,0.12),rgba(91,141,239,0.04),rgba(255,255,255,0))]" />
                 <p className="relative text-[12px] font-medium uppercase tracking-[0.08em] text-[#12A594]">{"Pr\u00f3xima leitura"}</p>
                 <h3 className="relative mt-2 max-w-[18ch] text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
                   {dashboardData?.sessionClosing.headline ??

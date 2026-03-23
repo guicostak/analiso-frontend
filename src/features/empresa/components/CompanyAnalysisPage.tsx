@@ -3171,8 +3171,8 @@ const changesCount = changesBySelectedWindow.length;
  }
  `}</style>
  <div className="relative flex h-full">
- <div className="w-[88px] flex-shrink-0 opacity-90">
- <Sidebar currentPage="explorar" />
+ <div className="hidden w-[240px] flex-shrink-0 xl:block">
+ <Sidebar currentPage="explorar" contextLabel="Explorar mercado" />
  </div>
 
  <aside
@@ -3244,7 +3244,7 @@ const changesCount = changesBySelectedWindow.length;
 
  {watchlistCollapsed && (
  <button
- className="absolute left-[88px] top-1/2 z-30 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB]"
+ className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB] xl:grid xl:left-[240px]"
  onClick={() => setWatchlistCollapsed(false)}
  aria-label="Expandir watchlist"
  title="Expandir watchlist"
