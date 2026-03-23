@@ -33,8 +33,8 @@ export function SecurityPage() {
       <section className="border-b border-[#EEF2F6] py-8">
         <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
           <div>
-            <h2 className="text-[17px] font-semibold text-[#171717]">Acesso a Salte</h2>
-            <p className="mt-2 text-[13px] text-[#8A8A8A]">Gerencie formas de acessar a Salte</p>
+            <h2 className="text-[17px] font-semibold text-[#171717]">Acesso à Analiso</h2>
+            <p className="mt-2 text-[13px] text-[#8A8A8A]">Gerencie formas de acessar a Analiso</p>
           </div>
 
           <div className="space-y-3">

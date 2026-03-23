@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowRight,
@@ -31,8 +31,8 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import logoImage from "@/src/assets/logos/logo.png";
-import { AssistantsShowcaseSection } from "./AssistantsShowcaseSection";
-import { ReadableCompanyHeroSection } from "./ReadableCompanyHeroSection";
+import { AnalysisFlowSection } from "./AnalysisFlowSection";
+import { ReadableCompanySection } from "./ReadableCompanySection";
 import { HeroDashboardMock } from "./HeroDashboardMock";
 
 const navItems = ["Início", "Atuação", "Solução", "Assistentes IA", "FAQ"] as const;
@@ -2962,7 +2962,7 @@ export function HeroMarqueeSection() {
   );
 }
 
-export function AudienceSection() {
+export function AnalysisMomentsSection() {
   return (
     <section
       id="atuacao"
@@ -3173,7 +3173,7 @@ export function CtaSection() {
   );
 }
 
-export function AnalisoLandingV2Sections() {
+export function LandingSections() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
@@ -3266,10 +3266,10 @@ export function AnalisoLandingV2Sections() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.04}>
-          <ReadableCompanyHeroSection />
+          <ReadableCompanySection />
         </ScrollReveal>
         <ScrollReveal delay={0.04}>
-          <AssistantsShowcaseSection />
+          <AnalysisFlowSection />
         </ScrollReveal>
 
         {false && <section id="allan" className="px-4 py-16 md:px-6 md:py-10">

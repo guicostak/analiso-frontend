@@ -171,7 +171,7 @@ const lensStates: LensState[] = [
   },
 ];
 
-export function ReadableCompanyHeroSection() {
+export function ReadableCompanySection() {
   const prefersReducedMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
 

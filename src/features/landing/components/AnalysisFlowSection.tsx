@@ -395,7 +395,7 @@ function FooterIcon({
   return <Clock3 className="h-[14px] w-[14px]" style={{ color }} />;
 }
 
-export function AssistantsShowcaseSection() {
+export function AnalysisFlowSection() {
   const [activeIndex, setActiveIndex] = useState(1);
   const [isHovered, setIsHovered] = useState(false);
   const shouldReduceMotion = useReducedMotion();

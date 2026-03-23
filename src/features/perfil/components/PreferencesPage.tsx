@@ -79,7 +79,7 @@ export function PreferencesPage() {
         <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
           <div>
             <h2 className="text-[17px] font-semibold text-[#171717]">Preferências do sistema</h2>
-            <p className="mt-2 text-[13px] text-[#8A8A8A]">Ajuste as preferências do sistema da Salte</p>
+            <p className="mt-2 text-[13px] text-[#8A8A8A]">Ajuste as preferências do sistema da Analiso</p>
           </div>
           <div />
         </div>
