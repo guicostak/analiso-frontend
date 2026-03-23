@@ -2583,18 +2583,8 @@ export function DarkCapabilities() {
 
 export function HeroSection() {
   const reducedMotion = useReducedMotion();
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const [heroQuery, setHeroQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setHeaderScrolled(window.scrollY > 24);
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const normalizedQuery = heroQuery.trim().toLowerCase();
   const filteredHeroResults =
@@ -2614,105 +2604,31 @@ export function HeroSection() {
   return (
     <section className="mt-2 px-5 max-sm:mt-0 max-sm:px-0">
       <div className="w-full overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#ffffff_0%,#f5fcfa_42%,#d8f3ed_100%)] max-sm:rounded-none">
-        <div className="hidden fixed left-0 right-0 top-0 z-[60] px-5 pt-2 max-sm:px-0">
-          <div className="mx-auto max-w-[1430px]">
-            <nav
-              className={`pointer-events-auto transition-all duration-300 ease-out ${
-                headerScrolled
-                  ? "translate-y-0 opacity-100 rounded-[20px] border border-primary-gray-50 bg-white py-4 pl-5 pr-4 shadow-[0_2px_21.9px_0_rgba(88,92,95,0.05)] max-md:w-full max-md:py-2.5 max-md:pl-4 max-md:pr-2.5"
-                  : "pointer-events-none invisible -translate-y-2 opacity-0"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-10">
-                <a href="/" className="flex shrink-0 items-center">
-                  <img
-                    src={logoImage.src}
-                    alt="Analiso"
-                    className="h-[25px] w-auto max-md:h-[20px]"
-                    draggable="false"
-                  />
-                </a>
-                <div className="flex items-center gap-0.5 max-md:hidden">
-                  <a href="/" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Início</a>
-                  <a href="#atuacao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Atuação</a>
-                  <a href="#solucao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Solução</a>
-                  <a href="#assistentes" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Assistentes IA</a>
-                  <a href="#faq" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">FAQ</a>
-                </div>
-                <a
-                  href="/login"
-                  className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
-                >
-                  <span>Entrar</span>
-                </a>
-              </div>
-            </nav>
+        <div className="mx-auto max-w-[1430px] relative flex items-center justify-between flex-wrap px-8 pt-8 max-md:px-4 max-md:pt-5">
+          <a href="/" className="order-1 flex shrink-0 items-center">
+            <img
+              src={logoImage.src}
+              alt="Analiso"
+              className="h-[25px] w-auto max-md:h-[20px]"
+              draggable="false"
+            />
+          </a>
+          <div className="absolute left-1/2 order-2 flex -translate-x-1/2 items-center gap-0.5 max-md:hidden">
+            <a href="/" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Início</a>
+            <a href="#atuacao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Atuação</a>
+            <a href="#solucao" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Solução</a>
+            <a href="#assistentes" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Assistentes IA</a>
+            <a href="#faq" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">FAQ</a>
           </div>
-        </div>
-        <div
-          className={`fixed left-0 right-0 top-0 z-50 px-5 pt-2 transition-all duration-300 ease-out max-sm:px-0 ${
-            headerScrolled ? "translate-y-0 opacity-100" : "translate-y-0 opacity-100"
-          }`}
-        >
-          <div className={`mx-auto max-w-[1430px] transition-all duration-300 ease-out ${
-            headerScrolled
-              ? "rounded-[20px] border border-primary-gray-50 bg-white py-4 pl-5 pr-4 max-md:w-full max-md:py-2.5 max-md:pl-4 max-md:pr-2.5 shadow-[0_2px_21.9px_0_rgba(88,92,95,0.05)]"
-              : "rounded-[20px] bg-white/82 px-8 pt-8 backdrop-blur-md max-md:px-4 max-md:pt-5 max-sm:rounded-none"
-          }`}>
-            <div className={`flex items-center justify-between gap-10 ${headerScrolled ? "" : "relative flex-wrap pb-4"}`}>
-            <a href="/" className={`${headerScrolled ? "flex" : "order-1 flex"} shrink-0 items-center`}>
-              <img
-                src={logoImage.src}
-                alt="Analiso"
-                className="h-[25px] w-auto max-md:h-[20px]"
-                draggable="false"
-              />
-            </a>
-
-            <div className={`${headerScrolled ? "flex" : "absolute left-1/2 order-2 flex -translate-x-1/2"} items-center gap-0.5 max-md:hidden`}>
-              <a
-                href="/"
-                className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700"
-              >
-                Início
-              </a>
-              <a
-                href="#atuacao"
-                className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700"
-              >
-                Atuação
-              </a>
-              <a
-                href="#solucao"
-                className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700"
-              >
-                Solução
-              </a>
-              <a
-                href="#assistentes"
-                className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700"
-              >
-                Assistentes IA
-              </a>
-              <a
-                href="#faq"
-                className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700"
-              >
-                FAQ
-              </a>
-            </div>
-
-            <a
-              href="/login"
-              className={`${headerScrolled ? "" : "order-3 "}flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]`}
-            >
-              Entrar
-            </a>
-            </div>
-          </div>
+          <a
+            href="/login"
+            className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
+          >
+            Entrar
+          </a>
         </div>
 
-        <div className="flex flex-col items-center px-8 pt-28 max-md:pt-24">
+        <div className="flex flex-col items-center px-8 pt-16 max-md:pt-12">
           <motion.h1
             className="w-[700px] text-center text-[56px] leading-[62px] tracking-[-1.12px] max-lg:w-full max-lg:max-w-[700px] max-lg:px-4 max-md:text-[40px] max-md:leading-[46px] max-md:tracking-[-0.8px] max-sm:px-2 max-sm:text-[32px] max-sm:leading-[38px] max-sm:tracking-[-0.64px]"
             style={{
@@ -2900,6 +2816,93 @@ export function HeroSection() {
         >
           <div className="mx-auto max-w-[1430px] relative">
             <HeroDashboard />
+
+            {/* Agent Card overlay */}
+            <div className="absolute right-[62px] top-[28px] h-[260px] w-[236px] max-xl:right-4 max-lg:hidden">
+              <div className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#e6efff] bg-white shadow-[0_18px_48px_rgba(15,23,40,0.12)]">
+                {/* Animated AI border ring */}
+                <div className="pointer-events-none absolute inset-0 rounded-[20px]">
+                  <svg className="absolute inset-0 h-full w-full" viewBox="0 0 236 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="234" height="258" rx="19" stroke="url(#agent-grad)" strokeWidth="1.5" />
+                    <defs>
+                      <linearGradient id="agent-grad" x1="0" y1="0" x2="236" y2="260" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#0e9384" stopOpacity="0.8" />
+                        <stop offset="0.4" stopColor="#7c3aed" stopOpacity="0.5" />
+                        <stop offset="1" stopColor="#0e9384" stopOpacity="0.1" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="flex h-full flex-col p-4">
+                  {/* Header */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]">
+                      <Sparkles className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-semibold text-[#171717]">Analise IA</div>
+                      <div className="text-[9px] text-[#9b9b9b]">WEGE3 — Weg S.A.</div>
+                    </div>
+                  </div>
+                  {/* Score */}
+                  <div className="mt-3 flex items-center gap-3">
+                    <span className="text-[36px] font-bold leading-none text-[#0e9384]">85</span>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[9px] text-[#aaa]">Score /100</span>
+                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-[#e2edf5]">
+                        <div className="h-full rounded-full bg-[#0e9384]" style={{ width: "85%" }} />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Tags */}
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    <span className="rounded-full border border-[#99f6e4] bg-[#f0fdfa] px-2 py-0.5 text-[9px] font-semibold text-[#0e9384]">Forte crescimento</span>
+                    <span className="rounded-full border border-[#e2edf5] bg-[#f6fafc] px-2 py-0.5 text-[9px] text-[#334155]">Baixo risco</span>
+                    <span className="rounded-full border border-[#e2edf5] bg-[#f6fafc] px-2 py-0.5 text-[9px] text-[#334155]">Margens estáveis</span>
+                  </div>
+                  {/* Mini chart */}
+                  <div className="mt-3 flex-1 overflow-hidden rounded-[12px] bg-[#f6fafc] p-2">
+                    <div className="mb-1 text-[9px] text-[#9b9b9b]">Score histórico — 12m</div>
+                    <svg viewBox="0 0 180 52" className="h-[52px] w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="ac-grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0e9384" stopOpacity="0.22" />
+                          <stop offset="100%" stopColor="#0e9384" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon points="0,42 18,38 36,34 54,28 72,24 90,18 108,14 126,10 144,7 162,4 180,2 180,52 0,52" fill="url(#ac-grad)" />
+                      <polyline points="0,42 18,38 36,34 54,28 72,24 90,18 108,14 126,10 144,7 162,4 180,2" stroke="#0e9384" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  {/* Summary text */}
+                  <p className="mt-2 text-[9.5px] leading-[14px] text-[#7a7a7a]">
+                    Weg apresenta expansão consistente de margens e geração de caixa acima da média setorial.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Voice / Insight Card overlay */}
+            <div className="absolute right-[62px] top-[297px] h-[62px] w-[236px] max-xl:right-4 max-lg:hidden">
+              <div className="flex h-full items-center gap-3 overflow-hidden rounded-[16px] border border-[#e6efff] bg-white px-4 shadow-[0_8px_24px_rgba(15,23,40,0.08)]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M4 3.5v7M10 3.5v7M1 6v2M13 6v2" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-semibold text-[#171717]">Novo resultado disponível</div>
+                  <div className="mt-0.5 truncate text-[9px] text-[#9b9b9b]">WEGE3 — 4T24 · Análise pronta</div>
+                </div>
+                <div className="flex items-end gap-[2px]">
+                  {[3, 5, 7, 4, 6, 8, 5, 7, 4, 6].map((h, i) => (
+                    <div
+                      key={i}
+                      className="w-[2px] rounded-full"
+                      style={{ height: `${h * 2}px`, backgroundColor: i === 6 ? "#0f9f8f" : `rgba(15,159,143,${0.2 + i * 0.07})` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
