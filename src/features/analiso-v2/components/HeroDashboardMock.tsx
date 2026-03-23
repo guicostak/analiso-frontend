@@ -712,7 +712,7 @@ export function HeroDashboardMock() {
       style={{ height: 420 }}
     >
       {/* Bottom fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[22%] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,#ffffff_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,#ffffff_100%)]" />
 
       {/* Scaled dashboard */}
       <div
