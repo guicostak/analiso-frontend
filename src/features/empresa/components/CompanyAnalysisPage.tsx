@@ -1751,13 +1751,13 @@ const pillarMapStatusTone: Record<PillarMapStatus, { stroke: string; fill: strin
  stroke: '#C78D21',
  fill: '#C78D21',
  label: 'Atenção',
- chip: 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]',
+ chip: 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]',
  },
  saudavel: {
  stroke: '#168E7D',
  fill: '#168E7D',
  label: 'Saudável',
- chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0F6F61]',
+ chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0E9384]',
  },
 };
 
@@ -1804,7 +1804,7 @@ function hexToRgba(hex: string, alpha: number) {
 
 function QueueLogo({ company }: { company: CompanyQueueItem }) {
  if (company.logo) {
- return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-[#E5E7EB] object-cover" />;
+ return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-[#E2EDF5] object-cover" />;
  }
  return (
  <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">
@@ -1820,7 +1820,7 @@ function PillarMapTooltip({ datum }: { datum: PillarMapDatum }) {
  const deltaText = hasDelta ? `${deltaArrow} ${Math.abs(datum.delta!)} vs trimestre anterior` : null;
 
  return (
- <div className="max-w-[240px] rounded-xl border border-[#E5E7EB] bg-white p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
+ <div className="max-w-[240px] rounded-xl border border-[#E2EDF5] bg-white p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
  <p className="text-[13px] font-semibold text-[#111827]">{datum.pillarLabel}</p>
  <p className="mt-1 text-[15px] font-semibold" style={{ color: '#1F2937' }}>{datum.score}/100 {tone.label}</p>
  {deltaText && <p className="mt-1 text-[12px] text-[#4B5563]">{deltaText}</p>}
@@ -1838,226 +1838,60 @@ function PillarMap({
  companyStatus: Status;
  onSelectPillar?: (pillar: PillarName) => void;
 }) {
- const tone = pillarMapStatusTone[mapStatusFromCompanyStatus(companyStatus)];
  const [activePillar, setActivePillar] = useState<PillarName | null>(null);
- const [tooltipAnchor, setTooltipAnchor] = useState<{ x: number; y: number } | null>(null);
- const [tooltipDatum, setTooltipDatum] = useState<PillarMapDatum | null>(null);
- const chartShellRef = useRef<HTMLDivElement | null>(null);
- const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
- const dotCoordsRef = useRef<Partial<Record<PillarName, { x: number; y: number }>>>({});
- const activeIndex = activePillar ? data.findIndex((entry) => entry.pillar === activePillar) : -1;
- const hasActivePillar = activeIndex >= 0;
 
- useEffect(() => {
- const element = chartShellRef.current;
- if (!element) return;
- const syncSize = () => setChartSize({ width: element.clientWidth, height: element.clientHeight });
- syncSize();
- const observer = new ResizeObserver(syncSize);
- observer.observe(element);
- return () => observer.disconnect();
- }, []);
-
- const focusPillar = (pillar: PillarName, anchor?: { x: number; y: number } | null) => {
- const datum = data.find((entry) => entry.pillar === pillar) ?? null;
- setActivePillar(pillar);
- setTooltipDatum(datum);
- setTooltipAnchor(anchor ?? dotCoordsRef.current[pillar] ?? null);
- };
-
- const clearPillarFocus = () => {
- setActivePillar(null);
- setTooltipDatum(null);
- setTooltipAnchor(null);
- };
-
- const centerX = chartSize.width / 2;
- const centerY = chartSize.height / 2;
- const outerRadius = Math.min(chartSize.width, chartSize.height) * 0.36;
- const sectorRadius = outerRadius * 1.02;
- const sectorBoundary = 360 / Math.max(data.length, 1);
- const polarToCartesian = (angleDeg: number, radius: number) => {
- const angleRad = (angleDeg * Math.PI) / 180;
- return {
- x: centerX + Math.cos(angleRad) * radius,
- y: centerY + Math.sin(angleRad) * radius,
- };
- };
-
- const sectorPath = (index: number) => {
- const axisAngle = -90 + index * sectorBoundary;
- const startAngle = axisAngle - sectorBoundary / 2;
- const endAngle = axisAngle + sectorBoundary / 2;
- const start = polarToCartesian(startAngle, sectorRadius);
- const end = polarToCartesian(endAngle, sectorRadius);
- return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${sectorRadius} ${sectorRadius} 0 0 1 ${end.x} ${end.y} Z`;
- };
  return (
- <div>
- <div className="text-center">
- <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-[#111827]">Mapa dos 5 pilares</h3>
- <p className="mt-1 text-[12px] text-[#667085]">Uma leitura rapida da saude estrutural da empresa.</p>
- </div>
- <div ref={chartShellRef} className="relative isolate mt-2 h-[245px] sm:h-[285px]">
- <div className="absolute inset-0 z-[15]">
- <ResponsiveContainer width="100%" height="100%">
- <RechartsRadarChart
- data={data}
- outerRadius="72%"
- >
- <PolarGrid gridType="polygon" radialLines={false} polarRadius={[20, 40]} stroke="#DCE2EA" strokeOpacity={0.22} />
- <PolarGrid gridType="polygon" radialLines={false} polarRadius={[60, 80]} stroke="#D6DEE8" strokeOpacity={0.38} />
- <PolarGrid gridType="polygon" radialLines={false} polarRadius={[100]} stroke="#CED8E4" strokeOpacity={0.6} />
- <PolarGrid gridType="polygon" polarRadius={[100]} stroke="#D3DBE5" strokeOpacity={0.38} />
- <PolarAngleAxis
- dataKey="pillarLabel"
- tick={({ payload, x, y, textAnchor }: any) => {
- const pillar = data.find((entry) => entry.pillarLabel === payload?.value)?.pillar;
- const isActive = pillar && pillar === activePillar;
- return (
- <text
- x={x}
- y={y}
- textAnchor={textAnchor}
- fill={isActive ? '#0F172A' : '#667085'}
- fontSize={13}
- fontWeight={isActive ? 700 : 600}
- className={pillar ? 'cursor-pointer' : undefined}
- onClick={() => {
- if (!pillar) return;
- setActivePillar(pillar);
- onSelectPillar?.(pillar);
- }}
- >
- {String(payload?.value ?? '').toUpperCase()}
- </text>
- );
- }}
- />
- <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
- <Radar
- dataKey="score"
- stroke={tone.stroke}
- fill="none"
- strokeWidth={5}
- strokeOpacity={hasActivePillar ? 0.2 : 0.26}
- isAnimationActive
- animationDuration={380}
- animationEasing="ease-out"
- />
- <Radar
- dataKey="score"
- stroke={tone.stroke}
- fill={tone.fill}
- strokeWidth={activePillar ? 3.6 : 3.2}
- fillOpacity={hasActivePillar ? 0.72 : 0.66}
- isAnimationActive
- animationDuration={360}
- animationEasing="ease-out"
- dot={(dotProps: any) => {
- const pillar = dotProps?.payload?.pillar as PillarName | undefined;
- if (!pillar) return null;
- const isActiveDot = pillar === activePillar;
- if (typeof dotProps.cx === 'number' && typeof dotProps.cy === 'number') {
- dotCoordsRef.current[pillar] = { x: dotProps.cx, y: dotProps.cy };
- }
- return (
- <circle
- cx={dotProps.cx}
- cy={dotProps.cy}
- r={isActiveDot ? 5.6 : 4.2}
- fill={tone.stroke}
- stroke={tone.stroke}
- strokeWidth={isActiveDot ? 2.6 : 1.8}
- style={{ transition: 'all 180ms ease-out', opacity: hasActivePillar && !isActiveDot ? 0.45 : 1 }}
- onMouseEnter={() => {
- focusPillar(pillar);
- if (typeof dotProps.cx === 'number' && typeof dotProps.cy === 'number') {
- setTooltipAnchor({ x: dotProps.cx, y: dotProps.cy });
- }
- }}
- onMouseLeave={clearPillarFocus}
- />
- );
- }}
- onClick={(state: unknown) => {
- const payloadData = state && typeof state === 'object' && 'payload' in state ? state.payload : null;
- const pillar = payloadData && typeof payloadData === 'object' && 'pillar' in payloadData ? (payloadData.pillar as PillarName) : null;
- if (pillar) {
- setActivePillar(pillar);
- onSelectPillar?.(pillar);
- }
- }}
- />
- </RechartsRadarChart>
- </ResponsiveContainer>
- </div>
- {chartSize.width > 0 && chartSize.height > 0 && (
- <svg
- className="absolute inset-0 z-20"
- viewBox={`0 0 ${chartSize.width} ${chartSize.height}`}
- onMouseLeave={clearPillarFocus}
- >
- {data.map((entry, index) => {
- const isActiveSector = activePillar === entry.pillar;
- const axisAngle = -90 + index * sectorBoundary;
- const anchor = polarToCartesian(axisAngle, outerRadius * 0.82);
- return (
- <path
- key={`sector-${entry.pillar}`}
- d={sectorPath(index)}
- fill={
- hasActivePillar
- ? (isActiveSector ? hexToRgba(tone.stroke, 0.24) : 'rgba(0,0,0,0.28)')
- : 'rgba(0,0,0,0)'
- }
- stroke={isActiveSector ? hexToRgba(tone.stroke, 0.45) : 'rgba(0,0,0,0)'}
- strokeWidth={isActiveSector ? 1.4 : 1}
- style={{ transition: 'fill 180ms ease-out, stroke 180ms ease-out' }}
- onMouseEnter={() => focusPillar(entry.pillar, anchor)}
- onClick={() => onSelectPillar?.(entry.pillar)}
- />
- );
+ <div className="space-y-1.5">
+ {data.map((entry) => {
+  const tone = pillarMapStatusTone[entry.status];
+  const isActive = activePillar === entry.pillar;
+  const hasDelta = typeof entry.delta === 'number' && Number.isFinite(entry.delta);
+  const deltaPositive = hasDelta && entry.delta! > 0;
+  const deltaNegative = hasDelta && entry.delta! < 0;
+  return (
+  <button
+   key={entry.pillar}
+   onClick={() => onSelectPillar?.(entry.pillar)}
+   onMouseEnter={() => setActivePillar(entry.pillar)}
+   onMouseLeave={() => setActivePillar(null)}
+   className={cx(
+   'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150',
+   isActive ? 'ring-1 ring-[#C8EDE6]' : '',
+   )}
+   style={{ background: isActive ? '#F4FBFA' : 'transparent' }}
+  >
+   <div
+   className="h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center"
+   style={{ backgroundColor: `${tone.stroke}1A` }}
+   >
+   <span className="text-[13px] font-bold tabular-nums" style={{ color: tone.stroke }}>
+    {entry.score}
+   </span>
+   </div>
+   <div className="flex-1 min-w-0">
+   <div className="flex items-center justify-between gap-2 mb-1.5">
+    <span className="text-[12px] font-semibold text-[#1F2937]">{entry.pillarLabel}</span>
+    <div className="flex items-center gap-1.5">
+    {hasDelta && (
+     <span className={cx('text-[10px] font-medium tabular-nums', deltaPositive ? 'text-[#0E9384]' : deltaNegative ? 'text-[#DC2626]' : 'text-[#9CA3AF]')}>
+     {deltaPositive ? '+' : ''}{entry.delta!.toFixed(0)}
+     </span>
+    )}
+    <span className={cx('rounded-full border px-1.5 py-0.5 text-[9px] font-semibold tracking-[0.04em]', tone.chip)}>
+     {tone.label.toUpperCase()}
+    </span>
+    </div>
+   </div>
+   <div className="h-1 w-full rounded-full bg-[#EEF2F6] overflow-hidden">
+    <div
+    className="h-full rounded-full transition-all duration-500"
+    style={{ width: `${entry.score}%`, backgroundColor: tone.stroke, opacity: isActive ? 1 : 0.6 }}
+    />
+   </div>
+   </div>
+  </button>
+  );
  })}
- </svg>
- )}
- {tooltipDatum && tooltipAnchor && (
- <div
- className="pointer-events-none absolute z-30"
- style={{
- left: tooltipAnchor.x,
- top: tooltipAnchor.y,
- transform: 'translate(12px, -50%)',
- }}
- >
- <PillarMapTooltip datum={tooltipDatum} />
- </div>
- )}
- </div>
- <div className="mt-1.5 flex flex-wrap justify-center gap-2">
- {data.map((entry) => (
- <button
- key={entry.pillar}
- onClick={() => onSelectPillar?.(entry.pillar)}
- onMouseEnter={() => focusPillar(entry.pillar)}
- onMouseLeave={clearPillarFocus}
- className={cx(
- 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-200',
- pillarMapStatusTone[entry.status].chip,
- activePillar === entry.pillar ? 'scale-[1.03] shadow-[0_8px_16px_-14px_rgba(2,6,23,0.9)] ring-1 ring-[#D1D5DB]' : ''
- )}
- aria-pressed={activePillar === entry.pillar}
- >
- <span className={cx('h-1.5 w-1.5 rounded-full transition-all duration-200', activePillar === entry.pillar ? 'scale-125' : '')} style={{ backgroundColor: pillarMapStatusTone[entry.status].stroke }} />
- {entry.pillarLabel} {entry.score}
- </button>
- ))}
- </div>
- {activeIndex >= 0 && (
- <p className="mt-2 text-center text-[11px] text-[#667085]">
- Foco atual: <span className="font-semibold text-[#344054]">{data[activeIndex].pillarLabel}</span> ({data[activeIndex].score}/100)
- </p>
- )}
  </div>
  );
 }
@@ -2080,89 +1914,102 @@ function MiniLineChart({
  referenceLabel?: string;
 }) {
  const width = 620;
- const height = 54;
- const padding = 10;
+ const height = 72;
+ const paddingX = 8;
+ const paddingTop = 8;
+ const paddingBottom = 14;
+ const chartH = height - paddingTop - paddingBottom;
  const min = Math.min(...values);
  const max = Math.max(...values);
  const span = max - min || 1;
+ const strokeColor = tone === 'teal' ? '#0E9384' : '#D97706';
+ const fillColor = tone === 'teal' ? '#0E938420' : '#D9770618';
+ const refLineColor = tone === 'teal' ? '#0E9384' : '#D97706';
 
- const points = values
- .map((value, index) => {
- const x = padding + (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
- const y = height - padding - ((value - min) / span) * (height - padding * 2);
- return `${x},${y}`;
- })
- .join(' ');
+ const toX = (index: number) => paddingX + (index * (width - paddingX * 2)) / Math.max(values.length - 1, 1);
+ const toY = (value: number) => paddingTop + chartH - ((value - min) / span) * chartH;
 
- const markerX =
- variant === 'line' &&
- highlightIndex !== undefined
- ? padding + (Math.max(Math.min(highlightIndex, Math.max(values.length - 1, 0)), 0) * (width - padding * 2)) / Math.max(values.length - 1, 1)
+ const points = values.map((value, index) => `${toX(index)},${toY(value)}`).join(' ');
+ const areaPoints = [
+ `${toX(0)},${height - paddingBottom}`,
+ ...values.map((value, index) => `${toX(index)},${toY(value)}`),
+ `${toX(values.length - 1)},${height - paddingBottom}`,
+ ].join(' ');
+
+ const markerX = highlightIndex !== undefined && variant === 'line'
+ ? toX(Math.max(Math.min(highlightIndex, values.length - 1), 0))
  : null;
- const markerY =
- variant === 'line' &&
- highlightIndex !== undefined && values[highlightIndex] !== undefined
- ? height - padding - ((values[highlightIndex] - min) / span) * (height - padding * 2)
+ const markerY = highlightIndex !== undefined && values[highlightIndex] !== undefined && variant === 'line'
+ ? toY(values[highlightIndex])
  : null;
+
  const hasReference = variant === 'line' && typeof referenceValue === 'number' && Number.isFinite(referenceValue);
- const refY = hasReference ? height - padding - (((referenceValue as number) - min) / span) * (height - padding * 2) : null;
- const safeRefY = refY === null ? null : Math.max(padding, Math.min(height - padding, refY));
+ const refYRaw = hasReference ? toY(referenceValue as number) : null;
+ const safeRefY = refYRaw === null ? null : Math.max(paddingTop + 2, Math.min(height - paddingBottom - 2, refYRaw));
  const latestValue = values[Math.max(values.length - 1, 0)];
  const isAboveReference = hasReference && typeof latestValue === 'number' ? latestValue >= (referenceValue as number) : null;
 
  return (
- <div className="space-y-1.5">
+ <div className="space-y-1">
  <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
- <line x1="0" y1="42" x2={width} y2="42" stroke="#D1D5DB" strokeWidth="1" strokeDasharray="4 4" />
- {safeRefY !== null && (
- <>
- <line x1={padding} y1={safeRefY} x2={width - padding} y2={safeRefY} stroke="#64748B" strokeWidth="1.4" strokeDasharray="2 2" />
- {referenceLabel && (
- <text x={width - padding} y={Math.max(safeRefY - 3, 9)} textAnchor="end" fill="#475569" fontSize="10" fontWeight={600}>
- {referenceLabel}
- </text>
- )}
- </>
- )}
- {variant === 'bar' ? (
- values.map((value, index) => {
- const barWidth = (width - padding * 2) / Math.max(values.length, 1) - 6;
- const x = padding + index * ((width - padding * 2) / Math.max(values.length, 1)) + 3;
- const y = height - padding - ((value - min) / span) * (height - padding * 2);
- const barHeight = Math.max(height - padding - y, 2);
- return (
- <rect
- key={`bar-${labels[index] ?? index}`}
- x={x}
- y={y}
- width={Math.max(barWidth, 2)}
- height={barHeight}
- rx={3}
- fill={tone === 'teal' ? '#99F6E4' : '#FDE68A'}
- />
- );
- })
- ) : (
- <polyline points={points} fill="none" stroke={tone === 'teal' ? '#0E9384' : '#D97706'} strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
- )}
- {markerX !== null && markerY !== null && (
- <>
- <circle cx={markerX} cy={markerY} r="4.5" fill="#0E9384" stroke="white" strokeWidth="1.5" />
- <text x={Math.min(markerX + 8, width - 24)} y={Math.max(markerY - 7, 10)} fill="#0F766E" fontSize="9" fontWeight={600}>
- Hoje
- </text>
- </>
- )}
+  {/* Area fill */}
+  {variant === 'line' && (
+  <polygon points={areaPoints} fill={fillColor} />
+  )}
+  {/* Reference zone: shade between ref and bottom */}
+  {safeRefY !== null && (
+  <rect x={paddingX} y={safeRefY} width={width - paddingX * 2} height={height - paddingBottom - safeRefY} fill={refLineColor} fillOpacity={0.05} />
+  )}
+  {/* Reference dashed line */}
+  {safeRefY !== null && (
+  <>
+  <line x1={paddingX} y1={safeRefY} x2={width - paddingX} y2={safeRefY} stroke={refLineColor} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity={0.5} />
+  {referenceLabel && (
+   <text x={paddingX + 4} y={safeRefY - 3} fill={refLineColor} fontSize="9" fontWeight={600} fillOpacity={0.7}>
+   {referenceLabel}
+   </text>
+  )}
+  </>
+  )}
+  {/* Bar variant */}
+  {variant === 'bar' && values.map((value, index) => {
+  const barW = (width - paddingX * 2) / Math.max(values.length, 1) - 5;
+  const bx = paddingX + index * ((width - paddingX * 2) / Math.max(values.length, 1)) + 2.5;
+  const by = toY(value);
+  const bh = Math.max(height - paddingBottom - by, 2);
+  return (
+   <rect key={`bar-${labels[index] ?? index}`} x={bx} y={by} width={Math.max(barW, 2)} height={bh} rx={3} fill={strokeColor} fillOpacity={0.35} />
+  );
+  })}
+  {/* Line */}
+  {variant === 'line' && (
+  <polyline points={points} fill="none" stroke={strokeColor} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" />
+  )}
+  {/* Data point dots */}
+  {variant === 'line' && values.map((value, index) => {
+  const isLast = index === values.length - 1;
+  const isHighlight = index === highlightIndex;
+  if (!isLast && !isHighlight) return null;
+  return (
+   <circle key={`dot-${index}`} cx={toX(index)} cy={toY(value)} r={isLast ? 5 : 3.5} fill={strokeColor} stroke="white" strokeWidth={isLast ? 2 : 1.5} />
+  );
+  })}
+  {/* Latest value label */}
+  {markerX !== null && markerY !== null && (
+  <text x={Math.min(markerX + 8, width - 40)} y={Math.max(markerY - 8, paddingTop + 8)} fill={strokeColor} fontSize="10" fontWeight={700}>
+   {values[highlightIndex!] !== undefined ? String(values[highlightIndex!]) : ''}
+  </text>
+  )}
  </svg>
  {isAboveReference !== null && (
- <p className={cx('text-[10px]', isAboveReference ? 'text-[#0F766E]' : 'text-[#9A3412]')}>
- {isAboveReference ? 'Acima da refer\u00EAncia hist\u00F3rica' : 'Abaixo da refer\u00EAncia hist\u00F3rica, sob press\u00E3o'}
- </p>
+  <p className={cx('text-[10px] font-medium', isAboveReference ? 'text-[#0E9384]' : 'text-[#B45309]')}>
+  {isAboveReference ? '↑ Acima da referência histórica' : '↓ Abaixo da referência histórica'}
+  </p>
  )}
- <div className="flex items-center justify-between text-[10px] text-[#9CA3AF]">
- {labels.map((label) => (
- <span key={label}>{label}</span>
- ))}
+ <div className="flex items-center justify-between text-[10px] text-[#B0BAC8]">
+  {labels.map((label) => (
+  <span key={label}>{label}</span>
+  ))}
  </div>
  </div>
  );
@@ -2394,7 +2241,7 @@ function median(values: number[]) {
 }
 
 function SkeletonBlock({ className }: { className: string }) {
- return <div className={cx('rounded-md bg-[#F3F4F6] skeleton-shimmer', className)} />;
+ return <div className={cx('rounded-md bg-[#F6FAFC] skeleton-shimmer', className)} />;
 }
 
 export function CompanyAnalysis() {
@@ -2576,12 +2423,12 @@ export function CompanyAnalysis() {
  const valuationStateChipLabel = safeMeta(activeData?.priceData.valuationStateChip?.label);
  const valuationStateChipToneRaw = safeMeta(activeData?.priceData.valuationStateChip?.tone).toLowerCase();
  const valuationStateChipTone = valuationStateChipToneRaw.includes('coral')
- ? 'border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]'
+ ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]'
  : valuationStateChipToneRaw.includes('amber')
- ? 'border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]'
+ ? 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]'
  : valuationStateChipToneRaw.includes('teal')
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0F766E]'
- : 'border-[#DDE3EA] bg-[#F8FAFC] text-[#475569]';
+ : 'border-[#E2EDF5] bg-[#F8FAFC] text-[#475569]';
 const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
 const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
 const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
@@ -2649,7 +2496,7 @@ const valuationBullet = activeData?.priceData.bulletChart ?? null;
  ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
  : sourceConfidenceLabel === 'Moderada'
  ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]'
- : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]';
+ : 'border-[#E2EDF5] bg-[#F6FAFC] text-[#64748B]';
  const sourceConfidenceSummary = outdatedPrimarySources > 0
  ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnóstico.`
  : `A leitura atual está apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Há ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Não há alerta de desatualização relevante no conjunto principal.'}`;
@@ -2994,99 +2841,107 @@ const changesCount = changesBySelectedWindow.length;
  };
 
  const renderChangeCard = (change: (typeof enrichedChanges)[number], nested = false) => (
- <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-xl border bg-white p-4', nested ? 'border-[#E5E7EB]' : 'border-[#DDE3EA]')}>
-  <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#5B6472]">
-  <span className="rounded-full border border-[#DDE3EA] bg-[#F8FAFC] px-2 py-0.5">{change.pillar}</span>
-  <span>|</span>
-  <span>{change.date}</span>
-  <span>|</span>
-  <span className={cx('rounded-full px-2 py-0.5', change.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : change.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
-   {change.severityLabel}
-  </span>
-  </p>
-  <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{change.title}</h3>
-  <p className="mt-2 text-[13px] text-[#374151]">{change.interpretation}</p>
-  <p className="mt-2 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Por que isso importa:</p>
-  <p className="text-[13px] text-[#475569]">{change.whyItMatters}</p>
-  <p className="mt-3 text-[11px] text-[#8B95A5]">
-   Fonte: {safeMeta(change.source.docLabel)} | Atualizado em {safeMeta(change.date)} | Status: Atualizado
-  </p>
-  <div className="mt-3 flex flex-wrap items-center gap-2">
-   <button
-   className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-   disabled={actionsDisabled}
-   onClick={(event) => {
-    if (guardAction(event, change.companyId)) return;
-    if (change.pillar !== 'A classificar') goToPillar(change.pillar);
-   }}
-   >
-   Ver impacto no pilar
-   </button>
-   <a
-   href={change.source.url}
-   target="_blank"
-   rel="noreferrer"
-   onClick={(event) => {
-    if (guardAction(event, change.companyId)) return;
-   }}
-   className={cx('inline-flex items-center gap-1 rounded-md border border-[#DDE3EA] px-3 py-1.5 text-[12px] text-[#5B6472]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-   >
-   Abrir documento original
-   <ExternalLink className="h-3.5 w-3.5" />
-   </a>
+ <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
+  <div className="p-4">
+   <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{change.pillar}</span>
+    <span className="text-[#D1D5DB]">·</span>
+    <span className="text-[#94A3B8]">{change.date}</span>
+    <span className="text-[#D1D5DB]">·</span>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : change.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+     {change.severityLabel}
+    </span>
+   </div>
+   <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{change.title}</h3>
+   <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{change.interpretation}</p>
+   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
+    <p className="mt-1 text-[13px] text-[#475569]">{change.whyItMatters}</p>
+   </div>
+   <p className="mt-3 text-[11px] text-[#B0BAC8]">
+    Fonte: {safeMeta(change.source.docLabel)} · {safeMeta(change.date)} · Atualizado
+   </p>
+   <div className="mt-3 flex flex-wrap items-center gap-2">
+    <button
+     className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     disabled={actionsDisabled}
+     onClick={(event) => {
+      if (guardAction(event, change.companyId)) return;
+      if (change.pillar !== 'A classificar') goToPillar(change.pillar);
+     }}
+    >
+     Ver impacto no pilar
+    </button>
+    <a
+     href={change.source.url}
+     target="_blank"
+     rel="noreferrer"
+     onClick={(event) => {
+      if (guardAction(event, change.companyId)) return;
+     }}
+     className={cx('inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+    >
+     Abrir documento original
+     <ExternalLink className="h-3.5 w-3.5" />
+    </a>
+   </div>
   </div>
  </article>
  );
 
  const renderAgendaEventCard = (timelineEvent: (typeof enrichedTimelineEvents)[number], nested = false) => (
- <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-xl border bg-white p-4', nested ? 'border-[#E5E7EB]' : 'border-[#DDE3EA]')}>
-  <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#5B6472]">
-  <span className="rounded-full border border-[#DDE3EA] bg-[#F8FAFC] px-2 py-0.5">{timelineEvent.mainPillar}</span>
-  <span>|</span>
-  <span>{timelineEvent.date}</span>
-  <span>|</span>
-  <span className={cx('rounded-full px-2 py-0.5', timelineEvent.level === 'Estrutural' ? 'border border-[#F6C9BF] bg-[#FFF4F1] text-[#B54834]' : timelineEvent.level === 'Relevante' ? 'border border-[#F6DEA9] bg-[#FFF9ED] text-[#9A6A0F]' : 'border border-[#CFEAE4] bg-[#F2FCF9] text-[#0F6F61]')}>
-   {timelineEvent.severityLabel}
-  </span>
-  </p>
-  <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{timelineEvent.title}</h3>
-  <p className="mt-2 text-[13px] text-[#374151]">{timelineEvent.interpretation}</p>
-  <p className="mt-2 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Por que isso importa:</p>
-  <p className="text-[13px] text-[#475569]">{timelineEvent.whyItMatters}</p>
-  <p className="mt-3 text-[11px] text-[#8B95A5]">
-   Fonte: {safeMeta(timelineEvent.source)} | Atualizado em {safeMeta(timelineEvent.date)} | Status: Monitorado
-  </p>
-  <div className="mt-3 flex flex-wrap items-center gap-2">
-   <button
-   className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-   disabled={actionsDisabled}
-   onClick={(event) => {
-    if (guardAction(event, timelineEvent.companyId)) return;
-    if (timelineEvent.mainPillar !== 'A classificar') goToPillar(timelineEvent.mainPillar);
-   }}
+ <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
+  <div className="p-4">
+   <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{timelineEvent.mainPillar}</span>
+    <span className="text-[#D1D5DB]">·</span>
+    <span className="text-[#94A3B8]">{timelineEvent.date}</span>
+    <span className="text-[#D1D5DB]">·</span>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : timelineEvent.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+     {timelineEvent.severityLabel}
+    </span>
+   </div>
+   <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{timelineEvent.title}</h3>
+   <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{timelineEvent.interpretation}</p>
+   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
+    <p className="mt-1 text-[13px] text-[#475569]">{timelineEvent.whyItMatters}</p>
+   </div>
+   <p className="mt-3 text-[11px] text-[#B0BAC8]">
+    Fonte: {safeMeta(timelineEvent.source)} · {safeMeta(timelineEvent.date)} · Monitorado
+   </p>
+   <div className="mt-3 flex flex-wrap items-center gap-2">
+    <button
+     className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     disabled={actionsDisabled}
+     onClick={(event) => {
+      if (guardAction(event, timelineEvent.companyId)) return;
+      if (timelineEvent.mainPillar !== 'A classificar') goToPillar(timelineEvent.mainPillar);
+     }}
+    >
+     Ver impacto no pilar
+    </button>
+    <button
+     className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3 py-1.5 text-[12px] font-medium text-[#374151] hover:bg-[#F6FAFC]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     disabled={actionsDisabled}
+     onClick={(event) => guardAction(event, timelineEvent.companyId)}
+    >
+     Me lembrar desse gatilho
+    </button>
+   </div>
+   <a
+    href={timelineEvent.sourceUrl}
+    target="_blank"
+    rel="noreferrer"
+    onClick={(event) => {
+     if (guardAction(event, timelineEvent.companyId)) return;
+    }}
+    className={cx('mt-3 inline-flex items-center gap-1 text-[12px] text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
    >
-   Ver impacto no pilar
-   </button>
-   <button
-   className={cx('rounded-md border border-[#DDE3EA] bg-white px-3 py-1.5 text-[12px] font-medium text-[#374151]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-   disabled={actionsDisabled}
-   onClick={(event) => guardAction(event, timelineEvent.companyId)}
-   >
-   Me lembrar desse gatilho
-   </button>
+    Abrir documento original
+    <ExternalLink className="h-3.5 w-3.5" />
+   </a>
   </div>
-  <a
-  href={timelineEvent.sourceUrl}
-  target="_blank"
-  rel="noreferrer"
-  onClick={(event) => {
-   if (guardAction(event, timelineEvent.companyId)) return;
-  }}
-  className={cx('mt-2 inline-flex items-center gap-1 text-[12px] text-[#5B6472] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-  >
-  Abrir documento original
-  <ExternalLink className="h-3.5 w-3.5" />
-  </a>
  </article>
  );
 
@@ -3158,10 +3013,10 @@ const changesCount = changesBySelectedWindow.length;
  }, [activeTab, changesWindow, companyContext.companyId, eventsWindow, expandedPillars]);
 
  return (
- <div className="h-screen overflow-hidden bg-[#F7F8FA] font-['Plus_Jakarta_Sans','DM_Sans',system-ui,sans-serif] text-[#111827]">
+ <div className="h-screen overflow-hidden bg-[#F6FAFC] font-['Plus_Jakarta_Sans','DM_Sans',system-ui,sans-serif] text-[#111827]">
  <style>{`
  .skeleton-shimmer {
- background-image: linear-gradient(90deg, #F3F4F6 0%, #E5E7EB 40%, #F3F4F6 80%);
+ background-image: linear-gradient(90deg, #EEF2F6 0%, #E4EBF2 40%, #EEF2F6 80%);
  background-size: 200% 100%;
  animation: shimmer 1.5s linear infinite;
  }
@@ -3171,19 +3026,19 @@ const changesCount = changesBySelectedWindow.length;
  }
  `}</style>
  <div className="relative flex h-full">
- <div className="w-[88px] flex-shrink-0 opacity-90">
- <Sidebar currentPage="explorar" />
+ <div className="hidden w-[240px] flex-shrink-0 xl:block">
+ <Sidebar currentPage="explorar" contextLabel="Explorar mercado" />
  </div>
 
  <aside
  className={cx(
  'relative h-full flex-shrink-0 overflow-hidden bg-[#FCFDFC] transition-all duration-200',
- watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-[#F3F4F6] p-3.5'
+ watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-[#E2EDF5] p-3.5'
  )}
  >
  {!watchlistCollapsed && (
  <button
- className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB]"
+ className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC]"
  onClick={() => setWatchlistCollapsed(true)}
  aria-label="Retrair watchlist"
  title="Retrair watchlist"
@@ -3207,7 +3062,7 @@ const changesCount = changesBySelectedWindow.length;
  onClick={() => setQueueFilter(filter)}
  className={cx(
  'h-7 rounded-full px-3.5 text-[13px]',
- queueFilter === filter ? 'border border-[#E5E7EB] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
+ queueFilter === filter ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
  )}
  >
  {filter === 'Atencao' ? 'Atenção' : filter}
@@ -3244,7 +3099,7 @@ const changesCount = changesBySelectedWindow.length;
 
  {watchlistCollapsed && (
  <button
- className="absolute left-[88px] top-1/2 z-30 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F9FAFB]"
+ className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC] xl:grid xl:left-[240px]"
  onClick={() => setWatchlistCollapsed(false)}
  aria-label="Expandir watchlist"
  title="Expandir watchlist"
@@ -3253,37 +3108,40 @@ const changesCount = changesBySelectedWindow.length;
  </button>
  )}
 
- <main className="h-full flex-1 overflow-y-auto bg-[#F7F8FA]">
- <header className="sticky top-0 z-10 border-b border-[#EFEFEF] bg-white px-6 py-3">
+ <main className="h-full flex-1 overflow-y-auto bg-[#F6FAFC]">
+ <header className="sticky top-0 z-10 border-b border-[#EAF0F6] bg-white shadow-[0_1px_6px_-2px_rgba(2,6,23,0.05)]">
+ {/* Hero strip */}
+ <div className="px-6 pt-4 pb-3" style={{ background: 'linear-gradient(160deg, #F8FBFF 0%, #FFFFFF 60%)' }}>
  <div className="flex min-w-0 items-start justify-between gap-4">
- <div className="flex min-w-0 items-start gap-4">
+ <div className="flex min-w-0 items-start gap-3.5">
  <QueueLogo company={activeCompany} />
  <div className="min-w-0">
- <div className="flex flex-wrap items-center gap-2">
- <h1 className="text-[30px] font-bold leading-none text-[#0B1220]">{activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}</h1>
- <span className="rounded-full border border-[#D1D5DB] px-2.5 py-1 text-[13px] font-medium text-[#374151]">{activeCompany.ticker}</span>
- <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', statusTone[companyStatus].badge)}>
- {statusLabel(companyStatus)} - {scoreAverage}/100
+ <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{activeCompany.ticker}</p>
+ <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[#0B1220]">
+ {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
+ </h1>
+ <p className="mt-0.5 max-w-[480px] truncate text-[12px] text-[#8494A9]">{activeCompany.description}</p>
+ <div className="mt-2.5 flex flex-wrap items-center gap-2">
+ <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', statusTone[companyStatus].badge)}>
+ {statusLabel(companyStatus)} · {scoreAverage}/100
  </span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[11px] font-medium text-[#6B7280]">
- Preço atual: {safeMeta(activeData?.priceData.current)} <span className="text-[#9CA3AF]">+0,8%</span>
+ {safeMeta(activeData?.priceData.current) && (
+ <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[11px] font-medium text-[#374151]">
+ {safeMeta(activeData?.priceData.current)}
  </span>
- </div>
- <p className="mt-1 truncate text-[13px] text-[#6B7280]">{activeCompany.description}</p>
- <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px] text-[#6B7280]">
- <span>Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
- <span>Setor: Industria | Bens de capital</span>
- <span title="Ver fontes na aba Fontes">Fontes: CVM, B3 e RI</span>
+ )}
+ <span className="text-[11px] text-[#A0AEC0]">Indústria · Bens de capital</span>
  <div className="relative">
- <button className="text-[12px] text-[#6B7280] hover:text-[#374151] hover:underline" onClick={() => setShowHeaderUpdateDetails((prev) => !prev)}>
- Ver detalhes da atualização
+ <button className="text-[11px] text-[#A0AEC0] hover:text-[#374151] transition-colors" onClick={() => setShowHeaderUpdateDetails((prev) => !prev)}>
+ Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}
  </button>
  {showHeaderUpdateDetails && (
- <div className="absolute left-0 top-6 z-30 min-w-[220px] rounded-lg border border-[#E5E7EB] bg-white p-3 text-[12px] text-[#4B5563] shadow-lg">
- <p>Financeiro: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p>Eventos: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p>Preço: {safeMeta(activeData?.priceData.updatedAt)}</p>
- <p>Fontes: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <div className="absolute left-0 top-6 z-30 min-w-[220px] rounded-xl border border-[#E5EEF6] bg-white p-3.5 text-[12px] text-[#4B5563] shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
+ <p className="font-semibold text-[#111827] mb-1.5">Detalhes da atualização</p>
+ <p className="text-[#6B7280]">Financeiro: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <p className="text-[#6B7280]">Eventos: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <p className="text-[#6B7280]">Preço: {safeMeta(activeData?.priceData.updatedAt)}</p>
+ <p className="text-[#6B7280]">Fontes: CVM, B3 e RI</p>
  </div>
  )}
  </div>
@@ -3293,51 +3151,55 @@ const changesCount = changesBySelectedWindow.length;
 
  <div className="relative flex flex-wrap items-center gap-2">
  <button
- className={cx('inline-flex items-center gap-1.5 rounded-lg border border-[#0E9384] bg-[#E9F8F5] px-3.5 py-2 text-[13px] font-semibold text-[#0E9384]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+ className={cx('inline-flex items-center gap-1.5 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[12px] font-semibold text-white transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:opacity-90')}
  disabled={actionsDisabled}
  onClick={(event) => guardAction(event)}
  >
- <Check className="h-4 w-4" />
+ <Check className="h-3.5 w-3.5" />
  Na Watchlist
  </button>
- <button className={cx('rounded-lg border border-[#D1D5DB] bg-white px-3.5 py-2 text-[13px] font-medium text-[#1F2937]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
- <button className={cx('rounded-lg border border-[#E5E7EB] bg-white px-3.5 py-2 text-[13px] text-[#4B5563]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
+ <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] font-medium text-[#374151] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
+ <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
  <button
- className={cx('grid h-9 w-9 place-items-center rounded-full border border-[#D1D5DB] text-[#374151]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+ className={cx('grid h-9 w-9 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')}
  disabled={actionsDisabled}
  onClick={() => setShowHeaderMenu((prev) => !prev)}
  >
- <MoreHorizontal className="h-[18px] w-[18px]" />
+ <MoreHorizontal className="h-4 w-4" />
  </button>
  {showHeaderMenu && (
- <div className="absolute right-0 top-11 z-30 w-40 rounded-lg border border-[#E5E7EB] bg-white p-1.5 shadow-lg">
- <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-[#374151] hover:bg-[#F9FAFB]" onClick={(event) => guardAction(event)}>
- <Bell className="h-4 w-4" />
+ <div className="absolute right-0 top-11 z-30 w-44 rounded-xl border border-[#E5EEF6] bg-white p-1.5 shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
+ <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-[#374151] hover:bg-[#F6FAFC]" onClick={(event) => guardAction(event)}>
+ <Bell className="h-3.5 w-3.5 text-[#8494A9]" />
  Notificações
  </button>
- <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-[#374151] hover:bg-[#F9FAFB]" onClick={(event) => guardAction(event)}>
- <Share2 className="h-4 w-4" />
+ <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-[#374151] hover:bg-[#F6FAFC]" onClick={(event) => guardAction(event)}>
+ <Share2 className="h-3.5 w-3.5 text-[#8494A9]" />
  Compartilhar
  </button>
  </div>
  )}
  </div>
  </div>
+ </div>
 
- <div className="mt-3 flex items-center gap-5 border-t border-[#E5E7EB] pt-2.5">
+ {/* Tab bar */}
+ <div className="flex items-center gap-0 px-6 overflow-x-auto">
  {mainTabs.map((tab) => (
  <button
  key={tab}
  onClick={() => setActiveTab(tab)}
  className={cx(
- 'pb-2 text-[13px] font-medium transition-colors duration-150',
- activeTab === tab ? 'border-b-2 border-[#9EDFD5] text-[#0B1220]' : 'text-[#6B7280] hover:text-[#374151]'
+ 'flex-shrink-0 py-3.5 px-4 text-[13px] font-medium border-b-2 transition-all duration-150',
+ activeTab === tab
+ ? 'border-[#0E9384] text-[#0B1220]'
+ : 'border-transparent text-[#8494A9] hover:text-[#374151] hover:border-[#D0DDE8]'
  )}
  >
  {tab === 'Mudancas'
- ? `O que mudou (90 dias) (${changesCount})`
+ ? `O que mudou (${changesCount})`
  : tab === 'Eventos'
- ? `Agenda (próximos eventos) (${eventsCount})`
+ ? `Agenda (${eventsCount})`
  : tab === 'Preço'
  ? 'Preço'
  : tab}
@@ -3348,55 +3210,63 @@ const changesCount = changesBySelectedWindow.length;
 
  <section className={cx('px-6 py-5 transition-opacity duration-150', contentVisible ? 'opacity-100' : 'opacity-0')}>
  {actionError && (
- <div className="mb-4 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-[13px] text-[#B45309]">
+ <div className="mb-4 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-[13px] text-[#B45309]">
  {actionError}
  </div>
  )}
  {showScoreInfo && (
- <div className="mb-4 rounded-xl border border-[#E8EAED] bg-white p-4">
+ <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
  <div className="flex items-center justify-between">
- <h3 className="text-[14px] font-semibold text-[#111827]">Como calculamos o placar</h3>
- <button className="text-[12px] text-[#0E9384] hover:underline" onClick={() => setShowScoreInfo(false)}>Fechar</button>
+ <div>
+ <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Metodologia</p>
+ <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Como calculamos o placar</h3>
  </div>
- <p className="mt-2 text-[12px] text-[#6B7280]">Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
- <p className="mt-1 text-[12px] text-[#6B7280]">Status exibido conforme informado no endpoint de cada pilar.</p>
- <p className="mt-1 text-[12px] text-[#6B7280]">Fontes: CVM, B3 e RI da empresa.</p>
+ <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setShowScoreInfo(false)}>Fechar</button>
+ </div>
+ <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
+ <p>Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
+ <p>Status exibido conforme informado no endpoint de cada pilar.</p>
+ <p>Fontes: CVM, B3 e RI da empresa.</p>
+ </div>
  </div>
  )}
  {evidenceModal && (
- <div className="mb-4 rounded-xl border border-[#E8EAED] bg-white p-4">
+ <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
  <div className="flex items-center justify-between">
- <h3 className="text-[14px] font-semibold text-[#111827]">Painel de fonte {evidenceModal.pillarName}</h3>
- <button className="text-[12px] text-[#0E9384] hover:underline" onClick={() => setEvidenceModal(null)}>Fechar</button>
+ <div>
+ <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Evidência</p>
+ <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Painel de fonte · {evidenceModal.pillarName}</h3>
  </div>
- <div className="mt-3 inline-flex rounded-full bg-[#F9FAFB] p-1">
+ <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setEvidenceModal(null)}>Fechar</button>
+ </div>
+ <div className="mt-3 inline-flex rounded-xl bg-[#F6FAFC] p-1">
  {(['Fonte', 'Trecho', 'Como calculamos'] as EvidenceTab[]).map((tab) => (
  <button
  key={tab}
  onClick={() => setEvidenceTab(tab)}
- className={cx('rounded-full px-2.5 py-1 text-[11px]', evidenceTab === tab ? 'border border-[#99F6E4] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'text-[#6B7280]')}
+ className={cx('rounded-lg px-3 py-1.5 text-[12px] transition-all', evidenceTab === tab ? 'bg-white border border-[#DDE8F2] font-semibold text-[#0E9384] shadow-sm' : 'text-[#6B7280] hover:text-[#374151]')}
  >
  {tab}
  </button>
  ))}
  </div>
  {evidenceTab === 'Fonte' && (
- <div className="mt-3 space-y-1 text-[12px] text-[#6B7280]">
- <p>Documento: {safeMeta(evidenceModal.evidence.source.docLabel)}</p>
- <p>Atualizado em: {safeMeta(evidenceModal.evidence.source.date)}</p>
- <a href={evidenceModal.evidence.source.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#0E9384] hover:underline">
+ <div className="mt-3 space-y-1.5 text-[13px] text-[#6B7280]">
+ <p><span className="font-medium text-[#374151]">Documento:</span> {safeMeta(evidenceModal.evidence.source.docLabel)}</p>
+ <p><span className="font-medium text-[#374151]">Atualizado em:</span> {safeMeta(evidenceModal.evidence.source.date)}</p>
+ <a href={evidenceModal.evidence.source.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#0E9384] hover:underline">
  Abrir fonte externa
  <ExternalLink className="h-3.5 w-3.5" />
  </a>
  </div>
  )}
  {evidenceTab === 'Trecho' && (
- <div className="mt-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-3 text-[12px] text-[#6B7280]">
- Trecho relevante: {evidenceModal.evidence.why}
+ <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3.5 text-[13px] text-[#6B7280] italic">
+ "{evidenceModal.evidence.why}"
  </div>
  )}
  {evidenceTab === 'Como calculamos' && (
- <div className="mt-3 space-y-1 text-[12px] text-[#6B7280]">
+ <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
  <p>Fórmula base: valor atual vs histórico de 5 anos.</p>
  <p>Notas: sinalizamos ponto forte/atenção conforme direção do pilar.</p>
  <p>Limitações: sujeito a revisão após novo release da companhia.</p>
@@ -3406,190 +3276,222 @@ const changesCount = changesBySelectedWindow.length;
  )}
  {showSkeleton ? (
  <div className="space-y-4">
+ <div className="rounded-2xl border border-[#E2EDF5] bg-white p-6"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-3 h-8 w-full" /><SkeletonBlock className="mt-2 h-5 w-4/5" /><SkeletonBlock className="mt-5 h-10 w-48" /></div>
  <div className="grid grid-cols-12 gap-4">
- <div className="col-span-5 rounded-xl border border-[#E8EAED] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-[220px] w-full" /><SkeletonBlock className="mt-4 h-8 w-full" /></div>
- <div className="col-span-3 rounded-xl border border-[#E8EAED] bg-white p-5"><SkeletonBlock className="h-5 w-32" /><SkeletonBlock className="mt-6 h-8 w-24" /><SkeletonBlock className="mt-3 h-16 w-full" /></div>
- <div className="col-span-4 rounded-xl border border-[#E8EAED] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-6 h-8 w-20" /><SkeletonBlock className="mt-3 h-16 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
  </div>
- <div className="rounded-xl border border-[#E8EAED] bg-white p-5"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /><SkeletonBlock className="mt-4 h-9 w-56" /></div>
+ <div className="rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /></div>
  </div>
  ) : activePayload?.status === 'empty' ? (
- <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <h2 className="text-[15px] font-semibold text-[#111827]">Sem dados ainda para está empresa (em ingestão)</h2>
+ <article className="rounded-2xl border border-[#E2EDF5] bg-white p-8 text-center">
+ <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F6FAFC]">
+ <Database className="h-5 w-5 text-[#A0AEC0]" />
+ </div>
+ <h2 className="text-[16px] font-semibold text-[#111827]">Empresa em processamento</h2>
+ <p className="mt-1.5 text-[13px] text-[#6B7280]">Os dados desta empresa estão sendo ingeridos. Em breve a leitura estará disponível.</p>
  </article>
  ) : (
  <>
 {activeTab === 'Resumo' && (
-<div className="space-y-4">
-<article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">Diagnóstico rápido</p>
- <h2 className="mt-2 text-[20px] font-semibold leading-tight text-[#0B1220]">
- {activeData?.diagnosisHeadline ?? 'A empresa permanece estruturalmente saudável, com um ponto de atenção concentrado em dívida.'}
+<div className="space-y-5">
+
+<article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+ <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Diagnóstico rápido</p>
+ <h2 className="mt-2 text-[22px] font-bold leading-snug text-[#0B1220]">
+  {activeData?.diagnosisHeadline ?? 'A empresa permanece estruturalmente saudável, com um ponto de atenção concentrado em dívida.'}
  </h2>
- <p className="mt-2 text-[13px] text-[#6B7280]">Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.</p>
- <div className="mt-4 flex flex-wrap items-center gap-2">
- <button
- className="rounded-lg border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[13px] font-semibold text-white"
- onClick={() => goToPillar(activeData?.strongest.title ?? 'Divida')}
- >
- Ver principal força
- </button>
- <button
- className="rounded-lg border border-[#F6DEA9] bg-[#FFFBEB] px-3.5 py-2 text-[13px] font-semibold text-[#9A6A0F]"
- onClick={() => goToPillar(activeData?.watchout.title ?? 'Margens')}
- >
- Ver principal atenção
- </button>
+ <p className="mt-2 text-[13px] leading-relaxed text-[#64748B]">Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.</p>
+ <div className="mt-5 flex flex-wrap items-center gap-2">
+  <button
+   className="rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+   onClick={() => goToPillar(activeData?.strongest.title ?? 'Divida')}
+  >
+   Ver principal força
+  </button>
+  <button
+   className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-[#D97706] transition-opacity hover:opacity-80"
+   onClick={() => goToPillar(activeData?.watchout.title ?? 'Margens')}
+  >
+   Ver principal atenção
+  </button>
  </div>
- </article>
+</article>
 
- <div className="grid grid-cols-12 gap-4">
+<div className="grid grid-cols-12 gap-4">
  <div className="col-span-12 space-y-4 xl:col-span-8">
- <article className="rounded-xl border border-[#E8EAED] border-l-[3px] border-l-[#0E9384] bg-white p-4">
- <div className="flex items-center gap-2">
- <BarChart3 className="h-4 w-4 text-[#0E9384]" />
- <h3 className="text-[14px] font-semibold text-[#111827]">Principal Força</h3>
+
+  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: '#0E9384' }}>
+   <div className="flex items-center gap-2">
+    <BarChart3 className="h-4 w-4 text-[#0E9384]" />
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Principal Força</p>
+   </div>
+   <div className="mt-3">
+    <p className="text-[26px] font-bold leading-none text-[#0E9384]">{activeData?.strongest.title ?? 'Divida'}</p>
+    <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+     {strongestHumanLine}
+    </p>
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
+     <span className="rounded-full border border-[#C7F5EE] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.score ?? '95/100'}</span>
+     <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.badge ?? ''}</span>
+     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
+    </div>
+    <div className="mt-3 flex items-center gap-2">
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
+      Ver pilar
+     </button>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
+      Ver fonte
+     </button>
+    </div>
+   </div>
+  </article>
+
+  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: '#F59E0B' }}>
+   <div className="flex items-center gap-2">
+    <TriangleAlert className="h-4 w-4 text-[#D97706]" />
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Principal Atenção</p>
+   </div>
+   <div className="mt-3">
+    <p className="text-[26px] font-bold leading-none text-[#D97706]">{activeData?.watchout.title ?? 'Margens'}</p>
+    <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+     {watchoutHumanLine}
+    </p>
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
+     <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{activeData?.watchout.score ?? '61/100'}</span>
+     <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{watchoutBadgeLabel}</span>
+     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
+    </div>
+    <div className="mt-3 flex items-center gap-2">
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
+      Ver pilar
+     </button>
+     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
+      Ver fonte
+     </button>
+    </div>
+   </div>
+  </article>
+
  </div>
- <div className="mt-4">
- <p className="text-[24px] font-bold text-[#0E9384]">{activeData?.strongest.title ?? 'Divida'}</p>
- <p className="mt-3 text-[14px] leading-relaxed text-[#4B5563]">
- {strongestHumanLine}
- </p>
- <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
- <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.strongest.score ?? '95/100'}</span>
- <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.badge ?? ''}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
- </div>
- <div className="mt-3 flex items-center gap-2">
- <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
- Ver pilar
- </button>
- <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
- Ver fonte
- </button>
- </div>
- </div>
+
+ <article className="col-span-12 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm xl:col-span-4">
+  <div className="flex items-center justify-between">
+   <h2 className="text-[15px] font-semibold text-[#111827]">Mapa dos 5 pilares</h2>
+   <button className="text-[11px] text-[#667085] hover:text-[#475467] hover:underline" onClick={() => setShowScoreInfo(true)}>
+    Como calculamos
+   </button>
+  </div>
+  <p className="mt-1 text-[12px] text-[#94A3B8]">Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.</p>
+  <div className="mt-3">
+   <PillarMap
+    data={mapPillarData}
+    companyStatus={companyStatus}
+    onSelectPillar={(pillar) => goToPillar(pillar)}
+   />
+  </div>
+  <p className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5 text-[12px] text-[#475467]">
+   Atenção principal em {activeData?.watchout.title ?? 'Margens'}; força relativa em {activeData?.strongest.title ?? 'Dívida'}.
+  </p>
  </article>
+</div>
 
- <article className="rounded-xl border border-[#E8EAED] border-l-[3px] border-l-[#F59E0B] bg-white p-4">
- <div className="flex items-center gap-2">
- <TriangleAlert className="h-4 w-4 text-[#D97706]" />
- <h3 className="text-[14px] font-semibold text-[#111827]">Principal Atenção</h3>
- </div>
- <div className="mt-4">
- <p className="text-[24px] font-bold text-[#D97706]">{activeData?.watchout.title ?? 'Margens'}</p>
- <p className="mt-3 text-[14px] leading-relaxed text-[#4B5563]">
- {watchoutHumanLine}
- </p>
- <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
- <span className="rounded-full border border-[#D1D5DB] bg-white px-2.5 py-1 font-semibold text-[#374151]">{activeData?.watchout.score ?? '61/100'}</span>
- <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{watchoutBadgeLabel}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
- </div>
- <div className="mt-3 flex items-center gap-2">
- <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
- Ver pilar
- </button>
- <button className="rounded-md border border-[#E5E7EB] px-3 py-1.5 text-[12px] text-[#6B7280]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
- Ver fonte
- </button>
- </div>
- </div>
- </article>
-
- </div>
-
- <article className="col-span-12 rounded-xl border border-[#E8EAED] bg-white p-5 xl:col-span-4">
+<article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
  <div className="flex items-center justify-between">
- <h2 className="text-[15px] font-semibold text-[#111827]">Mapa dos 5 pilares</h2>
- <button className="text-[11px] text-[#667085] hover:text-[#475467] hover:underline" onClick={() => setShowScoreInfo(true)}>
- Como calculamos
- </button>
- </div>
- <p className="mt-1 text-[12px] text-[#667085]">Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.</p>
- <div className="mt-2">
- <PillarMap
- data={mapPillarData}
- companyStatus={companyStatus}
- onSelectPillar={(pillar) => goToPillar(pillar)}
- />
- </div>
- <p className="mt-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-[12px] text-[#475467]">
- Atenção principal em {activeData?.watchout.title ?? 'Margens'}; força relativa em {activeData?.strongest.title ?? 'Dívida'}.
- </p>
- </article>
- </div>
-
- <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
- <div className="flex items-center justify-between">
- <div>
- <h2 className="text-[15px] font-semibold text-[#111827]">Resumo em 60s</h2>
- <p className="text-[12px] text-[#9CA3AF]">Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.</p>
- </div>
- <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
+  <div>
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Resumo em 60s</p>
+   <h2 className="mt-1 text-[16px] font-semibold text-[#111827]">Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.</h2>
+  </div>
+  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
  <p className="mt-4 text-[14px] leading-relaxed text-[#1F2937]">
- {summaryNarrative}
+  {summaryNarrative}
  </p>
- <div className="mt-3 space-y-1 text-[13px] text-[#374151]">
- <p><span className="font-semibold">Força principal:</span> {activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
- <p><span className="font-semibold">Atenção principal:</span> {activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
- <p><span className="font-semibold">O que monitorar:</span> {activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
+ <div className="mt-4 grid grid-cols-3 gap-3">
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Força principal</p>
+   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
+  </div>
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Atenção principal</p>
+   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
+  </div>
+  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">O que monitorar</p>
+   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
+  </div>
  </div>
- <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
- <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
- <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
- <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
+ <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
+  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
+  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
+  <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
  </div>
- </article>
+</article>
 
- <article className="rounded-xl border border-[#D6F5EE] bg-[#F4FFFC] p-5">
+<article className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-6">
  <div className="flex items-center justify-between gap-3">
- <h2 className="text-[15px] font-semibold text-[#111827]">Próximas ações</h2>
- <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
+  <div>
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0E9384]">Próximas ações</p>
+   <h2 className="mt-1 text-[15px] font-semibold text-[#111827]">Feche a leitura com um próximo passo útil e verificável.</h2>
+  </div>
+  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
- <p className="mt-1 text-[12px] text-[#667085]">Feche a leitura com um próximo passo útil e verificável.</p>
- <div className="mt-3 flex flex-wrap items-center gap-2">
- <button className={cx('rounded-lg border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[13px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
- Criar alerta da principal atenção
- </button>
- <button className="rounded-lg border border-[#E5E7EB] bg-white px-3.5 py-2 text-[13px] font-medium text-[#1F2937]" onClick={() => setActiveTab('Pilares')}>
- Ver pilares completos
- </button>
- <button className={cx('rounded-lg border border-[#E5E7EB] bg-white px-3.5 py-2 text-[13px] font-medium text-[#1F2937]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
- Comparar com outra empresa
- </button>
+ <div className="mt-4 flex flex-wrap items-center gap-2">
+  <button className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
+   Criar alerta da principal atenção
+  </button>
+  <button className="rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]" onClick={() => setActiveTab('Pilares')}>
+   Ver pilares completos
+  </button>
+  <button className={cx('rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
+   Comparar com outra empresa
+  </button>
  </div>
- </article>
- </div>
- )}
+</article>
+
+</div>
+)}
 
  {activeTab === 'Pilares' && (
- <div className="space-y-3">
- <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
- <h2 className="text-[15px] font-semibold text-[#111827]">Síntese do diagnóstico por pilares</h2>
- <p className="mt-1 text-[13px] text-[#6B7280]">
- {healthyPillars.length} pilares saudáveis, {attentionPillars.length} em atenção e {riskPillars.length} em risco.
- </p>
- <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#374151]">
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : ''}</span>
- <span className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : ''}</span>
- </div>
+ <div className="space-y-4">
+
+ <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+  <div className="flex flex-wrap items-start justify-between gap-3">
+   <div>
+    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Síntese dos pilares</p>
+    <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Diagnóstico por pilares</h2>
+   </div>
+   <div className="flex flex-wrap items-center gap-2 text-[12px]">
+    {healthyPillars.length > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-3 py-1 text-[12px] font-semibold text-[#0E9384]">{healthyPillars.length} saudável{healthyPillars.length !== 1 ? 's' : ''}</span>}
+    {attentionPillars.length > 0 && <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-3 py-1 font-semibold text-[#D97706]">{attentionPillars.length} atenção</span>}
+    {riskPillars.length > 0 && <span className="rounded-full border border-[#FECACA] bg-[#FEF2F2] px-3 py-1 font-semibold text-[#DC2626]">{riskPillars.length} risco</span>}
+   </div>
+  </div>
+  <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#374151]">
+   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : '—'}</span>
+   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : '—'}</span>
+  </div>
  </article>
+
  {(activeData?.pillars ?? []).filter((p) => p.companyId === companyContext.companyId).length === 0 && (
- <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <p className="text-[14px] text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
- <p className="mt-1 text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p className="text-[12px] text-[#9CA3AF]">Fonte esperada: CVM/RI</p>
+ <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+  <div className="flex flex-col items-center gap-3 py-4 text-center">
+   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F6FAFC]">
+    <BarChart3 className="h-5 w-5 text-[#A0AEC0]" />
+   </div>
+   <p className="text-[14px] font-medium text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
+   <p className="text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
+  </div>
  </article>
  )}
+
  {(activeData?.pillars ?? []).filter((pillar) => pillar.companyId === companyContext.companyId).map((pillar) => {
  const expanded = expandedPillars[pillar.name];
  const windowSize = windowByPillar[pillar.name];
  const values = windowSize === '5a' ? pillar.chart.series5 : pillar.chart.series10;
  const labels = windowSize === '5a' ? pillar.chart.years5 : pillar.chart.years10;
  const chartTone = pillar.status === 'Saudavel' ? 'teal' : 'amber';
- const accent = pillar.status === 'Saudavel' ? 'border-l-[#0E9384]' : pillar.status === 'Atencao' ? 'border-l-[#F59E0B]' : 'border-l-[#DC2626]';
+ const accent = pillar.status === 'Saudavel' ? '#0E9384' : pillar.status === 'Atencao' ? '#F59E0B' : '#DC2626';
  const pillarName = pillarLabel(pillar.name);
  const deltaLabel = formatDeltaForPillar(pillar.trend);
  const normalizedChartTitle = _normalizeSemanticText(pillar.chart.title);
@@ -3626,162 +3528,142 @@ const changesCount = changesBySelectedWindow.length;
  const chartVariant: 'line' | 'bar' = 'line';
 
  return (
- <article id={`pillar-${pillar.name}`} key={pillar.name} className={cx('rounded-xl border border-[#E8EAED] border-l-[3px] bg-white p-5', accent)}>
- <button
- onClick={() => {
- const isCurrentlyOpen = expandedPillars[pillar.name];
- if (isCurrentlyOpen) {
- setExpandedPillars({
- Divida: false,
- Caixa: false,
- Margens: false,
- Retorno: false,
- Proventos: false,
- });
- return;
- }
- setExpandedPillars({
- Divida: pillar.name === 'Divida',
- Caixa: pillar.name === 'Caixa',
- Margens: pillar.name === 'Margens',
- Retorno: pillar.name === 'Retorno',
- Proventos: pillar.name === 'Proventos',
- });
- }}
- className="flex w-full items-start justify-between text-left"
- >
- <div>
- <div className="flex flex-wrap items-center gap-2">
- <h2 className="text-[17px] font-bold text-[#111827]">{pillarName}</h2>
- <span className={cx('rounded-full border px-2.5 py-1 text-[12px] font-semibold', statusTone[pillar.status].badge)}>{statusLabel(pillar.status)}</span>
- <span className="text-[12px] text-[#6B7280]">{deltaLabel}</span>
- <span className="text-[10px] font-normal tracking-tight text-[#E2E8F0]">Score {pillar.score}/100</span>
- </div>
- <p className="mt-2 text-[14px] text-[#374151]">{verdictLine}</p>
- <p className="mt-1 text-[12px] text-[#9CA3AF]">Fonte: {pillar.trust.source} | Atualizado em {pillar.trust.updatedAt} | Status: {pillar.trust.status}</p>
- </div>
- <div className="ml-3 flex items-center">
- <span className="text-[#6B7280] transition-transform duration-200">{expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</span>
- </div>
- </button>
+ <article id={`pillar-${pillar.name}`} key={pillar.name} className="rounded-2xl border border-[#E2EDF5] bg-white shadow-sm overflow-hidden" style={{ borderTopWidth: '3px', borderTopColor: accent }}>
+  <button
+   onClick={() => {
+    const isCurrentlyOpen = expandedPillars[pillar.name];
+    if (isCurrentlyOpen) {
+     setExpandedPillars({ Divida: false, Caixa: false, Margens: false, Retorno: false, Proventos: false });
+     return;
+    }
+    setExpandedPillars({ Divida: pillar.name === 'Divida', Caixa: pillar.name === 'Caixa', Margens: pillar.name === 'Margens', Retorno: pillar.name === 'Retorno', Proventos: pillar.name === 'Proventos' });
+   }}
+   className="flex w-full items-center justify-between gap-3 p-5 text-left"
+  >
+   <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${accent}18` }}>
+     <span className="text-[13px] font-bold tabular-nums" style={{ color: accent }}>{pillar.score}</span>
+    </div>
+    <div className="min-w-0">
+     <div className="flex flex-wrap items-center gap-2">
+      <h2 className="text-[16px] font-bold text-[#111827]">{pillarName}</h2>
+      <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', statusTone[pillar.status].badge)}>{statusLabel(pillar.status)}</span>
+      {deltaLabel && <span className="text-[12px] text-[#6B7280]">{deltaLabel}</span>}
+     </div>
+     <p className="mt-0.5 text-[13px] text-[#64748B]">{verdictLine}</p>
+    </div>
+   </div>
+   <div className="ml-2 flex-shrink-0">
+    {expanded ? <ChevronUp className="h-4 w-4 text-[#94A3B8]" /> : <ChevronDown className="h-4 w-4 text-[#94A3B8]" />}
+   </div>
+  </button>
 
- <div className={cx('overflow-hidden transition-all duration-300', expanded ? 'max-h-[1800px] opacity-100' : 'max-h-0 opacity-0')}>
- <div className="my-4 border-t border-[#F3F4F6]" />
- <div className="space-y-2.5">
- <section className="rounded-lg border border-[#E8EAED] bg-[#FCFDFD] p-2.5">
- <div className="grid gap-2.5 lg:grid-cols-2">
- <div>
- <p className="text-[12px] font-semibold text-[#475569]">Evidência principal</p>
- <p className="mt-1 text-[13px] text-[#6B7280]">Indicador-base: {indicatorLabel}</p>
- <p className="mt-2 text-[28px] font-bold text-[#111827]">{evidenceHeadline}</p>
- <p className="text-[12px] text-[#6B7280]">Data: {baseMetric?.source.date ?? pillar.trust.updatedAt}</p>
- <p className="mt-2 text-[13px] text-[#1F2937]"><span className="font-semibold text-[#0F172A]">Referência de 5 anos:</span> <span className="font-medium">{referenceText}</span></p>
- {baseMetricReadingHint(pillar, baseMetric) && (
-  <p className="mt-1 text-[12px] text-[#6B7280]">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
- )}
- </div>
- <div>
- <div className="mb-2 flex justify-end">
- <div className="inline-flex rounded-full bg-[#F9FAFB] p-1">
- {(['5a', '10a'] as WindowSize[]).map((windowOption) => (
- <button
- key={windowOption}
- onClick={() => setWindowByPillar((prev) => ({ ...prev, [pillar.name]: windowOption }))}
- className={cx('rounded-full px-2.5 py-1 text-[11px]', windowSize === windowOption ? 'border border-[#99F6E4] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'text-[#6B7280]')}
- >
- {windowOption}
- </button>
- ))}
- </div>
- </div>
- <MiniLineChart
- values={values}
- labels={labels}
- tone={chartTone}
- highlightIndex={values.length - 1}
- variant={chartVariant}
- referenceValue={baseMetricRef}
- referenceLabel="Ref. histórica"
- />
- </div>
- </div>
- </section>
+  <div className={cx('overflow-hidden transition-all duration-300', expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0')}>
+   <div className="border-t border-[#E2EDF5]" />
+   <div className="grid gap-0 lg:grid-cols-12">
 
- <section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
- <h3 className="text-[13px] font-semibold text-[#111827]">O que isso significa</h3>
- <p className="mt-1 text-[14px] text-[#4B5563]">{whatItMeans}</p>
- </section>
+    {/* Left: meaning + monitor */}
+    <div className="space-y-0 border-b border-[#E2EDF5] p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
+     <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que isso significa</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-[#1F2937]">{whatItMeans}</p>
+     </div>
+     <div className="mt-4 pt-4 border-t border-[#E2EDF5]">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que monitorar</p>
+      <ul className="mt-2 space-y-2">
+       {monitorItems.map((item) => (
+        <li key={item} className="flex items-start gap-2 text-[13px] text-[#4B5563]">
+         <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" />
+         <span>{item}</span>
+        </li>
+       ))}
+      </ul>
+     </div>
+     <p className="mt-4 text-[11px] text-[#B0BAC8]">Fonte: {pillar.trust.source} · {pillar.trust.updatedAt} · {pillar.trust.status}</p>
+    </div>
 
- <section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
- <h3 className="text-[13px] font-semibold text-[#111827]">O que monitorar daqui para frente</h3>
- <ul className="mt-2 space-y-1.5 text-[14px] text-[#4B5563]">
- {monitorItems.map((item) => (
- <li key={item} className="flex items-start gap-2">
- <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#64748B]" />
- <span>{item}</span>
- </li>
- ))}
- </ul>
- </section>
+    {/* Right: evidence + chart + signal */}
+    <div className="p-5 lg:col-span-8">
+     <section className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+       <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Evidência principal</p>
+        <p className="mt-1 text-[12px] text-[#94A3B8]">Indicador: {indicatorLabel}</p>
+        <p className="mt-2 text-[32px] font-bold leading-none text-[#111827]">{evidenceHeadline}</p>
+        <p className="mt-1 text-[12px] text-[#94A3B8]">Data: {baseMetric?.source.date ?? pillar.trust.updatedAt}</p>
+        <p className="mt-2 text-[13px] text-[#1F2937]"><span className="font-semibold">Ref. 5 anos:</span> <span className="font-medium text-[#64748B]">{referenceText}</span></p>
+        {baseMetricReadingHint(pillar, baseMetric) && (
+         <p className="mt-1 text-[12px] text-[#94A3B8]">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
+        )}
+       </div>
+       <div>
+        <div className="mb-2 flex justify-end">
+         <div className="inline-flex rounded-full bg-[#F6FAFC] p-0.5">
+          {(['5a', '10a'] as WindowSize[]).map((windowOption) => (
+           <button
+            key={windowOption}
+            onClick={() => setWindowByPillar((prev) => ({ ...prev, [pillar.name]: windowOption }))}
+            className={cx('rounded-full px-3 py-1 text-[11px]', windowSize === windowOption ? 'border border-[#99F6E4] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'text-[#6B7280]')}
+           >
+            {windowOption}
+           </button>
+          ))}
+         </div>
+        </div>
+        <MiniLineChart
+         values={values}
+         labels={labels}
+         tone={chartTone}
+         highlightIndex={values.length - 1}
+         variant={chartVariant}
+         referenceValue={baseMetricRef}
+         referenceLabel="Ref. histórica"
+        />
+       </div>
+      </div>
+     </section>
 
- {mainEvidence && (
-<section className="rounded-lg border border-[#E8EAED] bg-white p-2.5">
-<h3 className="text-[13px] font-semibold text-[#111827]">Sinal principal</h3>
-<div
- className={cx(
- 'mt-2 rounded-lg border p-2.5',
- signalCopy.badgeTone === 'risk'
- ? 'border-[#FECACA] bg-[#FEF2F2]'
- : signalCopy.badgeTone === 'attention'
- ? 'border-[#FDE68A] bg-[#FFFBEB]'
- : 'border-[#D6F5EE] bg-[#F4FFFC]'
- )}
->
-{signalCopy.badgeLabel && (
- <span
-  className={cx(
-  'rounded-full border px-2.5 py-1 text-[12px] font-semibold',
-  signalCopy.badgeTone === 'risk'
-  ? 'border-[#DC2626] bg-[#DC2626] text-white'
-  : signalCopy.badgeTone === 'attention'
-  ? 'border-[#F59E0B] bg-[#F59E0B] text-white'
-  : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
-  )}
- >
- {signalCopy.badgeLabel}
- </span>
-)}
- <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signalCopy.title}</p>
- <p className="mt-1 text-[13px] text-[#4B5563]">{signalCopy.body}</p>
- {signalCopy.why && <p className="mt-1 text-[13px] text-[#4B5563]">Por que importa: {signalCopy.why}</p>}
- <div className="mt-2 flex items-center justify-between">
- <span className="text-[12px] text-[#94A3B8]">Fonte: {mainEvidenceSource}</span>
- <button
- onClick={(event) => {
- if (guardAction(event, mainEvidence.companyId)) return;
- setEvidenceModal({ pillarName: pillar.name, evidence: mainEvidence });
- setEvidenceTab('Fonte');
- }}
- className={cx('text-[13px] text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
- disabled={actionsDisabled || mainEvidence.companyId !== companyContext.companyId}
- >
- Ver fonte
- </button>
- </div>
- </div>
- </section>
- )}
+     {mainEvidence && (
+      <section className={cx('mt-3 rounded-xl border p-4', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB]' : 'border-[#99F6E4] bg-[#F0FDFA]')}>
+       <div className="flex items-start justify-between gap-3">
+        <div className="flex-1">
+         {signalCopy.badgeLabel && (
+          <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+           {signalCopy.badgeLabel}
+          </span>
+         )}
+         <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signalCopy.title}</p>
+         <p className="mt-1 text-[13px] text-[#4B5563]">{signalCopy.body}</p>
+         {signalCopy.why && <p className="mt-1 text-[13px] text-[#6B7280]">Por que importa: {signalCopy.why}</p>}
+        </div>
+        <button
+         onClick={(event) => {
+          if (guardAction(event, mainEvidence.companyId)) return;
+          setEvidenceModal({ pillarName: pillar.name, evidence: mainEvidence });
+          setEvidenceTab('Fonte');
+         }}
+         className={cx('flex-shrink-0 text-[12px] text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+         disabled={actionsDisabled || mainEvidence.companyId !== companyContext.companyId}
+        >
+         Ver fonte
+        </button>
+       </div>
+       <p className="mt-2 text-[11px] text-[#B0BAC8]">Fonte: {mainEvidenceSource}</p>
+      </section>
+     )}
 
- {(ctaCopy.title || ctaCopy.button) && (
- <section className="rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-2.5">
- <p className="text-[13px] text-[#374151]">{ctaCopy.title}</p>
- <button className={cx('mt-2 rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[13px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
- {ctaCopy.button}
- </button>
- </section>
- )}
- </div>
- </div>
+     {(ctaCopy.title || ctaCopy.button) && (
+      <section className="mt-3 rounded-xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-4">
+       <p className="text-[13px] text-[#374151]">{ctaCopy.title}</p>
+       <button className={cx('mt-2 rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
+        {ctaCopy.button}
+       </button>
+      </section>
+     )}
+    </div>
+
+   </div>
+  </div>
  </article>
  );
  })}
@@ -3790,599 +3672,644 @@ const changesCount = changesBySelectedWindow.length;
  )}
 
  {activeTab === 'Mudancas' && (
- <div>
- <section className="mb-4 rounded-xl border border-[#DDE3EA] bg-white p-4">
-  <h2 className="text-[15px] font-semibold text-[#111827]">O que mudou ({changesWindow})</h2>
-  <p className="mt-1 text-[13px] text-[#5B6472]">Vejá o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
- <div className="mt-3 border-t border-[#EEF2F6] pt-3">
-  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do período</p>
-  <p className="mt-2 max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
-   {changesSummaryText}
-  </p>
-  <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
-   <p className="font-semibold text-[#0F766E]">Pilar mais afetado: {periodMostAffected}</p>
-   <p>Mudanças estruturais: {structuralCount}</p>
-   <p>Atualizações de rotina: {routineCount}</p>
-  </div>
-  </div>
- </section>
-<div className="mb-4 space-y-2">
-  <div className="flex flex-wrap items-center gap-2">
-  {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
-   <button key={period} onClick={() => setChangesWindow(period)} className={cx('h-7 rounded-full px-3.5 text-[13px]', period === changesWindow ? 'border border-[#DDE3EA] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]')}>
-   {period}
-   </button>
-  ))}
-  </div>
-  <div className="flex flex-wrap items-center gap-2">
-  {changesFocusFilters.map((filter) => (
-   <button
-   key={filter}
-   onClick={() => setChangesFocus(filter)}
-   className={cx('rounded-full border px-3 py-1.5 text-[12px]', changesFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#DDE3EA] bg-white text-[#5B6472]')}
-   >
-   {filter}
-   </button>
-  ))}
-  </div>
-  <div className="flex items-center gap-2">
-   <label htmlFor="changes-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
-   <select
-   id="changes-pillar-filter"
-   value={changesPillarFilter}
-   onChange={(event) => setChangesPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
-   className="rounded-md border border-[#DDE3EA] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
-   >
-   {availablePillarsForFilter.map((pillar) => (
-    <option key={pillar} value={pillar}>{pillar}</option>
-   ))}
-   </select>
-  </div>
- </div>
+ <div className="space-y-4">
 
- {principalChange && (
- <section className="mb-4 rounded-xl border border-[#F6C9BF] bg-[#FFF7F5] p-3">
-  <div className="flex items-end justify-between gap-3">
-  <div>
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudança do período</p>
-   <p className="mt-1 text-[13px] text-[#1F2937]">
-   {`${principalChange.title}, com possível efeito no pilar de ${principalChange.pillar} nos próximos fechamentos.`}
-   </p>
-  </div>
-  <button
-  className={cx('whitespace-nowrap rounded-md border border-[#0E9384] bg-[#0E9384] px-2.5 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-  disabled={actionsDisabled}
-  onClick={(event) => {
-   if (guardAction(event, principalChange.companyId)) return;
-   if (principalChange.pillar !== 'A classificar') goToPillar(principalChange.pillar);
-  }}
-  >
-  Ver impacto no pilar
-  </button>
-  </div>
- </section>
- )}
-
- <div className="space-y-3">
-  {!hasVisibleChanges && (
-  <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
-   <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-   <p className="mt-1 text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
-  </article>
-  )}
-
-  {displayedStructural.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Mudanças estruturais</p>
-   {displayedStructural.map((change) => renderChangeCard(change))}
+  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">O que mudou ({changesWindow})</p>
+   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Mudanças do período</h2>
+   <p className="mt-1 text-[13px] text-[#64748B]">Veja o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
+   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
+    <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">{changesSummaryText}</p>
+    <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais afetado</p>
+      <p className="mt-1 font-semibold text-[#0F766E]">{periodMostAffected}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Estruturais</p>
+      <p className="mt-1 font-semibold text-[#111827]">{structuralCount}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
+      <p className="mt-1 font-semibold text-[#111827]">{routineCount}</p>
+     </div>
+    </div>
+   </div>
   </section>
-  )}
 
-  {displayedRelevant.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9A6A0F]">Mudanças relevantes</p>
-   {displayedRelevant.map((change) => renderChangeCard(change))}
-  </section>
-  )}
-
-  {displayedRoutine.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nível 3 | Rotina</p>
-   {displayedRoutine.map((item) => {
-   if (item.type === 'single') return renderChangeCard(item.payload);
-   const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
-   return (
-    <article key={item.payload.groupKey} className="rounded-xl border border-[#DDE3EA] bg-white p-4">
-    <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
-    <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
-    <p className="mt-2 text-[12px] text-[#5B6472]">Pilar afetado: {item.payload.pillar}</p>
-    <div className="mt-3 flex flex-wrap items-center gap-2">
-     <button
-     className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-     disabled={actionsDisabled}
-     onClick={(event) => {
-      if (guardAction(event, item.payload.items[0].companyId)) return;
-      if (item.payload.pillar !== 'A classificar') goToPillar(item.payload.pillar);
-     }}
-     >
-     Ver impacto no pilar
+  <div className="space-y-2">
+   <div className="flex flex-wrap items-center gap-2">
+    {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
+     <button key={period} onClick={() => setChangesWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === changesWindow ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827] shadow-sm' : 'text-[#6B7280]')}>
+      {period}
      </button>
+    ))}
+   </div>
+   <div className="flex flex-wrap items-center gap-2">
+    {changesFocusFilters.map((filter) => (
      <button
-     className="inline-flex items-center gap-1 rounded-md border border-[#DDE3EA] px-3 py-1.5 text-[12px] text-[#5B6472]"
-     onClick={() => setExpandedRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
+      key={filter}
+      onClick={() => setChangesFocus(filter)}
+      className={cx('rounded-full border px-3 py-1.5 text-[12px]', changesFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#E2EDF5] bg-white text-[#5B6472] hover:bg-[#F6FAFC]')}
      >
-     Ver eventos
-     {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+      {filter}
+     </button>
+    ))}
+   </div>
+   <div className="flex items-center gap-2">
+    <label htmlFor="changes-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
+    <select
+     id="changes-pillar-filter"
+     value={changesPillarFilter}
+     onChange={(event) => setChangesPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
+     className="rounded-xl border border-[#E2EDF5] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
+    >
+     {availablePillarsForFilter.map((pillar) => (
+      <option key={pillar} value={pillar}>{pillar}</option>
+     ))}
+    </select>
+   </div>
+  </div>
+
+  {principalChange && (
+   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
+    <div className="flex items-start justify-between gap-3">
+     <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal mudança do período</p>
+      <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalChange.title}</p>
+      <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalChange.pillar} nos próximos fechamentos.</p>
+     </div>
+     <button
+      className={cx('flex-shrink-0 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+      disabled={actionsDisabled}
+      onClick={(event) => {
+       if (guardAction(event, principalChange.companyId)) return;
+       if (principalChange.pillar !== 'A classificar') goToPillar(principalChange.pillar);
+      }}
+     >
+      Ver impacto
      </button>
     </div>
-    {isOpen && <div className="mt-3 space-y-2">{item.payload.items.map((change) => renderChangeCard(change, true))}</div>}
-    </article>
-   );
-   })}
-  </section>
+   </section>
   )}
- </div>
+
+  <div className="space-y-3">
+   {!hasVisibleChanges && (
+    <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+     <div className="flex flex-col items-center gap-2 py-4 text-center">
+      <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
+      <p className="text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+     </div>
+    </article>
+   )}
+
+   {displayedStructural.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Mudanças estruturais</p>
+     {displayedStructural.map((change) => renderChangeCard(change))}
+    </section>
+   )}
+
+   {displayedRelevant.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Mudanças relevantes</p>
+     {displayedRelevant.map((change) => renderChangeCard(change))}
+    </section>
+   )}
+
+   {displayedRoutine.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
+     {displayedRoutine.map((item) => {
+      if (item.type === 'single') return renderChangeCard(item.payload);
+      const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
+      return (
+       <article key={item.payload.groupKey} className="rounded-2xl border border-[#E2EDF5] bg-white p-4 shadow-sm">
+        <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
+        <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
+        <p className="mt-2 text-[12px] text-[#94A3B8]">Pilar afetado: {item.payload.pillar}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+         <button
+          className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+          disabled={actionsDisabled}
+          onClick={(event) => {
+           if (guardAction(event, item.payload.items[0].companyId)) return;
+           if (item.payload.pillar !== 'A classificar') goToPillar(item.payload.pillar);
+          }}
+         >
+          Ver impacto no pilar
+         </button>
+         <button
+          className="inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]"
+          onClick={() => setExpandedRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
+         >
+          Ver eventos
+          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+         </button>
+        </div>
+        {isOpen && <div className="mt-3 space-y-2">{item.payload.items.map((change) => renderChangeCard(change, true))}</div>}
+       </article>
+      );
+     })}
+    </section>
+   )}
+  </div>
  </div>
  )}
 
  {activeTab === 'Eventos' && (
- <div>
- <section className="mb-4 rounded-xl border border-[#DDE3EA] bg-white p-4">
-  <h2 className="text-[15px] font-semibold text-[#111827]">Agenda (próximos eventos) ({eventsWindow})</h2>
-  <p className="mt-1 text-[13px] text-[#5B6472]">Vejá o que pode ter impacto real, o que e rotina e quais pilares podem ser mais afetados.</p>
-  <div className="mt-3 border-t border-[#EEF2F6] pt-3">
-  <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Resumo do período</p>
-  <p className="mt-2 max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
-   {principalTimelineChange
-   ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o período traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
-   : `Nos próximos ${eventsWindow.replace(' dias', '')} dias, a agenda está concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
-  </p>
-  <div className="mt-2 space-y-1.5 text-[13px] text-[#374151]">
-   <p className="font-semibold text-[#0F766E]">Pilar mais sensivel: {timelineMostAffectedPillar}</p>
-   <p>Gatilhos principais: {timelineStructuralCount}</p>
-   <p>Atualizações de rotina: {timelineRoutineCount}</p>
-  </div>
-  </div>
- </section>
+ <div className="space-y-4">
 
- <div className="mb-4 space-y-2">
-  <div className="flex flex-wrap items-center gap-2">
-  {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
-   <button key={period} onClick={() => setEventsWindow(period)} className={cx('h-7 rounded-full px-3.5 text-[13px]', period === eventsWindow ? 'border border-[#DDE3EA] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]')}>
-   {period}
-   </button>
-  ))}
-  </div>
-  <div className="flex flex-wrap items-center gap-2">
-  {eventsFocusFilters.map((filter) => (
-   <button
-   key={filter}
-   onClick={() => setEventsFocus(filter)}
-   className={cx('rounded-full border px-3 py-1.5 text-[12px]', eventsFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#DDE3EA] bg-white text-[#5B6472]')}
-   >
-   {filter}
-   </button>
-  ))}
-  </div>
-  <div className="flex items-center gap-2">
-   <label htmlFor="events-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
-   <select
-   id="events-pillar-filter"
-   value={eventsPillarFilter}
-   onChange={(event) => setEventsPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
-   className="rounded-md border border-[#DDE3EA] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
-   >
-   {availablePillarsForFilter.map((pillar) => (
-    <option key={pillar} value={pillar}>{pillar}</option>
-   ))}
-   </select>
-  </div>
- </div>
-
- {principalTimelineChange && (
- <section className="mb-4 rounded-xl border border-[#F6C9BF] bg-[#FFF7F5] p-3">
-  <div className="flex items-end justify-between gap-3">
-  <div>
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Principal mudança do período</p>
-   <p className="mt-1 text-[13px] text-[#1F2937]">
-   {`${principalTimelineChange.title}, com possível efeito no pilar de ${principalTimelineChange.mainPillar} nos próximos fechamentos.`}
-   </p>
-  </div>
-  <button
-  className={cx('whitespace-nowrap rounded-md border border-[#0E9384] bg-[#0E9384] px-2.5 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-  disabled={actionsDisabled}
-  onClick={(event) => {
-   if (guardAction(event, principalTimelineChange.companyId)) return;
-   if (principalTimelineChange.mainPillar !== 'A classificar') goToPillar(principalTimelineChange.mainPillar);
-  }}
-  >
-  Ver impacto no pilar
-  </button>
-  </div>
- </section>
- )}
-
- <div className="space-y-3">
-  {!hasVisibleTimelineEvents && (
-  <article className="rounded-xl border border-[#E8EAED] bg-white p-4">
-   <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-   <p className="mt-1 text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
-  </article>
-  )}
-
-  {displayedTimelineStructural.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9F4636]">Gatilhos principais</p>
-   {displayedTimelineStructural.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
-  </section>
-  )}
-
-  {displayedTimelineRelevant.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#9A6A0F]">Eventos relevantes</p>
-   {displayedTimelineRelevant.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
-  </section>
-  )}
-
-  {displayedTimelineRoutine.length > 0 && (
-  <section className="space-y-2">
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#0F6F61]">Nível 3 | Rotina</p>
-   {displayedTimelineRoutine.map((item) => {
-   if (item.type === 'single') return renderAgendaEventCard(item.payload);
-   const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
-   return (
-    <article key={item.payload.groupKey} className="rounded-xl border border-[#DDE3EA] bg-white p-4">
-    <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
-    <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
-    <p className="mt-2 text-[12px] text-[#5B6472]">Pilar afetado: {item.payload.pillar}</p>
-    <div className="mt-3 flex flex-wrap items-center gap-2">
-     <button
-     className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-     disabled={actionsDisabled}
-     onClick={(event) => {
-      if (guardAction(event, item.payload.items[0].companyId)) return;
-      if (item.payload.pillar !== 'A classificar') goToPillar(item.payload.pillar);
-     }}
-     >
-     Ver impacto no pilar
-     </button>
-     <button
-     className="inline-flex items-center gap-1 rounded-md border border-[#DDE3EA] px-3 py-1.5 text-[12px] text-[#5B6472]"
-     onClick={() => setExpandedEventRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
-     >
-     Ver eventos
-     {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-     </button>
+  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Agenda ({eventsWindow})</p>
+   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Próximos eventos</h2>
+   <p className="mt-1 text-[13px] text-[#64748B]">Veja o que pode ter impacto real, o que é rotina e quais pilares podem ser mais afetados.</p>
+   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
+    <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
+     {principalTimelineChange
+      ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o período traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
+      : `Nos próximos ${eventsWindow.replace(' dias', '')} dias, a agenda está concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
+    </p>
+    <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais sensível</p>
+      <p className="mt-1 font-semibold text-[#0F766E]">{timelineMostAffectedPillar}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Gatilhos principais</p>
+      <p className="mt-1 font-semibold text-[#111827]">{timelineStructuralCount}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
+      <p className="mt-1 font-semibold text-[#111827]">{timelineRoutineCount}</p>
+     </div>
     </div>
-    {isOpen && <div className="mt-3 space-y-2">{item.payload.items.map((timelineEvent) => renderAgendaEventCard(timelineEvent, true))}</div>}
-    </article>
-   );
-   })}
-  </section>
-  )}
-
-  {hasVisibleTimelineEvents && (
-  <section className="rounded-xl border border-[#D6F5EE] bg-[#F4FFFC] p-4">
-   <p className="text-[13px] text-[#1F2937]">Feche a leitura com o próximo passo: acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
-   <div className="mt-3 flex flex-wrap items-center gap-2">
-    <button
-    className={cx('rounded-md border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-    disabled={actionsDisabled}
-    onClick={(event) => {
-     if (guardAction(event, companyContext.companyId)) return;
-     setActiveTab('Pilares');
-    }}
-    >
-    Ver todos os impactos esperados nos pilares
-    </button>
-    <button
-    className={cx('rounded-md border border-[#DDE3EA] bg-white px-3 py-1.5 text-[12px] font-medium text-[#374151]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
-    disabled={actionsDisabled}
-    onClick={(event) => guardAction(event, companyContext.companyId)}
-    >
-    Me lembrar dos principais gatilhos
-    </button>
    </div>
   </section>
+
+  <div className="space-y-2">
+   <div className="flex flex-wrap items-center gap-2">
+    {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
+     <button key={period} onClick={() => setEventsWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === eventsWindow ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827] shadow-sm' : 'text-[#6B7280]')}>
+      {period}
+     </button>
+    ))}
+   </div>
+   <div className="flex flex-wrap items-center gap-2">
+    {eventsFocusFilters.map((filter) => (
+     <button
+      key={filter}
+      onClick={() => setEventsFocus(filter)}
+      className={cx('rounded-full border px-3 py-1.5 text-[12px]', eventsFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#E2EDF5] bg-white text-[#5B6472] hover:bg-[#F6FAFC]')}
+     >
+      {filter}
+     </button>
+    ))}
+   </div>
+   <div className="flex items-center gap-2">
+    <label htmlFor="events-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
+    <select
+     id="events-pillar-filter"
+     value={eventsPillarFilter}
+     onChange={(event) => setEventsPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
+     className="rounded-xl border border-[#E2EDF5] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
+    >
+     {availablePillarsForFilter.map((pillar) => (
+      <option key={pillar} value={pillar}>{pillar}</option>
+     ))}
+    </select>
+   </div>
+  </div>
+
+  {principalTimelineChange && (
+   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
+    <div className="flex items-start justify-between gap-3">
+     <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal gatilho do período</p>
+      <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalTimelineChange.title}</p>
+      <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalTimelineChange.mainPillar} nos próximos fechamentos.</p>
+     </div>
+     <button
+      className={cx('flex-shrink-0 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+      disabled={actionsDisabled}
+      onClick={(event) => {
+       if (guardAction(event, principalTimelineChange.companyId)) return;
+       if (principalTimelineChange.mainPillar !== 'A classificar') goToPillar(principalTimelineChange.mainPillar);
+      }}
+     >
+      Ver impacto
+     </button>
+    </div>
+   </section>
   )}
- </div>
+
+  <div className="space-y-3">
+   {!hasVisibleTimelineEvents && (
+    <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+     <div className="flex flex-col items-center gap-2 py-4 text-center">
+      <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
+      <p className="text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+     </div>
+    </article>
+   )}
+
+   {displayedTimelineStructural.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Gatilhos principais</p>
+     {displayedTimelineStructural.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
+    </section>
+   )}
+
+   {displayedTimelineRelevant.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Eventos relevantes</p>
+     {displayedTimelineRelevant.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
+    </section>
+   )}
+
+   {displayedTimelineRoutine.length > 0 && (
+    <section className="space-y-2">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
+     {displayedTimelineRoutine.map((item) => {
+      if (item.type === 'single') return renderAgendaEventCard(item.payload);
+      const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
+      return (
+       <article key={item.payload.groupKey} className="rounded-2xl border border-[#E2EDF5] bg-white p-4 shadow-sm">
+        <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
+        <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
+        <p className="mt-2 text-[12px] text-[#94A3B8]">Pilar afetado: {item.payload.pillar}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+         <button
+          className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+          disabled={actionsDisabled}
+          onClick={(event) => {
+           if (guardAction(event, item.payload.items[0].companyId)) return;
+           if (item.payload.pillar !== 'A classificar') goToPillar(item.payload.pillar);
+          }}
+         >
+          Ver impacto no pilar
+         </button>
+         <button
+          className="inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]"
+          onClick={() => setExpandedEventRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
+         >
+          Ver eventos
+          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+         </button>
+        </div>
+        {isOpen && <div className="mt-3 space-y-2">{item.payload.items.map((timelineEvent) => renderAgendaEventCard(timelineEvent, true))}</div>}
+       </article>
+      );
+     })}
+    </section>
+   )}
+
+   {hasVisibleTimelineEvents && (
+    <section className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-5">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Fechar a leitura</p>
+     <p className="mt-1 text-[14px] text-[#1F2937]">Acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
+     <div className="mt-3 flex flex-wrap items-center gap-2">
+      <button
+       className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+       disabled={actionsDisabled}
+       onClick={(event) => {
+        if (guardAction(event, companyContext.companyId)) return;
+        setActiveTab('Pilares');
+       }}
+      >
+       Ver todos os impactos esperados nos pilares
+      </button>
+      <button
+       className={cx('rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+       disabled={actionsDisabled}
+       onClick={(event) => guardAction(event, companyContext.companyId)}
+      >
+       Me lembrar dos principais gatilhos
+      </button>
+     </div>
+    </section>
+   )}
+  </div>
  </div>
  )}
 
  {activeTab === 'Preço' && (
- <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <div className="flex flex-wrap items-start justify-between gap-2">
- <div>
- <h2 className="text-[15px] font-semibold text-[#111827]">Preço vs valor estimado</h2>
- <p className="mt-1 text-[14px] text-[#64748B]">Leitura por cenário-base de valuation (DCF). Não é recomendação de compra ou venda.</p>
- </div>
- <div className="flex items-center gap-2">
- {valuationStateChipLabel && (
- <span className={cx('rounded-full border px-2.5 py-1 text-[14px] font-semibold', valuationStateChipTone)}>{valuationStateChipLabel}</span>
- )}
- <button
- type="button"
- onClick={(event) => {
- event.preventDefault();
- event.stopPropagation();
- setShowValuationMethodologyDrawer(true);
- }}
- className="relative z-10 inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-[12px] text-[#64748B] transition-colors hover:bg-[#F5F7FA] hover:text-[#334155]"
- aria-label="Aprender como calculamos o valuation"
- title="Aprender"
- >
- <CircleHelp className="h-3.5 w-3.5" />
- Aprender
- </button>
- </div>
- </div>
- <p className="mt-2 text-[14px] text-[#9CA3AF]">Fonte: {safeMeta(activeData?.priceData.source)} | Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
+ <div className="space-y-4">
 
- <div className="mt-4 grid gap-2 sm:grid-cols-3">
- <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[14px] text-[#64748B]">Preço atual</p>
- <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.current) || '--'}</p>
- </div>
- <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[14px] text-[#64748B]">Preço justo estimado</p>
- <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.estimatedFairValue) || '--'}</p>
- </div>
- <div className="rounded-lg border border-[#E5EAF1] bg-[#F8FAFD] px-3 py-2">
- <p className="text-[14px] text-[#64748B]">Diferença vs preço atual</p>
- <p className="text-[14px] font-semibold text-[#1E293B]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '--'}</p>
- </div>
- </div>
+  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+   <div className="flex flex-wrap items-start justify-between gap-3">
+    <div>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Preço vs valor estimado</p>
+     <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Leitura por DCF</h2>
+     <p className="mt-1 text-[13px] text-[#64748B]">Não é recomendação de compra ou venda.</p>
+    </div>
+    <div className="flex items-center gap-2">
+     {valuationStateChipLabel && (
+      <span className={cx('rounded-full border px-3 py-1 text-[13px] font-semibold', valuationStateChipTone)}>{valuationStateChipLabel}</span>
+     )}
+     <button
+      type="button"
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowValuationMethodologyDrawer(true); }}
+      className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-[#E2EDF5] px-2.5 py-1.5 text-[12px] text-[#64748B] hover:bg-[#F6FAFC]"
+      aria-label="Aprender como calculamos o valuation"
+     >
+      <CircleHelp className="h-3.5 w-3.5" />
+      Aprender
+     </button>
+    </div>
+   </div>
+   <p className="mt-3 text-[11px] text-[#B0BAC8]">Fonte: {safeMeta(activeData?.priceData.source)} · Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
 
- {valuationSummaryLine && (
- <section className="mt-3 rounded-lg border border-[#D6F5EE] bg-[#F4FFFC] p-3">
- <p className="text-[11px] font-semibold uppercase tracking-wide text-[#0F766E]">Por que isso importa</p>
- <p className="mt-1 text-[14px] text-[#334155]">{valuationSummaryLine}</p>
- </section>
- )}
+   <div className="mt-4 grid gap-3 sm:grid-cols-3">
+    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Preço atual</p>
+     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.current) || '—'}</p>
+    </div>
+    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Preço justo estimado</p>
+     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.estimatedFairValue) || '—'}</p>
+    </div>
+    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Diferença vs atual</p>
+     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '—'}</p>
+    </div>
+   </div>
 
- <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-[#FCFDFE] p-4">
- <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Régua de valuation</p>
- {!hasSemanticDomain && (
- <div className="py-3 text-[14px] text-[#9CA3AF]">Sem base suficiente para exibir a régua de valuation neste momento.</div>
- )}
- {hasSemanticDomain && (
- <>
- <div className="mt-3 rounded-lg border border-[#E6ECF2] bg-white p-3">
- <div className="mb-2 flex items-center justify-between text-[14px] font-medium text-[#94A3B8]">
- <span>{formatCurrencyBRL(rulerMin)}</span>
- <span>Posição do preço atual vs. preço justo estimado</span>
- <span>{formatCurrencyBRL(rulerMax)}</span>
- </div>
- <div className="relative pt-9">
- {fairValue != null && fairMarker != null && (
- <div className="pointer-events-none absolute left-0 right-0 top-0">
- <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#CFE9E1] bg-white px-2 py-1 text-[14px] font-semibold text-[#0F766E] shadow-sm">
- Preço justo estimado {formatCurrencyBRL(fairValue)}
- </div>
- </div>
- )}
- {currentMarker != null && (
- <div className="pointer-events-none absolute bottom-0 top-0 z-[1]" style={{ left: `${currentMarker}%` }}>
- <div className="-ml-[1.5px] h-full w-[3px] rounded-full bg-[#0B1220]/95 shadow-[0_0_0_2px_#ffffff]" />
- <div className={`absolute -top-5 whitespace-nowrap rounded-md border border-[#CBD5E1] bg-white px-2 py-1 text-[14px] font-semibold text-[#0B1220] shadow-sm ${currentMarkerLabelClass}`}>
- <span>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}</span>
- <span className="ml-1 text-[#475569]">{formatCurrencyBRL(currentPriceForRuler)}</span>
- </div>
- </div>
- )}
- <div className="h-9 overflow-hidden rounded-full border border-[#DCE4EE] bg-[#F8FAFD]">
- {hasNearZone ? (
- <div className="flex h-full w-full">
- <div className="h-full bg-[#E9F8F4]" style={{ width: `${belowZoneWidthPct}%` }} />
- <div className="h-full border-x border-[#F2D28A] bg-[#FFF4DB]" style={{ width: `${nearZoneWidthPct}%` }} />
- <div className="h-full bg-[#FDEBE7]" style={{ width: `${aboveZoneWidthPct}%` }} />
- </div>
- ) : (
- <div className="h-full w-full bg-[#EEF2F6]" />
- )}
- </div>
- </div>
- <div className="mt-3 grid gap-2 text-[14px] text-[#5B6472] sm:grid-cols-3">
- <p><span className="inline-block h-2 w-2 rounded-full bg-[#A6E7D6]" /> <span className="ml-1 font-medium text-[#334155]">Abaixo do preço justo estimado</span></p>
- <p><span className="inline-block h-2 w-2 rounded-full bg-[#F2C86B]" /> <span className="ml-1 font-medium text-[#334155]">Próximo do preço justo estimado</span></p>
- <p><span className="inline-block h-2 w-2 rounded-full bg-[#F1B4A8]" /> <span className="ml-1 font-medium text-[#334155]">Acima do preço justo estimado</span></p>
- </div>
- <div className="mt-2">
- <p className="text-[14px] font-medium text-[#334155]">A régua mostra em qual zona o preço atual cai em relação ao preço justo estimado.</p>
- <button
- type="button"
- onClick={(event) => {
- event.preventDefault();
- event.stopPropagation();
- setShowValuationMethodologyDrawer(true);
- }}
- className="mt-1 inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[12px] text-[#64748B] transition-colors hover:bg-[#F5F7FA] hover:text-[#334155]"
- >
- <CircleHelp className="h-3.5 w-3.5" />
- Entender cálculo do valuation
- </button>
- </div>
- </div>
- </>
- )}
-</section>
+   {valuationSummaryLine && (
+    <div className="mt-4 rounded-xl border border-[#99F6E4] bg-[#F0FDFA] p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F766E]">Por que isso importa</p>
+     <p className="mt-1 text-[14px] text-[#334155]">{valuationSummaryLine}</p>
+    </div>
+   )}
+  </article>
 
- <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
- <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Cenários do valuation</p>
- <div className="grid grid-cols-4 border-b border-[#EEF2F6] pb-2 text-[11px] font-semibold text-[#94A3B8]">
- <span>Cenário</span>
- <span>Valor estimado</span>
- <span>Diferença vs preço atual</span>
- <span>Leitura</span>
- </div>
- {valuationScenarios.map((scenario, index) => (
- <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#EEF2F6] py-2.5 text-[14px] text-[#334155]">
- <span className="font-medium">{scenario.scenario || '--'}</span>
- <span>{scenario.estimatedValue || '--'}</span>
- <span>{scenario.differenceVsCurrent || '--'}</span>
- <span className="text-[#64748B]">{scenario.reading || '--'}</span>
- </div>
- ))}
- {valuationScenarios.length === 0 && <div className="py-3 text-[14px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
- </section>
+  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Régua de valuation</p>
+   {!hasSemanticDomain && (
+    <div className="py-6 text-center text-[14px] text-[#9CA3AF]">Sem base suficiente para exibir a régua de valuation neste momento.</div>
+   )}
+   {hasSemanticDomain && (
+   <>
+    <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F8FAFD] p-4">
+     <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-[#94A3B8]">
+      <span>{formatCurrencyBRL(rulerMin)}</span>
+      <span>Posição do preço atual vs. preço justo estimado</span>
+      <span>{formatCurrencyBRL(rulerMax)}</span>
+     </div>
+     <div className="relative pt-9">
+      {fairValue != null && fairMarker != null && (
+       <div className="pointer-events-none absolute left-0 right-0 top-0">
+        <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl border border-[#CFE9E1] bg-white px-2 py-1 text-[13px] font-semibold text-[#0F766E] shadow-sm">
+         Preço justo estimado {formatCurrencyBRL(fairValue)}
+        </div>
+       </div>
+      )}
+      {currentMarker != null && (
+       <div className="pointer-events-none absolute bottom-0 top-0 z-[1]" style={{ left: `${currentMarker}%` }}>
+        <div className="-ml-[1.5px] h-full w-[3px] rounded-full bg-[#0B1220]/95 shadow-[0_0_0_2px_#ffffff]" />
+        <div className={`absolute -top-5 whitespace-nowrap rounded-xl border border-[#CBD5E1] bg-white px-2 py-1 text-[13px] font-semibold text-[#0B1220] shadow-sm ${currentMarkerLabelClass}`}>
+         <span>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}</span>
+         <span className="ml-1 text-[#475569]">{formatCurrencyBRL(currentPriceForRuler)}</span>
+        </div>
+       </div>
+      )}
+      <div className="h-9 overflow-hidden rounded-full border border-[#DCE4EE] bg-[#F8FAFD]">
+       {hasNearZone ? (
+        <div className="flex h-full w-full">
+         <div className="h-full bg-[#E9F8F4]" style={{ width: `${belowZoneWidthPct}%` }} />
+         <div className="h-full border-x border-[#F2D28A] bg-[#FFF4DB]" style={{ width: `${nearZoneWidthPct}%` }} />
+         <div className="h-full bg-[#FDEBE7]" style={{ width: `${aboveZoneWidthPct}%` }} />
+        </div>
+       ) : (
+        <div className="h-full w-full bg-[#EEF2F6]" />
+       )}
+      </div>
+     </div>
+     <div className="mt-3 grid gap-2 text-[12px] text-[#5B6472] sm:grid-cols-3">
+      <p><span className="inline-block h-2 w-2 rounded-full bg-[#A6E7D6]" /> <span className="ml-1 font-medium text-[#334155]">Abaixo do preço justo estimado</span></p>
+      <p><span className="inline-block h-2 w-2 rounded-full bg-[#F2C86B]" /> <span className="ml-1 font-medium text-[#334155]">Próximo do preço justo estimado</span></p>
+      <p><span className="inline-block h-2 w-2 rounded-full bg-[#F1B4A8]" /> <span className="ml-1 font-medium text-[#334155]">Acima do preço justo estimado</span></p>
+     </div>
+     <div className="mt-2">
+      <p className="text-[13px] font-medium text-[#334155]">A régua mostra em qual zona o preço atual cai em relação ao preço justo estimado.</p>
+      <button
+       type="button"
+       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowValuationMethodologyDrawer(true); }}
+       className="mt-1 inline-flex items-center gap-1 rounded-xl px-1 py-0.5 text-[12px] text-[#64748B] hover:bg-[#F5F7FA]"
+      >
+       <CircleHelp className="h-3.5 w-3.5" />
+       Entender cálculo do valuation
+      </button>
+     </div>
+    </div>
+   </>
+   )}
+  </section>
 
- <section className="mt-4 rounded-lg border border-[#E5EAF1] bg-white p-3">
- <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">Sensibilidade do valuation</p>
- <p className="mt-1 text-[14px] text-[#6B7280]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
- <div className="mt-3 grid gap-2 sm:grid-cols-2">
- {sensitivityDrivers.map((driver, index) => (
- <div key={`${driver.driver}-${index}`} className="rounded-md border border-[#E6EAF0] bg-[#FBFCFE] p-2.5">
- <p className="text-[14px] font-semibold text-[#0F172A]">{driver.driver || '--'}</p>
- <p className="mt-1 text-[14px] text-[#475569]">{driver.value || '--'}</p>
- <p className="mt-1 text-[14px] text-[#6B7280]">{driver.impact || '--'}</p>
- </div>
- ))}
- {sensitivityDrivers.length === 0 && <p className="text-[14px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
- </div>
- </section>
+  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Cenários do valuation</p>
+   <div className="mt-3 grid grid-cols-4 border-b border-[#E2EDF5] pb-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <span>Cenário</span>
+    <span>Valor estimado</span>
+    <span>Diferença vs atual</span>
+    <span>Leitura</span>
+   </div>
+   {valuationScenarios.map((scenario, index) => (
+    <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#E2EDF5] py-3.5 text-[13px] text-[#334155]">
+     <span className="font-medium">{scenario.scenario || '—'}</span>
+     <span>{scenario.estimatedValue || '—'}</span>
+     <span>{scenario.differenceVsCurrent || '—'}</span>
+     <span className="text-[#64748B]">{scenario.reading || '—'}</span>
+    </div>
+   ))}
+   {valuationScenarios.length === 0 && <div className="py-4 text-center text-[13px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
+  </section>
 
- <section className="mt-5 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
- <p className="mb-2 text-[11px] uppercase tracking-wide text-[#94A3B8]">Múltiplos de apoio</p>
- <div className="grid grid-cols-5 border-b border-[#EEF2F6] pb-2 text-[11px] font-semibold text-[#94A3B8]">
- <span>Métrica</span>
- <span>Atual</span>
- <span>Setor</span>
- <span>Histórico 5a</span>
- <span>Leitura</span>
+  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Sensibilidade do valuation</p>
+   <p className="mt-1 text-[13px] text-[#64748B]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
+   <div className="mt-3 grid gap-3 sm:grid-cols-2">
+    {sensitivityDrivers.map((driver, index) => (
+     <div key={`${driver.driver}-${index}`} className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[13px] font-semibold text-[#0F172A]">{driver.driver || '—'}</p>
+      <p className="mt-1 text-[13px] text-[#475569]">{driver.value || '—'}</p>
+      <p className="mt-1 text-[12px] text-[#6B7280]">{driver.impact || '—'}</p>
+     </div>
+    ))}
+    {sensitivityDrivers.length === 0 && <p className="text-[13px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
+   </div>
+  </section>
+
+  <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
+   <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Múltiplos de apoio</p>
+   </div>
+   <div className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <span>Métrica</span>
+    <span>Atual</span>
+    <span>Setor</span>
+    <span>Histórico 5a</span>
+    <span>Leitura</span>
+   </div>
+   {companyPriceRows.map((row) => (
+    <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-3 text-[13px] text-[#334155] hover:bg-[#F6FAFC]">
+     <span className="font-medium">{row.metric}</span>
+     <span>{row.current}</span>
+     <span>{row.sector}</span>
+     <span>{row.histórical}</span>
+     <span className="text-[#64748B]">{row.insight}</span>
+    </div>
+   ))}
+   {companyPriceRows.length === 0 && <div className="px-5 py-4 text-center text-[13px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
+   <div className="border-t border-[#E2EDF5] px-5 py-3">
+    <p className="text-[12px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
+   </div>
+  </section>
+
  </div>
- {companyPriceRows.map((row) => (
- <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#EEF2F6] py-2.5 text-[14px] text-[#334155]">
- <span className="font-medium">{row.metric}</span>
- <span>{row.current}</span>
- <span>{row.sector}</span>
- <span>{row.histórical}</span>
- <span className="text-[#64748B]">{row.insight}</span>
- </div>
- ))}
- {companyPriceRows.length === 0 && <div className="py-3 text-[14px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
- <p className="mt-3 text-[14px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
- </section>
- </article>
  )}
 
  {activeTab === 'Fontes' && (
- <article className="rounded-xl border border-[#E8EAED] bg-white p-5">
- <h2 className="text-[15px] font-semibold text-[#111827]">Fontes & Metodologia</h2>
- <p className="mt-1 text-[13px] text-[#6B7280]">Transparência da leitura: veja de onde vem os dados e quão atualizadas estão as fontes que sustentam esta análise.</p>
+ <div className="space-y-4">
 
- {sourceRowsWithRelevance.length === 0 && (
- <div className="mt-4 rounded-lg border border-[#F3F4F6] px-4 py-3 text-[12px] text-[#9CA3AF]">
- Ainda não temos dados suficientes para este indicador. Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)}. Fonte esperada: CVM/RI
+  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Fontes & Metodologia</p>
+   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Transparência da leitura</h2>
+   <p className="mt-1 text-[13px] text-[#64748B]">Veja de onde vem os dados e quão atualizadas estão as fontes que sustentam esta análise.</p>
+  </article>
+
+  {sourceRowsWithRelevance.length === 0 && (
+   <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+    <div className="flex flex-col items-center gap-3 py-4 text-center">
+     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F6FAFC]">
+      <Database className="h-5 w-5 text-[#A0AEC0]" />
+     </div>
+     <p className="text-[14px] font-medium text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
+     <p className="text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
+    </div>
+   </article>
+  )}
+
+  {sourceRowsWithRelevance.length > 0 && (
+  <>
+   <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+     <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Confiabilidade das fontes</p>
+      <h3 className="mt-1 text-[16px] font-bold text-[#111827]">{resolvedSourceConfidenceLabel}</h3>
+     </div>
+     <span className={cx('rounded-full border px-3 py-1 text-[12px] font-semibold', sourceConfidenceTone)}>{resolvedSourceConfidenceLabel}</span>
+    </div>
+    <p className="mt-2 text-[13px] text-[#475569]">{resolvedSourceConfidenceSummary}</p>
+    <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes atualizadas</p>
+      <p className="mt-1 font-semibold text-[#111827]">{updatedPrimarySources}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes complementares antigas</p>
+      <p className="mt-1 font-semibold text-[#111827]">{outdatedComplementarySources}</p>
+     </div>
+     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Última atualização</p>
+      <p className="mt-1 font-semibold text-[#111827]">{safeMeta(latestSourceDate)}</p>
+     </div>
+    </div>
+   </section>
+
+   <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
+    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
+     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes principais da leitura</p>
+    </div>
+    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+     <span>Categoria</span>
+     <span>Fonte</span>
+     <span>Documento</span>
+     <span>Data</span>
+     <span>Status</span>
+     <span className="col-span-2">Consequência</span>
+     <span className="col-span-2">Link</span>
+    </div>
+    {primarySourceRows.map((row) => (
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
+     <span className="font-medium">{row.category}</span>
+     <span className="text-[#64748B]">{safeMeta(row.source)}</span>
+     <span>{row.doc}</span>
+     <span className="text-[#64748B]">{safeMeta(row.date)}</span>
+     <span>
+      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
+       {row.statusLabel}
+      </span>
+     </span>
+     <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
+     <a
+      href={row.link}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(event) => {
+       if (guardAction(event, row.companyId)) return;
+      }}
+      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
+     >
+      Abrir documento
+      <ExternalLink className="h-3 w-3" />
+     </a>
+    </div>
+    ))}
+   </section>
+
+   <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
+    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
+     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes complementares</p>
+    </div>
+    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+     <span>Categoria</span>
+     <span>Fonte</span>
+     <span>Documento</span>
+     <span>Data</span>
+     <span>Status</span>
+     <span className="col-span-2">Consequência</span>
+     <span className="col-span-2">Link</span>
+    </div>
+    {complementarySourceRows.map((row) => (
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
+     <span className="font-medium">{row.category}</span>
+     <span className="text-[#64748B]">{safeMeta(row.source)}</span>
+     <span>{row.doc}</span>
+     <span className="text-[#64748B]">{safeMeta(row.date)}</span>
+     <span>
+      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
+       {row.statusLabel}
+      </span>
+     </span>
+     <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
+     <a
+      href={row.link}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(event) => {
+       if (guardAction(event, row.companyId)) return;
+      }}
+      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
+     >
+      Abrir documento
+      <ExternalLink className="h-3 w-3" />
+     </a>
+    </div>
+    ))}
+   </section>
+
+   <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Como usamos essas fontes</p>
+    <ul className="mt-3 space-y-2">
+     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Dados financeiros sustentam os pilares estruturais da leitura.</span></li>
+     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Eventos e comunicados complementam o contexto recente da empresa.</span></li>
+     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Fontes complementares não substituem as fontes principais da análise.</span></li>
+    </ul>
+   </section>
+  </>
+  )}
  </div>
- )}
-
- {sourceRowsWithRelevance.length > 0 && (
- <>
- <section className="mt-4 rounded-xl border border-[#DDE3EA] bg-[#FCFDFE] p-4">
-  <div className="flex flex-wrap items-center justify-between gap-2">
-  <div>
-   <p className="text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">Confiabilidade das fontes</p>
-  <p className="mt-1 text-[14px] font-semibold text-[#111827]">{resolvedSourceConfidenceLabel}</p>
- </div>
-  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', sourceConfidenceTone)}>{resolvedSourceConfidenceLabel}</span>
- </div>
-  <p className="mt-2 text-[13px] text-[#475569]">{resolvedSourceConfidenceSummary}</p>
-  <div className="mt-3 space-y-1 text-[12px] text-[#374151]">
-  <p>Fontes principais atualizadas: {updatedPrimarySources}</p>
-  <p>Fontes complementares antigas: {outdatedComplementarySources}</p>
-  <p>Última atualização mais recente: {safeMeta(latestSourceDate)}</p>
-  </div>
- </section>
-
- <section className="mt-4 overflow-hidden rounded-lg border border-[#F3F4F6]">
-  <p className="border-b border-[#F3F4F6] bg-[#F9FAFB] px-4 py-2 text-[12px] font-semibold text-[#475467]">Fontes principais da leitura</p>
-  <div className="grid grid-cols-9 border-b border-[#F3F4F6] bg-white px-4 py-2.5 text-[11px] font-semibold text-[#94A3B8]">
-  <span>Categoria</span>
-  <span>Fonte</span>
-  <span>Documento</span>
-  <span>Data</span>
-  <span>Status</span>
-  <span className="col-span-2">Consequencia</span>
-  <span className="col-span-2">Link</span>
-  </div>
-  {primarySourceRows.map((row) => (
-  <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#F3F4F6] px-4 py-3 text-[12px] text-[#334155]">
-   <span>{row.category}</span>
-   <span>{safeMeta(row.source)}</span>
-   <span>{row.doc}</span>
-   <span>{safeMeta(row.date)}</span>
-   <span>
-   <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
-    {row.statusLabel}
-   </span>
-   </span>
-   <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
-   <a
-   href={row.link}
-   target="_blank"
-   rel="noreferrer"
-   onClick={(event) => {
-    if (guardAction(event, row.companyId)) return;
-   }}
-   className={cx('col-span-2 mt-1 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
-   >
-   Abrir documento original
-   <ExternalLink className="h-3.5 w-3.5" />
-   </a>
-  </div>
-  ))}
- </section>
-
- <section className="mt-4 overflow-hidden rounded-lg border border-[#F3F4F6]">
-  <p className="border-b border-[#F3F4F6] bg-[#F9FAFB] px-4 py-2 text-[12px] font-semibold text-[#475467]">Fontes complementares</p>
-  <div className="grid grid-cols-9 border-b border-[#F3F4F6] bg-white px-4 py-2.5 text-[11px] font-semibold text-[#94A3B8]">
-  <span>Categoria</span>
-  <span>Fonte</span>
-  <span>Documento</span>
-  <span>Data</span>
-  <span>Status</span>
-  <span className="col-span-2">Consequencia</span>
-  <span className="col-span-2">Link</span>
-  </div>
-  {complementarySourceRows.map((row) => (
-  <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#F3F4F6] px-4 py-3 text-[12px] text-[#334155]">
-   <span>{row.category}</span>
-   <span>{safeMeta(row.source)}</span>
-   <span>{row.doc}</span>
-   <span>{safeMeta(row.date)}</span>
-   <span>
-   <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
-    {row.statusLabel}
-   </span>
-   </span>
-   <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
-   <a
-   href={row.link}
-   target="_blank"
-   rel="noreferrer"
-   onClick={(event) => {
-    if (guardAction(event, row.companyId)) return;
-   }}
-   className={cx('col-span-2 mt-1 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
-   >
-   Abrir documento original
-   <ExternalLink className="h-3.5 w-3.5" />
-   </a>
-  </div>
-  ))}
- </section>
-
- <section className="mt-4 rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
-  <p className="text-[12px] font-semibold text-[#475569]">Como usamos essas fontes</p>
-  <ul className="mt-2 space-y-1 text-[12px] text-[#64748B]">
-  <li>Dados financeiros sustentam os pilares estruturais da leitura.</li>
-  <li>Eventos e comunicados complementam o contexto recente da empresa.</li>
-  <li>Fontes complementares não substituem as fontes principais da análise.</li>
-  </ul>
- </section>
- </>
- )}
- </article>
  )}
  </>
  )}
@@ -4404,7 +4331,7 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  <button
  type="button"
- className="rounded-md border border-[#E5E7EB] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
+ className="rounded-md border border-[#E2EDF5] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
  onClick={() => setShowValuationMethodologyDrawer(false)}
  >
  Fechar
@@ -4414,17 +4341,17 @@ const changesCount = changesBySelectedWindow.length;
  <p>Nosso valuation busca responder uma pergunta simples: quanto uma empresa vale hoje com base no caixa que ela pode gerar no futuro?</p>
  <p>Para isso, usamos um modelo de Fluxo de Caixa Descontado (DCF).</p>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">Em termos simples</p>
  <p className="mt-1">Projetamos a geração de caixa futura da empresa, trazemos esses valores para o presente com uma taxa de desconto e chegamos a uma estimativa de valor por ação.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">A lógica central</p>
  <p className="mt-1">Uma empresa vale o quanto consegue gerar de caixa ao longo do tempo. Como o dinheiro no futuro vale menos do que hoje, descontamos esses fluxos usando uma taxa que reflete risco, custo de capital e estrutura financeira.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">Como fazemos isso</p>
  <ul className="mt-2 list-disc space-y-1 pl-5">
  <li>Partimos dos dados atuais da empresa, como receita, EBIT, imposto, dívida, caixa e número de ações.</li>
@@ -4436,18 +4363,18 @@ const changesCount = changesBySelectedWindow.length;
  </ul>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que mais influencia o resultado</p>
  <p className="mt-1">O valuation depende principalmente de crescimento da receita, margem operacional, reinvestimento, WACC, crescimento terminal e número de ações.</p>
  <p className="mt-1">Pequenas mudanças nessas premissas podem alterar de forma relevante o preço justo estimado.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que esse cálculo faz bem</p>
  <p className="mt-1">Ele ajuda a enxergar o valor econômico do negócio, comparar preço de mercado com valor estimado e entender quais premissas sustentam a tese.</p>
  </section>
 
- <section className="rounded-lg border border-[#EEF2F6] bg-[#FBFCFE] p-3">
+ <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
  <p className="font-semibold text-[#0F172A]">O que esse cálculo não faz</p>
  <p className="mt-1">Ele não prevê o preço da ação no curto prazo, não garante retorno e não substitui a análise qualitativa do negócio.</p>
  </section>

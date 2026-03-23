@@ -19,7 +19,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   companies,
   highlights,
-  movers,
+  movers as mockMovers,
   indexCards,
   volatility,
   thesisCollections,
@@ -30,7 +30,10 @@ import {
   getPresetChipLabels,
   getSortedHighlights,
   pillarLabelMap,
+  mapMoversFromInsights,
 } from "../services";
+
+import type { ExploreMovementInsightsDto, ExploreResponse } from "../services";
 
 import type {
   MoverType,
@@ -78,10 +81,13 @@ export interface UseExploreReturn {
   volatilityIsStale: boolean;
 
   // Dados estáticos expostos ao componente
-  indexCards:         IndexCard[];
-  movers:             MoverRow[];
-  movementInsights:   Record<string, MovementInsight>;
-  volatility:         Volatility;
+  indexCards:          IndexCard[];
+  movers:              MoverRow[];
+  movementInsights:    Record<string, MovementInsight>;
+  movementInsightsDto: ExploreMovementInsightsDto | null;
+  movementSummary:     ExploreMovementInsightsDto['summary'];
+  movementDominant:    ExploreMovementInsightsDto['dominantInsight'];
+  volatility:          Volatility;
   thesisCollections:  string[];
   sectorCollections:  string[];
   pillars:            readonly string[];
@@ -144,6 +150,10 @@ export function useExplore(): UseExploreReturn {
 
   const isLoading = false; // pronto para ligar quando vier API
 
+  // Dados da API (null até haver chamada HTTP real)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const exploreData = null as ExploreResponse | null;
+
   // ─── Dados derivados ───────────────────────────────────────────────────────
 
   const filteredCompanies = useMemo<CompanyCard[]>(() => {
@@ -191,6 +201,17 @@ export function useExplore(): UseExploreReturn {
     () => getSortedHighlights(highlights),
     [],
   );
+
+  const movers = useMemo<MoverRow[]>(() => {
+    const dto = exploreData?.movementInsights ?? null;
+    if (dto?.groups) {
+      const highs      = mapMoversFromInsights(dto, 'highs');
+      const lows       = mapMoversFromInsights(dto, 'lows');
+      const mostTraded = mapMoversFromInsights(dto, 'mostTraded');
+      return [...highs, ...lows, ...mostTraded];
+    }
+    return mockMovers;
+  }, [exploreData]);
 
   const staleCount        = filteredCompanies.filter((c) => c.freshnessStatus === "Antigo").length;
   const showStaleBanner   = staleCount >= 2;
@@ -289,6 +310,9 @@ export function useExplore(): UseExploreReturn {
     indexCards,
     movers,
     movementInsights,
+    movementInsightsDto: exploreData?.movementInsights ?? null,
+    movementSummary:     exploreData?.movementInsights?.summary ?? null,
+    movementDominant:    exploreData?.movementInsights?.dominantInsight ?? null,
     volatility,
     thesisCollections,
     sectorCollections,

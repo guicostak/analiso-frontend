@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/comparar/page": "/comparar",
+  "/demo/page": "/demo",
+  "/dashboard/page": "/dashboard",
+  "/empresa/[ticker]/page": "/empresa/[ticker]",
+  "/login/page": "/login",
+  "/explorar/page": "/explorar",
+  "/salte-v2/page": "/salte-v2",
+  "/onboarding/page": "/onboarding",
+  "/watchlist/page": "/watchlist",
+  "/(marketing)/page": "/"
+}

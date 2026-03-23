@@ -194,6 +194,7 @@ export interface UseDashboardInboxReturn {
   hasSourceFilter:          boolean;
   hasPeriodFilter:          boolean;
   refreshLabel:             string;
+  renderedLabel:            string;
 
   // Ações
   setInboxFilters:         React.Dispatch<React.SetStateAction<InboxFilters>>;
@@ -398,6 +399,22 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
   const todayAttentionCount = todayItems.filter((i) => i.severity === "Atenção").length;
   const todayHealthyCount   = todayItems.filter((i) => i.severity === "Saudável").length;
 
+  const distinctTickers = useMemo(
+    () => Array.from(new Set(inboxItems.map((item) => item.ticker))),
+    [inboxItems],
+  );
+  const distinctHealthyTickers = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          todayItems
+            .filter((item) => item.severity === "Saudável")
+            .map((item) => item.ticker),
+        ),
+      ),
+    [todayItems],
+  );
+
   const topRiskItem    = todayItems.filter((i) => i.severity === "Risco").sort((a, b) => b.impactScore - a.impactScore)[0];
   const topImproveItem = todayItems.filter((i) => i.severity === "Saudável").sort((a, b) => b.impactScore - a.impactScore)[0];
 
@@ -529,6 +546,11 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
     [lastRefreshAt, clockTick],
   );
 
+  const renderedLabel = useMemo(
+    () => (dashboardData?.renderedAt ? relativeFromTimestamp(new Date(dashboardData.renderedAt).getTime()) : refreshLabel),
+    [dashboardData?.renderedAt, refreshLabel],
+  );
+
   return {
     // Estado da API
     dashboardData,
@@ -566,8 +588,8 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
     hasAnyFilterOverride,
     showFiltersCount,
     advancedFiltersCount,
-    healthyWatchlistCount: 12,
-    totalWatchlistCount:   20,
+    healthyWatchlistCount: distinctHealthyTickers.length,
+    totalWatchlistCount:   distinctTickers.length,
     activeSeverities,
     activePillars: activePillarsFilter,
     activeSources,
@@ -576,6 +598,7 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
     hasSourceFilter,
     hasPeriodFilter,
     refreshLabel,
+    renderedLabel,
 
     // Ações
     setInboxFilters,

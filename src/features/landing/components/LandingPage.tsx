@@ -1,58 +1,52 @@
-﻿import {
-  comparisonRows,
-  faqItems,
-  features,
-  navLinks,
-  pricingPlans,
-  steps,
-  testimonials,
-} from "@/src/data/landing";
-import { AboutAnalisoSection } from "./AboutAnalisoSection";
-import { BeginnerInvestSection } from "./BeginnerInvestSection";
-import { ComparisonSection } from "./ComparisonSection";
-import { ComparisonCtaBanner } from "./ComparisonCtaBanner";
-import { CtaSection } from "./CtaSection";
-import { FaqSection } from "./FaqSection";
-import { FeaturesSection } from "./FeaturesSection";
-import { FooterSection } from "./FooterSection";
-import { HeroSection } from "./HeroSection";
-import { PricingToggleClient } from "./PricingToggleClient";
-import { StepsSection } from "./StepsSection";
-import { TestimonialsClient } from "./TestimonialsClient";
-import { GuidedWorkspaceSection } from "./GuidedWorkspaceSection";
-import { InteractivePlatformSection } from "./InteractivePlatformSection";
+"use client";
+
+import {
+  AnalysisMomentsSection,
+  CtaSection,
+  DarkCapabilities,
+  FaqSection,
+  HeroMarqueeSection,
+  HeroSection,
+  ScrollReveal,
+  SolutionSection,
+  StepsSection,
+} from "./LandingSections";
+import { AnalysisFlowSection } from "./AnalysisFlowSection";
+import { ReadableCompanySection } from "./ReadableCompanySection";
 
 export function LandingPage() {
   return (
-    <div className="landing-theme min-h-screen bg-[#F4F6F9] text-[#0F0F14]">
-      <main className="landing-main">
-        <HeroSection navLinks={navLinks} />
-        <AboutAnalisoSection />
-        <BeginnerInvestSection />
-        <StepsSection steps={steps} />
-        <GuidedWorkspaceSection />
-        <InteractivePlatformSection />
-        <FeaturesSection features={features} />
-        <TestimonialsClient testimonials={testimonials} />
-        <PricingToggleClient pricingPlans={pricingPlans} />
-        <ComparisonSection comparisonRows={comparisonRows} />
-        <ComparisonCtaBanner />
-        <FaqSection items={faqItems} />
-        <CtaSection />
-        <FooterSection />
+    <div className="min-h-screen bg-white text-[#111111]">
+      <main>
+        <HeroSection />
+        <ScrollReveal delay={0.02}>
+          <HeroMarqueeSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.03}>
+          <AnalysisMomentsSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <SolutionSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.05}>
+          <StepsSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <ReadableCompanySection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <AnalysisFlowSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.05}>
+          <DarkCapabilities />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <FaqSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <CtaSection />
+        </ScrollReveal>
       </main>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
