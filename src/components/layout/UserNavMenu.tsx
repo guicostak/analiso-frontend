@@ -1,6 +1,4 @@
-"use client";
-
-import { CreditCard, LogOut, Settings, Sparkles, User, UserCircle2 } from "lucide-react";
+import { CreditCard, LogOut, Settings, User, UserCircle2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/features/auth/AuthContext";
@@ -13,6 +11,7 @@ export function UserNavMenu() {
 
   useEffect(() => {
     if (!open) return;
+
     const handlePointerDown = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
@@ -25,6 +24,7 @@ export function UserNavMenu() {
 
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleEscape);
+
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
@@ -40,7 +40,7 @@ export function UserNavMenu() {
     <div ref={rootRef} className="relative ml-1">
       <button
         onClick={() => setOpen((value) => !value)}
-        className={`h-8 w-8 overflow-hidden rounded-full border bg-white transition-all focus:outline-none ${open ? "border-[#12A594] ring-2 ring-[#DDF6F0]" : "border-border-strong hover:opacity-90"} `}
+        className={`h-8 w-8 overflow-hidden rounded-full border bg-white transition-all focus:outline-none ${open ? "border-[#12A594] ring-2 ring-[#DDF6F0]" : "border-border-strong hover:opacity-90"}`}
         aria-label="Abrir menu do usuário"
       >
         {user?.picture ? (
@@ -66,40 +66,26 @@ export function UserNavMenu() {
             </div>
           </div>
 
-          <div className="mt-2 rounded-[18px] border border-[#EEF2F6] bg-[linear-gradient(135deg,rgba(255,242,255,0.9)_0%,rgba(250,250,255,0.95)_52%,rgba(229,247,255,0.96)_100%)] p-3">
-            <div className="flex items-center gap-2 text-[#171717]">
-              <span className="grid h-6 w-6 place-items-center rounded-[9px] bg-white/80 text-[#D56AF1] shadow-[0_6px_16px_rgba(213,106,241,0.16)]">
-                <Sparkles className="h-3 w-3" />
-              </span>
-              <p className="text-[15px] font-semibold">Créditos de IA</p>
-            </div>
-
-            <div className="mt-3 flex items-center justify-between text-[12px] text-[#6F6F6F]">
-              <span>10 usados</span>
-              <span>10/100</span>
-            </div>
-
-            <div className="mt-2.5 h-1.5 rounded-full bg-[#EAF0F6]">
-              <div className="h-1.5 w-[38%] rounded-full bg-[#0B0B0B]" />
-            </div>
-
-            <button className="mt-3.5 inline-flex h-9 items-center justify-center rounded-[13px] border border-[#E6E6E6] bg-white px-4 text-[14px] font-semibold text-[#171717] shadow-[0_8px_18px_rgba(15,23,40,0.06)]">
-              Comprar créditos
-            </button>
-          </div>
-
           <div className="mt-2 space-y-0.5 px-0.5 py-1">
-            <button onClick={() => navigateTo("/perfil")} className="flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2 text-left text-[14px] text-[#4F4F4F] transition hover:bg-[#FAFAFA]">
+            <button
+              onClick={() => navigateTo("/perfil")}
+              className="flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2 text-left text-[14px] text-[#4F4F4F] transition hover:bg-[#FAFAFA]"
+            >
               <User className="h-4.5 w-4.5 text-[#8A8A8A]" />
               <span>Meu perfil</span>
             </button>
-            <button onClick={() => navigateTo("/assinatura")} className="flex w-full items-center justify-between rounded-[11px] px-2.5 py-2 text-left text-[14px] text-[#4F4F4F] transition hover:bg-[#FAFAFA]">
+
+            <button
+              onClick={() => navigateTo("/assinatura")}
+              className="flex w-full items-center justify-between rounded-[11px] px-2.5 py-2 text-left text-[14px] text-[#4F4F4F] transition hover:bg-[#FAFAFA]"
+            >
               <span className="flex items-center gap-2.5">
                 <CreditCard className="h-4.5 w-4.5 text-[#8A8A8A]" />
                 <span>Assinatura</span>
               </span>
               <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[11px] font-semibold text-[#3965B8]">PRO</span>
             </button>
+
             <button className="flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2 text-left text-[14px] text-[#4F4F4F] transition hover:bg-[#FAFAFA]">
               <Settings className="h-4.5 w-4.5 text-[#8A8A8A]" />
               <span>Configurações</span>

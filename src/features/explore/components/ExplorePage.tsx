@@ -80,19 +80,19 @@ export function ExplorePage() {
           <div className="absolute right-[10%] top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
         </div>
 
-        <div className="relative px-7 pb-8 pt-5">
-          <div className="mx-auto max-w-[1480px]">
-            <header className="mb-5 space-y-2.5">
+        <div className="relative px-6 pb-8 pt-5">
+          <div className="mx-auto max-w-[1380px]">
+            <header className="mb-4 space-y-2">
               <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Explorar mercado</p>
-              <div className="max-w-[700px] space-y-2.5">
-                <h1 className="text-[34px] font-semibold leading-[38px] tracking-[-0.04em] text-[#0F1728]">Explorar</h1>
-                <p className="text-[14px] leading-6 text-[#667085]">
+              <div className="max-w-[640px] space-y-2">
+                <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-[#0F1728]">Explorar</h1>
+                <p className="text-[13px] leading-6 text-[#667085]">
                   Descubra empresas e movimentos com uma leitura guiada, priorizando o que merece abertura agora e deixando a exploração mais leve ao longo da página.
                 </p>
               </div>
             </header>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <ExploreHighlightsSection
                 summaryScope={summaryScope}
                 summaryState={summaryState}

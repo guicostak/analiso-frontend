@@ -52,15 +52,15 @@ export function ExploreMarketContext({
   setShowVolatilityDetails,
 }: ExploreMarketContextProps) {
   return (
-    <section className="space-y-5">
+    <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Leitura de ambiente</p>
-          <h2 className="mt-2 text-[28px] font-semibold leading-8 tracking-[-0.03em] text-[#0F1728]">Contexto de mercado hoje</h2>
+          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-[#0F1728]">Contexto de mercado hoje</h2>
         </div>
         <button
           onClick={() => setShowContextPanel((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]"
+          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[11px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]"
         >
           {showContextPanel ? "Recolher contexto" : "Expandir contexto"}
           <ChevronDown className={`h-4 w-4 transition-transform ${showContextPanel ? "rotate-180" : ""}`} />
@@ -69,8 +69,8 @@ export function ExploreMarketContext({
 
       {showContextPanel ? (
         <>
-          <div className="grid gap-6 xl:grid-cols-12">
-            <article className="relative overflow-hidden rounded-[28px] border border-[#DDE9F5] bg-[linear-gradient(135deg,#EEF6FF_0%,#F2F8FF_28%,#F7FBFF_62%,#FFFFFF_100%)] p-7 shadow-[0_24px_50px_rgba(15,23,40,0.07)] xl:col-span-8 xl:min-h-[248px]">
+          <div className="grid gap-5 xl:grid-cols-12">
+            <article className="relative overflow-hidden rounded-[26px] border border-[#DDE9F5] bg-[linear-gradient(135deg,#EEF6FF_0%,#F2F8FF_28%,#F7FBFF_62%,#FFFFFF_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] xl:col-span-8 xl:min-h-[228px]">
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -left-10 -top-12 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.20)_0%,rgba(91,141,239,0.06)_36%,rgba(91,141,239,0)_72%)] blur-2xl" />
                 <div className="absolute left-[10%] top-5 h-24 w-40 rounded-[48%_52%_40%_60%/58%_38%_62%_42%] bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(255,255,255,0.12))]" />
@@ -78,32 +78,32 @@ export function ExploreMarketContext({
                 <div className="absolute inset-x-0 bottom-0 h-[112px] bg-[linear-gradient(180deg,rgba(238,246,255,0),rgba(238,246,255,0.34))]" />
               </div>
 
-              <div className="relative flex h-full flex-col justify-between gap-7">
+              <div className="relative flex h-full flex-col justify-between gap-6">
                 <div className="max-w-[72%]">
                   <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#3965B8]">
                     Contexto macro
                   </span>
-                  <h3 className="mt-5 text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#0F1728]">
+                  <h3 className="mt-4 text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#0F1728]">
                     Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado.
                   </h3>
-                  <p className="mt-4 text-[15px] leading-7 text-[#475467]">
+                  <p className="mt-3 text-[14px] leading-6 text-[#475467]">
                     Use este ambiente como apoio visual para decidir onde aprofundar a leitura, sem deixar o pano de fundo competir com a curadoria principal.
                   </p>
                 </div>
 
-                <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_228px]">
+                <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_216px]">
                   <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[linear-gradient(90deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
-                  <div className="relative rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.66))] p-5 shadow-[0_14px_32px_rgba(15,23,40,0.05)]">
+                  <div className="relative rounded-[22px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.66))] p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-12 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.44),rgba(255,255,255,0))]" />
                     <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Interpretacao principal</p>
-                    <p className="mt-3 max-w-[95%] text-[15px] leading-7 text-[#0F1728]">
+                    <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-[#0F1728]">
                       O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia.
                     </p>
                   </div>
-                  <div className="relative rounded-[24px] border border-white/72 bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.56))] p-5 shadow-[0_10px_24px_rgba(15,23,40,0.04)]">
+                  <div className="relative rounded-[22px] border border-white/72 bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.56))] p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]" />
                     <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">O que observar</p>
-                    <p className="mt-3 text-[14px] leading-6 text-[#475467]">
+                    <p className="mt-2.5 text-[13px] leading-5 text-[#475467]">
                       Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala.
                     </p>
                   </div>
@@ -111,10 +111,10 @@ export function ExploreMarketContext({
               </div>
             </article>
 
-            <aside className="rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.05)] xl:col-span-4">
-              <div className="mb-5">
+            <aside className="rounded-[26px] border border-[#E7EEF5] bg-white p-5 shadow-[0_18px_40px_rgba(15,23,40,0.05)] xl:col-span-4">
+              <div className="mb-4">
                 <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Resumo dos indices</p>
-                <p className="mt-2 text-[15px] leading-7 text-[#667085]">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
+                <p className="mt-2 text-[14px] leading-6 text-[#667085]">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
               </div>
 
               {isLoading ? (
@@ -128,7 +128,7 @@ export function ExploreMarketContext({
                   {indexCards.map((card) => (
                     <div
                       key={card.symbol}
-                      className={`relative overflow-hidden rounded-[20px] border border-[#EEF3F7] p-4 shadow-[0_10px_24px_rgba(15,23,40,0.03)] ${indexCardSurface[card.trend]}`}
+                      className={`relative overflow-hidden rounded-[18px] border border-[#EEF3F7] p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] ${indexCardSurface[card.trend]}`}
                     >
                       <div className={`pointer-events-none absolute inset-x-0 top-0 h-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]`} />
                       <div className={`pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full ${indexCardGlow[card.trend]}`} />
@@ -148,7 +148,7 @@ export function ExploreMarketContext({
                           />
                         </div>
                       </div>
-                      <p className="relative mt-4 text-[22px] font-semibold tracking-[-0.03em] text-[#0F1728]">{card.value}</p>
+                      <p className="relative mt-3 text-[19px] font-semibold tracking-[-0.03em] text-[#0F1728]">{card.value}</p>
                       <p className={`relative mt-1 text-[12px] font-medium ${trendTone[card.trend]}`}>
                         {card.changeAbs} ({card.changePct})
                       </p>
@@ -159,7 +159,7 @@ export function ExploreMarketContext({
             </aside>
           </div>
 
-          <div className="rounded-[28px] border border-[#E7EEF5] bg-[linear-gradient(135deg,#FFF5E8_0%,#FFFFFF_78%)] p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+          <div className="rounded-[26px] border border-[#E7EEF5] bg-[linear-gradient(135deg,#FFF5E8_0%,#FFFFFF_78%)] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-[760px]">
                 <div className="flex items-center gap-3">
@@ -174,8 +174,8 @@ export function ExploreMarketContext({
                     <Info className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-5 text-[32px] font-semibold leading-9 tracking-[-0.03em] text-[#0F1728]">{volatility.value}</p>
-                <p className="mt-3 text-[15px] leading-7 text-[#475467]">
+                <p className="mt-4 text-[28px] font-semibold leading-8 tracking-[-0.03em] text-[#0F1728]">{volatility.value}</p>
+                <p className="mt-3 text-[14px] leading-6 text-[#475467]">
                   Oscilacoes tendem a aumentar no curto prazo, entao vale combinar leitura de preco com confirmacao dos pilares antes de avancar.
                 </p>
                 {showVolatilityInfo && (
@@ -188,7 +188,7 @@ export function ExploreMarketContext({
               <div className="flex flex-col gap-3 lg:min-w-[240px] lg:items-end">
                 <button
                   onClick={() => setShowVolatilityDetails(true)}
-                  className="inline-flex h-11 items-center rounded-[16px] bg-white px-4 text-[14px] font-semibold text-[#0F1728] shadow-[0_12px_30px_rgba(15,23,40,0.06)] transition hover:bg-[#FCFDFE]"
+                  className="inline-flex h-10 items-center rounded-[14px] bg-white px-4 text-[13px] font-semibold text-[#0F1728] shadow-[0_12px_30px_rgba(15,23,40,0.06)] transition hover:bg-[#FCFDFE]"
                 >
                   Ver detalhes
                 </button>

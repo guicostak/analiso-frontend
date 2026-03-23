@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  BriefcaseBusiness,
-  FileText,
-  Mail,
-  Phone,
-  Shield,
-  User,
-  Users,
-} from "lucide-react";
+import { FileText, Mail, Phone, User, Users } from "lucide-react";
 import { useAuth } from "@/src/features/auth/AuthContext";
 import { AccountShell } from "./AccountShell";
 
@@ -24,15 +16,6 @@ const personalFields: AccountField[] = [
   { icon: Mail, label: "E-mail", value: "bianca@gmail.com" },
   { icon: FileText, label: "CPF", value: "115.432.423-43" },
   { icon: Users, label: "Gênero", value: "Feminino" },
-];
-
-const professionalFields: AccountField[] = [
-  { icon: BriefcaseBusiness, label: "Conselho", value: "CRP" },
-  { icon: FileText, label: "Registro", value: "06/123456" },
-  { icon: BriefcaseBusiness, label: "UF", value: "SP" },
-  { icon: BriefcaseBusiness, label: "Profissão", value: "Psicóloga" },
-  { icon: FileText, label: "C.B.O", value: "2515-10 – Psicólogo clínico" },
-  { icon: Shield, label: "RQE", value: "--" },
 ];
 
 function ProfileSection({
@@ -101,7 +84,7 @@ export function ProfilePage() {
           </div>
           <div>
             <p className="text-[15px] font-semibold text-[#171717]">Envie a foto</p>
-            <p className="mt-1 text-[14px] text-[#8A8A8A]">JPG ou PNG · até 1 MB · até 250×250 px</p>
+            <p className="mt-1 text-[14px] text-[#8A8A8A]">JPG ou PNG · até 1 MB · até 250x250 px</p>
           </div>
           <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-[#E8E8E8] bg-white px-4.5 text-[14px] font-semibold text-[#171717] shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
             Alterar foto
@@ -115,14 +98,6 @@ export function ProfilePage() {
         actionLabel="Editar informações"
       >
         <FieldList fields={personalFields} />
-      </ProfileSection>
-
-      <ProfileSection
-        title="Informações profissionais"
-        subtitle="Edite suas informações profissionais"
-        actionLabel="Editar informações"
-      >
-        <FieldList fields={professionalFields} />
       </ProfileSection>
     </AccountShell>
   );

@@ -6,7 +6,6 @@ import {
   Bookmark,
   ChevronRight,
   Database,
-  Sparkles,
 } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
@@ -265,18 +264,18 @@ export function Dashboard() {
 
       <main className="px-5 pb-8 pt-20 xl:ml-[240px] xl:px-7 xl:pt-20">
         <div className="mx-auto max-w-[1480px] space-y-5">
-          <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+          <section>
             <article
               className={cn(
                 "rounded-[24px] border border-[#C9DFFA] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]",
-                "relative col-span-1 min-h-[224px] overflow-hidden bg-[linear-gradient(180deg,#F7FBFF_0%,#FFFFFF_100%)] xl:col-span-4",
+                "relative min-h-[196px] overflow-hidden bg-[linear-gradient(180deg,#F7FBFF_0%,#FFFFFF_100%)]",
               )}
             >
-              <div className="absolute inset-x-0 top-0 h-[64px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)]" />
+              <div className="absolute inset-x-0 top-0 h-[68px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)]" />
               <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-[#2F6FD6]">Resumo do dia</span>
 
-              <div className="relative flex h-full flex-col justify-between p-4.5">
-                <div className="pt-[64px]">
+              <div className="relative grid h-full gap-6 px-6 pb-5 pt-[84px] xl:grid-cols-[minmax(0,1.6fr)_auto] xl:items-end">
+                <div>
                   {dashboardLoading ? (
                     <div className="space-y-3">
                       <div className="h-4 w-32 animate-pulse rounded-full bg-[#E8F0FB]" />
@@ -294,15 +293,15 @@ export function Dashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <h1 className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-[#0F1728]">
+                      <h1 className="max-w-[32ch] text-[25px] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0F1728]">
                         {heroHeadline}
                       </h1>
-                      <p className="max-w-[34ch] text-[14px] leading-6 text-[#526070]">{heroBody}</p>
+                      <p className="max-w-[96ch] text-[14px] leading-6 text-[#526070]">{heroBody}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between gap-3 border-t border-[#EEF3F7] pt-3.5">
+                <div className="flex flex-col items-start gap-3 xl:items-end">
                   <span className="text-[12px] font-medium text-[#98A2B3]">
                       {"Refer\u00eancia "}{dashboardData?.referenceDate ?? "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"}
                     </span>
@@ -319,17 +318,19 @@ export function Dashboard() {
                 </div>
               </div>
             </article>
+          </section>
 
-            <div className="col-span-1 grid gap-5 xl:col-span-3">
+          <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+            <div className="col-span-1 grid gap-5 xl:col-span-5">
               <button
                 onClick={() => (topRiskItem ? openInboxItem(topRiskItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-white p-4.5 text-left transition hover:shadow-[0_14px_26px_rgba(181,71,104,0.10)]"
+                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-white px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(181,71,104,0.10)]"
               >
                 <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#F7D9E2_0%,#FCECEF_100%)]" />
-                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">Maior risco</p>
+                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">Maior atenção</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(181,71,104,0.08)] blur-2xl" />
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1 pr-2">
                     <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topRiskItem ? topRiskItem.ticker : "Sem risco novo"}
                     </p>
@@ -340,7 +341,7 @@ export function Dashboard() {
                     </span>
                   ) : topRiskItem ? <StatusBadge status={topRiskItem.severity} /> : null}
                 </div>
-                <p className="max-w-[25ch] text-[13px] leading-5 text-[#5F6673]">
+                <p className="max-w-none pr-2 text-[13px] leading-5 text-[#5F6673]">
                   {topRiskItem
                     ? topRiskItem.benefitNow ?? topRiskItem.whyItMatters
                     : "Nenhum sinal cr\u00edtico novo entrou na watchlist nas \u00faltimas 24h."}
@@ -355,13 +356,13 @@ export function Dashboard() {
 
               <button
                 onClick={() => (topImproveItem ? openInboxItem(topImproveItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-white p-4.5 text-left transition hover:shadow-[0_14px_26px_rgba(18,165,148,0.10)]"
+                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-white px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(18,165,148,0.10)]"
               >
                 <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#D9EFE8_0%,#ECF8F4_100%)]" />
                 <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#0F9485]">Maior melhora</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(18,165,148,0.08)] blur-2xl" />
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1 pr-2">
                     <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topImproveItem ? topImproveItem.ticker : "Sem melhora nova"}
                     </p>
@@ -372,7 +373,7 @@ export function Dashboard() {
                     </span>
                   ) : topImproveItem ? <StatusBadge status={topImproveItem.severity} /> : null}
                 </div>
-                <p className="max-w-[25ch] text-[13px] leading-5 text-[#56666A]">
+                <p className="max-w-none pr-2 text-[13px] leading-5 text-[#56666A]">
                   {topImproveItem
                     ? topImproveItem.benefitNow ?? topImproveItem.whyItMatters
                     : "Ainda n\u00e3o apareceu uma recupera\u00e7\u00e3o relevante suficiente para liderar a sess\u00e3o."}
@@ -384,13 +385,12 @@ export function Dashboard() {
               </button>
             </div>
 
-            <article className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-6 xl:col-span-5")}>
-              <div className="flex h-full flex-col justify-between">
-                <div className="space-y-5">
+            <article className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-5 xl:col-span-7")}>
+              <div className="space-y-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Prioridade do dia</p>
-                      <h2 className="mt-2 max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                      <p className="text-[14px] font-medium text-[#98A2B3]">Prioridade do dia</p>
+                      <h2 className="max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
                         {priorityItem
                           ? `${priorityItem.ticker} \u00e9 o melhor ponto de entrada para entender o que mudou hoje.`
                           : `O pilar ${leadingPillarMovement.pillar.toLowerCase()} concentra o melhor ponto de leitura do dia.`}
@@ -411,66 +411,60 @@ export function Dashboard() {
 
                   <div className="rounded-[18px] bg-[#F5F9FC] p-3">
                     <div className="grid gap-3 md:grid-cols-3">
-                    {progressStates.map((step, index) => {
-                      const isCurrent = index === currentProgressStep;
-                      return (
-                        <div
-                          key={step.label}
-                          className={cn(
-                            "rounded-[18px] p-3.5",
-                            step.done
-                              ? "bg-[#F7FAFC]"
-                              : isCurrent
-                                ? "bg-[#EEF7FF]"
-                                : "bg-[#FAFCFD]",
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={cn(
-                                "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold",
-                                step.done
-                                  ? "bg-white text-[#12A594]"
-                                  : isCurrent
-                                    ? "bg-white text-[#5B8DEF]"
-                                    : "bg-white text-[#98A2B3]",
-                              )}
-                            >
-                              {step.done ? "OK" : index + 1}
-                            </span>
-                            <p className="text-[13px] font-medium text-[#0F1728]">{step.label}</p>
+                      {progressStates.map((step, index) => {
+                        const isCurrent = index === currentProgressStep;
+                        return (
+                          <div
+                            key={step.label}
+                            className={cn(
+                              "rounded-[18px] p-3.5",
+                              step.done
+                                ? "bg-[#F7FAFC]"
+                                : isCurrent
+                                  ? "bg-[#EEF7FF]"
+                                  : "bg-[#FAFCFD]",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={cn(
+                                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold",
+                                  step.done
+                                    ? "bg-white text-[#12A594]"
+                                    : isCurrent
+                                      ? "bg-white text-[#5B8DEF]"
+                                      : "bg-white text-[#98A2B3]",
+                                )}
+                              >
+                                {step.done ? "OK" : index + 1}
+                              </span>
+                              <p className="text-[13px] font-medium text-[#0F1728]">{step.label}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                  <button
-                    onClick={focusInboxRecentImpact}
-                    className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#EEF2F6]"
-                  >
-                    Abrir leitura guiada
-                    <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
-                  </button>
-                  <button className="text-[13px] font-medium text-[#12A594] transition hover:text-[#0F9485]">Ver fontes do dia</button>
-                </div>
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    <button
+                      onClick={focusInboxRecentImpact}
+                      className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#EEF2F6]"
+                    >
+                      Abrir leitura guiada
+                      <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                    </button>
+                    <button className="text-[13px] font-medium text-[#12A594] transition hover:text-[#0F9485]">Ver fontes do dia</button>
+                  </div>
               </div>
             </article>
           </section>
 
           <section className="rounded-[20px] border border-[#E8EEF5] bg-[#EEF7FF] px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#5B8DEF]">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">{"Por onde come\u00e7ar"}</p>
-                  <p className="mt-1 text-[15px] font-semibold leading-6 text-[#0F1728]">{editorialText}</p>
-                </div>
+              <div>
+                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">{"Por onde come\u00e7ar"}</p>
+                <p className="mt-1 text-[15px] font-semibold leading-6 text-[#0F1728]">{editorialText}</p>
               </div>
 
               <button
@@ -837,7 +831,6 @@ export function Dashboard() {
                       <span className="font-semibold text-[#3965B8]">{healthyWatchlistCount}/{totalWatchlistCount}</span>
                     </div>
                   </div>
-                      <span className="font-semibold text-[#3965B8]">{healthyWatchlistCount}/{totalWatchlistCount}</span>
                   <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-[linear-gradient(180deg,#F4F8FF_0%,#E8F1FF_100%)] px-3 py-2 text-right">
                     <span className="text-[10px] uppercase tracking-[0.08em] text-[#98A2B3]">Hoje</span>
                     <span className="text-[18px] font-semibold text-[#3965B8]">{todayHealthyCount}</span>

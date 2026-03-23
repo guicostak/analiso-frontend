@@ -76,9 +76,9 @@ function HighlightPriorityCard({
   const tone = severityTone[item.severity];
 
   return (
-    <article className={`relative flex h-full min-h-[144px] flex-col justify-between overflow-hidden rounded-[24px] border p-5 ${tone.shell} ${tone.cardShadow}`}>
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-14 ${tone.topBand}`} />
-      <div className={`pointer-events-none absolute left-5 top-3 h-9 w-20 ${tone.topShape}`} />
+    <article className={`relative flex h-full min-h-[132px] flex-col justify-between overflow-hidden rounded-[22px] border p-4 ${tone.shell} ${tone.cardShadow}`}>
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-12 ${tone.topBand}`} />
+      <div className={`pointer-events-none absolute left-4 top-3 h-8 w-20 ${tone.topShape}`} />
       <div className={`pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full ${tone.glow}`} />
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-[1px] ${tone.accent} opacity-80`} />
       <div className="flex items-start justify-between gap-4">
@@ -87,39 +87,39 @@ function HighlightPriorityCard({
             <img
               src={getCompanyLogo(item.ticker)}
               alt={`Logo ${item.ticker}`}
-              className="h-12 w-12 rounded-[18px] border border-white/70 bg-white object-cover p-1 shadow-[0_10px_30px_rgba(15,23,40,0.06)]"
+              className="h-11 w-11 rounded-[16px] border border-white/70 bg-white object-cover p-1 shadow-[0_10px_30px_rgba(15,23,40,0.06)]"
             />
           )}
           <div className="min-w-0">
             <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${tone.pill}`}>
               {priorityLabelMap[item.severity]}
             </span>
-            <p className="mt-3 text-[18px] font-semibold leading-6 text-[#0F1728]">
+            <p className="mt-2.5 text-[16px] font-semibold leading-6 text-[#0F1728]">
               {item.companyName} <span className="text-[#98A2B3]">{item.ticker}</span>
             </p>
-            <p className="mt-2 text-[14px] leading-6 text-[#667085]">{item.changeTitle}</p>
+            <p className="mt-1.5 text-[13px] leading-5 text-[#667085]">{item.changeTitle}</p>
           </div>
         </div>
         <button
           onClick={() => setSelectedSource(item)}
-          className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/88 text-[#667085] transition hover:text-[#0F1728]"
+          className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/88 text-[#667085] transition hover:text-[#0F1728]"
           aria-label={`Ver fonte de ${item.companyName}`}
         >
           <FileText className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="relative mt-5 flex items-end justify-between gap-4">
+      <div className="relative mt-4 flex items-end justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Impacto e pilar</p>
-          <p className="mt-1 text-[14px] leading-6 text-[#0F1728]">{item.whyItMatters}</p>
+          <p className="mt-1 text-[13px] leading-5 text-[#0F1728]">{item.whyItMatters}</p>
           <p className="mt-2 text-[12px] font-medium text-[#667085]">
             {item.pillar} . {item.timeframeLabel}
           </p>
         </div>
         <button
           onClick={() => applyHighlightPreset(item.filterPreset)}
-          className="inline-flex shrink-0 rounded-full bg-white px-4 py-2 text-[12px] font-semibold text-[#0E9384] shadow-[0_8px_22px_rgba(15,23,40,0.06)] transition hover:opacity-90"
+          className="inline-flex shrink-0 rounded-full bg-white px-3.5 py-2 text-[12px] font-semibold text-[#0E9384] shadow-[0_8px_22px_rgba(15,23,40,0.06)] transition hover:opacity-90"
         >
           Ver relacionadas
         </button>
@@ -148,7 +148,7 @@ export function ExploreHighlightsSection({
   const overflowHighlights = sortedHighlights.slice(4);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-5">
       {summaryState === "loading" && (
         <div className="grid gap-6 xl:grid-cols-12">
           <div className="xl:col-span-8 h-[340px] rounded-[28px] bg-[#EAF1F7]" />
@@ -187,8 +187,8 @@ export function ExploreHighlightsSection({
 
       {summaryState === "ready" && featuredHighlight && (
         <>
-          <div className="grid gap-6 xl:grid-cols-12">
-            <article className="relative overflow-hidden rounded-[28px] border border-[#DDE9F5] bg-[linear-gradient(140deg,#EAF4FF_0%,#EDF6FF_24%,#F4F9FF_54%,#FBFDFF_78%,#FFFFFF_100%)] p-7 shadow-[0_24px_50px_rgba(15,23,40,0.07)] xl:col-span-8 xl:min-h-[340px]">
+          <div className="grid gap-5 xl:grid-cols-12">
+            <article className="relative overflow-hidden rounded-[26px] border border-[#DDE9F5] bg-[linear-gradient(140deg,#EAF4FF_0%,#EDF6FF_24%,#F4F9FF_54%,#FBFDFF_78%,#FFFFFF_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] xl:col-span-8 xl:min-h-[312px]">
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -left-12 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.24)_0%,rgba(91,141,239,0.10)_28%,rgba(91,141,239,0)_72%)] blur-3xl" />
                 <div className="absolute left-10 top-8 h-32 w-52 rounded-[55%_45%_58%_42%/48%_35%_65%_52%] bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(255,255,255,0.08))]" />
@@ -198,18 +198,18 @@ export function ExploreHighlightsSection({
                 <div className="absolute inset-x-0 top-0 h-[120px] bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0))]" />
               </div>
 
-              <div className="relative grid h-full gap-8 lg:grid-cols-[minmax(0,1.2fr)_280px]">
+              <div className="relative grid h-full gap-6 lg:grid-cols-[minmax(0,1.2fr)_260px]">
                 <div className="flex flex-col justify-between">
                   <div>
                     <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#3965B8]">
                       Curadoria principal
                     </span>
-                    <h2 className="mt-5 max-w-[720px] text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#0F1728]">
+                    <h2 className="mt-4 max-w-[680px] text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#0F1728]">
                       {featuredHighlight.changeTitle}
                     </h2>
-                    <p className="mt-4 max-w-[640px] text-[15px] leading-7 text-[#475467]">{featuredHighlight.whyItMatters}</p>
+                    <p className="mt-3 max-w-[620px] text-[14px] leading-6 text-[#475467]">{featuredHighlight.whyItMatters}</p>
 
-                    <div className="relative mt-8 rounded-[24px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.72))] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.06)]">
+                    <div className="relative mt-6 rounded-[22px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.72))] p-4 shadow-[0_18px_40px_rgba(15,23,40,0.06)]">
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-14 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0))]" />
                       <div className="pointer-events-none absolute inset-y-3 left-0 w-px bg-[linear-gradient(180deg,rgba(91,141,239,0),rgba(91,141,239,0.18),rgba(91,141,239,0))]" />
                       <div className="flex items-start gap-4">
@@ -217,15 +217,15 @@ export function ExploreHighlightsSection({
                           <img
                             src={getCompanyLogo(featuredHighlight.ticker)}
                             alt={`Logo ${featuredHighlight.ticker}`}
-                            className="h-14 w-14 rounded-[20px] border border-white bg-white object-cover p-1 shadow-[0_12px_30px_rgba(15,23,40,0.08)]"
+                            className="h-12 w-12 rounded-[18px] border border-white bg-white object-cover p-1 shadow-[0_12px_30px_rgba(15,23,40,0.08)]"
                           />
                         )}
                         <div className="min-w-0">
-                          <p className="text-[20px] font-semibold leading-7 text-[#0F1728]">
+                          <p className="text-[18px] font-semibold leading-6 text-[#0F1728]">
                             {featuredHighlight.companyName} <span className="text-[#98A2B3]">{featuredHighlight.ticker}</span>
                           </p>
-                          <p className="mt-1 text-[14px] leading-6 text-[#667085]">Entrou hoje porque {featuredHighlight.changeTitle.toLowerCase()}.</p>
-                          <div className="mt-4 flex flex-wrap gap-2">
+                          <p className="mt-1 text-[13px] leading-5 text-[#667085]">Entrou hoje porque {featuredHighlight.changeTitle.toLowerCase()}.</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
                             <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${severityTone[featuredHighlight.severity].pill}`}>
                               {priorityLabelMap[featuredHighlight.severity]}
                             </span>
@@ -241,23 +241,23 @@ export function ExploreHighlightsSection({
                     </div>
                   </div>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap gap-3">
                     <Link
                       href={`/empresa/${featuredHighlight.ticker}`}
-                      className="inline-flex items-center rounded-[16px] bg-[#0E9384] px-5 py-3 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
+                      className="inline-flex items-center rounded-[15px] bg-[#0E9384] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
                     >
                       Abrir analise
                     </Link>
                     <button
                       onClick={() => applyHighlightPreset(featuredHighlight.filterPreset)}
-                      className="inline-flex items-center rounded-[16px] border border-[#DDE9F5] bg-white/80 px-5 py-3 text-[14px] font-semibold text-[#0F1728] transition hover:bg-white"
+                      className="inline-flex items-center rounded-[15px] border border-[#DDE9F5] bg-white/80 px-4 py-2.5 text-[13px] font-semibold text-[#0F1728] transition hover:bg-white"
                     >
                       Ver empresas relacionadas
                     </button>
                   </div>
                 </div>
 
-                <aside className="relative flex flex-col justify-between rounded-[24px] border border-[rgba(221,233,245,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,251,253,0.96))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+                <aside className="relative flex flex-col justify-between rounded-[22px] border border-[rgba(221,233,245,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,251,253,0.96))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-16 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(234,244,255,0.72),rgba(234,244,255,0))]" />
                   <div>
                     <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Por que abrir agora</p>

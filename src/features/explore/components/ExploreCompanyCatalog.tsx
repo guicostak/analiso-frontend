@@ -106,18 +106,18 @@ export function ExploreCompanyCatalog({
   resetFilters,
 }: ExploreCompanyCatalogProps) {
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="space-y-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descoberta guiada</p>
-          <h2 className="mt-2 text-[28px] font-semibold leading-8 tracking-[-0.03em] text-[#0F1728]">
+          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-[#0F1728]">
             Empresas para você analisar
           </h2>
-          <p className="mt-3 max-w-[760px] text-[15px] leading-7 text-[#667085]">
+          <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-[#667085]">
             Catálogo para aprofundar a leitura depois da curadoria principal, mantendo foco em tese, qualidade de fonte e pilar mais relevante.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]">
+        <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[11px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]">
           <Filter className="h-4 w-4" />
           {filteredCompanies.length} empresas
         </div>
@@ -125,12 +125,12 @@ export function ExploreCompanyCatalog({
 
       <div className="space-y-3">
         <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descobrir por tese</p>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {thesisCollections.map((entry) => (
             <button
               key={entry}
               onClick={() => toggleEntryPoint(entry)}
-              className={`rounded-full border px-5 py-3 text-[13px] font-medium transition ${
+              className={`rounded-full border px-4 py-2.5 text-[12px] font-medium transition ${
                 selectedEntryPoints.includes(entry)
                   ? "border-[#CDECDD] bg-[#EFFAF6] text-[#0E9384] shadow-[0_10px_24px_rgba(15,23,40,0.05)]"
                   : "border-[#E7EEF5] bg-white text-[#667085] hover:border-[#D7E3EE] hover:text-[#0F1728]"
@@ -148,7 +148,7 @@ export function ExploreCompanyCatalog({
       </div>
 
       {activePreset && (
-        <div className="flex flex-wrap items-center gap-2 rounded-[24px] border border-[#E7EEF5] bg-white px-4 py-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
+        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[#E7EEF5] bg-white px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
           {appliedChips.map((chip) => (
             <span
               key={chip}
@@ -175,17 +175,17 @@ export function ExploreCompanyCatalog({
         </div>
       )}
 
-      <div className="rounded-[24px] border border-[#E7EEF5] bg-white p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+      <div className="rounded-[22px] border border-[#E7EEF5] bg-white p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-            <label className="relative block xl:min-w-[280px] xl:flex-1">
+            <label className="relative block xl:min-w-[260px] xl:flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
               <input
                 type="text"
                 placeholder="Buscar empresa ou ticker"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-12 w-full rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] pl-11 pr-4 text-[14px] text-[#0F1728] outline-none transition placeholder:text-[#98A2B3] focus:border-[#D9E8FF]"
+                className="h-11 w-full rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] pl-11 pr-4 text-[13px] text-[#0F1728] outline-none transition placeholder:text-[#98A2B3] focus:border-[#D9E8FF]"
               />
             </label>
 
@@ -201,11 +201,11 @@ export function ExploreCompanyCatalog({
                   { label: "Pilar em destaque", key: "pillar", options: ["Todos", ...pillars] },
                 ] as Array<{ label: string; key: FilterKey; options: string[] }>
               ).map((filter) => (
-                <div key={filter.key} className="relative min-w-[168px] flex-1">
+                <div key={filter.key} className="relative min-w-[152px] flex-1">
                   <select
                     value={filters[filter.key]}
                     onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                    className="h-12 w-full appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                    className="h-11 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
                   >
                     {filter.options.map((option) => (
                       <option key={option} value={option}>
@@ -223,7 +223,7 @@ export function ExploreCompanyCatalog({
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                className="inline-flex h-11 items-center rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 text-[13px] font-medium text-[#0F1728] transition hover:bg-[#F1F6FA]"
+                className="inline-flex h-10 items-center rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 text-[12px] font-medium text-[#0F1728] transition hover:bg-[#F1F6FA]"
               >
                 {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
               </button>
@@ -236,11 +236,11 @@ export function ExploreCompanyCatalog({
                       { label: "Frescor", key: "freshness", options: ["Todos", "Atualizado", "Antigo"] },
                     ] as Array<{ label: string; key: FilterKey; options: string[] }>
                   ).map((filter) => (
-                    <div key={filter.key} className="relative min-w-[168px]">
+                    <div key={filter.key} className="relative min-w-[152px]">
                       <select
                         value={filters[filter.key]}
                         onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                        className="h-11 appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                        className="h-10 appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
                       >
                         {filter.options.map((option) => (
                           <option key={option} value={option}>
@@ -257,12 +257,12 @@ export function ExploreCompanyCatalog({
 
             <div className="flex items-center gap-3">
               <div className="h-6 w-px bg-[#EEF3F7]" />
-              <div className="relative min-w-[220px]">
+              <div className="relative min-w-[204px]">
                 <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
                 <select
                   value={filters.sort}
                   onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
-                  className="h-11 w-full appearance-none rounded-[16px] border border-[#EFF3F8] bg-[#F8FBFD] px-11 pr-10 text-[13px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                  className="h-10 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-11 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
                 >
                   {[
                     ...(activePreset ? ["Mais relevantes para este destaque"] : []),
@@ -283,9 +283,9 @@ export function ExploreCompanyCatalog({
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="min-h-[232px] rounded-[24px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+            <div key={item} className="min-h-[212px] rounded-[22px] border border-[#E7EEF5] bg-white p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
               <div className="h-4 w-32 rounded bg-[#EAF1F7]" />
               <div className="mt-4 h-3 w-28 rounded bg-[#EEF3F7]" />
               <div className="mt-6 h-20 rounded-[18px] bg-[#F4F8FB]" />
@@ -309,14 +309,14 @@ export function ExploreCompanyCatalog({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {filteredCompanies.map((company, index) => {
             const accentVariant = getCardAccentVariant(index);
 
             return (
             <article
               key={company.ticker}
-              className={`group relative flex min-h-[232px] flex-col justify-between overflow-hidden rounded-[24px] border border-[#E7EEF5] p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] ${getCardShellColor(company.status)}`}
+              className={`group relative flex min-h-[212px] flex-col justify-between overflow-hidden rounded-[22px] border border-[#E7EEF5] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] ${getCardShellColor(company.status)}`}
             >
               <div className={`pointer-events-none absolute inset-x-0 top-0 ${accentVariant.band} ${getCardAccentColor(company.status)} opacity-90`} />
               <div className={`pointer-events-none absolute ${accentVariant.shape} ${getCardAccentColor(company.status)} opacity-45`} />

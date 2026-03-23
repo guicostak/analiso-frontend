@@ -39,7 +39,7 @@ export function SubscriptionPage() {
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="max-w-[560px]">
                 <h2 className="text-[22px] font-semibold leading-[1.22] tracking-[-0.03em] text-[#171717]">
-                  Planos desenvolvidos para impulsionar a sua gestão
+                  Flexibilidade e recursos sob medida para cada investidor
                 </h2>
               </div>
 
