@@ -6,7 +6,15 @@ import logoRenner from "@/src/assets/logos/renner.png";
 import logoVale from "@/src/assets/logos/vale.png";
 import logoWeg from "@/src/assets/logos/weg.jpeg";
 
-const watchlistItems = [
+type Tone = "attention" | "positive" | "neutral";
+
+const watchlistItems: Array<{
+  ticker: string;
+  title: string;
+  note: string;
+  tone: Tone;
+  logo: string;
+}> = [
   {
     ticker: "WEGE3",
     title: "Margens seguem como principal ponto do dia",
@@ -30,7 +38,13 @@ const watchlistItems = [
   },
 ];
 
-const feedItems = [
+const feedItems: Array<{
+  section: string;
+  ticker: string;
+  title: string;
+  body: string;
+  tone: Tone;
+}> = [
   {
     section: "Prioridade do dia",
     ticker: "WEGE3",
@@ -60,7 +74,7 @@ const pillarMovements = [
   { pillar: "Retorno", events: 3, color: "#2F6FD6" },
 ];
 
-function toneClasses(tone: "attention" | "positive" | "neutral") {
+function toneClasses(tone: Tone) {
   if (tone === "attention") {
     return {
       chip: "border-[#F8E1B1] bg-[#FFF4DE] text-[#B27300]",

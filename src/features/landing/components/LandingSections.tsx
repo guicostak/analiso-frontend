@@ -192,7 +192,7 @@ const faqItems = [
 
 void faqs;
 
-const marqueeItems = [
+const legacyMarqueeItems = [
   { label: "Mensagens", icon: MessageCircleMore },
   { label: "Agenda", icon: CalendarDays },
   { label: "Notificações", icon: Bell },
@@ -218,6 +218,19 @@ const marqueeItems = [
   { label: "Alertas", icon: TriangleAlert },
   { label: "Relatórios", icon: Presentation },
   { label: "Insights", icon: Presentation },
+] as const;
+
+void legacyMarqueeItems;
+
+const marqueeItems = [
+  { label: "Diagnóstico", icon: ClipboardList },
+  { label: "Mudanças", icon: RefreshCw },
+  { label: "Agenda", icon: CalendarDays },
+  { label: "Preço", icon: DollarSign },
+  { label: "Comparação", icon: Presentation },
+  { label: "Watchlist", icon: Bookmark },
+  { label: "Fontes", icon: FileText },
+  { label: "Contexto", icon: NotebookPen },
 ] as const;
 
 function AnalisoLogo() {
@@ -1438,7 +1451,7 @@ function AIAgentsHero() {
         </p>
 
         <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
-          Entrar na lista de espera
+          Conhecer a Analiso
         </button>
       </div>
 
@@ -3092,15 +3105,33 @@ export function HeroSection() {
             {/* Agent Card overlay */}
             <div className="absolute right-[62px] top-[28px] h-[260px] w-[236px] max-xl:right-4 max-lg:hidden">
               <div className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#e6efff] bg-white shadow-[0_18px_48px_rgba(15,23,40,0.12)]">
-                {/* Animated AI border ring */}
+                {/* Animated border trace */}
                 <div className="pointer-events-none absolute inset-0 rounded-[20px]">
                   <svg className="absolute inset-0 h-full w-full" viewBox="0 0 236 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="234" height="258" rx="19" stroke="url(#agent-grad)" strokeWidth="1.5" />
+                    <rect x="1" y="1" width="234" height="258" rx="19" stroke="url(#agent-base-grad)" strokeWidth="1.5" />
+                    <motion.rect
+                      x="1"
+                      y="1"
+                      width="234"
+                      height="258"
+                      rx="19"
+                      stroke="url(#agent-trace-grad)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeDasharray="110 700"
+                      initial={{ strokeDashoffset: 0 }}
+                      animate={{ strokeDashoffset: -810 }}
+                      transition={{ duration: 1.35, ease: "linear", repeat: Infinity }}
+                    />
                     <defs>
-                      <linearGradient id="agent-grad" x1="0" y1="0" x2="236" y2="260" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#0e9384" stopOpacity="0.8" />
-                        <stop offset="0.4" stopColor="#7c3aed" stopOpacity="0.5" />
-                        <stop offset="1" stopColor="#0e9384" stopOpacity="0.1" />
+                      <linearGradient id="agent-base-grad" x1="0" y1="0" x2="236" y2="260" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#0e9384" stopOpacity="0.2" />
+                        <stop offset="1" stopColor="#0e9384" stopOpacity="0.05" />
+                      </linearGradient>
+                      <linearGradient id="agent-trace-grad" x1="0" y1="0" x2="236" y2="260" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#99f6e4" />
+                        <stop offset="0.45" stopColor="#0e9384" />
+                        <stop offset="1" stopColor="#5eead4" />
                       </linearGradient>
                     </defs>
                   </svg>
@@ -3112,7 +3143,7 @@ export function HeroSection() {
                       <Sparkles className="h-3.5 w-3.5 text-white" />
                     </div>
                     <div>
-                      <div className="text-[11px] font-semibold text-[#171717]">Analise IA</div>
+                      <div className="text-[11px] font-semibold text-[#171717]">Análise Simplificada</div>
                       <div className="text-[9px] text-[#9b9b9b]">WEGE3 — Weg S.A.</div>
                     </div>
                   </div>
@@ -3154,27 +3185,18 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Voice / Insight Card overlay */}
-            <div className="absolute right-[62px] top-[297px] h-[62px] w-[236px] max-xl:right-4 max-lg:hidden">
-              <div className="flex h-full items-center gap-3 overflow-hidden rounded-[16px] border border-[#e6efff] bg-white px-4 shadow-[0_8px_24px_rgba(15,23,40,0.08)]">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M4 3.5v7M10 3.5v7M1 6v2M13 6v2" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                {/* Insight update card overlay */}
+                <div className="absolute right-[62px] top-[297px] h-[62px] w-[236px] max-xl:right-4 max-lg:hidden">
+                  <div className="flex h-full items-center gap-3 overflow-hidden rounded-[16px] border border-[#e6efff] bg-white px-4 shadow-[0_8px_24px_rgba(15,23,40,0.08)]">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]">
+                      <FileText className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[10px] font-semibold text-[#171717]">Novo resultado disponível</div>
+                      <div className="mt-0.5 truncate text-[9px] text-[#9b9b9b]">WEGE3 — 4T24 · Análise pronta</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-semibold text-[#171717]">Novo resultado disponível</div>
-                  <div className="mt-0.5 truncate text-[9px] text-[#9b9b9b]">WEGE3 — 4T24 · Análise pronta</div>
-                </div>
-                <div className="flex items-end gap-[2px]">
-                  {[3, 5, 7, 4, 6, 8, 5, 7, 4, 6].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-[2px] rounded-full"
-                      style={{ height: `${h * 2}px`, backgroundColor: i === 6 ? "#0f9f8f" : `rgba(15,159,143,${0.2 + i * 0.07})` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>
@@ -3183,7 +3205,8 @@ export function HeroSection() {
 }
 
 export function HeroMarqueeSection() {
-  const repeatedItems = [...marqueeItems, ...marqueeItems];
+  const reduceMotion = useReducedMotion();
+  const repeatedItems = [...marqueeItems, ...marqueeItems, ...marqueeItems];
 
   return (
     <section className="px-20 py-12 max-lg:px-10 max-md:px-6 max-md:py-8 max-sm:px-4">
@@ -3197,7 +3220,19 @@ export function HeroMarqueeSection() {
               "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
           }}
         >
-          <div className="flex w-max items-start">
+          <motion.div
+            className="flex w-max items-start"
+            animate={reduceMotion ? undefined : { x: ["0%", "-33.333%"] }}
+            transition={
+              reduceMotion
+                ? undefined
+                : {
+                    duration: 5.5,
+                    ease: "linear",
+                    repeat: Infinity,
+                  }
+            }
+          >
             {repeatedItems.map((item, index) => {
               const Icon = item.icon;
 
@@ -3205,7 +3240,7 @@ export function HeroMarqueeSection() {
                 <div
                   key={`${item.label}-${index}`}
                   aria-hidden={index >= marqueeItems.length}
-                  className="mr-4 flex h-[94px] w-[95px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl"
+                  className="mr-4 flex h-[94px] w-[95px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl last:mr-0"
                 >
                   <Icon className="h-5 w-5 text-[#c4c4c4]" />
                   <span className="text-sm font-medium leading-5 text-[#c4c4c4]">
@@ -3214,7 +3249,7 @@ export function HeroMarqueeSection() {
                 </div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -3288,7 +3323,7 @@ export function StepsSection() {
             </div>
 
             <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
-              Entrar na lista de espera
+              Conhecer a Analiso
             </button>
           </div>
 
@@ -3514,7 +3549,7 @@ export function LandingSections() {
                 </div>
 
                 <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
-                  Entrar na lista de espera
+                  Conhecer a Analiso
                 </button>
               </div>
 
