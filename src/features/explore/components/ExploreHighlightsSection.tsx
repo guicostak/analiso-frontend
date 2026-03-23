@@ -18,7 +18,7 @@ const severityTone: Record<
     cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)]",
   },
   Moderada: {
-    shell: "bg-[linear-gradient(180deg,#FFF4E4_0%,#FFF9F1_56%,#FFFFFF_100%)] border-[#F0DEC4]",
+    shell: "bg-[linear-gradient(180deg,#FFF4E4_0%,#FFF9F1_56%,#FFFFFF_100%)] border-[#C9DFFA]",
     pill: "bg-[#FFF1DD] text-[#B36A11] border-[#F2D5A6]",
     accent: "bg-[#FFE8C7]",
     glow: "bg-[radial-gradient(circle,rgba(243,183,70,0.18)_0%,rgba(243,183,70,0)_72%)]",
