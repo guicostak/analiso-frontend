@@ -24,7 +24,14 @@
       "Bash(grep -r \"import.*from.*@/\" /c/Users/guilh/Desktop/analiso-frontend/src/features/landing/components/*.tsx)",
       "Bash(grep -r \"password\\\\|reset\\\\|verification\" /c/Users/guilh/Desktop/analiso-backend/src/main/java --include=*.java)",
       "Bash(find /c/Users/guilh/Desktop/analiso-frontend -type f \\\\\\(-name *nav* -o -name *header* -o -name *bar* \\\\\\) \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
-      "Bash(ls -la /c/Users/guilh/Desktop/analiso-frontend/app/\\\\\\(marketing\\\\\\)/)"
+      "Bash(ls -la /c/Users/guilh/Desktop/analiso-frontend/app/\\\\\\(marketing\\\\\\)/)",
+      "Bash(copy \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-32.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-32.png\")",
+      "Bash(copy \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-16.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-16.png\")",
+      "Bash(mkdir -p \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public\")",
+      "Bash(cp \"/mnt/c/Users/guilh/Desktop/analiso-frontend/src/assets/logos/favicon-32.png\" \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public/favicon-32.png\")",
+      "Bash(cp \"/mnt/c/Users/guilh/Desktop/analiso-frontend/src/assets/logos/favicon-16.png\" \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public/favicon-16.png\")",
+      "Read(//mnt/c/Users/guilh/Desktop/analiso-frontend/**)",
+      "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-32.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-32.png''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-16.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-16.png''; ls ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''\")"
     ]
   }
 }
