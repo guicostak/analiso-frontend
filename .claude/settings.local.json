@@ -21,7 +21,10 @@
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)",
       "Bash(find /c/Users/guilh/Desktop/analiso-frontend -not -path */node_modules/* -type f)",
       "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)",
-      "Bash(grep -r \"import.*from.*@/\" /c/Users/guilh/Desktop/analiso-frontend/src/features/landing/components/*.tsx)"
+      "Bash(grep -r \"import.*from.*@/\" /c/Users/guilh/Desktop/analiso-frontend/src/features/landing/components/*.tsx)",
+      "Bash(grep -r \"password\\\\|reset\\\\|verification\" /c/Users/guilh/Desktop/analiso-backend/src/main/java --include=*.java)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend -type f \\\\\\(-name *nav* -o -name *header* -o -name *bar* \\\\\\) \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(ls -la /c/Users/guilh/Desktop/analiso-frontend/app/\\\\\\(marketing\\\\\\)/)"
     ]
   }
 }

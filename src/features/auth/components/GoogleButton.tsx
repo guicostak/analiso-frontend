@@ -86,7 +86,7 @@ export function GoogleButton({ onSuccess, onError }: GoogleButtonProps) {
         onError?.();
       }}
       text="signin_with"
-      shape="rectangular"
+      shape="pill"
     />
   );
 }

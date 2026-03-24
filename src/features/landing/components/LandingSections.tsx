@@ -881,9 +881,9 @@ export function SolutionSection() {
         </div>
 
         <div className="relative z-[1] flex h-[620px] w-full max-w-[1430px] flex-col items-center justify-end overflow-hidden rounded-[20px] bg-gradient-to-b from-[#f5f5f5] to-white p-[60px] max-md:h-auto max-md:overflow-visible max-md:rounded-none max-md:bg-none max-md:p-0">
-          <div className="relative h-[442px] w-full max-w-[1430px] max-md:h-auto">
-            <div className="relative flex h-full w-full items-start gap-4 opacity-100 transition-opacity duration-500 max-md:flex-col max-md:h-auto">
-              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:h-auto max-md:w-full max-md:gap-8 max-md:overflow-visible max-md:rounded-[16px] max-md:p-6">
+          <div className="relative h-[442px] w-full max-w-[1430px] max-md:h-auto max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden">
+            <div className="relative flex h-full w-full items-start gap-4 opacity-100 transition-opacity duration-500 max-md:h-auto max-md:w-max">
+              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:h-auto max-md:w-[88vw] max-md:min-w-[88vw] max-md:snap-start max-md:gap-8 max-md:overflow-visible max-md:rounded-[16px] max-md:p-6">
                 <div className="flex w-full flex-col items-start gap-6">
                     <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#dbecff] to-white">
                       {solutionMode === "analisar" ? (
@@ -1095,7 +1095,7 @@ export function SolutionSection() {
                 </div>
               </div>}
 
-              <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
+              <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:h-[420px] max-md:min-w-[88vw] max-md:w-[88vw] max-md:snap-start max-md:shrink-0">
                 <AnimatePresence mode="wait" initial={false}>
                   {solutionMode === "acompanhar" && activeAccompanyFeature === 0 ? (
                     <motion.div
