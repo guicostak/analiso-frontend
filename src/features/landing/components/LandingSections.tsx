@@ -18,6 +18,7 @@ import {
   FolderKanban,
   MessageCircleMore,
   Mail,
+  Menu,
   NotebookPen,
   Presentation,
   Receipt,
@@ -28,6 +29,7 @@ import {
   TriangleAlert,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -881,7 +883,7 @@ export function SolutionSection() {
         <div className="relative z-[1] flex h-[620px] w-full max-w-[1430px] flex-col items-center justify-end overflow-hidden rounded-[20px] bg-gradient-to-b from-[#f5f5f5] to-white p-[60px] max-md:h-auto max-md:overflow-visible max-md:rounded-none max-md:bg-none max-md:p-0">
           <div className="relative h-[442px] w-full max-w-[1430px] max-md:h-auto">
             <div className="relative flex h-full w-full items-start gap-4 opacity-100 transition-opacity duration-500 max-md:flex-col max-md:h-auto">
-              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:hidden">
+              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:h-auto max-md:w-full max-md:gap-8 max-md:overflow-visible max-md:rounded-[16px] max-md:p-6">
                 <div className="flex w-full flex-col items-start gap-6">
                     <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#dbecff] to-white">
                       {solutionMode === "analisar" ? (
@@ -2851,6 +2853,7 @@ export function HeroSection() {
   const reducedMotion = useReducedMotion();
   const [heroQuery, setHeroQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const normalizedQuery = heroQuery.trim().toLowerCase();
   const filteredHeroResults =
@@ -2886,13 +2889,63 @@ export function HeroSection() {
             
             <a href="#faq" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">FAQ</a>
           </div>
-          <a
-            href="/login"
-            className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
-          >
-            Entrar
-          </a>
+          <div className="order-3 flex shrink-0 items-center gap-2">
+            <a
+              href="/login"
+              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
+            >
+              Entrar
+            </a>
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
+              className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white text-[#555] shadow-small max-md:flex"
+              aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="mx-auto w-full max-w-[1430px] border-t border-[#f0f0f0] px-4 py-2">
+            <nav className="flex flex-col">
+              <a
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
+              >
+                Início
+              </a>
+              <a
+                href="#como-funciona"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
+              >
+                Como funciona
+              </a>
+              <a
+                href="#para-quem-e"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
+              >
+                Para quem é
+              </a>
+              <a
+                href="#faq"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
+              >
+                FAQ
+              </a>
+            </nav>
+          </div>
+        )}
 
         <div className="flex flex-col items-center px-8 pt-16 max-md:pt-12">
           <motion.h1
@@ -3063,8 +3116,8 @@ export function HeroSection() {
 
           </motion.div>
 
-          <div className="mt-6 flex flex-col items-center gap-y-2">
-            <div className="flex items-center justify-center gap-x-1.5">
+          <div className="mt-6 flex flex-col items-center gap-y-2 max-sm:px-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1.5">
               {heroChips.slice(0, 5).map((chip) => (
                 <span
                   key={chip}
@@ -3074,7 +3127,7 @@ export function HeroSection() {
                 </span>
               ))}
             </div>
-            <div className="flex items-center justify-center gap-x-1.5">
+            <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1.5">
               {heroChips.slice(5).map((chip) => (
                 <span
                   key={chip}
@@ -3277,7 +3330,7 @@ export function AnalysisMomentsSection() {
           </p>
         </div>
 
-        <div className="mt-16 flex gap-px overflow-hidden rounded-[20px] border-y border-[#f3f3f3] bg-[#f3f3f3] max-lg:flex-col max-lg:gap-0 max-md:mt-8 max-md:rounded-[16px]">
+        <div className="mt-16 flex gap-px overflow-hidden rounded-[20px] border-y border-[#f3f3f3] bg-[#f3f3f3] max-lg:flex-col max-md:mt-8 max-md:rounded-[16px]">
           {segments.map((segment, index) => (
             <SegmentCard
               key={segment.title}
@@ -3425,7 +3478,7 @@ export function CtaSection() {
             "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E8F8F4 70%, #B7E9DD 100%)",
         }}
       >
-        <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-50">
+        <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-[0.65] max-sm:scale-[0.45]">
           {[980, 750, 536, 333].map((size) => (
             <div
               key={size}
@@ -3501,7 +3554,7 @@ export function LandingSections() {
               </p>
             </div>
 
-            <div className="mt-16 flex gap-px overflow-hidden rounded-[20px] border-y border-[#f3f3f3] bg-[#f3f3f3] max-lg:flex-col max-lg:gap-0 max-md:mt-8 max-md:rounded-[16px]">
+            <div className="mt-16 flex gap-px overflow-hidden rounded-[20px] border-y border-[#f3f3f3] bg-[#f3f3f3] max-lg:flex-col max-md:mt-8 max-md:rounded-[16px]">
               {segments.map((segment, index) => (
                 <SegmentCard
                   key={segment.title}
@@ -3711,7 +3764,7 @@ export function LandingSections() {
                 "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E8F8F4 70%, #B7E9DD 100%)",
             }}
           >
-            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-50">
+            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-[0.65] max-sm:scale-[0.45]">
               {[980, 750, 536, 333].map((size) => (
                 <div
                   key={size}

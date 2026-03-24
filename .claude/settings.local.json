@@ -20,7 +20,8 @@
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/src)",
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)",
       "Bash(find /c/Users/guilh/Desktop/analiso-frontend -not -path */node_modules/* -type f)",
-      "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)"
+      "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)",
+      "Bash(grep -r \"import.*from.*@/\" /c/Users/guilh/Desktop/analiso-frontend/src/features/landing/components/*.tsx)"
     ]
   }
 }
