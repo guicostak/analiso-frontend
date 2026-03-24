@@ -3274,7 +3274,7 @@ export function HeroMarqueeSection() {
               reduceMotion
                 ? undefined
                 : {
-                    duration: 5.5,
+                    duration: 20,
                     ease: "linear",
                     repeat: Infinity,
                   }
