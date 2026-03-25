@@ -1467,9 +1467,13 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const strongestScore = (strongest.score as Record<string, unknown> | undefined) ?? {};
  const watchoutScore = (watchout.score as Record<string, unknown> | undefined) ?? {};
 
+ const companyBlock = (raw.company as Record<string, unknown> | undefined) ?? {};
+
  return {
  companyId,
  ticker,
+ companyName: safeMeta(companyBlock.name) || safeMeta(companyBlock.displayName) || undefined,
+ logoUrl: safeMeta(companyBlock.logoUrl) || undefined,
  radarScores,
  radarPreviousScores,
   diagnosisHeadline: safeMeta(overview.diagnosisHeadline),
