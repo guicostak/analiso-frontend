@@ -2362,9 +2362,9 @@ export function CompanyAnalysis() {
  score: mapScores[pillar],
  status: pillarDataByName.get(pillar)?.status ?? 'Atencao',
  }));
- const companyStatus: Status = mapPillarEntries.some((entry) => entry.status === 'Risco')
+ const companyStatus: Status = scoreAverage < 45
  ? 'Risco'
- : mapPillarEntries.some((entry) => entry.status === 'Atencao')
+ : scoreAverage < 65
  ? 'Atencao'
  : 'Saudavel';
  const mapPillarData: PillarMapDatum[] = pillarOrder.map((pillar) => {
