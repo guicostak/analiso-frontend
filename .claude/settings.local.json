@@ -32,7 +32,15 @@
       "Bash(cp \"/mnt/c/Users/guilh/Desktop/analiso-frontend/src/assets/logos/favicon-16.png\" \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public/favicon-16.png\")",
       "Read(//mnt/c/Users/guilh/Desktop/analiso-frontend/**)",
       "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-32.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-32.png''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-16.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-16.png''; ls ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''\")",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:simplywall.st)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.data-to-viz.com)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f \\\\\\(-name *.ts -o -name *.js \\\\\\))",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f -name *.ts)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src -type f -name *.ts)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src/main -type f -name *.java)"
     ]
   }
 }
