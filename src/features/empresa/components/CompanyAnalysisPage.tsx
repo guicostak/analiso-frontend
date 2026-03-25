@@ -1231,14 +1231,25 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   const trendObj = (pillar.trend as Record<string, unknown> | undefined) ?? {};
   const scoreObj = (pillar.score as Record<string, unknown> | undefined) ?? {};
 
+  // Java backend returns these fields as plain primitives; handle both plain and object shapes
+  const statusRaw = typeof pillar.status === 'string'
+   ? pillar.status
+   : safeMeta(statusObj.display) || safeMeta(statusObj.key);
+  const scoreRaw = typeof pillar.score === 'number'
+   ? pillar.score
+   : Number(scoreObj.raw ?? 50);
+  const trendRaw = typeof pillar.trend === 'string'
+   ? pillar.trend
+   : safeMeta(trendObj.display);
+
   return {
   companyId,
   ticker,
   name,
   displayName: safeMeta(pillar.displayName),
-  status: normalizeStatusLabel(safeMeta(statusObj.display) || safeMeta(statusObj.key), 'Atencao'),
-  score: Number(scoreObj.raw ?? 50),
-  trend: safeMeta(trendObj.display),
+  status: normalizeStatusLabel(statusRaw, 'Atencao'),
+  score: scoreRaw,
+  trend: trendRaw,
   summary: safeMeta(pillar.summary) || safeMeta(meaning.text),
   meaningText: safeMeta(meaning.text),
   trust: {
