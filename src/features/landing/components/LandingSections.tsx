@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  BarChart3,
   Bot,
   CalendarDays,
   Check,
@@ -16,20 +17,29 @@ import {
   DollarSign,
   FilePenLine,
   FolderKanban,
+  GitCompare,
+  Globe,
+  Layers,
+  LineChart,
   MessageCircleMore,
   Mail,
   Menu,
   NotebookPen,
+  PieChart,
   Presentation,
   Receipt,
   RefreshCw,
+  Search,
   Shield,
   Sparkles,
   Stethoscope,
+  Target,
+  TrendingUp,
   TriangleAlert,
   Users,
   Wallet,
   X,
+  Zap,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -229,10 +239,22 @@ const marqueeItems = [
   { label: "Mudanças", icon: RefreshCw },
   { label: "Agenda", icon: CalendarDays },
   { label: "Preço", icon: DollarSign },
-  { label: "Comparação", icon: Presentation },
+  { label: "Comparação", icon: GitCompare },
   { label: "Watchlist", icon: Bookmark },
   { label: "Fontes", icon: FileText },
   { label: "Contexto", icon: NotebookPen },
+  { label: "Alertas", icon: TriangleAlert },
+  { label: "Busca", icon: Search },
+  { label: "Indicadores", icon: BarChart3 },
+  { label: "Tendências", icon: TrendingUp },
+  { label: "Relatórios", icon: Presentation },
+  { label: "Mercado", icon: Globe },
+  { label: "Setores", icon: PieChart },
+  { label: "Receita", icon: LineChart },
+  { label: "Automação", icon: Zap },
+  { label: "Insights", icon: Sparkles },
+  { label: "Camadas", icon: Layers },
+  { label: "Metas", icon: Target },
 ] as const;
 
 function AnalisoLogo() {
@@ -3252,51 +3274,35 @@ export function HeroSection() {
 }
 
 export function HeroMarqueeSection() {
-  const reduceMotion = useReducedMotion();
-  const repeatedItems = [...marqueeItems, ...marqueeItems, ...marqueeItems];
-
   return (
-    <section className="px-20 py-12 max-lg:px-10 max-md:px-6 max-md:py-8 max-sm:px-4">
-      <div className="mx-auto w-full max-w-[1430px] overflow-hidden">
+    <section className="py-12 max-md:py-8">
+      <div className="mx-auto w-full max-w-[1430px]">
         <div
-          className="relative"
+          className="relative overflow-hidden"
           style={{
             WebkitMaskImage:
-              "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+              "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
             maskImage:
-              "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+              "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
           }}
         >
-          <motion.div
-            className="flex w-max items-start"
-            animate={reduceMotion ? undefined : { x: ["0%", "-33.333%"] }}
-            transition={
-              reduceMotion
-                ? undefined
-                : {
-                    duration: 20,
-                    ease: "linear",
-                    repeat: Infinity,
-                  }
-            }
-          >
-            {repeatedItems.map((item, index) => {
+          <div className="flex items-center justify-center gap-2 px-6 max-md:gap-1">
+            {marqueeItems.map((item) => {
               const Icon = item.icon;
 
               return (
                 <div
-                  key={`${item.label}-${index}`}
-                  aria-hidden={index >= marqueeItems.length}
-                  className="mr-4 flex h-[94px] w-[95px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl last:mr-0"
+                  key={item.label}
+                  className="flex h-[88px] w-[90px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl max-md:h-[72px] max-md:w-[72px]"
                 >
-                  <Icon className="h-5 w-5 text-[#c4c4c4]" />
-                  <span className="text-sm font-medium leading-5 text-[#c4c4c4]">
+                  <Icon className="h-5 w-5 text-[#c4c4c4] max-md:h-4 max-md:w-4" />
+                  <span className="text-[13px] font-medium leading-5 text-[#c4c4c4] max-md:text-[11px] max-md:leading-4">
                     {item.label}
                   </span>
                 </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
