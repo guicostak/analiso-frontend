@@ -32,18 +32,10 @@ import {
 } from 'recharts';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/src/components/layout/Sidebar';
-import logoWeg from '@/src/assets/logos/weg.jpeg';
-import logoVale from '@/src/assets/logos/vale.png';
 import { API_BASE_URL } from '@/src/lib/api-base';
-import logoRenner from '@/src/assets/logos/renner.png';
-import logoMrv from '@/src/assets/logos/mrv.jpg';
-import logoTaesa from '@/src/assets/logos/taesa.png';
-import logoItau from '@/src/assets/logos/itau.png';
-import logoPetrobras from '@/src/assets/logos/petrobras.webp';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
-type QueueFilter = 'Todas' | 'Atencao' | 'Risco';
 type WindowSize = '5a' | '10a';
 type FeedWindow = '30 dias' | '60 dias' | '90 dias';
 type ChangesFocusFilter = 'Mais relevantes' | 'Rotina' | 'Estruturais';
@@ -100,15 +92,6 @@ type Contextual<T> = T & {
  ticker: string;
 };
 
-type CompanyQueueItem = {
- companyId: string;
- ticker: string;
- name: string;
- status: Status;
- logo?: string;
- initials?: string;
- description: string;
-};
 
 type Source = {
  name: string;
@@ -169,16 +152,6 @@ type PillarData = {
  cta?: { title: string; button: string };
  meaningText?: string;
 };
-const queueItems: CompanyQueueItem[] = [
- { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale.src, description: 'Mineradora global com forte exposição a minério de ferro.' },
- { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras.src, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
- { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner.src, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
- { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv.src, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
- { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa.src, description: 'Empresa de transmissão de energia com receita regulada.' },
- { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg.src, description: 'Empresa de equipamentos elétricos e automação industrial com presença global.' },
- { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itaú Unibanco', status: 'Saudavel', logo: logoItau.src, description: 'Banco universal com foco em crédito, serviços e seguros.' },
- { companyId: 'BBAS3', ticker: 'BBAS3', name: 'Banco do Brasil', status: 'Saudavel', initials: 'BB', description: 'Banco com forte exposição ao agronegócio e setor público.' },
-];
 
 const mainTabs: MainTab[] = ['Resumo', 'Pilares', 'Mudancas', 'Eventos', 'Preço', 'Fontes'];
 const EMPTY_RADAR_SCORES: Record<PillarName, number> = { Divida: 0, Caixa: 0, Margens: 0, Retorno: 0, Proventos: 0 };
@@ -517,6 +490,8 @@ const sourceRows = [
 type CompanyData = {
  companyId: string;
  ticker: string;
+ companyName?: string;
+ logoUrl?: string;
  radarScores: Record<PillarName, number>;
  radarPreviousScores?: Record<PillarName, number>;
  diagnosisHeadline: string;
@@ -571,12 +546,11 @@ function contextualize<T>(items: T[], companyId: string, ticker: string): Array<
 }
 
 function companyContextFromTicker(tickerParam?: string): CompanyContext {
- const normalizedTicker = (tickerParam ?? 'WEGE3').toUpperCase();
- const company = queueItems.find((item) => item.ticker === normalizedTicker) ?? queueItems[4];
+ const normalizedTicker = (tickerParam ?? '').toUpperCase();
  return {
- companyId: company.companyId,
- ticker: company.ticker,
- name: company.name,
+  companyId: normalizedTicker,
+  ticker: normalizedTicker,
+  name: normalizedTicker,
  };
 }
 
@@ -590,7 +564,7 @@ function toDisplayText(value: unknown): string {
 }
 
 function normalizeMojibake(text: string) {
- if (!/[\u00C2\u00C3]/.test(text)) return text;
+ if (!/[ÂÃ]/.test(text)) return text;
  try {
   const bytes = Uint8Array.from(text, (char) => char.charCodeAt(0) & 0xFF);
   const decoded = new TextDecoder('utf-8').decode(bytes);
@@ -1633,6 +1607,8 @@ function normalizeLegacyCompanyData(raw: unknown, companyId: string, ticker: str
  return {
  companyId,
  ticker,
+ companyName: (payload as Record<string, unknown>).companyName as string | undefined,
+ logoUrl: (payload as Record<string, unknown>).logoUrl as string | undefined,
  radarScores: normalizedRadarScores,
  radarPreviousScores: normalizedPreviousScores,
  diagnosisHeadline: payload.diagnosisHeadline ?? '',
@@ -1800,16 +1776,6 @@ function hexToRgba(hex: string, alpha: number) {
  return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function QueueLogo({ company }: { company: CompanyQueueItem }) {
- if (company.logo) {
- return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-[#E2EDF5] object-cover" />;
- }
- return (
- <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">
- {company.initials}
- </div>
- );
-}
 
 function PillarMapTooltip({ datum }: { datum: PillarMapDatum }) {
  const tone = pillarMapStatusTone[datum.status];
@@ -2247,7 +2213,6 @@ export function CompanyAnalysis() {
  const { ticker } = useParams() as { ticker: string };
  const searchParams = useSearchParams();
 
- const [queueFilter, setQueueFilter] = useState<QueueFilter>('Todas');
  const [activeTab, setActiveTab] = useState<MainTab>('Resumo');
  const [contentVisible, setContentVisible] = useState(true);
  const [companyContext, setCompanyContext] = useState<CompanyContext>(() => companyContextFromTicker(ticker));
@@ -2255,7 +2220,6 @@ export function CompanyAnalysis() {
  const [loadingTab, setLoadingTab] = useState(true);
  const [tabCache, setTabCache] = useState<Record<string, TabPayload>>({});
  const [actionError, setActionError] = useState<string | null>(null);
- const [watchlistCollapsed, setWatchlistCollapsed] = useState(true);
  const [showScoreInfo, setShowScoreInfo] = useState(false);
  const [showHeaderUpdateDetails, setShowHeaderUpdateDetails] = useState(false);
  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -2337,12 +2301,7 @@ export function CompanyAnalysis() {
  return () => window.clearTimeout(timer);
  }, [companyContext.companyId]);
 
- const filteredQueue = useMemo(() => {
- if (queueFilter === 'Todas') return queueItems;
- return queueItems.filter((item) => item.status === queueFilter);
- }, [queueFilter]);
 
- const activeCompany = queueItems.find((item) => item.companyId === companyContext.companyId) ?? queueItems[4];
  const tabKey = companyContext.companyId;
  const hasCachedTab = Boolean(tabCache[tabKey]);
 
@@ -3028,97 +2987,21 @@ const changesCount = changesBySelectedWindow.length;
  <Sidebar currentPage="explorar" contextLabel="Explorar mercado" />
  </div>
 
- <aside
- className={cx(
- 'relative h-full flex-shrink-0 overflow-hidden bg-[#FCFDFC] transition-all duration-200',
- watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-[#E2EDF5] p-3.5'
- )}
- >
- {!watchlistCollapsed && (
- <button
- className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC]"
- onClick={() => setWatchlistCollapsed(true)}
- aria-label="Retrair watchlist"
- title="Retrair watchlist"
- >
- <ChevronLeft className="h-4 w-4 transition-transform" />
- </button>
- )}
- {!watchlistCollapsed && (
- <div className="flex items-center justify-between">
- <h2 className="text-[14px] font-semibold text-[#374151]">Watchlist</h2>
- <div className="flex items-center gap-2">
- <Search className="h-4 w-4 text-[#9CA3AF]" />
- </div>
- </div>
- )}
- {!watchlistCollapsed && (
- <div className="mt-3 flex items-center gap-1.5">
- {(['Todas', 'Atencao', 'Risco'] as QueueFilter[]).map((filter) => (
- <button
- key={filter}
- onClick={() => setQueueFilter(filter)}
- className={cx(
- 'h-7 rounded-full px-3.5 text-[13px]',
- queueFilter === filter ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827]' : 'text-[#6B7280]'
- )}
- >
- {filter === 'Atencao' ? 'Atenção' : filter}
- </button>
- ))}
- </div>
- )}
- {!watchlistCollapsed && (
- <div className="mt-4 divide-y divide-[#F3F4F6]">
- {filteredQueue.map((company) => {
- const selected = company.companyId === companyContext.companyId;
- return (
- <button
- key={company.ticker}
- onClick={() => switchCompany(company.ticker)}
- className={cx(
- 'group flex w-full items-center gap-2.5 text-left',
- selected ? 'rounded-[10px] border border-[#BEEDE6] bg-[#F4FCFA] p-2.5' : 'px-2 py-2.5'
- )}
- >
- <QueueLogo company={company} />
- <div className="min-w-0 flex-1">
- <p className="truncate text-[13px] font-bold text-[#111827]">{company.ticker}</p>
- <p className="truncate text-[11px] text-[#9CA3AF]">{company.name}</p>
- </div>
- <span className={cx('h-[7px] w-[7px] rounded-full', statusTone[company.status].dot)} />
- <MoreHorizontal className={cx('h-3.5 w-3.5 text-[#9CA3AF] transition-opacity', selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')} />
- </button>
- );
- })}
- </div>
- )}
- </aside>
-
- {watchlistCollapsed && (
- <button
- className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-[#D1D5DB] bg-white text-[#6B7280] shadow-sm hover:bg-[#F6FAFC] xl:grid xl:left-[240px]"
- onClick={() => setWatchlistCollapsed(false)}
- aria-label="Expandir watchlist"
- title="Expandir watchlist"
- >
- <ChevronLeft className="h-4 w-4 rotate-180 transition-transform" />
- </button>
- )}
-
  <main className="h-full flex-1 overflow-y-auto bg-[#F6FAFC]">
  <header className="sticky top-0 z-10 border-b border-[#EAF0F6] bg-white shadow-[0_1px_6px_-2px_rgba(2,6,23,0.05)]">
  {/* Hero strip */}
  <div className="px-6 pt-4 pb-3" style={{ background: 'linear-gradient(160deg, #F8FBFF 0%, #FFFFFF 60%)' }}>
  <div className="flex min-w-0 items-start justify-between gap-4">
  <div className="flex min-w-0 items-start gap-3.5">
- <QueueLogo company={activeCompany} />
+ {activeData?.logoUrl
+           ? <img src={activeData.logoUrl} alt={companyContext.ticker} className="h-9 w-9 rounded-lg border border-[#E2EDF5] object-cover" />
+           : <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">{companyContext.ticker.slice(0, 2)}</div>
+         }
  <div className="min-w-0">
- <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{activeCompany.ticker}</p>
+ <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{companyContext.ticker}</p>
  <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[#0B1220]">
- {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
+ {activeData?.companyName ?? companyContext.ticker}
  </h1>
- <p className="mt-0.5 max-w-[480px] truncate text-[12px] text-[#8494A9]">{activeCompany.description}</p>
  <div className="mt-2.5 flex flex-wrap items-center gap-2">
  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', statusTone[companyStatus].badge)}>
  {statusLabel(companyStatus)} · {scoreAverage}/100
