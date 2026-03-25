@@ -839,9 +839,9 @@ function sanitizePayloadText<T>(value: T): T {
 function normalizeStatusLabel(value?: string, fallback: Status = 'Atencao'): Status {
  const raw = (value ?? '').trim().toLowerCase();
  if (!raw) return fallback;
- if (raw.includes('ris')) return 'Risco';
- if (raw.includes('aten') || raw.includes('monitor')) return 'Atencao';
- if (raw.includes('saud') || raw.includes('fort')) return 'Saudavel';
+ if (raw.includes('ris') || raw === 'negative') return 'Risco';
+ if (raw.includes('aten') || raw.includes('monitor') || raw === 'attention') return 'Atencao';
+ if (raw.includes('saud') || raw.includes('fort') || raw === 'positive') return 'Saudavel';
  return fallback;
 }
 
