@@ -61,7 +61,7 @@ const TABS: { id: AnalysisTab; label: string; icon: React.ReactNode }[] = [
   { id: 'past', label: 'Passado', icon: <BarChart3 className="w-4 h-4" /> },
   { id: 'health', label: 'Saúde', icon: <Shield className="w-4 h-4" /> },
   { id: 'dividend', label: 'Dividendos', icon: <DollarSign className="w-4 h-4" /> },
-  { id: 'ownership', label: 'Composição', icon: <Users className="w-4 h-4" /> },
+  { id: 'ownership', label: 'Composição Acionária', icon: <Users className="w-4 h-4" /> },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -88,11 +88,11 @@ function ScoreBar({ score, max = 6, color }: { score: number; max?: number; colo
   );
 }
 
-function SectionCard({ title, subtitle, children, className = '' }: { title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
+function SectionCard({ id, title, subtitle, children, className = '' }: { id?: string; title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-neutral-200 p-6 ${className}`}>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
+    <div id={id} className={`bg-white rounded-2xl shadow-sm p-6 scroll-mt-24 ${className}`}>
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
         {subtitle && <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>}
       </div>
       {children}
@@ -128,6 +128,124 @@ function CheckList({ checks }: { checks: DimensionScore['checks'] }) {
       ))}
     </div>
   );
+}
+
+const DIMENSION_PRIORITY: Record<string, number> = {
+  dividend: 1,
+  health: 2,
+  past: 3,
+  future: 4,
+  value: 5,
+};
+
+const DIMENSION_CONTEXT: Record<string, string> = {
+  value: 'preco e margem de seguranca',
+  future: 'crescimento e previsibilidade',
+  past: 'historico operacional',
+  health: 'balanco e cobertura financeira',
+  dividend: 'proventos e consistencia',
+};
+
+function getTopDimension(dimensions: DimensionScore[]) {
+  return [...dimensions].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return DIMENSION_PRIORITY[a.dimension] - DIMENSION_PRIORITY[b.dimension];
+  })[0];
+}
+
+function getBottomDimension(dimensions: DimensionScore[]) {
+  return [...dimensions].sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    return DIMENSION_PRIORITY[a.dimension] - DIMENSION_PRIORITY[b.dimension];
+  })[0];
+}
+
+function buildOverviewNarrative(data: AnalysisData) {
+  const bestDimension = getTopDimension(data.snowflake);
+  const weakestDimension = getBottomDimension(data.snowflake);
+  const topReward = data.rewardsAndRisks.find((item) => item.type === 'reward');
+  const topRisk = data.rewardsAndRisks.find((item) => item.type === 'risk');
+  const hasDiscount = data.valuation.discountPercent > 0;
+  const betterThanMarketLongTerm = data.returnComparison[data.returnComparison.length - 1]?.stock > data.returnComparison[data.returnComparison.length - 1]?.market;
+
+  const headline = [
+    `${data.company.name} combina forca em ${DIMENSION_CONTEXT[bestDimension.dimension]}`,
+    hasDiscount ? 'com espaco para reprecificacao' : 'com leitura mais dependente de execucao',
+    topRisk ? `, mas carrega pressao em ${DIMENSION_CONTEXT[weakestDimension.dimension]}` : '',
+  ].join('');
+
+  const subheadline = [
+    topReward?.text ?? `A melhor leitura hoje esta em ${bestDimension.displayName.toLowerCase()}.`,
+    topRisk?.text ? `O principal ponto de atencao esta em ${topRisk.text.toLowerCase()}.` : '',
+    betterThanMarketLongTerm ? 'No horizonte longo, a tese ainda preserva sustentacao relativa.' : 'No curto prazo, o mercado ainda pede confirmacao da tese.',
+  ].filter(Boolean).join(' ');
+
+  const quickRead = [
+    `Tese ${bestDimension.score - weakestDimension.score >= 2 ? 'desequilibrada para os pontos fortes' : 'equilibrada'},`,
+    `com destaque para ${bestDimension.displayName.toLowerCase()}`,
+    `e maior vigilancia em ${weakestDimension.displayName.toLowerCase()}.`,
+  ].join(' ');
+
+  return { bestDimension, weakestDimension, topReward, topRisk, headline, subheadline, quickRead };
+}
+
+function buildPriceInsight(data: AnalysisData) {
+  const oneYearVsMarket = data.priceHistory.return1y - data.priceHistory.marketReturn1y;
+  const fiveYearTrend = data.priceHistory.return5y;
+
+  if (data.priceHistory.return1y < 0 && fiveYearTrend > 0) {
+    return 'Depois de um periodo mais pressionado no curto prazo, a acao ainda preserva ganho acumulado no horizonte mais longo, mas sem uma recuperacao convincente o suficiente para eliminar a cautela.';
+  }
+
+  if (oneYearVsMarket > 0) {
+    return 'O papel vem sustentando desempenho acima do mercado no recorte recente, o que reforca a leitura de que a tese ainda encontra apoio em preco.';
+  }
+
+  return 'O comportamento recente do papel segue mais de confirmacao do que de aceleracao: ha sinais mistos no preco e o usuario ainda precisa acompanhar os gatilhos que podem destravar ou enfraquecer a tese.';
+}
+
+function buildReturnInsight(data: AnalysisData) {
+  const shortTerm = data.returnComparison.slice(0, 4);
+  const longTerm = data.returnComparison.slice(4);
+  const shortUnderperformance = shortTerm.filter((item) => item.stock < item.market).length;
+  const longOutperformance = longTerm.filter((item) => item.stock > item.market).length;
+
+  if (shortUnderperformance >= 3 && longOutperformance >= 1) {
+    return `${data.company.name} ficou abaixo do Ibovespa nos recortes mais curtos, mas ainda preserva vantagem relativa nos horizontes mais longos.`;
+  }
+
+  if (shortUnderperformance >= 3) {
+    return `${data.company.name} vem perdendo para o Ibovespa na maior parte dos recortes recentes, sinal de que o mercado ainda cobra confirmacao adicional da tese.`;
+  }
+
+  return `${data.company.name} mostra leitura relativa mais equilibrada contra o Ibovespa, sem uma dominancia clara nem no curto nem no longo prazo.`;
+}
+
+function inferTimelineImpact(event: TimelineEvent) {
+  const text = `${event.title} ${event.description ?? ''}`.toLowerCase();
+
+  if (text.includes('divid')) return 'Dividendos';
+  if (text.includes('marg') || text.includes('resultado') || text.includes('lucro')) return 'Margens';
+  if (text.includes('barrag') || text.includes('jurid') || text.includes('process')) return 'Juridico';
+  if (text.includes('miner') || text.includes('commodity') || text.includes('china')) return 'Commodity';
+  if (text.includes('cfo') || text.includes('gest')) return 'Gestao';
+  return 'Operacao';
+}
+
+function getCompetitorSummary(comp: Competitor) {
+  const entries = Object.entries(comp.scores).sort((a, b) => b[1] - a[1]);
+  const best = entries[0];
+  const worst = entries[entries.length - 1];
+  const average = entries.reduce((sum, [, value]) => sum + value, 0) / entries.length;
+
+  let synthesis = 'mais equilibrada';
+  if (average < 50) synthesis = 'mais pressionada';
+  else if (best[1] - worst[1] >= 25) synthesis = 'maior assimetria risco-retorno';
+
+  return {
+    synthesis,
+    differential: `Destaque em ${DIMENSION_CONTEXT[best[0]]}; pede cuidado em ${DIMENSION_CONTEXT[worst[0]]}.`,
+  };
 }
 
 // ─── Reusable Chart Components (data-to-viz optimized) ──────────────────────
@@ -336,11 +454,11 @@ function DumbbellScenarios({
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-green-600" />
-          <span>Upside</span>
+          <span>Potencial de Alta</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-600" />
-          <span>Downside</span>
+          <span>Potencial de Baixa</span>
         </div>
       </div>
     </div>
@@ -387,7 +505,12 @@ function EventTimeline({ events }: { events: TimelineEvent[] }) {
                 {event.description && (
                   <p className="text-xs text-neutral-600">{event.description}</p>
                 )}
-                <span className="text-[10px] text-neutral-400 mt-1 block">Fonte: {event.source}</span>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center rounded-full bg-white/80 px-2 py-1 text-[10px] font-medium text-neutral-600">
+                    Impacta: {inferTimelineImpact(event)}
+                  </span>
+                  <span className="text-[10px] text-neutral-400 block">Fonte: {event.source}</span>
+                </div>
               </div>
             </div>
           );
@@ -673,15 +796,28 @@ function DividendVsEarningsChart({ data }: { data: DividendVsEarnings[] }) {
  * Shows investment highlights (green stars) and risk factors (orange warnings).
  */
 function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
-  const rewards = items.filter(i => i.type === 'reward');
-  const risks = items.filter(i => i.type === 'risk');
+  const rewards = items.filter(i => i.type === 'reward').slice(0, 3);
+  const risks = items.filter(i => i.type === 'risk').slice(0, 3);
+  const leadReward = rewards[0];
+  const leadRisk = risks[0];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+        <p className="text-sm font-semibold text-neutral-900">
+          {leadReward?.text ?? 'A tese tem pontos fortes relevantes'}
+          {leadRisk ? `, mas pede cuidado com ${leadRisk.text.toLowerCase()}.` : '.'}
+        </p>
+        <p className="mt-2 text-sm text-neutral-600">
+          {leadReward?.detail ?? 'Os fundamentos positivos aparecem de forma consistente na leitura atual.'}
+          {leadRisk?.detail ? ` O principal ponto de atencao hoje vem de ${leadRisk.detail.toLowerCase()}.` : ''}
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-1.5">
           <Star className="w-4 h-4 fill-green-500 text-green-500" />
-          REWARDS
+          Principais forcas
         </h4>
         <div className="space-y-2.5">
           {rewards.map((r, i) => (
@@ -698,7 +834,7 @@ function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
       <div>
         <h4 className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-1.5">
           <AlertTriangle className="w-4 h-4 text-red-500" />
-          RISK ANALYSIS
+          Principais riscos
         </h4>
         <div className="space-y-2.5">
           {risks.map((r, i) => (
@@ -711,6 +847,7 @@ function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
@@ -733,15 +870,21 @@ function CompetitorGrid({ competitors }: { competitors: Competitor[] }) {
         ];
         const avg = Object.values(comp.scores).reduce((a, b) => a + b, 0) / 5;
         const status = avg >= 60 ? 'healthy' : avg >= 40 ? 'attention' : 'risk';
+        const summary = getCompetitorSummary(comp);
 
         return (
-          <div key={comp.ticker} className="bg-neutral-50 rounded-xl p-4 text-center hover:bg-neutral-100 transition-colors cursor-pointer border border-transparent hover:border-neutral-200">
+          <div key={comp.ticker} className="bg-neutral-50 rounded-xl p-4 hover:bg-neutral-100 transition-colors cursor-pointer border border-transparent hover:border-neutral-200">
             <div className="flex justify-center mb-2">
               <SnowflakeChart dimensions={dims} size="small" status={status as any} />
             </div>
             <div className="text-sm font-bold text-neutral-900">{comp.name}</div>
             <div className="text-xs text-neutral-500 font-mono">{comp.exchange}:{comp.ticker}</div>
-            <div className="text-xs text-neutral-400 mt-0.5">{comp.marketCap}</div>
+            <div className="mt-3 rounded-xl bg-white/80 p-3 text-left">
+              <div className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Sintese</div>
+              <div className="mt-1 text-sm font-semibold text-neutral-900">{summary.synthesis}</div>
+              <div className="mt-1 text-xs text-neutral-600">{summary.differential}</div>
+            </div>
+            <div className="text-xs text-neutral-400 mt-2">{comp.marketCap}</div>
           </div>
         );
       })}
@@ -775,10 +918,10 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           discount > 0 ? 'bg-blue-100 text-blue-800' :
           'bg-red-100 text-red-800'
         }`}>
-          {discount > 0 ? `${discount.toFixed(1)}% abaixo do fair value` : `${Math.abs(discount).toFixed(1)}% acima do fair value`}
+          {discount > 0 ? `${discount.toFixed(1)}% abaixo do valor justo` : `${Math.abs(discount).toFixed(1)}% acima do valor justo`}
         </div>
         <div>
-          <span className="text-neutral-500">Fair Value:</span>{' '}
+          <span className="text-neutral-500">Valor Justo:</span>{' '}
           <span className="font-bold text-green-700">R$ {fairValue.toFixed(2)}</span>
         </div>
       </div>
@@ -819,7 +962,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
         <span>R$ {rangeMin.toFixed(0)}</span>
         <div className="flex gap-4">
           <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-sm bg-indigo-600" />Preço Atual</span>
-          <span className="flex items-center gap-1"><div className="w-2.5 h-0.5 bg-green-600" />Fair Value</span>
+          <span className="flex items-center gap-1"><div className="w-2.5 h-0.5 bg-green-600" />Valor Justo</span>
         </div>
         <span>R$ {rangeMax.toFixed(0)}</span>
       </div>
@@ -851,7 +994,7 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
         {/* Center label */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-[10px] text-neutral-500">Market Cap</div>
+            <div className="text-[10px] text-neutral-500">Cap. de Mercado</div>
             <div className="text-sm font-bold text-neutral-900">R$ {formatNumber(composition.marketCap)}M</div>
           </div>
         </div>
@@ -874,11 +1017,11 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
         <div className="border-t border-neutral-200 pt-3 grid grid-cols-2 gap-4">
           <div>
             <div className="text-2xl font-bold text-neutral-900">{composition.peRatio}x</div>
-            <div className="text-xs text-neutral-500">P/L Ratio</div>
+            <div className="text-xs text-neutral-500">Índice P/L</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-neutral-900">{composition.psRatio}x</div>
-            <div className="text-xs text-neutral-500">P/S Ratio</div>
+            <div className="text-xs text-neutral-500">Índice P/S</div>
           </div>
         </div>
       </div>
@@ -975,190 +1118,231 @@ const EVENT_LABELS: Record<string, string> = {
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
-function OverviewTab({ data }: { data: AnalysisData }) {
+function OverviewTab({ data, onSelectTab }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void }) {
   const snowflakeDims: SnowflakeDimension[] = data.snowflake.map((d) => ({
     label: d.displayName,
     value: d.normalizedScore,
     color: DIMENSION_COLORS[d.dimension],
     why: d.summary,
-    metric: `${d.score}/6 checks`,
+    metric: `${d.score}/6 critérios`,
   }));
 
   const totalScore = data.snowflake.reduce((sum, d) => sum + d.score, 0);
   const overallStatus = totalScore >= 20 ? 'healthy' : totalScore >= 12 ? 'attention' : 'risk';
+  const { bestDimension, weakestDimension, topReward, topRisk, headline, subheadline, quickRead } = buildOverviewNarrative(data);
+  const priceInsight = buildPriceInsight(data);
+  const returnInsight = buildReturnInsight(data);
 
   return (
     <div className="space-y-6">
-      {/* Company Header */}
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
             {data.company.ticker.slice(0, 2)}
           </div>
           <div className="flex-1">
-            <div className="flex items-baseline gap-3">
-              <h1 className="text-2xl font-bold text-neutral-900">{data.company.name}</h1>
-              <span className="text-sm font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h1 className="text-xl font-bold text-neutral-900">{data.company.name}</h1>
+              <span className="text-xs font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded">
                 {data.company.exchange}:{data.company.ticker}
               </span>
             </div>
-            <p className="text-sm text-neutral-600 mt-1">{data.company.sector} — {data.company.industry}</p>
-            <p className="text-sm text-neutral-500 mt-1">Market Cap: {data.company.marketCap}</p>
+            <p className="text-xs text-neutral-400 mt-1">{data.company.sector} · {data.company.industry} · Cap. {data.company.marketCap}</p>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-neutral-900">
-              R$ {data.valuation.currentPrice.toFixed(2)}
-            </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-2xl font-bold text-neutral-900">R$ {data.valuation.currentPrice.toFixed(2)}</div>
             <div className={`text-sm font-medium ${data.priceHistory.return1y >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {data.priceHistory.return1y >= 0 ? '+' : ''}{data.priceHistory.return1y}% (1 ano)
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Snowflake + Rewards/Risks — SimplyWall.St layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <SectionCard title="Snowflake Analysis" className="flex flex-col items-center">
-          <SnowflakeChart
-            dimensions={snowflakeDims}
-            size="large"
-            status={overallStatus}
-          />
-          <div className="mt-4 text-center">
-            <div className="text-3xl font-bold text-neutral-900">{totalScore}/30</div>
-            <p className="text-sm text-neutral-500">Score geral</p>
-          </div>
-        </SectionCard>
-
-        <div className="lg:col-span-2">
-          <SectionCard title={`${data.company.name} (${data.company.ticker}) Stock Overview`}>
-            <p className="text-sm text-neutral-600 mb-4">{data.company.description}</p>
-            <RewardsAndRisks items={data.rewardsAndRisks} />
-          </SectionCard>
+        <div className="mt-5 pt-5 border-t border-neutral-100">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-600">Tese resumida</div>
+          <h2 className="mt-2 max-w-3xl text-lg font-semibold leading-snug text-neutral-900">{headline}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">{subheadline}</p>
         </div>
       </div>
 
-      {/* Market Cap Donut + Earnings & Revenue — SimplyWall.St style */}
+      <SectionCard id="panorama-tese" title="Panorama da tese">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
+          <div className="flex flex-col items-center">
+            <SnowflakeChart dimensions={snowflakeDims} size="large" status={overallStatus} />
+            <div className="mt-3 text-center">
+              <div className="text-2xl font-bold text-neutral-900">{totalScore}/30</div>
+              <p className="text-xs text-neutral-400">Score geral</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <p className="text-sm leading-6 text-neutral-600">{data.company.description}</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="p-4 bg-neutral-50 rounded-xl border-l-2 border-teal-400">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-teal-600">Maior força</div>
+                <div className="mt-1.5 text-sm font-semibold text-neutral-900">{topReward?.text ?? bestDimension.displayName}</div>
+                <div className="mt-1 text-xs text-neutral-500 leading-5">
+                  {topReward?.detail ?? `A tese hoje se apoia mais em ${DIMENSION_CONTEXT[bestDimension.dimension]}.`}
+                </div>
+              </div>
+              <div className="p-4 bg-neutral-50 rounded-xl border-l-2 border-amber-400">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-amber-600">Maior fragilidade</div>
+                <div className="mt-1.5 text-sm font-semibold text-neutral-900">{topRisk?.text ?? weakestDimension.displayName}</div>
+                <div className="mt-1 text-xs text-neutral-500 leading-5">
+                  {topRisk?.detail ?? `O ponto mais sensível hoje está em ${DIMENSION_CONTEXT[weakestDimension.dimension]}.`}
+                </div>
+              </div>
+            </div>
+            <div className="p-4 bg-neutral-50 rounded-xl">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-400">Leitura rápida</div>
+              <p className="mt-1.5 text-sm leading-6 text-neutral-600">{quickRead}</p>
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard id="resumo-dimensoes" title="Resumo por dimensão" subtitle="Ponto de partida para aprofundar em cada eixo da análise">
+        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="p-4 bg-teal-50 rounded-xl border-l-2 border-teal-400">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-teal-600">Melhor dimensão hoje</div>
+            <div className="mt-1.5 text-sm font-semibold text-teal-900">{bestDimension.displayName}</div>
+            <div className="mt-1 text-xs text-teal-700 leading-5">{bestDimension.summary}</div>
+          </div>
+          <div className="p-4 bg-amber-50 rounded-xl border-l-2 border-amber-400">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-amber-600">Mais pressionada hoje</div>
+            <div className="mt-1.5 text-sm font-semibold text-amber-900">{weakestDimension.displayName}</div>
+            <div className="mt-1 text-xs text-amber-700 leading-5">{weakestDimension.summary}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+          {data.snowflake.map((dim) => (
+            <button
+              key={dim.dimension}
+              type="button"
+              onClick={() => onSelectTab(dim.dimension)}
+              className="p-3 rounded-xl hover:bg-neutral-50 transition-colors text-left border-l-2"
+              style={{ borderLeftColor: DIMENSION_COLORS[dim.dimension] }}
+            >
+              <span className="font-medium text-neutral-800 text-sm block mb-2">{dim.displayName}</span>
+              <ScoreBar score={dim.score} color={DIMENSION_COLORS[dim.dimension]} />
+              <p className="text-xs text-neutral-400 mt-2 line-clamp-2 leading-5">{dim.summary}</p>
+            </button>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard id="forcas-riscos" title="Forças e riscos da tese">
+        <RewardsAndRisks items={data.rewardsAndRisks} />
+      </SectionCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SectionCard title="Visão de Mercado">
+        <SectionCard title="Visao de mercado">
           <MarketCapDonut composition={data.marketCapComposition} />
         </SectionCard>
 
-        <SectionCard title="Receita & Lucro">
+        <SectionCard title="Receita e lucro">
           <EarningsRevenueChart series={data.earningsRevenueSeries} />
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-sky-500" /><span className="text-neutral-500">Receita (histórico)</span>
+              <div className="w-3 h-3 rounded bg-sky-500" /><span className="text-neutral-500">Receita (historico)</span>
               <div className="w-3 h-3 rounded bg-sky-300 ml-2" /><span className="text-neutral-500">Receita (est.)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-teal-500" /><span className="text-neutral-500">Lucro (histórico)</span>
+              <div className="w-3 h-3 rounded bg-teal-500" /><span className="text-neutral-500">Lucro (historico)</span>
               <div className="w-3 h-3 rounded bg-teal-300 ml-2" /><span className="text-neutral-500">Lucro (est.)</span>
             </div>
           </div>
         </SectionCard>
       </div>
 
-      {/* Dimension Summary */}
-      <SectionCard title="Resumo por Dimensão">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {data.snowflake.map((dim) => (
-            <div key={dim.dimension} className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-colors">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-neutral-900 text-sm">{dim.displayName}</span>
-              </div>
-              <ScoreBar score={dim.score} color={DIMENSION_COLORS[dim.dimension]} />
-              <p className="text-xs text-neutral-500 mt-2">{dim.summary}</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Price History & Performance — SimplyWall.St style with event dots */}
-      <SectionCard title="Price History & Performance" subtitle="Gráfico de preço com eventos categorizados (estilo SimplyWall.St)">
-        <div className="h-72">
-          <TremorArea
-            data={data.priceHistory.series}
-            index="date"
-            categories={["price"]}
-            colors={["teal"]}
-            valueFormatter={(v: number) => `R$ ${v.toFixed(2)}`}
-            showGridLines={true}
-            showLegend={false}
-            curveType="monotone"
-          />
-        </div>
-        <div className="flex gap-6 mt-4 text-sm">
+      <SectionCard
+        id="mercado-eventos"
+        title="Preco, retorno e eventos recentes"
+        subtitle="Conecte o que aconteceu, quando aconteceu e como isso apareceu no comportamento do papel"
+      >
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <span className="text-neutral-500">Retorno 1a:</span>{' '}
-            <span className={data.priceHistory.return1y >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-              {data.priceHistory.return1y >= 0 ? '+' : ''}{data.priceHistory.return1y}%
-            </span>
-          </div>
-          <div>
-            <span className="text-neutral-500">Retorno 5a:</span>{' '}
-            <span className={data.priceHistory.return5y >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-              {data.priceHistory.return5y >= 0 ? '+' : ''}{data.priceHistory.return5y}%
-            </span>
-          </div>
-          <div>
-            <span className="text-neutral-500">Mercado 1a:</span>{' '}
-            <span className="font-semibold text-neutral-700">{data.priceHistory.marketReturn1y >= 0 ? '+' : ''}{data.priceHistory.marketReturn1y}%</span>
-          </div>
-          <div>
-            <span className="text-neutral-500">Beta:</span>{' '}
-            <span className="font-semibold text-neutral-700">{data.priceHistory.volatilityBeta}</span>
-          </div>
-        </div>
-        {/* Event category dots legend — SimplyWall.St style */}
-        <div className="mt-4 pt-3 border-t border-neutral-100">
-          <div className="flex items-center gap-1 mb-2 flex-wrap">
-            {data.priceEvents.map((evt, idx) => (
-              <div
-                key={idx}
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: EVENT_COLORS[evt.category] }}
-                title={`${evt.date}: ${evt.title}`}
+            <div className="rounded-2xl bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">{priceInsight}</div>
+            <div className="mt-4 h-72">
+              <TremorArea
+                data={data.priceHistory.series}
+                index="date"
+                categories={["price"]}
+                colors={["teal"]}
+                valueFormatter={(v: number) => `R$ ${v.toFixed(2)}`}
+                showGridLines={true}
+                showLegend={false}
+                curveType="monotone"
               />
-            ))}
+            </div>
+            <div className="flex gap-6 mt-4 text-sm flex-wrap">
+              <div>
+                <span className="text-neutral-500">Retorno 1a:</span>{' '}
+                <span className={data.priceHistory.return1y >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                  {data.priceHistory.return1y >= 0 ? '+' : ''}{data.priceHistory.return1y}%
+                </span>
+              </div>
+              <div>
+                <span className="text-neutral-500">Retorno 5a:</span>{' '}
+                <span className={data.priceHistory.return5y >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                  {data.priceHistory.return5y >= 0 ? '+' : ''}{data.priceHistory.return5y}%
+                </span>
+              </div>
+              <div>
+                <span className="text-neutral-500">Mercado 1a:</span>{' '}
+                <span className="font-semibold text-neutral-700">{data.priceHistory.marketReturn1y >= 0 ? '+' : ''}{data.priceHistory.marketReturn1y}%</span>
+              </div>
+              <div>
+                <span className="text-neutral-500">Beta:</span>{' '}
+                <span className="font-semibold text-neutral-700">{data.priceHistory.volatilityBeta}</span>
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-neutral-100">
+              <div className="flex items-center gap-1 mb-2 flex-wrap">
+                {data.priceEvents.map((evt, idx) => (
+                  <div
+                    key={idx}
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: EVENT_COLORS[evt.category] }}
+                    title={`${evt.date}: ${evt.title}`}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-3 text-[10px] text-neutral-500">
+                {Object.entries(EVENT_LABELS).map(([key, label]) => (
+                  <span key={key} className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS[key] }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3 text-[10px] text-neutral-500">
-            {Object.entries(EVENT_LABELS).map(([key, label]) => (
-              <span key={key} className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS[key] }} />
-                {label}
-              </span>
-            ))}
+          <div>
+            <div className="rounded-2xl bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">{returnInsight}</div>
+            <div className="mt-4">
+              <ReturnComparisonChart data={data.returnComparison} />
+            </div>
+            <div className="mt-6 border-t border-neutral-100 pt-6">
+              <div className="mb-3">
+                <h4 className="text-sm font-semibold text-neutral-900">Timeline recente</h4>
+                <p className="text-xs text-neutral-500">Use esta leitura para conectar evento, data e pilar mais afetado.</p>
+              </div>
+              <EventTimeline events={data.timelineEvents.slice(0, 4)} />
+            </div>
           </div>
         </div>
       </SectionCard>
 
-      {/* Competitors — SimplyWall.St style mini snowflakes */}
-      <SectionCard title={`${data.company.name} Competitors`}>
+      <SectionCard title="Comparacao com competidores" subtitle="O radar segue como apoio visual, mas a leitura principal vem da sintese textual">
         <CompetitorGrid competitors={data.competitors} />
       </SectionCard>
 
-      {/* Community Fair Values — SimplyWall.St histogram */}
-      <SectionCard title={`${data.company.ticker} Community Fair Values`} subtitle={`Veja o que ${data.communityFairValues.reduce((s, b) => s + b.count, 0)} outros acham que a ação vale`}>
-        <CommunityFairValuesChart buckets={data.communityFairValues} lastPrice={data.valuation.currentPrice} />
-      </SectionCard>
-
-      {/* Stock Return vs Market Return */}
       <SectionCard
-        title="Retorno: Ação vs Ibovespa"
-        subtitle="data-to-viz: Diverging Bar — eixo central em 0% mostra outperformance/underperformance claramente"
+        title="Percepção da comunidade sobre valor justo"
+        subtitle={`Veja o que ${data.communityFairValues.reduce((s, b) => s + b.count, 0)} pessoas estimam, sem substituir a leitura fundamentalista`}
       >
-        <ReturnComparisonChart data={data.returnComparison} />
-        <div className="mt-3 p-3 rounded-lg bg-neutral-50 text-sm text-neutral-600">
-          <strong>Leitura:</strong> Barras à direita do 0 = retorno positivo. Quando a ação (roxo) ultrapassa o mercado (cinza), há outperformance.
-          Em horizontes curtos ({data.returnComparison[0].period}–{data.returnComparison[2].period}) a ação está underperformando,
-          mas em 5 anos supera o Ibovespa.
+        <div className="mb-4 rounded-2xl bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+          Este bloco mostra percepcao agregada da comunidade. Ele ajuda a entender expectativas, mas nao deve ancorar sozinho a leitura da tese.
         </div>
-      </SectionCard>
-
-      {/* Timeline Events */}
-      <SectionCard title="Eventos Recentes" subtitle="data-to-viz: Timeline vertical com impacto color-coded">
-        <EventTimeline events={data.timelineEvents.slice(0, 4)} />
+        <CommunityFairValuesChart buckets={data.communityFairValues} lastPrice={data.valuation.currentPrice} />
       </SectionCard>
     </div>
   );
@@ -1173,14 +1357,14 @@ function ValueTab({ data }: { data: AnalysisData }) {
   return (
     <div className="space-y-6">
       {/* Dimension Header */}
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.value}15` }}>
               <DollarSign className="w-5 h-5" style={{ color: COLORS.value }} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-neutral-900">Valor (Valuation)</h2>
+              <h2 className="text-xl font-bold text-neutral-900">Valor</h2>
               <p className="text-sm text-neutral-500">{dim.summary}</p>
             </div>
           </div>
@@ -1190,12 +1374,12 @@ function ValueTab({ data }: { data: AnalysisData }) {
       </div>
 
       {/* Share Price vs Fair Value — SimplyWall.St horizontal bar */}
-      <SectionCard title="Share Price vs Fair Value" subtitle="Visualização estilo SimplyWall.St com zonas de valoração">
+      <SectionCard title="Preço da ação vs valor justo" subtitle="Zonas de valoração: subvalorizado, justo e sobrevalorizado">
         <SharePriceVsFairValue currentPrice={v.currentPrice} fairValue={v.fairValue} />
       </SectionCard>
 
       {/* Analyst Price Target — SimplyWall.St consensus band */}
-      <SectionCard title="Analyst Price Targets" subtitle="Preço vs alvo consenso dos analistas com banda de dispersão">
+      <SectionCard title="Alvos de preço dos analistas" subtitle="Preço atual versus consenso de analistas com banda de dispersão">
         <AnalystPriceTarget targets={data.analystTargets} />
         <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
           <div className="p-2 rounded-lg bg-neutral-50 text-center">
@@ -1216,7 +1400,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* BULLET CHART — Fair Value (replaces gauge/progress bar) */}
       <SectionCard
         title="DCF — Valor Justo vs Preço Atual"
-        subtitle="data-to-viz: Bullet Chart — posição é o encoding mais preciso. Faixas mostram cenários."
+        subtitle="Faixas mostram os cenários pessimista, base e otimista do fluxo de caixa descontado"
       >
         <div className="flex items-center gap-8 mb-6">
           <div className="text-center">
@@ -1263,7 +1447,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* DUMBBELL CHART — Price Scenarios */}
       <SectionCard
         title="Cenários de Preço"
-        subtitle="data-to-viz: Dumbbell/Range Chart — mostra distância entre preço atual e cenários"
+        subtitle="Distância entre o preço atual e cada cenário de valoração projetado"
       >
         <DumbbellScenarios
           scenarios={data.priceScenarios.map(s => ({ label: s.label, value: s.estimatedValue, gap: s.gapVsCurrent }))}
@@ -1274,7 +1458,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* FCF with trend line — data-to-viz: bar + line combo for series */}
       <SectionCard
         title="Fluxo de Caixa Livre Projetado (10 anos)"
-        subtitle="data-to-viz: BarChart com linha de tendência (não barras puras para série temporal)"
+        subtitle="Fluxo de caixa livre projetado para os próximos 10 anos"
       >
         <div className="h-64">
           <TremorBar
@@ -1293,7 +1477,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SectionCard
           title="P/L — Comparação"
-          subtitle="data-to-viz: Lollipop > barras (evita efeito Moiré, caveat #33)"
+          subtitle="Comparação com a média da indústria e do mercado"
         >
           <LollipopComparison
             items={[
@@ -1309,7 +1493,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
 
         <SectionCard
           title="P/VP — Comparação"
-          subtitle="data-to-viz: Lollipop horizontal — labels legíveis sem rotação"
+          subtitle="Comparação com a média da indústria"
         >
           <LollipopComparison
             items={[
@@ -1326,7 +1510,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* DISTRIBUTION HISTOGRAMS */}
       <SectionCard
         title="Distribuição de Múltiplos no Setor"
-        subtitle="data-to-viz: Histogram com marcadores — mostra posição da empresa na distribuição"
+        subtitle="Posição da empresa na distribuição de múltiplos do setor"
       >
         <div className="space-y-6">
           {data.distributions.map((dist) => (
@@ -1340,8 +1524,8 @@ function ValueTab({ data }: { data: AnalysisData }) {
 
       {/* BULLET CHART — PEG Ratio (replaces gauge) */}
       <SectionCard
-        title="PEG Ratio"
-        subtitle="data-to-viz: Bullet Chart substitui gauge (encoding por área é impreciso, caveat #24)"
+        title="Índice PEG"
+        subtitle="PEG abaixo de 1 indica boa relação entre preço e crescimento esperado"
       >
         <BulletChart
           value={rv.pegRatio}
@@ -1359,7 +1543,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* SENSITIVITY — Horizontal Lollipop */}
       <SectionCard
         title="Sensibilidade da Estimativa"
-        subtitle="data-to-viz: Lollipop horizontal ordenado por impacto — regra #1: sempre ordenar dados"
+        subtitle="Fatores que mais influenciam o valor justo calculado pelo modelo"
       >
         <SensitivityChart drivers={data.sensitivityDrivers} />
       </SectionCard>
@@ -1367,7 +1551,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* NEW: DCF Sensitivity Heatmap */}
       <SectionCard
         title="Matriz de Sensibilidade DCF"
-        subtitle="data-to-viz: Heatmap — ideal para matriz numérica. Cor codifica fair value vs preço atual."
+        subtitle="Simulação do valor justo em diferentes combinações de WACC e crescimento terminal"
       >
         <DCFSensitivityHeatmap
           cells={data.dcfSensitivity}
@@ -1384,7 +1568,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
       {/* NEW: Ratio Trends Small Multiples */}
       <SectionCard
         title="Evolução de Múltiplos (5 anos)"
-        subtitle="data-to-viz: Small Multiples evitam spaghetti chart (caveat #3) — 1 mini gráfico por métrica"
+        subtitle="Evolução de P/L, P/VP e EV/EBITDA ao longo dos últimos 5 anos"
       >
         <RatioTrendSmallMultiples trends={data.ratioTrends} />
         <p className="mt-3 text-sm text-neutral-600">
@@ -1403,7 +1587,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.future}15` }}>
@@ -1422,7 +1606,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
       {/* Growth Rate Comparison — Lollipop */}
       <SectionCard
         title="Taxas de Crescimento — Empresa vs Mercado"
-        subtitle="data-to-viz: Lollipop pareado — comparação direta sem barras redundantes"
+        subtitle="Crescimento anual estimado comparado com a média do mercado"
       >
         <div className="grid grid-cols-2 gap-8">
           <div>
@@ -1449,7 +1633,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
       {/* Earnings Forecast — Bar + Reference Line for historical/forecast split */}
       <SectionCard
         title="Projeção de Lucro Líquido"
-        subtitle="data-to-viz: BarChart com cores distintas histório/forecast + separador visual"
+        subtitle="Histórico e projeção de consenso dos analistas"
       >
         <div className="h-72">
           <TremorBar
@@ -1470,7 +1654,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded border border-blue-400" style={{ backgroundColor: COLORS.forecast }} />
-            <span>Projetado (consensus)</span>
+            <span>Projetado (consenso)</span>
           </div>
         </div>
       </SectionCard>
@@ -1494,7 +1678,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
       {/* Future ROE — Bullet Chart (replaces gauge) */}
       <SectionCard
         title="ROE Estimado (3 anos)"
-        subtitle="data-to-viz: Bullet Chart substitui barra de progresso circular/gauge"
+        subtitle="ROE projetado nos próximos 3 anos versus benchmark de referência de 20%"
       >
         <BulletChart
           value={g.futureROE}
@@ -1520,7 +1704,7 @@ function PastTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.past}15` }}>
@@ -1537,7 +1721,7 @@ function PastTab({ data }: { data: AnalysisData }) {
       </div>
 
       {/* EPS — Area Chart (correct per data-to-viz for time series) */}
-      <SectionCard title="Evolução do LPA (Lucro por Ação)" subtitle="data-to-viz: Area Chart — ideal para série temporal contínua">
+      <SectionCard title="Evolução do LPA (Lucro por Ação)" subtitle="Lucro distribuído por ação ao longo dos anos">
         <div className="h-72">
           <TremorArea
             data={p.epsSeries}
@@ -1554,7 +1738,7 @@ function PastTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       {/* ROE — Bar with benchmark */}
-      <SectionCard title="ROE — Retorno sobre Patrimônio Líquido" subtitle="data-to-viz: BarChart com Reference Line de benchmark — cor semântica (verde=bom)">
+      <SectionCard title="ROE — Retorno sobre Patrimônio Líquido" subtitle="Retorno gerado sobre o patrimônio dos acionistas ano a ano">
         <div className="h-64">
           <TremorBar
             data={p.roeSeries}
@@ -1569,7 +1753,7 @@ function PastTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       {/* ROCE — Line Chart with confidence band */}
-      <SectionCard title="ROCE — Retorno sobre Capital Empregado" subtitle="data-to-viz: Line Chart com benchmark — connected dots para tendência">
+      <SectionCard title="ROCE — Retorno sobre Capital Empregado" subtitle="Eficiência no uso do capital total empregado na operação">
         <div className="h-64">
           <TremorLine
             data={p.roceSeries}
@@ -1601,7 +1785,7 @@ function PastTab({ data }: { data: AnalysisData }) {
       {/* NEW: Margin Evolution */}
       <SectionCard
         title="Evolução das Margens (5 anos)"
-        subtitle="data-to-viz: Multi-line Area Chart — mostra 3 séries sem empilhar (cada margem tem significado independente)"
+        subtitle="Evolução das margens bruta, operacional e líquida nos últimos 5 anos"
       >
         <MarginEvolution series={data.marginSeries} />
         <div className="mt-3 grid grid-cols-3 gap-3">
@@ -1620,15 +1804,15 @@ function PastTab({ data }: { data: AnalysisData }) {
 
       {/* NEW: ROE/ROCE/ROA Comparative */}
       <SectionCard
-        title="Comparação de Retornos: Empresa vs Benchmark"
-        subtitle="data-to-viz: Lollipop Chart agrupado — compara 3 métricas de retorno contra benchmarks"
+        title="Comparação de Retornos: Empresa vs Referência"
+        subtitle="ROE, ROCE e ROA comparados com os benchmarks de referência do setor"
       >
         <LollipopComparison
           items={[
             { name: `ROE (${p.currentROE}%)`, value: p.currentROE, color: p.currentROE >= 20 ? COLORS.positive : COLORS.negative, isHighlight: true },
-            { name: 'ROE benchmark', value: 20, color: '#94a3b8' },
+            { name: 'ROE referência', value: 20, color: '#94a3b8' },
             { name: `ROCE (${p.currentROCE}%)`, value: p.currentROCE, color: p.currentROCE >= 20 ? COLORS.positive : COLORS.health, isHighlight: true },
-            { name: 'ROCE benchmark', value: 20, color: '#94a3b8' },
+            { name: 'ROCE referência', value: 20, color: '#94a3b8' },
             { name: `ROA (${p.currentROA}%)`, value: p.currentROA, color: p.currentROA >= p.industryROA ? COLORS.positive : COLORS.negative, isHighlight: true },
             { name: `ROA indústria (${p.industryROA}%)`, value: p.industryROA, color: '#94a3b8' },
           ]}
@@ -1652,7 +1836,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.health}15` }}>
@@ -1671,7 +1855,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
       {/* Assets vs Liabilities — GROUPED BAR */}
       <SectionCard
         title="Ativos vs Passivos"
-        subtitle="data-to-viz: Barras agrupadas — comparação direta entre pares (caveat #25: barras próximas)"
+        subtitle="Comparação de ativos e passivos de curto e longo prazo"
       >
         <div className="h-80">
           <TremorBar
@@ -1702,7 +1886,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       {/* D/E Trend — Area Chart with danger zone */}
-      <SectionCard title="Dívida/Patrimônio — Evolução (5 anos)" subtitle="data-to-viz: Area Chart com threshold — linha de referência contextualiza o dado">
+      <SectionCard title="Dívida/Patrimônio — Evolução (5 anos)" subtitle="Trajetória de endividamento relativo ao patrimônio líquido">
         <div className="h-72">
           <TremorArea
             data={h.debtToEquitySeries}
@@ -1723,7 +1907,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
 
       {/* Coverage Metrics — Bullet Charts (replaces progress bars) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SectionCard title="Cobertura de Dívida (FCO/Dívida)" subtitle="data-to-viz: Bullet Chart">
+        <SectionCard title="Cobertura de Dívida (FCO/Dívida)" subtitle="Capacidade de pagar a dívida com o caixa operacional">
           <BulletChart
             value={Math.round((h.operatingCashFlow / h.totalDebt) * 100)}
             target={20}
@@ -1734,7 +1918,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
           />
         </SectionCard>
 
-        <SectionCard title="Cobertura de Juros (EBIT/Juros)" subtitle="data-to-viz: Bullet Chart">
+        <SectionCard title="Cobertura de Juros (EBIT/Juros)" subtitle="Quantas vezes o resultado operacional cobre as despesas financeiras">
           <BulletChart
             value={Number((h.ebit / h.interestExpense).toFixed(1))}
             target={5}
@@ -1749,7 +1933,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
       {/* NEW: Beta Risk Profile */}
       <SectionCard
         title="Perfil de Risco (Beta)"
-        subtitle="data-to-viz: Bullet Chart — mostra volatilidade relativa ao mercado (beta=1 é o benchmark)"
+        subtitle="Beta acima de 1 indica maior volatilidade em relação ao Ibovespa"
       >
         <BulletChart
           value={data.priceHistory.volatilityBeta}
@@ -1778,7 +1962,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.dividend}15` }}>
@@ -1796,15 +1980,15 @@ function DividendTab({ data }: { data: AnalysisData }) {
 
       {/* Yield — Bullet Chart with market percentiles (replaces gauge) */}
       <SectionCard
-        title="Dividend Yield — Posição no Mercado"
-        subtitle="data-to-viz: Bullet Chart com faixas de percentil — substitui gauge (encoding por posição > ângulo)"
+        title="Rendimento de Dividendos — Posição no Mercado"
+        subtitle="Posição do rendimento atual em relação à distribuição do mercado"
       >
         <div className="flex items-center gap-6 mb-4">
           <div className="text-center">
             <div className="text-4xl font-bold" style={{ color: COLORS.dividend }}>
               {d.currentYield}%
             </div>
-            <div className="text-sm text-neutral-500 mt-1">Yield atual</div>
+            <div className="text-sm text-neutral-500 mt-1">Rendimento atual</div>
           </div>
           <div className="flex-1">
             <BulletChart
@@ -1820,7 +2004,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       {/* Dividend History — Bar with color-coded drops */}
-      <SectionCard title="Histórico de Dividendos por Ação (10 anos)" subtitle="data-to-viz: BarChart com cor semântica — vermelho = queda >10% (caveat #17: cor = informação)">
+      <SectionCard title="Histórico de dividendos por ação (10 anos)" subtitle="Evolução do dividendo distribuído por ação na última década">
         <div className="h-64">
           <TremorBar
             data={d.dividendSeries}
@@ -1840,7 +2024,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       {/* Payout Ratio — Area with danger zone */}
-      <SectionCard title="Payout Ratio — Evolução" subtitle="data-to-viz: Area Chart com zona de perigo">
+      <SectionCard title="Índice de Payout — Evolução" subtitle="Percentual do lucro distribuído como dividendo ao longo dos anos">
         <div className="h-64">
           <TremorArea
             data={d.payoutSeries}
@@ -1859,7 +2043,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
             <div className="text-lg font-bold text-green-800">{d.payoutRatio}%</div>
           </div>
           <div className={`p-3 rounded-lg ${d.futurePayoutRatio <= 90 ? 'bg-green-50' : 'bg-red-50'}`}>
-            <div className={`text-sm font-medium ${d.futurePayoutRatio <= 90 ? 'text-green-700' : 'text-red-700'}`}>Payout Estimado (3a)</div>
+            <div className={`text-sm font-medium ${d.futurePayoutRatio <= 90 ? 'text-green-700' : 'text-red-700'}`}>Payout Estimado (3 anos)</div>
             <div className={`text-lg font-bold ${d.futurePayoutRatio <= 90 ? 'text-green-800' : 'text-red-800'}`}>{d.futurePayoutRatio}%</div>
           </div>
         </div>
@@ -1868,7 +2052,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
       {/* NEW: Dividend vs Earnings sustainability */}
       <SectionCard
         title="Dividendo vs Lucro por Ação (10 anos)"
-        subtitle="data-to-viz: Grouped Bar — mostra se o lucro cobre o dividendo (sustentabilidade)"
+        subtitle="O lucro por ação (LPA) deve sempre superar o dividendo por ação (DPA) para ser sustentável"
       >
         <DividendVsEarningsChart data={data.dividendVsEarnings} />
         <div className="mt-3 p-3 rounded-lg bg-blue-50 text-sm text-blue-800">
@@ -1897,13 +2081,13 @@ function OwnershipTab({ data }: { data: AnalysisData }) {
       {/* STACKED BAR replaces PIE — data-to-viz caveat #4 */}
       <SectionCard
         title="Composição Acionária"
-        subtitle="data-to-viz: Stacked Horizontal Bar substitui Pie Chart — humanos leem posição/comprimento melhor que ângulo (caveat #4)"
+        subtitle="Distribuição entre investidores institucionais, insiders e público geral"
       >
         <StackedOwnershipBar items={ownershipItems} />
       </SectionCard>
 
       {/* Top Shareholders — Table (best for precise values per data-to-viz) */}
-      <SectionCard title="Maiores Acionistas" subtitle="data-to-viz: Tabela para valores precisos — gráficos não substituem dados exatos">
+      <SectionCard title="Maiores acionistas" subtitle="Principais detentores e seus percentuais de participação">
         <div className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -1982,7 +2166,7 @@ function OwnershipTab({ data }: { data: AnalysisData }) {
       {/* NEW: Insider Sentiment Trend */}
       <SectionCard
         title="Sentimento Insider (Trimestral)"
-        subtitle="data-to-viz: Diverging Bar — saldo positivo (verde) = insiders comprando mais que vendendo"
+        subtitle="Saldo trimestral de compras e vendas de insiders — positivo indica maior confiança da gestão"
       >
         <InsiderSentimentChart data={data.insiderSentiment} />
         <div className="mt-3 p-3 rounded-lg bg-neutral-50 text-sm text-neutral-600">
@@ -2005,14 +2189,14 @@ export function AnalysisPage() {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'overview': return <OverviewTab data={data} />;
+      case 'overview': return <OverviewTab data={data} onSelectTab={setActiveTab} />;
       case 'value': return <ValueTab data={data} />;
       case 'future': return <FutureTab data={data} />;
       case 'past': return <PastTab data={data} />;
       case 'health': return <HealthTab data={data} />;
       case 'dividend': return <DividendTab data={data} />;
       case 'ownership': return <OwnershipTab data={data} />;
-      default: return <OverviewTab data={data} />;
+      default: return <OverviewTab data={data} onSelectTab={setActiveTab} />;
     }
   };
 
@@ -2020,7 +2204,7 @@ export function AnalysisPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Top Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-neutral-400 hover:text-neutral-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
@@ -2046,66 +2230,57 @@ export function AnalysisPage() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="sticky top-[57px] z-20 bg-white border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto py-1 -mb-px">
+      {/* Body */}
+      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6 items-start">
+        {/* Left Sidebar — Tab Navigation */}
+        <aside className="w-48 flex-shrink-0 sticky top-[57px] self-start">
+          <nav className="flex flex-col">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
-              const dim = data.snowflake.find(d => d.dimension === tab.id);
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                  className={`flex items-center pl-4 pr-3 py-2.5 text-sm font-medium transition-all text-left border-l-2 ${
                     isActive
-                      ? 'bg-neutral-900 text-white'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
+                      ? 'border-teal-500 text-neutral-900 bg-teal-50/60'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100'
                   }`}
                 >
-                  {tab.icon}
                   {tab.label}
-                  {dim && (
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500'
-                    }`}>
-                      {dim.score}/6
-                    </span>
-                  )}
                 </button>
               );
             })}
-          </div>
-        </div>
-      </div>
+          </nav>
+        </aside>
 
-      {/* Tab Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          {renderTab()}
-        </motion.div>
-      </div>
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {renderTab()}
+          </motion.div>
 
-      {/* Footer */}
-      <div className="max-w-6xl mx-auto px-4 py-8 border-t border-neutral-200 mt-8">
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-100">
-          <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">Sobre este modelo</p>
-            <p>
-              Análise baseada no modelo SimplyWall.St com 30 checks (6 por dimensão) em 5 eixos:
-              Valor, Crescimento Futuro, Performance Passada, Saúde Financeira e Dividendos.
-              Gráficos otimizados conforme recomendações do <strong>data-to-viz.com</strong>.
-              Os dados apresentados são <strong>mocks para demonstração</strong> e não constituem recomendação de investimento.
-            </p>
+          {/* Footer */}
+          <div className="py-8 border-t border-neutral-200 mt-8">
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-100">
+              <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">Sobre esta análise</p>
+                <p>
+                  Análise estruturada em 30 critérios distribuídos em 5 eixos: Valor, Crescimento Futuro, Histórico Operacional, Saúde Financeira e Dividendos.
+                  Os dados apresentados são <strong>demonstrativos</strong> e não constituem recomendação de investimento.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
