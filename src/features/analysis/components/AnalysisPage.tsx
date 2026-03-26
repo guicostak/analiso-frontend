@@ -6,43 +6,42 @@ import { motion } from 'motion/react';
 import {
   TrendingUp, Shield, DollarSign, BarChart3,
   CheckCircle2, XCircle, ArrowLeft, Users, Activity, Info,
-  Calendar, ArrowUpRight, ArrowDownRight, Minus,
+  Calendar, ArrowUpRight, ArrowDownRight, Minus, Star, AlertTriangle,
 } from 'lucide-react';
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, ReferenceLine, Cell, Area, AreaChart,
-  Legend,
-} from 'recharts';
+  AreaChart as TremorArea,
+  BarChart as TremorBar,
+  LineChart as TremorLine,
+  DonutChart,
+} from '@tremor/react';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const fmtBRL = (suffix: string) => (v: any) => [`R$ ${Number(v).toFixed(2)}`, suffix];
-const fmtBRLM = (suffix: string) => (v: any) => [`R$ ${formatNumber(Number(v))}M`, suffix];
-const fmtPct = (suffix: string) => (v: any) => [`${v}%`, suffix];
-const fmtX = (suffix: string) => (v: any) => [`${v}x`, suffix];
-/* eslint-enable @typescript-eslint/no-explicit-any */
 import Link from 'next/link';
 import { SnowflakeChart, type SnowflakeDimension } from '@/src/components/shared/SnowflakeChart';
 import { getAnalysisData } from '../services';
 import type {
   AnalysisData, AnalysisTab, DimensionScore, MetricDistribution, TimelineEvent,
   DCFSensitivityCell, RatioTrend, MarginSeries, ReturnComparison, InsiderSentimentPoint, DividendVsEarnings,
+  RewardRisk, Competitor, AnalystTarget, EarningsRevenueSeries, CommunityFairValue,
 } from '../interfaces';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
+// Palette based on color theory: muted saturation (45-65%) for professionalism,
+// analogous harmony (blue-teal-green) for cohesion, split-complementary accents.
+// Inspired by Stripe/Linear/Bloomberg — 60-30-10 rule: neutral/primary/accent.
 
 const COLORS = {
-  value: '#6366f1',
-  future: '#3b82f6',
-  past: '#10b981',
-  health: '#f59e0b',
-  dividend: '#8b5cf6',
-  positive: '#16a34a',
-  negative: '#dc2626',
-  neutral: '#6b7280',
-  muted: '#e5e7eb',
-  forecast: '#93c5fd',
-  historical: '#3b82f6',
-  bg: '#f8fafc',
+  value: '#5B6AC0',       // Muted indigo — trust, analytical depth
+  future: '#3E8ED0',      // Steel blue — forward-looking, clarity
+  past: '#2EAA8A',        // Teal green — grounded, historical
+  health: '#D4913B',      // Warm amber — attention without alarm
+  dividend: '#8B6CDB',    // Soft violet — income, reward
+  positive: '#2D9F6F',    // Forest green — muted success
+  negative: '#C74B4B',    // Soft coral — risk without aggression
+  neutral: '#8A8F9C',     // Cool gray
+  muted: '#E8EBF0',       // Light cool gray
+  forecast: '#8CBAE0',    // Pastel steel blue
+  historical: '#3E8ED0',  // Matches future
+  bg: '#F7F8FA',          // Near-white with cool undertone
 };
 
 const DIMENSION_COLORS: Record<string, string> = {
@@ -68,8 +67,9 @@ const TABS: { id: AnalysisTab; label: string; icon: React.ReactNode }[] = [
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatNumber(n: number): string {
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
+  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
+  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+  if (Math.abs(n) >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
   return n.toFixed(1);
 }
 
@@ -191,7 +191,7 @@ function DistributionHistogram({ distribution }: { distribution: MetricDistribut
     <div>
       <div className="flex items-center gap-4 mb-2 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+          <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
           <span className="text-neutral-600">{distribution.metric} da empresa: <strong>{distribution.currentValue}x</strong></span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -199,20 +199,19 @@ function DistributionHistogram({ distribution }: { distribution: MetricDistribut
           <span className="text-neutral-600">Mediana setor: <strong>{distribution.sectorMedian}x</strong></span>
         </div>
       </div>
-      <div className="h-44">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={distribution.buckets} barCategoryGap="15%">
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} label={{ value: 'Empresas', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#9ca3af' }} />
-            <Tooltip formatter={fmtX('empresas')} />
-            <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-              {distribution.buckets.map((b, i) => (
-                <Cell key={i} fill={b.isCurrent ? '#6366f1' : b.isMedian ? '#f59e0b' : '#e2e8f0'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="h-60">
+        <TremorBar
+          data={distribution.buckets.map(b => ({
+            ...b,
+            label: b.label,
+            value: b.value,
+          }))}
+          index="label"
+          categories={["value"]}
+          colors={["sky"]}
+          showLegend={false}
+          yAxisWidth={48}
+        />
       </div>
     </div>
   );
@@ -491,9 +490,6 @@ function DCFSensitivityHeatmap({
 }) {
   const waccValues = [...new Set(cells.map(c => c.wacc))].sort((a, b) => a - b);
   const growthValues = [...new Set(cells.map(c => c.terminalGrowth))].sort((a, b) => a - b);
-  const allFV = cells.map(c => c.fairValue);
-  const minFV = Math.min(...allFV);
-  const maxFV = Math.max(...allFV);
 
   const getColor = (fv: number) => {
     if (fv >= currentPrice * 1.2) return { bg: 'bg-green-200', text: 'text-green-900' };
@@ -558,20 +554,20 @@ function RatioTrendSmallMultiples({ trends }: { trends: RatioTrend[] }) {
       {trends.map((trend) => (
         <div key={trend.metric} className="bg-neutral-50 rounded-xl p-4">
           <h4 className="text-sm font-semibold text-neutral-700 mb-2">{trend.metric}</h4>
-          <div className="h-36">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trend.series}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="year" tick={{ fontSize: 9 }} />
-                <YAxis tick={{ fontSize: 9 }} tickFormatter={(v: any) => `${v}x`} domain={['auto', 'auto']} />
-                <Tooltip formatter={fmtX('')} />
-                <Line type="monotone" dataKey="company" stroke={COLORS.value} strokeWidth={2.5} dot={{ r: 3, fill: COLORS.value }} name="Empresa" />
-                <Line type="monotone" dataKey="industry" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 4" dot={{ r: 2, fill: '#94a3b8' }} name="Indústria" />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="h-40">
+            <TremorLine
+              data={trend.series}
+              index="year"
+              categories={["company", "industry"]}
+              colors={["blue", "slate"]}
+              valueFormatter={(v: number) => `${v}x`}
+              showLegend={false}
+              curveType="monotone"
+              yAxisWidth={36}
+            />
           </div>
           <div className="flex items-center gap-3 mt-2 text-[10px] text-neutral-500">
-            <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-indigo-500 rounded" />Empresa</div>
+            <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-blue-500 rounded" />Empresa</div>
             <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-neutral-400 rounded border-dashed" />Indústria</div>
           </div>
         </div>
@@ -586,33 +582,18 @@ function RatioTrendSmallMultiples({ trends }: { trends: RatioTrend[] }) {
  */
 function MarginEvolution({ series }: { series: MarginSeries[] }) {
   return (
-    <div className="h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={series}>
-          <defs>
-            <linearGradient id="grossGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="opGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-          <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: any) => `${v}%`} />
-          <Tooltip formatter={fmtPct('')} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Area type="monotone" dataKey="grossMargin" name="Margem Bruta" stroke="#10b981" strokeWidth={2} fill="url(#grossGrad)" dot={{ r: 3 }} />
-          <Area type="monotone" dataKey="operatingMargin" name="Margem Operacional" stroke="#3b82f6" strokeWidth={2} fill="url(#opGrad)" dot={{ r: 3 }} />
-          <Area type="monotone" dataKey="netMargin" name="Margem Líquida" stroke="#8b5cf6" strokeWidth={2} fill="url(#netGrad)" dot={{ r: 3 }} />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div className="h-72">
+      <TremorArea
+        data={series}
+        index="year"
+        categories={["grossMargin", "operatingMargin", "netMargin"]}
+        colors={["teal", "sky", "violet"]}
+        valueFormatter={(v: number) => `${v}%`}
+        showLegend={true}
+        showGridLines={true}
+        curveType="monotone"
+        yAxisWidth={48}
+      />
     </div>
   );
 }
@@ -627,29 +608,20 @@ function ReturnComparisonChart({ data }: { data: ReturnComparison[] }) {
     period: d.period,
     stock: d.stock,
     market: d.market,
-    gap: d.stock - d.market,
   }));
 
   return (
-    <div className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} layout="vertical" barCategoryGap="20%">
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v: any) => `${v}%`} />
-          <YAxis type="category" dataKey="period" tick={{ fontSize: 11, fontWeight: 600 }} width={35} />
-          <Tooltip
-            formatter={(v: any, name: any) => [`${Number(v).toFixed(1)}%`, name === 'stock' ? 'Ação' : 'Ibovespa']}
-          />
-          <Legend wrapperStyle={{ fontSize: 11 }} formatter={(v: any) => v === 'stock' ? 'Ação' : 'Ibovespa'} />
-          <ReferenceLine x={0} stroke="#374151" strokeWidth={1} />
-          <Bar dataKey="stock" fill={COLORS.value} radius={[0, 4, 4, 0]} name="stock">
-            {chartData.map((entry, idx) => (
-              <Cell key={idx} fill={entry.stock >= 0 ? '#6366f1' : '#ef4444'} />
-            ))}
-          </Bar>
-          <Bar dataKey="market" fill="#94a3b8" radius={[0, 4, 4, 0]} name="market" />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="h-80">
+      <TremorBar
+        data={chartData}
+        index="period"
+        categories={["stock", "market"]}
+        colors={["blue", "slate"]}
+        valueFormatter={(v: number) => `${v.toFixed(1)}%`}
+        layout="vertical"
+        showLegend={true}
+        yAxisWidth={48}
+      />
     </div>
   );
 }
@@ -660,21 +632,17 @@ function ReturnComparisonChart({ data }: { data: ReturnComparison[] }) {
  */
 function InsiderSentimentChart({ data }: { data: InsiderSentimentPoint[] }) {
   return (
-    <div className="h-56">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} barCategoryGap="15%">
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-          <XAxis dataKey="quarter" tick={{ fontSize: 10 }} />
-          <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: any) => `${(Number(v) / 1e6).toFixed(0)}M`} />
-          <Tooltip formatter={(v: any) => [`R$ ${(Number(v) / 1e6).toFixed(1)}M`, '']} />
-          <ReferenceLine y={0} stroke="#374151" strokeWidth={1} />
-          <Bar dataKey="netValue" radius={[4, 4, 4, 4]} name="Saldo Líquido">
-            {data.map((entry, idx) => (
-              <Cell key={idx} fill={entry.netValue >= 0 ? '#16a34a' : '#dc2626'} fillOpacity={0.85} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="h-72">
+      <TremorBar
+        data={data}
+        index="quarter"
+        categories={["netValue"]}
+        colors={["teal"]}
+        valueFormatter={(v: number) => `R$ ${(v / 1e6).toFixed(1)}M`}
+        showLegend={false}
+        showGridLines={true}
+        yAxisWidth={56}
+      />
     </div>
   );
 }
@@ -685,21 +653,325 @@ function InsiderSentimentChart({ data }: { data: InsiderSentimentPoint[] }) {
  */
 function DividendVsEarningsChart({ data }: { data: DividendVsEarnings[] }) {
   return (
-    <div className="h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} barCategoryGap="20%">
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-          <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-          <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: any) => `R$${v}`} />
-          <Tooltip formatter={(v: any, name: any) => [`R$ ${Number(v).toFixed(2)}`, name === 'earnings' ? 'LPA' : 'DPA']} />
-          <Legend wrapperStyle={{ fontSize: 11 }} formatter={(v: any) => v === 'earnings' ? 'Lucro por Ação (LPA)' : 'Dividendo por Ação (DPA)'} />
-          <Bar dataKey="earnings" fill="#3b82f6" radius={[4, 4, 0, 0]} name="earnings" />
-          <Bar dataKey="dividend" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="dividend" />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="h-72">
+      <TremorBar
+        data={data}
+        index="year"
+        categories={["earnings", "dividend"]}
+        colors={["sky", "violet"]}
+        valueFormatter={(v: number) => `R$ ${v.toFixed(2)}`}
+        showLegend={true}
+        showGridLines={true}
+        yAxisWidth={48}
+      />
     </div>
   );
 }
+
+/**
+ * REWARDS & RISK ANALYSIS — SimplyWall.St style star/warning list.
+ * Shows investment highlights (green stars) and risk factors (orange warnings).
+ */
+function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
+  const rewards = items.filter(i => i.type === 'reward');
+  const risks = items.filter(i => i.type === 'risk');
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-1.5">
+          <Star className="w-4 h-4 fill-green-500 text-green-500" />
+          REWARDS
+        </h4>
+        <div className="space-y-2.5">
+          {rewards.map((r, i) => (
+            <div key={i} className="flex items-start gap-2.5 group">
+              <Star className="w-4 h-4 flex-shrink-0 mt-0.5 fill-amber-400 text-amber-400" />
+              <div>
+                <p className="text-sm text-neutral-800 font-medium">{r.text}</p>
+                {r.detail && <p className="text-xs text-neutral-500 mt-0.5">{r.detail}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-1.5">
+          <AlertTriangle className="w-4 h-4 text-red-500" />
+          RISK ANALYSIS
+        </h4>
+        <div className="space-y-2.5">
+          {risks.map((r, i) => (
+            <div key={i} className="flex items-start gap-2.5 group">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-orange-500" />
+              <div>
+                <p className="text-sm text-neutral-800 font-medium">{r.text}</p>
+                {r.detail && <p className="text-xs text-neutral-500 mt-0.5">{r.detail}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * COMPETITOR SNOWFLAKE GRID — SimplyWall.St competitors with mini snowflakes.
+ * Uses small multiples pattern (data-to-viz best practice).
+ */
+function CompetitorGrid({ competitors }: { competitors: Competitor[] }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {competitors.map((comp) => {
+        const dims: SnowflakeDimension[] = [
+          { label: 'Valor', value: comp.scores.value, color: COLORS.value, why: '', metric: '' },
+          { label: 'Futuro', value: comp.scores.future, color: COLORS.future, why: '', metric: '' },
+          { label: 'Passado', value: comp.scores.past, color: COLORS.past, why: '', metric: '' },
+          { label: 'Saúde', value: comp.scores.health, color: COLORS.health, why: '', metric: '' },
+          { label: 'Dividendo', value: comp.scores.dividend, color: COLORS.dividend, why: '', metric: '' },
+        ];
+        const avg = Object.values(comp.scores).reduce((a, b) => a + b, 0) / 5;
+        const status = avg >= 60 ? 'healthy' : avg >= 40 ? 'attention' : 'risk';
+
+        return (
+          <div key={comp.ticker} className="bg-neutral-50 rounded-xl p-4 text-center hover:bg-neutral-100 transition-colors cursor-pointer border border-transparent hover:border-neutral-200">
+            <div className="flex justify-center mb-2">
+              <SnowflakeChart dimensions={dims} size="small" status={status as any} />
+            </div>
+            <div className="text-sm font-bold text-neutral-900">{comp.name}</div>
+            <div className="text-xs text-neutral-500 font-mono">{comp.exchange}:{comp.ticker}</div>
+            <div className="text-xs text-neutral-400 mt-0.5">{comp.marketCap}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * SHARE PRICE vs FAIR VALUE BAR — SimplyWall.St horizontal range indicator.
+ * Shows 3 zones: 20% Undervalued, About Right, 20% Overvalued.
+ */
+function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: number; fairValue: number }) {
+  const rangeMin = fairValue * 0.6;
+  const rangeMax = fairValue * 1.4;
+  const totalRange = rangeMax - rangeMin;
+  const pricePct = Math.max(0, Math.min(100, ((currentPrice - rangeMin) / totalRange) * 100));
+  const fairPct = ((fairValue - rangeMin) / totalRange) * 100;
+  const underPct = ((fairValue * 0.8 - rangeMin) / totalRange) * 100;
+  const overPct = ((fairValue * 1.2 - rangeMin) / totalRange) * 100;
+  const discount = ((fairValue - currentPrice) / fairValue * 100);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between text-sm">
+        <div>
+          <span className="text-neutral-500">Preço Atual:</span>{' '}
+          <span className="font-bold text-neutral-900">R$ {currentPrice.toFixed(2)}</span>
+        </div>
+        <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          discount > 20 ? 'bg-green-100 text-green-800' :
+          discount > 0 ? 'bg-blue-100 text-blue-800' :
+          'bg-red-100 text-red-800'
+        }`}>
+          {discount > 0 ? `${discount.toFixed(1)}% abaixo do fair value` : `${Math.abs(discount).toFixed(1)}% acima do fair value`}
+        </div>
+        <div>
+          <span className="text-neutral-500">Fair Value:</span>{' '}
+          <span className="font-bold text-green-700">R$ {fairValue.toFixed(2)}</span>
+        </div>
+      </div>
+
+      {/* Horizontal bar with zones */}
+      <div className="relative h-12 rounded-xl overflow-hidden">
+        {/* Zone backgrounds */}
+        <div className="absolute inset-0 flex">
+          <div style={{ width: `${underPct}%` }} className="bg-green-100" />
+          <div style={{ width: `${overPct - underPct}%` }} className="bg-blue-50" />
+          <div style={{ width: `${100 - overPct}%` }} className="bg-red-100" />
+        </div>
+
+        {/* Zone labels */}
+        <div className="absolute inset-0 flex items-center">
+          <div style={{ width: `${underPct}%` }} className="text-center text-[10px] font-medium text-green-700">
+            Subvalorizado
+          </div>
+          <div style={{ width: `${overPct - underPct}%` }} className="text-center text-[10px] font-medium text-blue-700">
+            Justo
+          </div>
+          <div style={{ width: `${100 - overPct}%` }} className="text-center text-[10px] font-medium text-red-700">
+            Sobrevalorizado
+          </div>
+        </div>
+
+        {/* Fair value marker */}
+        <div className="absolute top-0 bottom-0 w-0.5 bg-green-600" style={{ left: `${fairPct}%` }} />
+
+        {/* Current price marker */}
+        <div className="absolute top-1 bottom-1" style={{ left: `${pricePct}%`, transform: 'translateX(-50%)' }}>
+          <div className="w-3 h-full rounded-sm bg-indigo-600 shadow-sm" />
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex justify-between text-[10px] text-neutral-400">
+        <span>R$ {rangeMin.toFixed(0)}</span>
+        <div className="flex gap-4">
+          <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-sm bg-indigo-600" />Preço Atual</span>
+          <span className="flex items-center gap-1"><div className="w-2.5 h-0.5 bg-green-600" />Fair Value</span>
+        </div>
+        <span>R$ {rangeMax.toFixed(0)}</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * MARKET CAP DONUT — SimplyWall.St style donut showing earnings/revenue vs market cap.
+ */
+function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapComposition'] }) {
+  const donutData = [
+    { name: 'Lucro', value: composition.earnings },
+    { name: 'Outros', value: composition.revenue - composition.earnings },
+  ];
+
+  return (
+    <div className="flex items-center gap-8">
+      <div className="w-48 h-48 relative">
+        <DonutChart
+          data={donutData}
+          category="value"
+          index="name"
+          colors={["teal", "sky"]}
+          valueFormatter={(v: number) => `R$ ${formatNumber(v)}M`}
+          showLabel={false}
+          showAnimation={true}
+        />
+        {/* Center label */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <div className="text-[10px] text-neutral-500">Market Cap</div>
+            <div className="text-sm font-bold text-neutral-900">R$ {formatNumber(composition.marketCap)}M</div>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 rounded-full bg-teal-500" />
+            <span className="text-neutral-600">Lucro</span>
+          </div>
+          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.earnings)}M</div>
+        </div>
+        <div>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 rounded-full bg-sky-500" />
+            <span className="text-neutral-600">Receita</span>
+          </div>
+          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.revenue)}M</div>
+        </div>
+        <div className="border-t border-neutral-200 pt-3 grid grid-cols-2 gap-4">
+          <div>
+            <div className="text-2xl font-bold text-neutral-900">{composition.peRatio}x</div>
+            <div className="text-xs text-neutral-500">P/L Ratio</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-neutral-900">{composition.psRatio}x</div>
+            <div className="text-xs text-neutral-500">P/S Ratio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * EARNINGS & REVENUE GROUPED BAR — SimplyWall.St style with forecast distinction.
+ */
+function EarningsRevenueChart({ series }: { series: EarningsRevenueSeries[] }) {
+  return (
+    <div className="h-72">
+      <TremorBar
+        data={series}
+        index="year"
+        categories={["revenue", "earnings"]}
+        colors={["sky", "teal"]}
+        valueFormatter={(v: number) => `R$ ${formatNumber(v)}M`}
+        showLegend={true}
+        showGridLines={true}
+        yAxisWidth={56}
+      />
+    </div>
+  );
+}
+
+/**
+ * ANALYST PRICE TARGET — Line chart with consensus band.
+ * SimplyWall.St shows price vs consensus target with dispersion.
+ */
+function AnalystPriceTarget({ targets }: { targets: AnalystTarget[] }) {
+  return (
+    <div className="h-72">
+      <TremorLine
+        data={targets}
+        index="date"
+        categories={["price", "consensusTarget", "high", "low"]}
+        colors={["sky", "violet", "slate", "rose"]}
+        valueFormatter={(v: number) => `R$ ${v.toFixed(2)}`}
+        showLegend={true}
+        curveType="monotone"
+        yAxisWidth={48}
+      />
+    </div>
+  );
+}
+
+/**
+ * COMMUNITY FAIR VALUES HISTOGRAM — SimplyWall.St style bar histogram
+ * with "Last Share Price" marker line.
+ */
+function CommunityFairValuesChart({ buckets, lastPrice }: { buckets: CommunityFairValue[]; lastPrice: number }) {
+  return (
+    <div className="h-64">
+      <TremorBar
+        data={buckets}
+        index="priceRange"
+        categories={["count"]}
+        colors={["violet"]}
+        showLegend={false}
+        showGridLines={true}
+        yAxisWidth={36}
+      />
+      <div className="flex items-center gap-2 mt-2 text-xs">
+        <div className="w-3 h-3 bg-indigo-600 rounded-sm" />
+        <span className="text-neutral-600">Último Preço: <strong className="text-indigo-700">R$ {lastPrice.toFixed(2)}</strong></span>
+        <span className="text-neutral-400 ml-2">|</span>
+        <span className="text-neutral-500">{buckets.reduce((s, b) => s + b.count, 0)} estimativas da comunidade</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PRICE CHART WITH EVENT DOTS — Enhanced price chart with colored category dots.
+ * SimplyWall.St shows dividend/financial/management/strategy/other events as dots.
+ */
+const EVENT_COLORS: Record<string, string> = {
+  dividend: '#10b981',
+  financial: '#d946ef',
+  management: '#8b5cf6',
+  strategy: '#f59e0b',
+  other: '#6366f1',
+};
+
+const EVENT_LABELS: Record<string, string> = {
+  dividend: 'Dividendo',
+  financial: 'Financeiro',
+  management: 'Gestão',
+  strategy: 'Estratégia',
+  other: 'Outro',
+};
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
@@ -744,9 +1016,9 @@ function OverviewTab({ data }: { data: AnalysisData }) {
         </div>
       </div>
 
-      {/* Snowflake + Score Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SectionCard title="Snowflake" className="flex flex-col items-center">
+      {/* Snowflake + Rewards/Risks — SimplyWall.St layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <SectionCard title="Snowflake Analysis" className="flex flex-col items-center">
           <SnowflakeChart
             dimensions={snowflakeDims}
             size="large"
@@ -758,44 +1030,63 @@ function OverviewTab({ data }: { data: AnalysisData }) {
           </div>
         </SectionCard>
 
-        <SectionCard title="Resumo por Dimensão">
-          <div className="space-y-4">
-            {data.snowflake.map((dim) => (
-              <div key={dim.dimension} className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-neutral-900">{dim.displayName}</span>
-                  <ScoreBar score={dim.score} color={DIMENSION_COLORS[dim.dimension]} />
-                </div>
-                <p className="text-sm text-neutral-600">{dim.summary}</p>
-              </div>
-            ))}
+        <div className="lg:col-span-2">
+          <SectionCard title={`${data.company.name} (${data.company.ticker}) Stock Overview`}>
+            <p className="text-sm text-neutral-600 mb-4">{data.company.description}</p>
+            <RewardsAndRisks items={data.rewardsAndRisks} />
+          </SectionCard>
+        </div>
+      </div>
+
+      {/* Market Cap Donut + Earnings & Revenue — SimplyWall.St style */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SectionCard title="Visão de Mercado">
+          <MarketCapDonut composition={data.marketCapComposition} />
+        </SectionCard>
+
+        <SectionCard title="Receita & Lucro">
+          <EarningsRevenueChart series={data.earningsRevenueSeries} />
+          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-sky-500" /><span className="text-neutral-500">Receita (histórico)</span>
+              <div className="w-3 h-3 rounded bg-sky-300 ml-2" /><span className="text-neutral-500">Receita (est.)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-teal-500" /><span className="text-neutral-500">Lucro (histórico)</span>
+              <div className="w-3 h-3 rounded bg-teal-300 ml-2" /><span className="text-neutral-500">Lucro (est.)</span>
+            </div>
           </div>
         </SectionCard>
       </div>
 
-      {/* Price Chart with Timeline Annotations */}
-      <SectionCard title="Histórico de Preço (1 ano)" subtitle="data-to-viz: Area Chart com anotações de eventos — evita gráficos sem contexto (caveat #32)">
+      {/* Dimension Summary */}
+      <SectionCard title="Resumo por Dimensão">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {data.snowflake.map((dim) => (
+            <div key={dim.dimension} className="p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-colors">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-neutral-900 text-sm">{dim.displayName}</span>
+              </div>
+              <ScoreBar score={dim.score} color={DIMENSION_COLORS[dim.dimension]} />
+              <p className="text-xs text-neutral-500 mt-2">{dim.summary}</p>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Price History & Performance — SimplyWall.St style with event dots */}
+      <SectionCard title="Price History & Performance" subtitle="Gráfico de preço com eventos categorizados (estilo SimplyWall.St)">
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data.priceHistory.series}>
-              <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tickFormatter={(v: any) => String(v).slice(5, 7) + '/' + String(v).slice(2, 4)} tick={{ fontSize: 11 }} interval={20} />
-              <YAxis domain={[0, 'auto']} tick={{ fontSize: 11 }} tickFormatter={(v: any) => `R$${v}`} />
-              <Tooltip
-                formatter={fmtBRL('Preço')}
-                labelFormatter={(label: any) => `Data: ${label}`}
-              />
-              {/* Fair value reference line */}
-              <ReferenceLine y={data.valuation.fairValue} stroke="#16a34a" strokeDasharray="8 4" label={{ value: `Fair value: R$${data.valuation.fairValue}`, position: 'right', fontSize: 10, fill: '#16a34a' }} />
-              <Area type="monotone" dataKey="price" stroke="#14b8a6" strokeWidth={2} fill="url(#priceGradient)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          <TremorArea
+            data={data.priceHistory.series}
+            index="date"
+            categories={["price"]}
+            colors={["teal"]}
+            valueFormatter={(v: number) => `R$ ${v.toFixed(2)}`}
+            showGridLines={true}
+            showLegend={false}
+            curveType="monotone"
+          />
         </div>
         <div className="flex gap-6 mt-4 text-sm">
           <div>
@@ -819,9 +1110,40 @@ function OverviewTab({ data }: { data: AnalysisData }) {
             <span className="font-semibold text-neutral-700">{data.priceHistory.volatilityBeta}</span>
           </div>
         </div>
+        {/* Event category dots legend — SimplyWall.St style */}
+        <div className="mt-4 pt-3 border-t border-neutral-100">
+          <div className="flex items-center gap-1 mb-2 flex-wrap">
+            {data.priceEvents.map((evt, idx) => (
+              <div
+                key={idx}
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: EVENT_COLORS[evt.category] }}
+                title={`${evt.date}: ${evt.title}`}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3 text-[10px] text-neutral-500">
+            {Object.entries(EVENT_LABELS).map(([key, label]) => (
+              <span key={key} className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: EVENT_COLORS[key] }} />
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
       </SectionCard>
 
-      {/* NEW: Stock Return vs Market Return */}
+      {/* Competitors — SimplyWall.St style mini snowflakes */}
+      <SectionCard title={`${data.company.name} Competitors`}>
+        <CompetitorGrid competitors={data.competitors} />
+      </SectionCard>
+
+      {/* Community Fair Values — SimplyWall.St histogram */}
+      <SectionCard title={`${data.company.ticker} Community Fair Values`} subtitle={`Veja o que ${data.communityFairValues.reduce((s, b) => s + b.count, 0)} outros acham que a ação vale`}>
+        <CommunityFairValuesChart buckets={data.communityFairValues} lastPrice={data.valuation.currentPrice} />
+      </SectionCard>
+
+      {/* Stock Return vs Market Return */}
       <SectionCard
         title="Retorno: Ação vs Ibovespa"
         subtitle="data-to-viz: Diverging Bar — eixo central em 0% mostra outperformance/underperformance claramente"
@@ -866,6 +1188,30 @@ function ValueTab({ data }: { data: AnalysisData }) {
         </div>
         <CheckList checks={dim.checks} />
       </div>
+
+      {/* Share Price vs Fair Value — SimplyWall.St horizontal bar */}
+      <SectionCard title="Share Price vs Fair Value" subtitle="Visualização estilo SimplyWall.St com zonas de valoração">
+        <SharePriceVsFairValue currentPrice={v.currentPrice} fairValue={v.fairValue} />
+      </SectionCard>
+
+      {/* Analyst Price Target — SimplyWall.St consensus band */}
+      <SectionCard title="Analyst Price Targets" subtitle="Preço vs alvo consenso dos analistas com banda de dispersão">
+        <AnalystPriceTarget targets={data.analystTargets} />
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div className="p-2 rounded-lg bg-neutral-50 text-center">
+            <div className="text-xs text-neutral-500">Alvo Baixo</div>
+            <div className="font-bold text-red-600">R$ {data.analystTargets[data.analystTargets.length - 1]?.low.toFixed(2)}</div>
+          </div>
+          <div className="p-2 rounded-lg bg-purple-50 text-center">
+            <div className="text-xs text-neutral-500">Consenso</div>
+            <div className="font-bold text-purple-700">R$ {data.analystTargets[data.analystTargets.length - 1]?.consensusTarget.toFixed(2)}</div>
+          </div>
+          <div className="p-2 rounded-lg bg-neutral-50 text-center">
+            <div className="text-xs text-neutral-500">Alvo Alto</div>
+            <div className="font-bold text-green-700">R$ {data.analystTargets[data.analystTargets.length - 1]?.high.toFixed(2)}</div>
+          </div>
+        </div>
+      </SectionCard>
 
       {/* BULLET CHART — Fair Value (replaces gauge/progress bar) */}
       <SectionCard
@@ -931,20 +1277,15 @@ function ValueTab({ data }: { data: AnalysisData }) {
         subtitle="data-to-viz: BarChart com linha de tendência (não barras puras para série temporal)"
       >
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={v.projectedFCF}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => formatNumber(Number(val))} />
-              <Tooltip formatter={fmtBRLM('FCF')} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {v.projectedFCF.map((_, idx) => (
-                  <Cell key={idx} fill={idx < 3 ? COLORS.value : '#a5b4fc'} fillOpacity={1 - idx * 0.05} />
-                ))}
-              </Bar>
-              <Line type="monotone" dataKey="value" stroke="#1e1b4b" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
-            </BarChart>
-          </ResponsiveContainer>
+          <TremorBar
+            data={v.projectedFCF}
+            index="year"
+            categories={["value"]}
+            colors={["indigo"]}
+            valueFormatter={(val: number) => `R$ ${formatNumber(val)}M`}
+            showLegend={false}
+            showGridLines={true}
+          />
         </div>
       </SectionCard>
 
@@ -1111,25 +1452,16 @@ function FutureTab({ data }: { data: AnalysisData }) {
         subtitle="data-to-viz: BarChart com cores distintas histório/forecast + separador visual"
       >
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={g.earningsSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => formatNumber(Number(val))} />
-              <Tooltip formatter={fmtBRLM('Lucro')} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {g.earningsSeries.map((entry, idx) => (
-                  <Cell
-                    key={idx}
-                    fill={entry.type === 'historical' ? COLORS.historical : COLORS.forecast}
-                    strokeDasharray={entry.type === 'forecast' ? '4 2' : undefined}
-                    stroke={entry.type === 'forecast' ? COLORS.historical : undefined}
-                    strokeWidth={entry.type === 'forecast' ? 1 : 0}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <TremorBar
+            data={g.earningsSeries}
+            index="year"
+            categories={["value"]}
+            colors={["sky"]}
+            valueFormatter={(val: number) => `R$ ${formatNumber(val)}M`}
+            showLegend={false}
+            showGridLines={true}
+            yAxisWidth={56}
+          />
         </div>
         <div className="flex items-center gap-4 mt-2 text-xs text-neutral-500">
           <div className="flex items-center gap-1.5">
@@ -1146,19 +1478,16 @@ function FutureTab({ data }: { data: AnalysisData }) {
       {/* Revenue Forecast */}
       <SectionCard title="Projeção de Receita">
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={g.revenueSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => formatNumber(Number(val))} />
-              <Tooltip formatter={fmtBRLM('Receita')} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {g.revenueSeries.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.type === 'historical' ? '#10b981' : '#6ee7b7'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <TremorBar
+            data={g.revenueSeries}
+            index="year"
+            categories={["value"]}
+            colors={["teal"]}
+            valueFormatter={(val: number) => `R$ ${formatNumber(val)}M`}
+            showLegend={false}
+            showGridLines={true}
+            yAxisWidth={56}
+          />
         </div>
       </SectionCard>
 
@@ -1209,58 +1538,48 @@ function PastTab({ data }: { data: AnalysisData }) {
 
       {/* EPS — Area Chart (correct per data-to-viz for time series) */}
       <SectionCard title="Evolução do LPA (Lucro por Ação)" subtitle="data-to-viz: Area Chart — ideal para série temporal contínua">
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={p.epsSeries}>
-              <defs>
-                <linearGradient id="epsGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.past} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.past} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `R$${Number(val).toFixed(1)}`} />
-              <Tooltip formatter={fmtBRL('LPA')} />
-              <Area type="monotone" dataKey="value" stroke={COLORS.past} strokeWidth={2.5} fill="url(#epsGradient)" dot={{ r: 4, fill: COLORS.past }} />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="h-72">
+          <TremorArea
+            data={p.epsSeries}
+            index="year"
+            categories={["value"]}
+            colors={["teal"]}
+            valueFormatter={(v: number) => `R$ ${v.toFixed(1)}`}
+            showLegend={false}
+            showGridLines={true}
+            curveType="monotone"
+            yAxisWidth={48}
+          />
         </div>
       </SectionCard>
 
-      {/* ROE — Bar with benchmark (correct: categorical comparison per year) */}
+      {/* ROE — Bar with benchmark */}
       <SectionCard title="ROE — Retorno sobre Patrimônio Líquido" subtitle="data-to-viz: BarChart com Reference Line de benchmark — cor semântica (verde=bom)">
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={p.roeSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `${val}%`} />
-              <Tooltip formatter={fmtPct('ROE')} />
-              <ReferenceLine y={20} stroke="#ef4444" strokeDasharray="5 5" label={{ value: '20% benchmark', position: 'right', fontSize: 10, fill: '#ef4444' }} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {p.roeSeries.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.value >= 20 ? COLORS.past : '#6ee7b7'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <TremorBar
+            data={p.roeSeries}
+            index="year"
+            categories={["value"]}
+            colors={["emerald"]}
+            valueFormatter={(v: number) => `${v}%`}
+            showLegend={false}
+            showGridLines={true}
+          />
         </div>
       </SectionCard>
 
       {/* ROCE — Line Chart with confidence band */}
       <SectionCard title="ROCE — Retorno sobre Capital Empregado" subtitle="data-to-viz: Line Chart com benchmark — connected dots para tendência">
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={p.roceSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `${val}%`} />
-              <Tooltip formatter={fmtPct('ROCE')} />
-              <ReferenceLine y={20} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: '20%', position: 'right', fontSize: 10, fill: '#f59e0b' }} />
-              <Line type="monotone" dataKey="value" stroke={COLORS.past} strokeWidth={2.5} dot={{ r: 5, fill: COLORS.past, stroke: '#fff', strokeWidth: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          <TremorLine
+            data={p.roceSeries}
+            index="year"
+            categories={["value"]}
+            colors={["emerald"]}
+            valueFormatter={(v: number) => `${v}%`}
+            showLegend={false}
+            curveType="monotone"
+          />
         </div>
       </SectionCard>
 
@@ -1349,23 +1668,22 @@ function HealthTab({ data }: { data: AnalysisData }) {
         <CheckList checks={dim.checks} />
       </div>
 
-      {/* Assets vs Liabilities — GROUPED BAR (data-to-viz: grouped bar for paired comparison) */}
+      {/* Assets vs Liabilities — GROUPED BAR */}
       <SectionCard
         title="Ativos vs Passivos"
         subtitle="data-to-viz: Barras agrupadas — comparação direta entre pares (caveat #25: barras próximas)"
       >
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={balanceGrouped} barCategoryGap="25%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => formatNumber(Number(val))} />
-              <Tooltip formatter={fmtBRLM('')} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar name="Ativos" dataKey="ativos" fill="#22c55e" radius={[4, 4, 0, 0]} />
-              <Bar name="Passivos" dataKey="passivos" fill="#ef4444" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="h-80">
+          <TremorBar
+            data={balanceGrouped}
+            index="name"
+            categories={["ativos", "passivos"]}
+            colors={["teal", "rose"]}
+            valueFormatter={(val: number) => `R$ ${formatNumber(val)}M`}
+            showLegend={true}
+            showGridLines={true}
+            yAxisWidth={56}
+          />
         </div>
         <div className="mt-3 grid grid-cols-2 gap-4">
           <div className="p-3 rounded-lg bg-green-50">
@@ -1385,23 +1703,18 @@ function HealthTab({ data }: { data: AnalysisData }) {
 
       {/* D/E Trend — Area Chart with danger zone */}
       <SectionCard title="Dívida/Patrimônio — Evolução (5 anos)" subtitle="data-to-viz: Area Chart com threshold — linha de referência contextualiza o dado">
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={h.debtToEquitySeries}>
-              <defs>
-                <linearGradient id="deGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.health} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.health} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `${val}%`} />
-              <Tooltip formatter={fmtPct('D/E')} />
-              <ReferenceLine y={40} stroke="#ef4444" strokeDasharray="5 5" label={{ value: '40% limite', position: 'right', fontSize: 10, fill: '#ef4444' }} />
-              <Area type="monotone" dataKey="value" stroke={COLORS.health} strokeWidth={2.5} fill="url(#deGradient)" dot={{ r: 4, fill: COLORS.health }} />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="h-72">
+          <TremorArea
+            data={h.debtToEquitySeries}
+            index="year"
+            categories={["value"]}
+            colors={["amber"]}
+            valueFormatter={(v: number) => `${v}%`}
+            showLegend={false}
+            showGridLines={true}
+            curveType="monotone"
+            yAxisWidth={48}
+          />
         </div>
         <div className="mt-3 p-3 rounded-lg bg-green-50 text-sm text-green-700">
           D/E caiu de {h.debtToEquity5yAgo}% para {h.debtToEquity}% nos últimos 5 anos — tendência positiva.
@@ -1509,21 +1822,15 @@ function DividendTab({ data }: { data: AnalysisData }) {
       {/* Dividend History — Bar with color-coded drops */}
       <SectionCard title="Histórico de Dividendos por Ação (10 anos)" subtitle="data-to-viz: BarChart com cor semântica — vermelho = queda >10% (caveat #17: cor = informação)">
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={d.dividendSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `R$${Number(val).toFixed(1)}`} />
-              <Tooltip formatter={fmtBRL('DPA')} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {d.dividendSeries.map((entry, idx) => {
-                  const prevValue = idx > 0 ? d.dividendSeries[idx - 1].value : entry.value;
-                  const dropped = entry.value < prevValue * 0.9;
-                  return <Cell key={idx} fill={dropped ? '#ef4444' : COLORS.dividend} />;
-                })}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <TremorBar
+            data={d.dividendSeries}
+            index="year"
+            categories={["value"]}
+            colors={["violet"]}
+            valueFormatter={(v: number) => `R$ ${v.toFixed(1)}`}
+            showLegend={false}
+            showGridLines={true}
+          />
         </div>
         {!d.isStable && (
           <div className="mt-3 p-3 rounded-lg bg-amber-50 text-sm text-amber-700">
@@ -1535,22 +1842,16 @@ function DividendTab({ data }: { data: AnalysisData }) {
       {/* Payout Ratio — Area with danger zone */}
       <SectionCard title="Payout Ratio — Evolução" subtitle="data-to-viz: Area Chart com zona de perigo">
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={d.payoutSeries}>
-              <defs>
-                <linearGradient id="payoutGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.dividend} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.dividend} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(val: any) => `${val}%`} domain={[0, 100]} />
-              <Tooltip formatter={fmtPct('Payout')} />
-              <ReferenceLine y={90} stroke="#ef4444" strokeDasharray="5 5" label={{ value: '90% limite', position: 'right', fontSize: 10, fill: '#ef4444' }} />
-              <Area type="monotone" dataKey="value" stroke={COLORS.dividend} strokeWidth={2.5} fill="url(#payoutGradient)" dot={{ r: 4, fill: COLORS.dividend }} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <TremorArea
+            data={d.payoutSeries}
+            index="year"
+            categories={["value"]}
+            colors={["violet"]}
+            valueFormatter={(v: number) => `${v}%`}
+            showLegend={false}
+            showGridLines={true}
+            curveType="monotone"
+          />
         </div>
         <div className="mt-3 grid grid-cols-2 gap-4">
           <div className="p-3 rounded-lg bg-green-50">

@@ -245,6 +245,68 @@ export type DividendVsEarnings = {
   earnings: number;
 };
 
+// ─── Rewards & Risk Analysis (SimplyWall.St overview) ────────────────────────
+
+export type RewardRisk = {
+  type: 'reward' | 'risk';
+  text: string;
+  detail?: string;
+};
+
+// ─── Competitor Snowflakes (SimplyWall.St competitors section) ───────────────
+
+export type Competitor = {
+  ticker: string;
+  name: string;
+  exchange: string;
+  marketCap: string;
+  scores: { value: number; future: number; past: number; health: number; dividend: number };
+};
+
+// ─── Analyst Price Target (SimplyWall.St valuation) ──────────────────────────
+
+export type AnalystTarget = {
+  date: string;
+  price: number;
+  consensusTarget: number;
+  low: number;
+  high: number;
+};
+
+// ─── Market Cap Composition (SimplyWall.St overview donut) ───────────────────
+
+export type MarketCapComposition = {
+  earnings: number;
+  revenue: number;
+  marketCap: number;
+  peRatio: number;
+  psRatio: number;
+};
+
+// ─── Earnings & Revenue History (SimplyWall.St past tab) ─────────────────────
+
+export type EarningsRevenueSeries = {
+  year: string;
+  revenue: number;
+  earnings: number;
+  type: 'historical' | 'forecast';
+};
+
+// ─── Price Event Category (SimplyWall.St price chart overlay) ────────────────
+
+export type PriceEvent = {
+  date: string;
+  category: 'dividend' | 'financial' | 'management' | 'strategy' | 'other';
+  title: string;
+};
+
+// ─── Community Fair Values (SimplyWall.St community histogram) ───────────────
+
+export type CommunityFairValue = {
+  priceRange: string;
+  count: number;
+};
+
 // ─── Full Analysis Data ──────────────────────────────────────────────────────
 
 export type AnalysisData = {
@@ -270,6 +332,14 @@ export type AnalysisData = {
   returnComparison: ReturnComparison[];
   insiderSentiment: InsiderSentimentPoint[];
   dividendVsEarnings: DividendVsEarnings[];
+  // SimplyWall.St specific charts
+  rewardsAndRisks: RewardRisk[];
+  competitors: Competitor[];
+  analystTargets: AnalystTarget[];
+  marketCapComposition: MarketCapComposition;
+  earningsRevenueSeries: EarningsRevenueSeries[];
+  priceEvents: PriceEvent[];
+  communityFairValues: CommunityFairValue[];
 };
 
 // ─── Active tab ──────────────────────────────────────────────────────────────

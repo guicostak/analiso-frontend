@@ -40,7 +40,12 @@
       "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f \\\\\\(-name *.ts -o -name *.js \\\\\\))",
       "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f -name *.ts)",
       "Bash(find /c/Users/guilh/Desktop/analiso-backend/src -type f -name *.ts)",
-      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src/main -type f -name *.java)"
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src/main -type f -name *.java)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:tremor.so)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const t = require\\(''@tremor/react''\\); console.log\\(Object.keys\\(t\\).filter\\(k => /Chart|Donut|Bar|Line|Area|Spark|Tracker|Progress/.test\\(k\\)\\).join\\('', ''\\)\\)\")"
     ]
   }
 }

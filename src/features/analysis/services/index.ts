@@ -633,6 +633,85 @@ export const MOCK_VALE3: AnalysisData = {
     { year: '2024', dividend: 3.89, earnings: 6.40 },
     { year: '2025', dividend: 4.12, earnings: 6.80 },
   ],
+
+  // ─── Rewards & Risks (SimplyWall.St style) ──────────────────────────────
+  rewardsAndRisks: [
+    { type: 'reward', text: 'Negociando 16.2% abaixo da estimativa de valor justo', detail: 'Preço atual R$48.89 vs fair value R$58.40' },
+    { type: 'reward', text: 'Lucros devem crescer 18.2% ao ano', detail: 'Acima da média do mercado de 14.5%' },
+    { type: 'reward', text: 'Lucros cresceram 22.3% no último ano', detail: 'Superando a média do setor de 15.1%' },
+    { type: 'reward', text: 'Dividendo de 8.2% acima do 75º percentil do mercado', detail: 'Yield robusto e sustentável' },
+    { type: 'reward', text: 'Dívida bem coberta pelo fluxo de caixa operacional', detail: 'FCO/Dívida Total = 48.3%' },
+    { type: 'risk', text: 'Dividendo instável nos últimos 10 anos', detail: 'Quedas significativas em 2020 e 2023' },
+    { type: 'risk', text: 'Alta exposição ao preço do minério de ferro', detail: '68% da receita ligada a commodities de ferro' },
+    { type: 'risk', text: 'Margens estão comprimindo vs 3 anos atrás', detail: 'Margem líquida caiu de 38.6% para 31.2%' },
+  ],
+
+  // ─── Competitors with Snowflake Scores ──────────────────────────────────
+  competitors: [
+    { ticker: 'CSNA3', name: 'CSN', exchange: 'BOVESPA', marketCap: 'R$ 18.5B', scores: { value: 65, future: 40, past: 55, health: 30, dividend: 70 } },
+    { ticker: 'GGBR4', name: 'Gerdau', exchange: 'BOVESPA', marketCap: 'R$ 42.1B', scores: { value: 50, future: 55, past: 70, health: 75, dividend: 60 } },
+    { ticker: 'USIM5', name: 'Usiminas', exchange: 'BOVESPA', marketCap: 'R$ 8.2B', scores: { value: 70, future: 35, past: 40, health: 45, dividend: 55 } },
+    { ticker: 'CMIN3', name: 'CSN Mineração', exchange: 'BOVESPA', marketCap: 'R$ 15.8B', scores: { value: 60, future: 50, past: 45, health: 55, dividend: 65 } },
+  ],
+
+  // ─── Analyst Price Targets (12 months history) ──────────────────────────
+  analystTargets: [
+    { date: '2025-04', price: 62.50, consensusTarget: 72.00, low: 58.00, high: 85.00 },
+    { date: '2025-06', price: 58.30, consensusTarget: 70.50, low: 55.00, high: 82.00 },
+    { date: '2025-08', price: 55.10, consensusTarget: 68.00, low: 52.00, high: 80.00 },
+    { date: '2025-10', price: 52.40, consensusTarget: 65.50, low: 50.00, high: 78.00 },
+    { date: '2025-12', price: 50.20, consensusTarget: 63.00, low: 48.00, high: 75.00 },
+    { date: '2026-01', price: 49.80, consensusTarget: 62.00, low: 47.00, high: 74.00 },
+    { date: '2026-03', price: 48.89, consensusTarget: 61.50, low: 46.00, high: 73.00 },
+  ],
+
+  // ─── Market Cap Composition (donut) ─────────────────────────────────────
+  marketCapComposition: {
+    earnings: 42800,   // R$ M
+    revenue: 198500,   // R$ M
+    marketCap: 248500,  // R$ M
+    peRatio: 5.8,
+    psRatio: 1.25,
+  },
+
+  // ─── Earnings & Revenue Series (grouped bars) ───────────────────────────
+  earningsRevenueSeries: [
+    { year: '2020', revenue: 208200, earnings: 26800, type: 'historical' },
+    { year: '2021', revenue: 319700, earnings: 121500, type: 'historical' },
+    { year: '2022', revenue: 274100, earnings: 78400, type: 'historical' },
+    { year: '2023', revenue: 203600, earnings: 39800, type: 'historical' },
+    { year: '2024', revenue: 215900, earnings: 48200, type: 'historical' },
+    { year: '2025', revenue: 198500, earnings: 42800, type: 'historical' },
+    { year: '2026E', revenue: 215000, earnings: 50600, type: 'forecast' },
+    { year: '2027E', revenue: 232000, earnings: 59800, type: 'forecast' },
+  ],
+
+  // ─── Price Events (colored dots on price chart) ─────────────────────────
+  priceEvents: [
+    { date: '2025-05-15', category: 'dividend', title: 'Ex-dividendo R$ 1.82' },
+    { date: '2025-07-20', category: 'financial', title: 'Resultado 2T25' },
+    { date: '2025-08-10', category: 'strategy', title: 'Acordo com China Baowu' },
+    { date: '2025-10-25', category: 'financial', title: 'Resultado 3T25' },
+    { date: '2025-11-15', category: 'dividend', title: 'Ex-dividendo R$ 2.30' },
+    { date: '2025-12-05', category: 'management', title: 'Novo CFO nomeado' },
+    { date: '2026-01-30', category: 'financial', title: 'Resultado 4T25' },
+    { date: '2026-02-15', category: 'strategy', title: 'Expansão S11D aprovada' },
+    { date: '2026-03-10', category: 'other', title: 'Rompimento de barragem (risco)' },
+  ],
+
+  // ─── Community Fair Values (histogram) ──────────────────────────────────
+  communityFairValues: [
+    { priceRange: 'R$35-40', count: 3 },
+    { priceRange: 'R$40-45', count: 8 },
+    { priceRange: 'R$45-50', count: 15 },
+    { priceRange: 'R$50-55', count: 28 },
+    { priceRange: 'R$55-60', count: 42 },
+    { priceRange: 'R$60-65', count: 35 },
+    { priceRange: 'R$65-70', count: 22 },
+    { priceRange: 'R$70-75', count: 12 },
+    { priceRange: 'R$75-80', count: 5 },
+    { priceRange: 'R$80-85', count: 2 },
+  ],
 };
 
 // ─── Fetcher ─────────────────────────────────────────────────────────────────
