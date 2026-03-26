@@ -648,10 +648,10 @@ export const MOCK_VALE3: AnalysisData = {
 
   // ─── Competitors with Snowflake Scores ──────────────────────────────────
   competitors: [
-    { ticker: 'CSNA3', name: 'CSN', exchange: 'BOVESPA', marketCap: 'R$ 18.5B', scores: { value: 65, future: 40, past: 55, health: 30, dividend: 70 } },
-    { ticker: 'GGBR4', name: 'Gerdau', exchange: 'BOVESPA', marketCap: 'R$ 42.1B', scores: { value: 50, future: 55, past: 70, health: 75, dividend: 60 } },
-    { ticker: 'USIM5', name: 'Usiminas', exchange: 'BOVESPA', marketCap: 'R$ 8.2B', scores: { value: 70, future: 35, past: 40, health: 45, dividend: 55 } },
-    { ticker: 'CMIN3', name: 'CSN Mineração', exchange: 'BOVESPA', marketCap: 'R$ 15.8B', scores: { value: 60, future: 50, past: 45, health: 55, dividend: 65 } },
+    { ticker: 'CSNA3', name: 'CSN', exchange: 'BOVESPA', marketCap: 'R$ 18.5B', pe: 48.2, earningsGrowth: 19.6, scores: { value: 65, future: 40, past: 55, health: 30, dividend: 70 } },
+    { ticker: 'GGBR4', name: 'Gerdau', exchange: 'BOVESPA', marketCap: 'R$ 42.1B', pe: 22.4, earningsGrowth: 8.9, scores: { value: 50, future: 55, past: 70, health: 75, dividend: 60 } },
+    { ticker: 'USIM5', name: 'Usiminas', exchange: 'BOVESPA', marketCap: 'R$ 8.2B', pe: 18.7, earningsGrowth: 11.0, scores: { value: 70, future: 35, past: 40, health: 45, dividend: 55 } },
+    { ticker: 'CMIN3', name: 'CSN Mineração', exchange: 'BOVESPA', marketCap: 'R$ 15.8B', pe: 29.1, earningsGrowth: 18.6, scores: { value: 60, future: 50, past: 45, health: 55, dividend: 65 } },
   ],
 
   // ─── Analyst Price Targets (12 months history) ──────────────────────────
