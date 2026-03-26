@@ -20,7 +20,32 @@
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/src)",
       "Bash(grep -rn from.*app-top-bar C:/Users/guilh/Desktop/analiso-frontend/app)",
       "Bash(find /c/Users/guilh/Desktop/analiso-frontend -not -path */node_modules/* -type f)",
-      "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)"
+      "Bash(wc -l /c/Users/guilh/Desktop/analiso-frontend/src/**/*.tsx)",
+      "Bash(grep -r \"import.*from.*@/\" /c/Users/guilh/Desktop/analiso-frontend/src/features/landing/components/*.tsx)",
+      "Bash(grep -r \"password\\\\|reset\\\\|verification\" /c/Users/guilh/Desktop/analiso-backend/src/main/java --include=*.java)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend -type f \\\\\\(-name *nav* -o -name *header* -o -name *bar* \\\\\\) \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(ls -la /c/Users/guilh/Desktop/analiso-frontend/app/\\\\\\(marketing\\\\\\)/)",
+      "Bash(copy \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-32.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-32.png\")",
+      "Bash(copy \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-16.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-16.png\")",
+      "Bash(mkdir -p \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public\")",
+      "Bash(cp \"/mnt/c/Users/guilh/Desktop/analiso-frontend/src/assets/logos/favicon-32.png\" \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public/favicon-32.png\")",
+      "Bash(cp \"/mnt/c/Users/guilh/Desktop/analiso-frontend/src/assets/logos/favicon-16.png\" \"/mnt/c/Users/guilh/Desktop/analiso-frontend/public/favicon-16.png\")",
+      "Read(//mnt/c/Users/guilh/Desktop/analiso-frontend/**)",
+      "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-32.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-32.png''; Copy-Item ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\favicon-16.png'' ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\favicon-16.png''; ls ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public''\")",
+      "Bash(npx next:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:simplywall.st)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.data-to-viz.com)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f \\\\\\(-name *.ts -o -name *.js \\\\\\))",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend -type f -name *.ts)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src -type f -name *.ts)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src/main -type f -name *.java)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:tremor.so)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const t = require\\(''@tremor/react''\\); console.log\\(Object.keys\\(t\\).filter\\(k => /Chart|Donut|Bar|Line|Area|Spark|Tracker|Progress/.test\\(k\\)\\).join\\('', ''\\)\\)\")"
     ]
   }
 }

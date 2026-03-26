@@ -3,13 +3,15 @@ import "../src/styles/globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Analiso",
+  title: "Analiso — Análise financeira guiada",
   description: "Transforme dados financeiros em leitura guiada, clara e verificável.",
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
     ],
+    shortcut: "/favicon-32.png",
+    apple: "/favicon-32.png",
   },
 };
 

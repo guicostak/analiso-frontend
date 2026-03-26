@@ -210,7 +210,7 @@ export function ReadableCompanySection() {
         </button>
       </div>
 
-      <div className="relative mx-auto mt-[20px] h-[620px] max-w-[1430px] max-md:mt-[18px] max-md:h-[520px] max-sm:mt-[14px] max-sm:h-[460px]">
+      <div className="relative mx-auto mt-[20px] h-[620px] max-w-[1430px] max-md:mt-[18px] max-md:h-[520px] max-sm:mt-[14px] max-sm:h-[660px]">
         <AnimatePresence mode="sync">
           <motion.div
             key={activeState.id}
@@ -309,7 +309,7 @@ export function ReadableCompanySection() {
 
         <div className="absolute inset-x-0 bottom-[22px] z-[4] flex flex-col items-center gap-4 max-sm:bottom-[12px]">
           <motion.div
-            className="relative w-full max-w-[760px] rounded-[28px] border border-white/85 bg-white/94 p-5 shadow-[0_38px_100px_rgba(29,35,41,0.14)] backdrop-blur-xl max-md:max-w-[640px] max-sm:max-w-full max-sm:rounded-[24px] max-sm:p-4"
+            className="relative w-full max-w-[760px] rounded-[28px] border border-white/85 bg-white/94 p-5 shadow-[0_38px_100px_rgba(29,35,41,0.14)] backdrop-blur-xl max-md:max-w-[640px] max-sm:max-w-full max-sm:rounded-[22px] max-sm:p-3"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 10, scale: 0.995 }}
             animate={
               prefersReducedMotion
@@ -353,9 +353,9 @@ export function ReadableCompanySection() {
                 }
                 transition={{ duration: 0.45, ease: "easeInOut" }}
               >
-              <div className="flex items-start justify-between gap-4 max-sm:flex-col">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-flex items-center rounded-full border px-3 py-1 text-[12px] font-semibold ${activeState.chipTone}`}
                     >
@@ -370,22 +370,23 @@ export function ReadableCompanySection() {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 max-w-[470px] text-[32px] font-semibold leading-[1.04] tracking-[-0.05em] text-[#171c20] max-sm:text-[24px]">
+                  <h3 className="mt-3 text-[28px] font-semibold leading-[1.08] tracking-[-0.05em] text-[#171c20] max-md:max-w-full max-sm:text-[22px] md:max-w-[470px] md:text-[32px]">
                     {activeState.headline}
                   </h3>
                 </div>
 
-                <div className="grid min-w-[220px] gap-2 max-sm:w-full max-sm:min-w-0">
+                {/* Métricas: 3 colunas no mobile, 1 coluna no desktop */}
+                <div className="grid w-full grid-cols-3 gap-2 md:w-auto md:min-w-[210px] md:grid-cols-1">
                   {activeState.metrics.map((metric) => (
                     <div
                       key={metric.label}
-                      className="rounded-[18px] border border-[#eef1f4] bg-white/82 px-3 py-3"
+                      className="rounded-[14px] border border-[#eef1f4] bg-white/82 px-2 py-2 md:rounded-[18px] md:px-3 md:py-3"
                     >
-                      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#9aa1a8]">
+                      <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[#9aa1a8] md:text-[11px] md:tracking-[0.08em]">
                         {metric.label}
                       </div>
                       <div
-                        className={`mt-1 text-[18px] font-semibold ${
+                        className={`mt-0.5 text-[13px] font-semibold md:mt-1 md:text-[18px] ${
                           metric.tone === "positive"
                             ? "text-[#21855a]"
                             : metric.tone === "attention"
@@ -400,27 +401,27 @@ export function ReadableCompanySection() {
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3 md:grid-cols-[1fr_240px]">
-                <div className="rounded-[22px] bg-[linear-gradient(180deg,#fbfcfd,#f5f7f8)] p-4">
-                  <div className="mb-3 flex items-center gap-2 text-[12px] font-semibold text-[#7f8991]">
+              <div className="mt-4 grid gap-3 md:mt-5 md:grid-cols-[1fr_240px]">
+                <div className="rounded-[18px] bg-[linear-gradient(180deg,#fbfcfd,#f5f7f8)] p-3 md:rounded-[22px] md:p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-[#7f8991] md:mb-3">
                     <Layers3 className="h-4 w-4" />
                     Leitura guiada
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 md:space-y-2">
                     {activeState.summary.map((line) => (
                       <div
                         key={line}
-                        className="flex items-start gap-2 rounded-[16px] bg-white px-3 py-2.5 text-[12px] leading-5 text-[#293036] shadow-[0_6px_18px_rgba(28,33,36,0.03)]"
+                        className="flex items-start gap-2 rounded-[12px] bg-white px-2.5 py-2 text-[12px] leading-[1.4] text-[#293036] shadow-[0_6px_18px_rgba(28,33,36,0.03)] md:rounded-[16px] md:px-3 md:py-2.5 md:leading-5"
                       >
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0f9f8f]" />
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0f9f8f] md:h-4 md:w-4" />
                         <span>{line}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-[22px] border border-[#eef1f4] bg-white/82 p-4">
-                  <div className="mb-3 flex items-center gap-2 text-[12px] font-semibold text-[#7f8991]">
+                <div className="rounded-[18px] border border-[#eef1f4] bg-white/82 p-3 md:rounded-[22px] md:p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-[#7f8991] md:mb-3">
                     {activeState.id === "attention" ? (
                       <CircleAlert className="h-4 w-4" />
                     ) : activeState.id === "results" ? (
@@ -430,7 +431,7 @@ export function ReadableCompanySection() {
                     )}
                     Microinsight
                   </div>
-                  <p className="text-[13px] leading-5 text-[#2d3338]">
+                  <p className="text-[12px] leading-[1.45] text-[#2d3338] md:text-[13px] md:leading-5">
                     {activeState.microInsight}
                   </p>
                 </div>

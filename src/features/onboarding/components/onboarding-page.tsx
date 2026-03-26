@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import { LandingNav } from "@/src/components/layout/LandingNav";
 
 import { useOnboarding } from "../hooks/useOnboarding";
 import {
@@ -377,22 +379,26 @@ export function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#0B1220]">
+      <LandingNav showAuthButton={false} />
+
       <div className="max-w-[1200px] mx-auto px-6 py-8">
-        <div className="flex items-center justify-between">
+        {/* Topo: voltar + barra de progresso */}
+        <div className="flex items-center justify-between mb-10">
+          <button
+            type="button"
+            onClick={step > 1 ? goBack : undefined}
+            disabled={step === 1 || completing}
+            className="inline-flex items-center gap-2 text-sm text-[#667085] hover:text-[#0B1220] transition-colors disabled:opacity-40 disabled:cursor-not-allowed group"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Voltar
+          </button>
+
           <ProgressBar step={step} />
-          <div className="flex-1 text-center">
-            <div className="inline-flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0E9384]/10 border border-[#0E9384]/30 flex items-center justify-center text-sm font-semibold text-[#0E9384]">
-                A
-              </div>
-              <span className="text-sm font-semibold tracking-wide">Analiso</span>
-            </div>
-          </div>
-          <div className="w-48" />
         </div>
 
-        <div className="mt-10 flex justify-center">
-          <div className="w-full max-w-[720px] bg-white border border-[#EAECF0] rounded-3xl shadow-sm p-6 md:p-8">
+        <div className="flex justify-center">
+          <div className="w-full max-w-[720px] bg-white border border-[#EAECF0] rounded-3xl shadow-sm p-8 md:p-12">
             <div className="text-center">
               {step === 4 && (
                 <img
@@ -402,25 +408,18 @@ export function OnboardingPage() {
                   loading="lazy"
                 />
               )}
-              <p className="text-xs text-[#667085]">Etapa {step} de {TOTAL_STEPS}</p>
-              <h1 className="mt-2 text-2xl md:text-3xl font-semibold">{meta.title}</h1>
-              <p className="mt-2 text-sm text-[#475467]">{meta.subtitle}</p>
+              <p className="text-xs font-medium tracking-wide text-[#667085] uppercase">Etapa {step} de {TOTAL_STEPS}</p>
+              <h1 className="mt-3 text-2xl md:text-3xl font-semibold tracking-tight">{meta.title}</h1>
+              <p className="mt-2 text-sm sm:text-base text-[#475467] leading-relaxed">{meta.subtitle}</p>
             </div>
 
-            <div className="mt-8">{renderContent()}</div>
+            <div className="mt-10">{renderContent()}</div>
 
             {completeError && (
               <p className="mt-4 text-sm text-red-600 text-center">{completeError}</p>
             )}
 
-            <div className="mt-8 flex items-center justify-between">
-              {step === 1 ? (
-                <div />
-              ) : (
-                <SecondaryButton onClick={goBack} disabled={completing}>
-                  &larr; Voltar
-                </SecondaryButton>
-              )}
+            <div className="mt-10 flex items-center justify-end">
               {step < TOTAL_STEPS ? (
                 <PrimaryButton onClick={goNext} disabled={!canContinue}>
                   Continuar &rarr;
