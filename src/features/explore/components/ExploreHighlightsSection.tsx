@@ -84,9 +84,9 @@ function HighlightPriorityCard({
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-[1px] ${tone.accent} opacity-80`} />
       <div className="flex items-start justify-between gap-4">
         <div className="relative flex min-w-0 items-start gap-3">
-          {getCompanyLogo(item.ticker) && (
+          {(item.logoUrl ?? getCompanyLogo(item.ticker)) && (
             <img
-              src={getCompanyLogo(item.ticker)}
+              src={(item.logoUrl ?? getCompanyLogo(item.ticker))!}
               alt={`Logo ${item.ticker}`}
               className="h-11 w-11 rounded-[16px] border border-white/70 bg-white object-cover p-1 shadow-[0_10px_30px_rgba(15,23,40,0.06)]"
             />
@@ -215,9 +215,9 @@ export function ExploreHighlightsSection({
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-14 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0))]" />
                       <div className="pointer-events-none absolute inset-y-3 left-0 w-px bg-[linear-gradient(180deg,rgba(91,141,239,0),rgba(91,141,239,0.18),rgba(91,141,239,0))]" />
                       <div className="flex items-start gap-4">
-                        {getCompanyLogo(featuredHighlight.ticker) && (
+                        {(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker)) && (
                           <img
-                            src={getCompanyLogo(featuredHighlight.ticker)}
+                            src={(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker))!}
                             alt={`Logo ${featuredHighlight.ticker}`}
                             className="h-12 w-12 rounded-[18px] border border-white bg-white object-cover p-1 shadow-[0_12px_30px_rgba(15,23,40,0.08)]"
                           />
@@ -226,7 +226,7 @@ export function ExploreHighlightsSection({
                           <p className="text-[18px] font-semibold leading-6 text-[#0F1728]">
                             {featuredHighlight.companyName} <span className="text-[#98A2B3]">{featuredHighlight.ticker}</span>
                           </p>
-                          <p className="mt-1 text-[13px] leading-5 text-[#667085]">Entrou hoje porque {featuredHighlight.changeTitle.toLowerCase()}.</p>
+                          <p className="mt-1 text-[13px] leading-5 text-[#667085]">{featuredHighlight.whyItMatters}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${severityTone[featuredHighlight.severity].pill}`}>
                               {priorityLabelMap[featuredHighlight.severity]}
@@ -263,7 +263,7 @@ export function ExploreHighlightsSection({
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-16 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(234,244,255,0.72),rgba(234,244,255,0))]" />
                   <div>
                     <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Por que abrir agora</p>
-                    <p className="mt-3 text-[15px] leading-7 text-[#0F1728]">{featuredHighlight.whyItMatters}</p>
+                    <p className="mt-3 text-[15px] leading-7 text-[#0F1728]">{featuredHighlight.openNowBenefit ?? featuredHighlight.whyItMatters}</p>
                   </div>
 
                   <div className="space-y-4">

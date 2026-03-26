@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 
 import { useAuth } from "@/src/features/auth/AuthContext";
-import { getDashboard, mapApiItemsToInboxSeed, inboxSeed, pillarMovements } from "../services";
+import { getDashboard, mapApiItemsToInboxSeed } from "../services";
 import { ApiError } from "@/src/lib/api";
 
 import type {
@@ -349,8 +349,7 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
     };
   }, []);
 
-  // — Dados base: API quando disponível, mock como fallback —
-  const baseInboxItems = apiInboxItems.length > 0 ? apiInboxItems : inboxSeed;
+  const baseInboxItems = apiInboxItems;
 
   const inboxItems = useMemo<InboxItem[]>(
     () =>
@@ -418,32 +417,30 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
   const topRiskItem    = todayItems.filter((i) => i.severity === "Risco").sort((a, b) => b.impactScore - a.impactScore)[0];
   const topImproveItem = todayItems.filter((i) => i.severity === "Saudável").sort((a, b) => b.impactScore - a.impactScore)[0];
 
-  const priorityItem           = inboxRows[0];
-  const sortedPillarMovements  = [...pillarMovements].sort((a, b) => b.events - a.events);
-  const leadingPillarMovement  = sortedPillarMovements[0];
+  const priorityItem = inboxRows[0];
+
+  const pillarMovements = useMemo<PillarMovement[]>(() => {
+    return allPillars.map((pillar) => {
+      const items     = apiInboxItems.filter((i) => i.pillarKey === pillar);
+      const risk      = items.filter((i) => i.severity === "Risco").length;
+      const attention = items.filter((i) => i.severity === "Atenção").length;
+      const healthy   = items.filter((i) => i.severity === "Saudável").length;
+      return { pillar, events: items.length, trendLabel: "", trendUp: false, risk, attention, healthy };
+    }).filter((p) => p.events > 0);
+  }, [apiInboxItems]);
+
+  const sortedPillarMovements  = useMemo(() => [...pillarMovements].sort((a, b) => b.events - a.events), [pillarMovements]);
+  const leadingPillarMovement  = sortedPillarMovements[0] ?? { pillar: "Dívida" as Pillar, events: 0, trendLabel: "", trendUp: false, risk: 0, attention: 0, healthy: 0 };
   const visiblePillarMovements = sortedPillarMovements.slice(0, 2);
   const focusedPillar          = inboxFilters.pillars.length === 1
     ? inboxFilters.pillars[0]
-    : pillarMovements[0].pillar;
+    : (sortedPillarMovements[0]?.pillar ?? "Dívida");
 
   // — Auto-refresh em modo tempo-real —
   const refreshInboxNow = useCallback(() => {
     try {
       setIsRefreshing(true);
-      const now = Date.now();
-      setLastRefreshAt(now);
-      if (inboxMode === "tempo-real") {
-        const template = inboxSeed[refreshSequenceRef.current % inboxSeed.length];
-        refreshSequenceRef.current += 1;
-        const realtimeItem: InboxSeedItem = {
-          ...template,
-          id:          `${template.id}-rt-${now}`,
-          ageMinutes:  0,
-          impactScore: Math.min(100, template.impactScore + 3),
-        };
-        setRealtimeItems((prev) => [realtimeItem, ...prev].slice(0, 12));
-        setNewBadgeUntil((prev) => ({ ...prev, [realtimeItem.id]: now + NEW_ITEM_HIGHLIGHT_MS }));
-      }
+      setLastRefreshAt(Date.now());
       setRefreshError(null);
       setInboxError(false);
     } catch {
@@ -452,7 +449,7 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
     } finally {
       setIsRefreshing(false);
     }
-  }, [inboxMode]);
+  }, []);
 
   useEffect(() => {
     if (inboxMode !== "tempo-real") return;

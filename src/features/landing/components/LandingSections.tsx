@@ -290,7 +290,7 @@ function Header() {
 
         <a
           href="/login"
-          className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#ececec] bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
+          className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border-2 border-[#d9d9d9] bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#cfcfcf] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
         >
           Entrar
         </a>
@@ -1414,135 +1414,6 @@ function StepCards() {
         </div>
       ))}
     </div>
-  );
-}
-
-function AIAgentsHero() {
-  return (
-    <section
-      id="allan"
-      className="relative overflow-hidden px-20 pb-[80px] max-lg:px-10 max-md:px-6 max-sm:px-0 max-sm:pb-[40px]"
-    >
-      <div className="relative z-10 flex flex-col items-center gap-6 pt-[64px] max-md:pt-10 max-sm:gap-4 max-sm:px-4">
-        <div className="relative h-[88px] w-[88px] overflow-hidden rounded-full max-sm:h-[64px] max-sm:w-[64px]">
-          <div className="absolute inset-0 rounded-full bg-white" />
-          <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.95)_0%,rgba(223,246,241,0.85)_30%,rgba(15,159,143,0.22)_62%,rgba(255,255,255,0)_100%)]" />
-          <div className="absolute left-1/2 top-1/2 h-[53px] w-[53px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#9bf0de_0%,#0f9f8f_62%,#0c7a6d_100%)] shadow-[0_8px_26px_rgba(15,159,143,0.25)] max-sm:h-[40px] max-sm:w-[40px]" />
-          <Sparkles className="absolute left-1/2 top-1/2 z-10 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-white max-sm:h-5 max-sm:w-5" />
-        </div>
-
-        <h2
-          className="max-w-[620px] bg-clip-text text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-transparent max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]"
-          style={{
-            backgroundImage: "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
-          }}
-        >
-          A mesma empresa, agora muito mais legível.
-        </h2>
-
-        <p className="max-w-[474px] text-center text-lg leading-6 text-[#7a7a7a] max-md:text-base max-md:leading-5">
-          A Analiso organiza sinais, contexto e mudanças em uma leitura guiada para você entender o que importa sem se perder no ruído.
-        </p>
-
-        <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
-          Ver como funciona
-        </button>
-      </div>
-
-      <div className="relative mt-[-40px] max-md:mt-[-20px] max-sm:mt-[-10px]">
-        <div className="pointer-events-none absolute bottom-0 top-0 left-1/2 z-0 w-screen -translate-x-1/2">
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,1)_0%,rgba(255,255,255,0.95)_15%,rgba(159,252,202,0.15)_35%,rgba(159,252,202,0.4)_60%,rgba(159,252,202,1)_100%)]" />
-          <div className="absolute left-0 right-0 top-0 z-[5] h-[28%] bg-gradient-to-b from-white to-transparent max-md:h-[130px] max-sm:h-[100px]" />
-          <div className="absolute bottom-[-20px] left-0 right-0 z-40 h-[45%] bg-gradient-to-t from-white/80 to-transparent max-md:h-[320px] max-md:from-white max-sm:h-[40%] max-sm:from-white" />
-          <div
-            className="absolute bottom-0 left-0 right-0 z-[50] h-[30px]"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%)",
-            }}
-          />
-        </div>
-
-        <div
-          className="pointer-events-none absolute bottom-0 left-1/2 z-[2] h-[220px] w-screen -translate-x-1/2 max-sm:h-[35%]"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%)",
-          }}
-        />
-
-        <div className="relative z-[1] mx-auto h-[580px] w-full max-w-[1430px] overflow-hidden max-md:h-[400px] max-sm:h-[300px]">
-          {[980, 750, 536, 333].map((size) => (
-            <div
-              key={size}
-              className="pointer-events-none absolute left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2 rounded-full max-md:top-[28%] max-sm:top-[35%]"
-              style={{
-                width: size,
-                height: size,
-                opacity: 0.45,
-                background:
-                  "linear-gradient(to bottom, rgba(159,252,202,0) 0%, rgba(159,252,202,0.35) 100%)",
-                border: "2px solid rgba(159,252,202,0.15)",
-                boxShadow: "0 4px 12px 0 rgba(0,0,0,0.06)",
-              }}
-            />
-          ))}
-
-          {[1134, 864, 612, 386].map((size, index) => (
-            <div
-              key={`ring-${size}`}
-              className="pointer-events-none absolute left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 max-md:top-[28%] max-sm:top-[35%]"
-              style={{
-                width: size,
-                height: size,
-                opacity: 0.34 - index * 0.05,
-              }}
-            />
-          ))}
-
-          <div className="absolute left-[-10px] top-[241px] z-10 hidden h-[339px] w-[347px] rounded-[160px] bg-[radial-gradient(circle_at_50%_26%,#ebe6df_0%,#ccb29f_14%,#b0e7dc_15%,#f4f4f4_28%,#f4f4f4_100%)] opacity-30 max-sm:!hidden" />
-          <div className="absolute left-[211px] top-[59px] z-[35] h-[521px] w-[521px] rounded-full bg-[radial-gradient(circle_at_50%_24%,#ebe6df_0%,#ccb29f_13%,#b0e7dc_14%,#f4f4f4_30%,#f4f4f4_100%)] shadow-[0_20px_40px_rgba(0,0,0,0.08)]" />
-          <div className="absolute left-[781px] top-[163px] z-20 h-[417px] w-[427px] rounded-[180px] bg-[radial-gradient(circle_at_50%_26%,#ebe6df_0%,#ccb29f_14%,#f4b8da_15%,#f4f4f4_28%,#f4f4f4_100%)] opacity-30" />
-          <div className="absolute left-[1069px] top-[233px] z-10 hidden h-[347px] w-[355px] rounded-[170px] bg-[radial-gradient(circle_at_50%_26%,#ebe6df_0%,#ccb29f_14%,#b0e7dc_15%,#f4f4f4_28%,#f4f4f4_100%)] opacity-30 max-sm:!hidden" />
-
-          <div
-            className="pointer-events-none absolute left-0 right-0 top-0 z-[45] h-[115px]"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%)",
-            }}
-          />
-        </div>
-
-        <div className="absolute bottom-[33px] left-0 right-0 z-[3] flex flex-col items-center gap-2 max-sm:bottom-[-30px]">
-          <div className="flex cursor-pointer items-center gap-3 rounded-full bg-white py-[6px] pl-[6px] pr-3 shadow-[0px_4px_20px_-8px_rgba(88,92,95,0.16)]">
-            <div className="relative h-[66px] w-[66px] shrink-0 rounded-full border border-[#f0f0f0] bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[50px] max-md:w-[50px]">
-              <div className="absolute inset-0 overflow-hidden rounded-full">
-                <div className="absolute bottom-0 left-1/2 h-[66px] w-[54px] -translate-x-1/2 rounded-b-full bg-[radial-gradient(circle_at_50%_24%,#ebe6df_0%,#ccb29f_14%,#b0e7dc_15%,#f4f4f4_28%,#f4f4f4_100%)] max-md:h-[50px] max-md:w-[42px]" />
-              </div>
-              <span className="absolute bottom-[4px] right-[-2px] z-10 inline-flex h-[14px] w-[22px] items-center justify-center rounded-[6px] bg-[#0f9f8f] text-[9px] font-bold text-white">
-                IA
-              </span>
-            </div>
-
-            <div className="flex h-[56px] items-center rounded-[74px] border border-[#f0f0f0] bg-white px-4 shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[44px] max-md:px-3">
-              <div className="flex flex-col">
-                <span className="text-base font-semibold leading-6 text-[#171717] max-md:text-sm max-md:leading-5">
-                  Angelina
-                </span>
-                <span className="text-xs font-semibold text-[#9a9a9a]">Finanças</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-[31px] bg-white p-2 shadow-[0px_2px_10px_0px_rgba(88,92,95,0.1)]">
-            <div className="h-[3px] w-[27px] overflow-hidden rounded-full bg-[#ececec]">
-              <div className="h-full w-full rounded-full bg-[#0f9f8f]" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -2888,7 +2759,7 @@ export function HeroSection() {
           </div>
           <a
             href="/login"
-            className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
+            className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border-2 border-primary-gray-200 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-300 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
           >
             Entrar
           </a>
@@ -3462,8 +3333,6 @@ export function CtaSection() {
 }
 
 export function LandingSections() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
   return (
     <div className="min-h-screen bg-white text-[#111111]">
       <main>
@@ -3473,46 +3342,7 @@ export function LandingSections() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.03}>
-        <section
-          id="para-quem-e"
-          className="px-20 pb-16 pt-24 max-lg:px-10 max-md:px-6 max-md:pb-10 max-md:pt-12 max-sm:px-4"
-        >
-          <div className="mx-auto max-w-[1430px]">
-            <div className="flex flex-col items-center gap-6">
-              <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
-                Para quem é
-              </span>
-              <h2
-                className="max-w-[560px] bg-clip-text text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-transparent max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
-                }}
-              >
-                Clareza para diferentes
-                <br />
-                momentos da análise.
-              </h2>
-              {false && <p className="max-w-[525px] text-center text-lg leading-6 text-[#7a7a7a]">
-                A Analiso organiza os dados de uma empresa em uma leitura guiada e verificável, para você entender mais rápido o que importa sem se perder no ruído.
-              </p>}
-              <p className="max-w-[525px] text-center text-lg leading-6 text-[#7a7a7a]">
-                Da primeira leitura ao acompanhamento contínuo, a Analiso ajuda você a entender empresas sem se perder no ruído.
-              </p>
-            </div>
-
-            <div className="mt-16 flex gap-px overflow-hidden rounded-[20px] border-y border-[#f3f3f3] bg-[#f3f3f3] max-lg:flex-col max-lg:gap-0 max-md:mt-8 max-md:rounded-[16px]">
-              {segments.map((segment, index) => (
-                <SegmentCard
-                  key={segment.title}
-                  index={index}
-                  title={segment.title}
-                  description={segment.description}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+          <AnalysisMomentsSection />
         </ScrollReveal>
 
         <ScrollReveal delay={0.04}>
@@ -3520,37 +3350,37 @@ export function LandingSections() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.05}>
-        <section className="px-20 pb-[120px] pt-[100px] max-lg:px-10 max-md:px-6 max-md:pb-16 max-md:pt-16 max-sm:px-4">
-          <div className="mx-auto max-w-[1430px]">
-            <div className="flex flex-col gap-14">
-              <div className="flex items-end justify-between max-md:flex-col max-md:items-start max-md:gap-6">
-                <div className="flex w-[534px] flex-col items-start gap-6 max-md:w-full">
-                  <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
-                    Passo a Passo
-                  </span>
-                  <h2
-                    className="bg-clip-text text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-transparent max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
-                    }}
-                  >
-                    Da primeira leitura ao acompanhamento.
-                  </h2>
-                  <p className="text-lg leading-6 text-[#7a7a7a]">
-                    Veja como a Analiso guia sua análise.
-                  </p>
+          <section className="px-20 pb-[120px] pt-[100px] max-lg:px-10 max-md:px-6 max-md:pb-16 max-md:pt-16 max-sm:px-4">
+            <div className="mx-auto max-w-[1430px]">
+              <div className="flex flex-col gap-14">
+                <div className="flex items-end justify-between max-md:flex-col max-md:items-start max-md:gap-6">
+                  <div className="flex w-[534px] flex-col items-start gap-6 max-md:w-full">
+                    <span className="rounded-lg bg-[#e7fbf7] px-2 py-1 text-xs font-semibold leading-[18px] text-[#0f9f8f]">
+                      Passo a Passo
+                    </span>
+                    <h2
+                      className="bg-clip-text text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-transparent max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
+                      }}
+                    >
+                      Da primeira leitura ao acompanhamento.
+                    </h2>
+                    <p className="text-lg leading-6 text-[#7a7a7a]">
+                      Veja como a Analiso guia sua an�lise.
+                    </p>
+                  </div>
+
+                  <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
+                    Conhecer a Analiso
+                  </button>
                 </div>
 
-                <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
-                  Conhecer a Analiso
-                </button>
+                <StepCards />
               </div>
-
-              <StepCards />
             </div>
-          </div>
-        </section>
+          </section>
         </ScrollReveal>
 
         <ScrollReveal delay={0.04}>
@@ -3566,10 +3396,10 @@ export function LandingSections() {
               <h2 className="text-[38px] font-semibold leading-[0.98] tracking-[-0.05em] text-[#2a2a2a] md:text-[58px]">
                 Uma equipe de IA trabalhando
                 <br />
-                pela sua clínica.
+                pela sua cl�nica.
               </h2>
               <p className="mx-auto mt-5 max-w-[500px] text-[17px] text-[#7a7a7a]">
-                Assistentes especializados que automatizam tarefas clínicas, financeiras e operacionais.
+                Assistentes especializados que automatizam tarefas cl�nicas, financeiras e operacionais.
               </p>
               <div className="mt-7 flex items-center justify-center gap-2">
                 {[1, 2, 3].map((item) => (
@@ -3595,92 +3425,13 @@ export function LandingSections() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.04}>
-        <section
-          id="faq"
-          className="px-20 pt-[130px] max-lg:px-10 max-md:px-6 max-md:pt-16 max-sm:px-4"
-        >
-          <div className="mx-auto flex max-w-[1430px] flex-col items-center gap-10">
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex h-[26px] items-center justify-center rounded-[8px] bg-primary-bluebrand-50 px-2 py-1">
-                <span className="text-xs font-semibold leading-[18px] text-primary-bluebrand-600">
-                  Dúvidas
-                </span>
-              </div>
-              <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-black max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
-                Perguntas frequentes
-              </h2>
-              <p className="max-w-[279px] text-center text-lg leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-base">
-                Algumas respostas sobre a Analiso e o acesso antecipado.
-              </p>
-            </div>
-
-            <div className="w-[868px] overflow-hidden rounded-[20px] border border-primary-gray-50 bg-white shadow-small max-lg:w-full max-md:rounded-[16px]">
-              {faqItems.map((faq, index) => {
-                const isOpen = openFaq === index;
-
-                return (
-                  <div key={faq.question} className="faq-item" data-faq-index={index}>
-                    {index > 0 ? <div className="mx-8 h-px bg-[#f2f2f2] max-md:mx-5" /> : null}
-                    <div className="px-8 py-8 max-md:px-5 max-md:py-6">
-                      <button
-                        type="button"
-                        className="faq-trigger flex w-full cursor-pointer items-center justify-between"
-                        onClick={() => setOpenFaq(isOpen ? null : index)}
-                        aria-expanded={isOpen}
-                        aria-controls={`faq-answer-${index}`}
-                      >
-                        <span className="text-left text-base font-semibold leading-6 text-primary-gray-900 max-md:text-sm max-md:leading-5">
-                          {faq.question}
-                        </span>
-                        <div
-                          className={`faq-icon-wrap flex shrink-0 items-center p-2 text-primary-gray-300 transition-all duration-300 ${
-                            isOpen ? "rotate-45" : ""
-                          }`}
-                        >
-                          <svg className="size-5" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path
-                              d="M10 4.16669V15.8334"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M4.16667 10H15.8333"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                      </button>
-                      <div
-                        id={`faq-answer-${index}`}
-                        className="faq-answer overflow-hidden transition-all duration-300"
-                        style={{ maxHeight: isOpen ? "220px" : "0px", opacity: isOpen ? 1 : 0 }}
-                      >
-                        <div className="faq-answer-inner">
-                          <div className="pt-2">
-                            <p className="max-w-[561px] text-base font-normal leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-sm max-md:leading-5">
-                              {faq.answer}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+          <FaqSection />
         </ScrollReveal>
 
         <section id="faq-legacy" className="hidden px-4 py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-[1140px]">
             <SectionHeading
-              badge="Dúvidas"
+              badge="D�vidas"
               title="Perguntas frequentes"
               description="Algumas respostas sobre a Analiso e o acesso antecipado."
             />
@@ -3694,7 +3445,7 @@ export function LandingSections() {
                     </span>
                   </summary>
                   <div className="px-7 pb-8 text-[15px] leading-[1.55] text-[#757575]">
-                    Acesso antecipado, novidades da plataforma e detalhes do lançamento serão enviados para os usuários da lista de espera.
+                    Acesso antecipado, novidades da plataforma e detalhes do lan�amento ser�o enviados para os usu�rios da lista de espera.
                   </div>
                 </details>
               ))}
@@ -3703,47 +3454,47 @@ export function LandingSections() {
         </section>
 
         <ScrollReveal delay={0.04}>
-        <section className="px-5 pt-[130px] max-md:pt-16 max-sm:px-0">
-          <div
-            className="relative h-[466px] w-full overflow-hidden rounded-[20px] max-md:h-auto max-md:rounded-[16px] max-md:pb-16 max-sm:rounded-none"
-            style={{
-              background:
-                "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E8F8F4 70%, #B7E9DD 100%)",
-            }}
-          >
-            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-50">
-              {[980, 750, 536, 333].map((size) => (
-                <div
-                  key={size}
-                  className="footer-halo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#cfece4]"
-                  style={{
-                    width: size,
-                    height: size,
-                    boxShadow: "0 0 0 1px rgba(255,255,255,0.2) inset",
-                  }}
-                />
-              ))}
+          <section className="px-5 pt-[130px] max-md:pt-16 max-sm:px-0">
+            <div
+              className="relative h-[466px] w-full overflow-hidden rounded-[20px] max-md:h-auto max-md:rounded-[16px] max-md:pb-16 max-sm:rounded-none"
+              style={{
+                background:
+                  "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E8F8F4 70%, #B7E9DD 100%)",
+              }}
+            >
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-50">
+                {[980, 750, 536, 333].map((size) => (
+                  <div
+                    key={size}
+                    className="footer-halo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#cfece4]"
+                    style={{
+                      width: size,
+                      height: size,
+                      boxShadow: "0 0 0 1px rgba(255,255,255,0.2) inset",
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-white via-white to-transparent" />
+              <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
+                <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-black max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
+                  Pronto para transformar sua an�lise?
+                </h2>
+                <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
+                  Entre na lista de espera e receba acesso antecipado � plataforma.
+                </p>
+                <button
+                  type="button"
+                  className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-white focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
+                >
+                  Come�ar gr�tis
+                </button>
+              </div>
             </div>
-            <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-white via-white to-transparent" />
-            <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
-              <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-black max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
-                Pronto para transformar sua análise?
-              </h2>
-              <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
-                Entre na lista de espera e receba acesso antecipado à plataforma.
-              </p>
-              <button
-                type="button"
-                className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-white focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
-              >
-                Começar grátis
-              </button>
+            <div className="py-6 text-center text-[13px] text-[#8f8f8f]">
+              � 2026 Analiso. Todos os direitos reservados.
             </div>
-          </div>
-          <div className="py-6 text-center text-[13px] text-[#8f8f8f]">
-            © 2026 Analiso. Todos os direitos reservados.
-          </div>
-        </section>
+          </section>
         </ScrollReveal>
 
         <section className="hidden px-4 pb-10 pt-8 md:px-6">
@@ -3755,7 +3506,7 @@ export function LandingSections() {
                 a usar a Analiso.
               </h2>
               <p className="mx-auto mt-6 max-w-[450px] text-[17px] text-[#7a7a7a]">
-                Entre na lista de espera e receba acesso antecipado à plataforma.
+                Entre na lista de espera e receba acesso antecipado � plataforma.
               </p>
               <div className="mt-10">
                 <EmailForm />
@@ -3763,17 +3514,10 @@ export function LandingSections() {
             </div>
           </div>
           <div className="py-6 text-center text-[13px] text-[#8f8f8f]">
-            © 2026 Analiso. Todos os direitos reservados.
+            � 2026 Analiso. Todos os direitos reservados.
           </div>
         </section>
       </main>
     </div>
   );
 }
-
-
-
-
-
-
-

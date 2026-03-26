@@ -330,8 +330,14 @@ export function Dashboard() {
                 <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">Maior atenção</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(181,71,104,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1 pr-2">
-                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                  <div className="mt-9 flex min-w-0 flex-1 items-center gap-2.5 pr-2">
+                    {topRiskItem && (
+                      <Avatar className="h-8 w-8 shrink-0 rounded-[10px] border border-[#F0CCD7] bg-white">
+                        <AvatarImage src={topRiskItem.logoUrl ?? logoByTicker[topRiskItem.ticker]} alt={topRiskItem.ticker} className="object-cover" />
+                        <AvatarFallback className="bg-white text-[10px] text-[#B54768]">{topRiskItem.ticker.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <p className="text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topRiskItem ? topRiskItem.ticker : "Sem risco novo"}
                     </p>
                   </div>
@@ -362,8 +368,14 @@ export function Dashboard() {
                 <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#0F9485]">Maior melhora</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(18,165,148,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1 pr-2">
-                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                  <div className="mt-9 flex min-w-0 flex-1 items-center gap-2.5 pr-2">
+                    {topImproveItem && (
+                      <Avatar className="h-8 w-8 shrink-0 rounded-[10px] border border-[#CFE9E2] bg-white">
+                        <AvatarImage src={topImproveItem.logoUrl ?? logoByTicker[topImproveItem.ticker]} alt={topImproveItem.ticker} className="object-cover" />
+                        <AvatarFallback className="bg-white text-[10px] text-[#0F9485]">{topImproveItem.ticker.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <p className="text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
                       {topImproveItem ? topImproveItem.ticker : "Sem melhora nova"}
                     </p>
                   </div>
@@ -684,7 +696,7 @@ export function Dashboard() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex min-w-0 flex-1 items-start gap-3.5">
                               <Avatar className={cn("border border-[#E8EEF5] bg-white", isPriority ? "h-11 w-11 rounded-[14px]" : isRelevant ? "h-10 w-10 rounded-[12px]" : "h-8 w-8 rounded-[12px]")}>
-                                <AvatarImage src={logoByTicker[item.ticker]} alt={item.ticker} className="object-cover" />
+                                <AvatarImage src={item.logoUrl ?? logoByTicker[item.ticker]} alt={item.ticker} className="object-cover" />
                                 <AvatarFallback className="bg-white text-[10px] text-[#667085]">
                                   {item.ticker.slice(0, 2)}
                                 </AvatarFallback>

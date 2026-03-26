@@ -27,7 +27,7 @@ interface ExploreMovementsPanelProps {
 const tabLabelMap: Record<MoverType, string> = {
   altas: "Altas",
   baixas: "Baixas",
-  negociadas: "Fluxo",
+  negociadas: "Mais negociadas",
 };
 
 const tabEmptyStateMap: Record<MoverType, string> = {
@@ -59,16 +59,16 @@ function MovementCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            {getCompanyLogo(row.ticker) && (
+            {(row.logoUrl ?? getCompanyLogo(row.ticker)) && (
               <img
-                src={getCompanyLogo(row.ticker)}
+                src={row.logoUrl ?? getCompanyLogo(row.ticker)}
                 alt={`Logo ${row.ticker}`}
                 className={`${featured ? "h-11 w-11 rounded-[16px]" : "h-9 w-9 rounded-[14px]"} border border-[#EEF3F7] bg-white object-cover p-1`}
               />
             )}
             <div className="min-w-0">
               <p className={`${featured ? "text-[18px] leading-6" : "text-[15px] leading-6"} truncate font-semibold text-[#0F1728]`}>
-                {row.name} <span className="text-[#98A2B3]">{row.ticker}</span>
+                {row.name !== row.ticker ? <>{row.name} <span className="text-[#98A2B3]">{row.ticker}</span></> : row.ticker}
               </p>
               <p className="text-[12px] font-medium text-[#98A2B3]">Preco {row.price} . {row.changePct}</p>
             </div>
@@ -137,7 +137,7 @@ export function ExploreMovementsPanel({
         {[
           { label: "Altas", value: "altas" },
           { label: "Baixas", value: "baixas" },
-          { label: "Fluxo", value: "negociadas" },
+          { label: "Mais negociadas", value: "negociadas" },
         ].map((tab) => (
           <button
             key={tab.value}
@@ -186,7 +186,7 @@ export function ExploreMovementsPanel({
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
                       <p className="text-[15px] font-semibold leading-6 text-[#0F1728]">
-                        {row.name} <span className="text-[#98A2B3]">{row.ticker}</span>
+                        {row.name !== row.ticker ? <>{row.name} <span className="text-[#98A2B3]">{row.ticker}</span></> : row.ticker}
                       </p>
                       <p className="mt-1 text-[13px] leading-5 text-[#475467]">{row.note}</p>
                       <p className="mt-2 text-[12px] font-medium text-[#667085]">
@@ -220,22 +220,22 @@ export function ExploreMovementsPanel({
 
         <aside className="space-y-4 xl:col-span-4 xl:sticky xl:top-24 xl:self-start">
           <div className="rounded-[22px] border border-[#E7EEF5] bg-[#EEF6FF] p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
-            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#3965B8]">Leitura do mercado</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#3965B8]">O que aconteceu</p>
             <p className="mt-3 text-[16px] font-semibold leading-6 text-[#0F1728]">
-              {movementSummary?.title || `Como ler ${tabLabelMap[selectedTab].toLowerCase()} hoje`}
+              {movementSummary?.title || `Resumo dos movimentos de ${tabLabelMap[selectedTab].toLowerCase()}`}
             </p>
             <p className="mt-2.5 text-[13px] leading-5 text-[#475467]">
-              {movementSummary?.body || "Use os movimentos como pista inicial e confirme se a narrativa aparece tambem nos pilares principais."}
+              {movementSummary?.body || "Esses sao os ativos que mais se movimentaram hoje. Use como ponto de partida para entender o que o mercado esta precificando."}
             </p>
           </div>
 
           <div className="rounded-[22px] border border-[#E7EEF5] bg-[#EFFAF6] p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
-            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#0E9384]">Pilar mais afetado</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#0E9384]">O que isso significa</p>
             <p className="mt-3 text-[16px] font-semibold leading-6 text-[#0F1728]">
-              {movementDominant?.title || "Observe o impacto antes do ruido"}
+              {movementDominant?.title || "Movimento no preco nao e o mesmo que mudanca nos fundamentos"}
             </p>
             <p className="mt-2.5 text-[13px] leading-5 text-[#475467]">
-              {movementDominant?.body || "Quando o preco chama atencao, o proximo passo e verificar se caixa, margens ou retorno realmente mudaram."}
+              {movementDominant?.body || "Antes de agir, verifique se caixa, margens ou retorno sobre capital realmente mudaram. O preco sobe e desce todo dia; o que importa e o que esta por tras."}
             </p>
           </div>
 

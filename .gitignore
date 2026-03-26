@@ -4,6 +4,7 @@ node_modules
 .next/
 next-env.d.ts
 out/
+dist/
 
 # Variáveis de ambiente — nunca commitar
 .env

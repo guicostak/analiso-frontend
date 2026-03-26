@@ -324,9 +324,9 @@ export function ExploreCompanyCatalog({
               <div className="relative">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-4">
-                    {getCompanyLogo(company.ticker) && (
+                    {(company.logoUrl ?? getCompanyLogo(company.ticker)) && (
                       <img
-                        src={getCompanyLogo(company.ticker)}
+                        src={company.logoUrl ?? getCompanyLogo(company.ticker)}
                         alt={`Logo ${company.ticker}`}
                         className="h-12 w-12 rounded-[18px] border border-[#EEF3F7] bg-[#F8FBFD] object-cover p-1"
                       />
@@ -349,7 +349,11 @@ export function ExploreCompanyCatalog({
                   </div>
                 </div>
 
-                <p className="mt-6 text-[15px] leading-7 text-[#475467]">{company.shortDiagnosis}</p>
+                <p className="mt-4 text-[13px] font-semibold text-[#344054]">{company.headline}</p>
+                <p className="mt-1 text-[13px] leading-6 text-[#475467]">{company.shortDiagnosis}</p>
+                {company.whyOpen && (
+                  <p className="mt-2 text-[12px] leading-5 text-[#667085] italic">{company.whyOpen}</p>
+                )}
 
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                   <span className="inline-flex rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-3 py-1 text-[11px] font-medium text-[#3965B8]">

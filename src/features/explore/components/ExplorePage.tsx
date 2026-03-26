@@ -166,29 +166,96 @@ export function ExplorePage() {
       <ExploreCompareBar compareTickers={compareTickers} toggleCompare={toggleCompare} />
 
       {/* Source drawer */}
-      <ExploreDrawer open={!!selectedSource} onClose={() => setSelectedSource(null)} title="Detalhes da fonte">
-        {selectedSource && (
-          <div className="space-y-4 text-sm text-foreground/80">
-            <div>
-              <p className="text-xs text-muted-foreground">Fonte</p>
-              <p className="font-medium text-foreground">{selectedSource.source.name}</p>
+      <ExploreDrawer open={!!selectedSource} onClose={() => setSelectedSource(null)} title="Fonte e rastreabilidade">
+        {selectedSource && (() => {
+          const sd = selectedSource.sourceDetail;
+          const stateLabel: Record<string, string> = { RISK: "Risco", ATTENTION: "Atenção", HEALTHY: "Saudável" };
+          const recencyLabel = sd && sd.sourceRecencyDays > 0
+            ? sd.sourceRecencyDays === 1 ? "Ontem"
+            : sd.sourceRecencyDays < 7   ? `${sd.sourceRecencyDays} dias atrás`
+            : sd.sourceRecencyDays < 30  ? `${Math.floor(sd.sourceRecencyDays / 7)} sem atrás`
+            : "Último dado disponível"
+            : null;
+
+          return (
+            <div className="space-y-5">
+              {/* Cabeçalho da empresa */}
+              <div className="flex items-center gap-3 rounded-[16px] border border-[#E7EEF5] bg-[#F8FBFD] p-4">
+                {(selectedSource.logoUrl) && (
+                  <img src={selectedSource.logoUrl} alt={selectedSource.ticker} className="h-10 w-10 rounded-[12px] border border-white bg-white object-cover p-1 shadow-sm" />
+                )}
+                <div>
+                  <p className="text-[15px] font-semibold text-[#0F1728]">{selectedSource.companyName}</p>
+                  <p className="text-[12px] text-[#98A2B3]">{selectedSource.ticker}</p>
+                </div>
+              </div>
+
+              {/* O que mudou */}
+              {sd && (
+                <div className="rounded-[16px] border border-[#E7EEF5] bg-white p-4 space-y-3">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">O que mudou</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[11px] text-[#98A2B3]">Pilar afetado</p>
+                      <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{sd.pillar}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-[#98A2B3]">Leitura atual</p>
+                      <p className={`mt-0.5 text-[14px] font-semibold ${sd.catalogState === 'RISK' ? 'text-[#B54768]' : sd.catalogState === 'ATTENTION' ? 'text-[#B36A11]' : 'text-[#027A48]'}`}>
+                        {stateLabel[sd.catalogState] ?? sd.catalogState}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-[#98A2B3]">Score do pilar</p>
+                      <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{sd.currentScore}<span className="text-[11px] font-normal text-[#98A2B3]">/100</span></p>
+                    </div>
+                    {sd.periodLabel && (
+                      <div>
+                        <p className="text-[11px] text-[#98A2B3]">Período analisado</p>
+                        <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{sd.periodLabel}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* De onde veio */}
+              <div className="rounded-[16px] border border-[#E7EEF5] bg-white p-4 space-y-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">De onde veio</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[11px] text-[#98A2B3]">Fonte</p>
+                    <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{sd?.sourceName ?? selectedSource.source.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-[#98A2B3]">Documento</p>
+                    <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{selectedSource.source.docLabel}</p>
+                  </div>
+                  {recencyLabel && (
+                    <div>
+                      <p className="text-[11px] text-[#98A2B3]">Dado coletado</p>
+                      <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{recencyLabel}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-[11px] text-[#98A2B3]">Atualizado em</p>
+                    <p className="mt-0.5 text-[14px] font-semibold text-[#0F1728]">{selectedSource.source.updatedAt}</p>
+                  </div>
+                </div>
+                {selectedSource.source.url && (
+                  <a href={selectedSource.source.url} className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-medium text-[#0E9384] hover:text-[#0F1728]">
+                    Ver documento externo <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
+
+              {/* Nota educacional */}
+              <p className="text-[11px] leading-5 text-[#98A2B3]">
+                Este sinal é gerado automaticamente a partir de dados públicos (CVM, B3, RI). Não constitui recomendação de compra ou venda.
+              </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Documento</p>
-              <p className="font-medium text-foreground">{selectedSource.source.docLabel}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Data de referência</p>
-              <p className="font-medium text-foreground">{selectedSource.source.updatedAt}</p>
-            </div>
-            {selectedSource.source.url && (
-              <a href={selectedSource.source.url} className="inline-flex items-center gap-2 text-xs text-[#0E9384] hover:text-foreground">
-                Ver documento externo
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )}
-          </div>
-        )}
+          );
+        })()}
       </ExploreDrawer>
 
       {/* Volatility drawer */}

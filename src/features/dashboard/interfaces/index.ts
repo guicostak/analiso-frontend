@@ -75,6 +75,7 @@ export interface InboxSeedItem {
   companyId: string;
   ticker: string;
   companyName: string;
+  logoUrl?: string | null;
   title: string;
   whyItMatters: string;
   badge?: string;
