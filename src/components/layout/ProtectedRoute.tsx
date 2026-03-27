@@ -14,9 +14,12 @@ interface ProtectedRouteProps {
  * to prevent a flash of the login page on hard refresh.
  */
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  /* DEV-ONLY bypass: ?dev=1 — remover antes de produção */
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1")
+    return <>{children}</>;
+
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.replace("/login");

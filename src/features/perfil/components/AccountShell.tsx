@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Lock, Mail, Settings2, User } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import { UserNavMenu } from "@/src/components/layout/UserNavMenu";
 
 type AccountTabKey = "conta" | "preferencias" | "seguranca";
@@ -44,7 +45,7 @@ export function AccountShell({
         </div>
       </header>
 
-      <main className="px-7 pb-10 pt-[82px] xl:ml-[240px]">
+      <MainContent className="px-7 pb-10 pt-[82px]">
         <div className="mx-auto max-w-[1460px]">
           <div className="border-b border-[#EEF2F6]">
             <div className="flex flex-wrap gap-8">
@@ -72,7 +73,7 @@ export function AccountShell({
 
           <div className="bg-white">{children}</div>
         </div>
-      </main>
+      </MainContent>
     </div>
   );
 }

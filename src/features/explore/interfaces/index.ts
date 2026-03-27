@@ -99,6 +99,42 @@ export interface HighlightItem {
   filterPreset: HighlightPreset;
 }
 
+export interface CompanyFinancials {
+  pl: number | null;           // P/L (Preço/Lucro)
+  pvp: number | null;          // P/VP (Preço/Valor Patrimonial)
+  dividendYield: number | null; // Dividend Yield (%)
+  roe: number | null;          // ROE (%)
+  roic: number | null;         // ROIC (%)
+  margemLiquida: number | null; // Margem Líquida (%)
+  margemEbitda: number | null;  // Margem EBITDA (%)
+  dividaLiquidaEbitda: number | null; // Dívida Líquida / EBITDA
+  evEbitda: number | null;     // EV/EBITDA
+  lpa: number | null;          // LPA (Lucro por Ação)
+}
+
+export interface AdvancedSearchFilters {
+  plMin: number | null;
+  plMax: number | null;
+  pvpMin: number | null;
+  pvpMax: number | null;
+  dividendYieldMin: number | null;
+  dividendYieldMax: number | null;
+  roeMin: number | null;
+  roeMax: number | null;
+  roicMin: number | null;
+  roicMax: number | null;
+  margemLiquidaMin: number | null;
+  margemLiquidaMax: number | null;
+  margemEbitdaMin: number | null;
+  margemEbitdaMax: number | null;
+  dividaLiquidaEbitdaMin: number | null;
+  dividaLiquidaEbitdaMax: number | null;
+  evEbitdaMin: number | null;
+  evEbitdaMax: number | null;
+  lpaMin: number | null;
+  lpaMax: number | null;
+}
+
 export interface CompanyCard {
   name: string;
   ticker: string;
@@ -111,4 +147,5 @@ export interface CompanyCard {
   updatedAt: string;
   source: string;
   highlightPillar: HighlightPillar;
+  financials: CompanyFinancials;
 }

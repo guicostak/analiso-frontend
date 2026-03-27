@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/components/ui/utils";
@@ -262,7 +263,7 @@ export function Dashboard() {
       <Sidebar currentPage="dashboard" contextLabel="Minha watchlist" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
-      <main className="px-5 pb-8 pt-20 xl:ml-[240px] xl:px-7 xl:pt-20">
+      <MainContent className="px-5 pb-8 pt-20 xl:px-7 xl:pt-20">
         <div className="mx-auto max-w-[1480px] space-y-5">
           <section>
             <article
@@ -918,7 +919,7 @@ export function Dashboard() {
             </div>
           </section>
         </div>
-      </main>
+      </MainContent>
     </div>
   );
 }

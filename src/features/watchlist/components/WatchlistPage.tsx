@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import { useWatchlist } from "../hooks/useWatchlist";
 import { suggestedCompanies } from "../services";
 import type { Pillar, WatchlistCompany, WatchlistStatus } from "../interfaces";
@@ -105,7 +106,7 @@ export function WatchlistPage() {
       <Sidebar currentPage="watchlist" contextLabel="Minha watchlist" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
-      <main className="relative overflow-hidden pt-20 xl:ml-[240px]">
+      <MainContent className="relative overflow-hidden pt-20">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[14%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.09)_0%,rgba(91,141,239,0)_72%)]" />
           <div className="absolute right-[10%] top-44 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
@@ -257,7 +258,7 @@ export function WatchlistPage() {
             </div>
           </div>
         </div>
-      </main>
+      </MainContent>
     </div>
   );
 }

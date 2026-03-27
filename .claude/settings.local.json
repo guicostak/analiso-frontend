@@ -45,7 +45,24 @@
       "WebFetch(domain:tremor.so)",
       "WebFetch(domain:www.npmjs.com)",
       "Bash(npm install:*)",
-      "Bash(node -e \"const t = require\\(''@tremor/react''\\); console.log\\(Object.keys\\(t\\).filter\\(k => /Chart|Donut|Bar|Line|Area|Spark|Tracker|Progress/.test\\(k\\)\\).join\\('', ''\\)\\)\")"
+      "Bash(node -e \"const t = require\\(''@tremor/react''\\); console.log\\(Object.keys\\(t\\).filter\\(k => /Chart|Donut|Bar|Line|Area|Spark|Tracker|Progress/.test\\(k\\)\\).join\\('', ''\\)\\)\")",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\.next\")",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend/src/app -name *.tsx)",
+      "Bash(head -5 grep -n \"Sidebar\\\\|AppTopBar\\\\|sidebarOffset\" C:/Users/guilh/Desktop/analiso-frontend/src/features/watchlist/components/WatchlistPage.tsx)",
+      "Bash(head -5 grep -n \"Sidebar\\\\|AppTopBar\\\\|sidebarOffset\" C:/Users/guilh/Desktop/analiso-frontend/src/features/compare/components/ComparePage.tsx)",
+      "Bash(sed -n '260,270p' \"C:/Users/guilh/Desktop/analiso-frontend/src/features/dashboard/components/DashboardPage.tsx\")",
+      "Bash(sed -n '8,14p' \"C:/Users/guilh/Desktop/analiso-frontend/src/features/dashboard/components/DashboardPage.tsx\")",
+      "Bash(head -5 grep -n \"</main>\" \"C:/Users/guilh/Desktop/analiso-frontend/src/features/compare/components/ComparePage.tsx\")",
+      "Bash(find C:/Users/guilh/Desktop/analiso-frontend/app/demo -name *.tsx)",
+      "Bash(node -e \"require\\(''''openai''''\\)\")",
+      "Bash(if not:*)",
+      "Bash(\"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\.env.local\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(ls /mnt/)",
+      "Read(//c//**)",
+      "Bash(curl -s http://localhost:3003/dashboard)",
+      "Bash(fuser -k 3003/tcp)"
     ]
   }
 }

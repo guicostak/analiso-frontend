@@ -29,6 +29,7 @@ import {
 } from "recharts";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import wegLogo from "@/src/assets/logos/weg.jpeg";
 import valeLogo from "@/src/assets/logos/vale.png";
 import { useCompare } from "../hooks/useCompare";
@@ -363,7 +364,7 @@ export function ComparePage() {
     <div className="min-h-screen bg-[#F6FAFC] text-[#0F1728]" style={{ fontFamily: "Inter, sans-serif" }}>
       <Sidebar currentPage="comparar" contextLabel="Comparar empresas" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
-      <main className="relative overflow-hidden pt-20 xl:ml-[240px]">
+      <MainContent className="relative overflow-hidden pt-20">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[8%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.10)_0%,rgba(91,141,239,0)_72%)]" />
           <div className="absolute right-[6%] top-40 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.09)_0%,rgba(18,165,148,0)_72%)]" />
@@ -1053,7 +1054,7 @@ export function ComparePage() {
             )}
           </div>
         </div>
-      </main>
+      </MainContent>
 
       <CompareEvidenceDrawer data={evidence} onClose={() => setEvidence(null)} formatMetric={formatMetric} />
 

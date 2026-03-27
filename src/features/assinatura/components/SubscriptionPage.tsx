@@ -2,6 +2,7 @@
 
 import { Bell, Search } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import { UserNavMenu } from "@/src/components/layout/UserNavMenu";
 import { subscriptionPlans } from "../services";
 import { SubscriptionPlanCard } from "./SubscriptionPlanCard";
@@ -33,7 +34,7 @@ export function SubscriptionPage() {
         </div>
       </header>
 
-      <main className="xl:ml-[240px]">
+      <MainContent>
         <section className="px-8 pb-10 pt-[102px]">
           <div className="mx-auto max-w-[1260px]">
             <div className="flex flex-wrap items-start justify-between gap-6">
@@ -57,7 +58,7 @@ export function SubscriptionPage() {
             </div>
           </div>
         </section>
-      </main>
+      </MainContent>
     </div>
   );
 }

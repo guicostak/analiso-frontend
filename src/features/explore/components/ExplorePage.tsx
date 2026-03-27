@@ -3,12 +3,14 @@
 import { ExternalLink } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
+import { MainContent } from "@/src/components/layout/MainContent";
 import { useExplore } from "../hooks/useExplore";
 import { ExploreHighlightsSection } from "./ExploreHighlightsSection";
 import { ExploreCompanyCatalog } from "./ExploreCompanyCatalog";
 import { ExploreMarketContext } from "./ExploreMarketContext";
 import { ExploreMovementsPanel } from "./ExploreMovementsPanel";
 import { ExploreCompareBar } from "./ExploreCompareBar";
+import { ExploreAdvancedSearch } from "./ExploreAdvancedSearch";
 import { ExploreDrawer } from "./ExploreDrawer";
 
 export function ExplorePage() {
@@ -66,6 +68,10 @@ export function ExplorePage() {
     clearPreset,
     toggleCompare,
     resetFilters,
+    advancedSearchFilters,
+    advancedSearchActiveCount,
+    setAdvancedSearchFilters,
+    resetAdvancedSearch,
   } = useExplore();
 
   return (
@@ -74,7 +80,7 @@ export function ExplorePage() {
 
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
-      <main className="relative overflow-hidden pt-20 xl:ml-[240px]">
+      <MainContent className="relative overflow-hidden pt-20">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[18%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.10)_0%,rgba(91,141,239,0)_72%)]" />
           <div className="absolute right-[10%] top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
@@ -107,6 +113,13 @@ export function ExplorePage() {
                 setSelectedSource={setSelectedSource}
                 setShowAllHighlights={setShowAllHighlights}
                 applyHighlightPreset={applyHighlightPreset}
+              />
+
+              <ExploreAdvancedSearch
+                advancedSearchFilters={advancedSearchFilters}
+                setAdvancedSearchFilters={setAdvancedSearchFilters}
+                resetAdvancedSearch={resetAdvancedSearch}
+                activeFilterCount={advancedSearchActiveCount}
               />
 
               <div className="grid grid-cols-1 gap-5">
@@ -161,7 +174,7 @@ export function ExplorePage() {
             </div>
           </div>
         </div>
-      </main>
+      </MainContent>
 
       <ExploreCompareBar compareTickers={compareTickers} toggleCompare={toggleCompare} />
 
