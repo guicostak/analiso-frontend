@@ -324,9 +324,9 @@ export function ExploreCompanyCatalog({
               <div className="relative">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-4">
-                    {getCompanyLogo(company.ticker) && (
+                    {(company.logoUrl ?? getCompanyLogo(company.ticker)) && (
                       <img
-                        src={getCompanyLogo(company.ticker)}
+                        src={company.logoUrl ?? getCompanyLogo(company.ticker)}
                         alt={`Logo ${company.ticker}`}
                         className="h-12 w-12 rounded-[18px] border border-border bg-muted object-cover p-1"
                       />

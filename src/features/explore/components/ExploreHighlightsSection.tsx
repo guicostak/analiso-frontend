@@ -84,9 +84,9 @@ function HighlightPriorityCard({
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-[1px] ${tone.accent} opacity-80`} />
       <div className="flex items-start justify-between gap-4">
         <div className="relative flex min-w-0 items-start gap-3">
-          {getCompanyLogo(item.ticker) && (
+          {(item.logoUrl ?? getCompanyLogo(item.ticker)) && (
             <img
-              src={getCompanyLogo(item.ticker)}
+              src={(item.logoUrl ?? getCompanyLogo(item.ticker))!}
               alt={`Logo ${item.ticker}`}
               className="h-11 w-11 rounded-[16px] border border-border bg-card object-cover p-1 shadow-[0_10px_30px_rgba(15,23,40,0.06)] dark:shadow-none"
             />
@@ -215,9 +215,9 @@ export function ExploreHighlightsSection({
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-14 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0))] dark:hidden" />
                       <div className="pointer-events-none absolute inset-y-3 left-0 w-px bg-[linear-gradient(180deg,rgba(91,141,239,0),rgba(91,141,239,0.18),rgba(91,141,239,0))]" />
                       <div className="flex items-start gap-4">
-                        {getCompanyLogo(featuredHighlight.ticker) && (
+                        {(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker)) && (
                           <img
-                            src={getCompanyLogo(featuredHighlight.ticker)}
+                            src={(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker))!}
                             alt={`Logo ${featuredHighlight.ticker}`}
                             className="h-12 w-12 rounded-[18px] border border-border bg-card object-cover p-1 shadow-[0_12px_30px_rgba(15,23,40,0.08)] dark:shadow-none"
                           />

@@ -58,6 +58,7 @@ export interface MoverRow {
   updatedAt: string;
   source: string;
   type: MoverType;
+  logoUrl?: string | null;
 }
 
 export interface MovementInsight {
@@ -80,12 +81,24 @@ export interface HighlightPreset {
   scope: HighlightScope;
 }
 
+export interface HighlightSourceDetail {
+  pillar:           string;
+  currentScore:     number;
+  catalogState:     string;   // "RISK" | "ATTENTION" | "HEALTHY"
+  periodLabel:      string;   // ex: "3T24"
+  sourceRecencyDays: number;
+  sourceName:       string;   // ex: "CVM"
+}
+
 export interface HighlightItem {
   id: string;
   companyName: string;
   ticker: string;
+  logoUrl?: string | null;
   changeTitle: string;
   whyItMatters: string;
+  openNowBenefit?: string | null;
+  sourceDetail?: HighlightSourceDetail | null;
   pillar: HighlightPillar;
   severity: HighlightSeverity;
   timeframeLabel: string;
@@ -119,10 +132,13 @@ export interface CompanyCard {
   size: CompanySize;
   status: CompanyStatus;
   pillarsScores: number[];
+  headline: string;
   shortDiagnosis: string;
+  whyOpen?: string | null;
   freshnessStatus: FreshnessStatus;
   updatedAt: string;
   source: string;
   highlightPillar: HighlightPillar;
+  logoUrl?: string | null;
   financials: CompanyFinancials;
 }

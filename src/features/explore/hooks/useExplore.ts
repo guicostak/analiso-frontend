@@ -14,16 +14,18 @@
  * O componente ExplorePage só precisa destructurar o retorno e renderizar o JSX.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useAuth } from "../../auth/AuthContext";
 
 import {
-  companies,
-  highlights,
+  companies as mockCompanies,
+  highlights as mockHighlights,
   movers as mockMovers,
-  indexCards,
-  volatility,
-  thesisCollections,
-  sectorCollections,
+  indexCards as mockIndexCards,
+  volatility as mockVolatility,
+  thesisCollections as mockThesisCollections,
+  sectorCollections as mockSectorCollections,
   pillars,
   movementInsights,
   getCompanyLogo,
@@ -31,6 +33,11 @@ import {
   getSortedHighlights,
   pillarLabelMap,
   mapMoversFromInsights,
+  mapIndexCardDto,
+  mapMarketContextDetailToVolatility,
+  mapCatalogItemDto,
+  mapCurationItemToHighlight,
+  getExplore,
 } from "../services";
 
 import type { ExploreMovementInsightsDto, ExploreResponse } from "../services";
@@ -92,6 +99,7 @@ export interface UseExploreReturn {
   sectorCollections:  string[];
   pillars:            readonly string[];
   highlights:         HighlightItem[];
+  referenceDate:      string | null;
 
   // Helpers expostos
   getCompanyLogo: (ticker: string) => string | undefined;
@@ -155,8 +163,41 @@ export function useExplore(): UseExploreReturn {
 
   // ─── Dados derivados ───────────────────────────────────────────────────────
 
+  const allCompanies = useMemo<CompanyCard[]>(() => {
+    if (exploreData?.catalogItems?.length) {
+      return exploreData.catalogItems.map(mapCatalogItemDto);
+    }
+    return [];
+  }, [exploreData]);
+
+  const resolvedHighlights = useMemo<HighlightItem[]>(() => {
+    const items = exploreData?.heroCuration?.items;
+    if (items?.length) return items.map(mapCurationItemToHighlight);
+    return [];
+  }, [exploreData]);
+
+  const resolvedThesisCollections = useMemo<string[]>(() => {
+    if (exploreData?.catalogItems?.length) {
+      const labels = exploreData.catalogItems
+        .map(i => i.thesisLabel)
+        .filter(Boolean);
+      return [...new Set(labels)];
+    }
+    return [];
+  }, [exploreData]);
+
+  const resolvedSectorCollections = useMemo<string[]>(() => {
+    if (exploreData?.catalogItems?.length) {
+      const sectors = exploreData.catalogItems
+        .map(i => i.sectorLabel)
+        .filter((s): s is string => !!s);
+      return [...new Set(sectors)].sort();
+    }
+    return [];
+  }, [exploreData]);
+
   const filteredCompanies = useMemo<CompanyCard[]>(() => {
-    return companies
+    return allCompanies
       .filter((company) => {
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
@@ -194,11 +235,11 @@ export function useExplore(): UseExploreReturn {
         if (filters.sort === "Maior consistência") return a.status === "Saudável" ? -1 : 1;
         return 0;
       });
-  }, [filters, searchQuery, activePreset]);
+  }, [allCompanies, filters, searchQuery, activePreset]);
 
   const sortedHighlights = useMemo<HighlightItem[]>(
-    () => getSortedHighlights(highlights),
-    [],
+    () => getSortedHighlights(resolvedHighlights),
+    [resolvedHighlights],
   );
 
   const movers = useMemo<MoverRow[]>(() => {
@@ -209,7 +250,20 @@ export function useExplore(): UseExploreReturn {
       const mostTraded = mapMoversFromInsights(dto, 'mostTraded');
       return [...highs, ...lows, ...mostTraded];
     }
-    return mockMovers;
+    return [];
+  }, [exploreData]);
+
+  const resolvedIndexCards = useMemo<IndexCard[]>(() => {
+    if (exploreData?.indexCards?.length) {
+      return exploreData.indexCards.map(mapIndexCardDto);
+    }
+    return [];
+  }, [exploreData]);
+
+  const resolvedVolatility = useMemo<Volatility>(() => {
+    const detail = exploreData?.marketContext?.detail;
+    if (detail) return mapMarketContextDetailToVolatility(detail);
+    return mockVolatility;
   }, [exploreData]);
 
   const staleCount        = filteredCompanies.filter((c) => c.freshnessStatus === "Antigo").length;
@@ -306,17 +360,18 @@ export function useExplore(): UseExploreReturn {
     volatilityIsStale,
 
     // Dados estáticos
-    indexCards,
+    indexCards:          resolvedIndexCards,
     movers,
     movementInsights,
     movementInsightsDto: exploreData?.movementInsights ?? null,
     movementSummary:     exploreData?.movementInsights?.summary ?? null,
     movementDominant:    exploreData?.movementInsights?.dominantInsight ?? null,
-    volatility,
-    thesisCollections,
-    sectorCollections,
+    volatility:          resolvedVolatility,
+    thesisCollections:   resolvedThesisCollections,
+    sectorCollections:   resolvedSectorCollections,
     pillars,
-    highlights,
+    highlights:          resolvedHighlights,
+    referenceDate:       exploreData?.referenceDate ?? null,
 
     // Helpers
     getCompanyLogo,

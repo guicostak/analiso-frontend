@@ -27,7 +27,7 @@ interface ExploreMovementsPanelProps {
 const tabLabelMap: Record<MoverType, string> = {
   altas: "Altas",
   baixas: "Baixas",
-  negociadas: "Fluxo",
+  negociadas: "Mais negociadas",
 };
 
 const tabEmptyStateMap: Record<MoverType, string> = {
@@ -59,9 +59,9 @@ function MovementCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            {getCompanyLogo(row.ticker) && (
+            {(row.logoUrl ?? getCompanyLogo(row.ticker)) && (
               <img
-                src={getCompanyLogo(row.ticker)}
+                src={row.logoUrl ?? getCompanyLogo(row.ticker)}
                 alt={`Logo ${row.ticker}`}
                 className={`${featured ? "h-11 w-11 rounded-[16px]" : "h-9 w-9 rounded-[14px]"} border border-border bg-card object-cover p-1`}
               />
@@ -137,7 +137,7 @@ export function ExploreMovementsPanel({
         {[
           { label: "Altas", value: "altas" },
           { label: "Baixas", value: "baixas" },
-          { label: "Fluxo", value: "negociadas" },
+          { label: "Mais negociadas", value: "negociadas" },
         ].map((tab) => (
           <button
             key={tab.value}

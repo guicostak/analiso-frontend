@@ -261,6 +261,8 @@ export type Competitor = {
   exchange: string;
   marketCap: string;
   scores: { value: number; future: number; past: number; health: number; dividend: number };
+  pe?: number;
+  earningsGrowth?: number;
 };
 
 // ─── Analyst Price Target (SimplyWall.St valuation) ──────────────────────────

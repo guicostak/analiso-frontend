@@ -24,6 +24,8 @@ import logoTaesa from "@/src/assets/logos/taesa.png";
 import logoVale from "@/src/assets/logos/vale.png";
 import logoWeg from "@/src/assets/logos/weg.jpeg";
 
+import { apiFetch } from "@/src/lib/api";
+
 import type {
   IndexCard,
   IndexCardTrend,
@@ -47,11 +49,15 @@ import type {
 export interface ExploreMovementItemDto {
   template:     string;
   badge:        string;
+  ticker:       string;
+  logoUrl:      string | null;
   headline:     string;
   supportLine:  string;
   whyItMatters: string;
   metaLine:     string;
   ctaLabel:     string;
+  price:        string | null;
+  changePct:    string | null;
 }
 
 export interface ExploreMovementGroupDto {
@@ -86,8 +92,112 @@ export interface ExploreMovementInsightsDto {
   emptyState:      unknown;
 }
 
+// Index cards
+export interface ExploreIndexCardDto {
+  indexTicker: string;
+  indexLabel:  string;
+  lastPrice:   string;
+  changePct:   string;
+  changeAbs:   string;
+  trend:       string;
+  sparkline:   number[];
+}
+
+// Market context
+export interface ExploreMarketContextSupportingIndexDto {
+  indexLabel:  string;
+  volDisplay:  string;
+  statusLabel: string;
+}
+
+export interface ExploreMarketContextDetailDto {
+  template:            string;
+  title:               string;
+  subtitle:            string;
+  value:               string;
+  statusLabel:         string;
+  description:         string;
+  metaLine:            string;
+  ctaLabel:            string;
+  infoLabel:           string;
+  dominantIndex:       string;
+  dominantStatusKey:   string;
+  dominantStatusLabel: string;
+  dominantScore:       number;
+  dominantVolDisplay:  string;
+  supportingIndexes:   ExploreMarketContextSupportingIndexDto[];
+}
+
+export interface ExploreMarketContextSummaryDto {
+  template: string;
+  title:    string;
+  body:     string;
+  ctaLabel: string;
+}
+
+export interface ExploreMarketContextDto {
+  summary: ExploreMarketContextSummaryDto | null;
+  detail:  ExploreMarketContextDetailDto  | null;
+}
+
+// Catalog item
+export interface ExploreCatalogItemDto {
+  ticker:          string;
+  companyName:     string;
+  logoUrl:         string | null;
+  sectorLabel:     string | null;
+  template:        string;
+  overlays:        string[];
+  badge:           string;
+  headline:        string;
+  supportLine:     string | null;
+  whyOpen:         string;
+  metaLine:        string;
+  chips:           string[];
+  ctaPrimary:      string;
+  ctaSecondary:    string;
+  status:          string;
+  primaryPillar:   string;
+  freshnessStatus: string;
+  updatedAt:       string;
+  thesisLabel:     string;
+}
+
+// Curation item
+export interface ExploreCurationItemDto {
+  rank:              number;
+  score:             number;
+  ticker:            string;
+  companyName:       string;
+  logoUrl:           string | null;
+  sectorLabel:       string | null;
+  template:          string;
+  topTag:            string | null;
+  badge:             string;
+  whySelected:       string;
+  entryReason:       string;
+  openNowBenefit:    string;
+  impactPillars:     string[];
+  metaLine:          string;
+  ctaLabel:          string;
+  // Rastreabilidade da fonte
+  currentScore?:       number | null;
+  periodLabel?:        string | null;
+  sourceRecencyDays?:  number | null;
+  catalogState?:       string | null;
+}
+
+// Resposta completa
 export interface ExploreResponse {
-  movementInsights: ExploreMovementInsightsDto | null;
+  manifestVersion:  string;
+  mode:             string;
+  pageTemplate:     string;
+  referenceDate:    string;
+  indexCards:       ExploreIndexCardDto[]       | null;
+  marketContext:    ExploreMarketContextDto     | null;
+  movementInsights: ExploreMovementInsightsDto  | null;
+  catalogItems:     ExploreCatalogItemDto[]     | null;
+  heroCuration:     { items: ExploreCurationItemDto[] } | null;
 }
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────
@@ -181,14 +291,15 @@ export function getSortedHighlights(items: HighlightItem[]): HighlightItem[] {
 
 export function mapMovementItemToMoverRow(item: ExploreMovementItemDto): MoverRow {
   return {
-    ticker:    item.headline,
+    ticker:    item.ticker ?? item.headline,
     name:      item.headline,
-    price:     '—',
-    changePct: '—',
+    price:     item.price ?? '—',
+    changePct: item.changePct ?? item.badge ?? '—',
     note:      item.whyItMatters,
-    updatedAt: '',
+    updatedAt: item.metaLine ?? '',
     source:    'B3',
     type:      'altas',
+    logoUrl:   item.logoUrl ?? null,
   };
 }
 
@@ -206,6 +317,117 @@ export function mapMoversFromInsights(
     ...mapMovementItemToMoverRow(item),
     type: typeMap[bucket],
   }));
+}
+
+export function mapIndexCardDto(dto: ExploreIndexCardDto): IndexCard {
+  return {
+    name:      dto.indexLabel,
+    symbol:    dto.indexTicker,
+    value:     dto.lastPrice,
+    changeAbs: dto.changeAbs,
+    changePct: dto.changePct,
+    trend:     (dto.trend?.toLowerCase() as IndexCardTrend) ?? 'neutral',
+    sparkline: dto.sparkline ?? [],
+  };
+}
+
+const _VOLATILITY_LABELS = new Set(["Baixa", "Moderada", "Alta"]);
+
+export function mapMarketContextDetailToVolatility(
+  detail: ExploreMarketContextDetailDto,
+): Volatility {
+  const rawLabel = detail.dominantStatusLabel ?? '';
+  const label = _VOLATILITY_LABELS.has(rawLabel)
+    ? (rawLabel as Volatility['label'])
+    : 'Moderada';
+  return {
+    value:     detail.dominantScore ?? 0,
+    label,
+    updatedAt: detail.metaLine ?? '—',
+    source:    'B3',
+  };
+}
+
+const _PILLAR_LABEL_TO_KEY: Record<string, HighlightPillarKey> = {
+  "Dívida":   "divida",
+  "Caixa":    "caixa",
+  "Margens":  "margens",
+  "Retorno":  "retorno",
+  "Proventos":"proventos",
+};
+
+export function mapCatalogItemDto(dto: ExploreCatalogItemDto): CompanyCard {
+  const status    = (dto.status as CompanyCard['status']) ?? 'Atenção';
+  const freshness = (dto.freshnessStatus as CompanyCard['freshnessStatus']) ?? 'Atualizado';
+  const pillar    = (dto.primaryPillar as HighlightPillar)
+    ?? 'Margens' as HighlightPillar;
+
+  return {
+    name:            dto.companyName,
+    ticker:          dto.ticker,
+    sector:          dto.sectorLabel ?? '—',
+    size:            'Grande' as CompanySize, // enriquecimento futuro
+    status,
+    pillarsScores:   [],
+    headline:        dto.headline,
+    shortDiagnosis:  dto.supportLine ?? dto.headline,
+    whyOpen:         dto.whyOpen ?? null,
+    freshnessStatus: freshness,
+    updatedAt:       dto.updatedAt,
+    source:          'CVM/B3/RI',
+    highlightPillar: pillar,
+    logoUrl:         dto.logoUrl ?? undefined,
+  };
+}
+
+export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): HighlightItem {
+  const rawPillar   = dto.impactPillars?.[0] ?? 'Margens';
+  const pillar      = (rawPillar as HighlightPillar);
+  const pillarKey   = _PILLAR_LABEL_TO_KEY[rawPillar] ?? 'margens';
+  // Usa rank da API para determinar severidade — rank 1 é sempre o mais urgente
+  const severity: HighlightSeverity =
+    dto.rank === 1 ? 'Forte' :
+    dto.rank === 2 ? 'Moderada' : 'Leve';
+
+  return {
+    id:             dto.ticker,
+    companyName:    dto.companyName,
+    ticker:         dto.ticker,
+    logoUrl:        dto.logoUrl ?? null,
+    changeTitle:    dto.whySelected,
+    whyItMatters:   dto.entryReason,
+    openNowBenefit: dto.openNowBenefit ?? null,
+    sourceDetail: (dto.currentScore != null || dto.periodLabel) ? {
+      pillar:            rawPillar,
+      currentScore:      dto.currentScore ?? 0,
+      catalogState:      dto.catalogState ?? '',
+      periodLabel:       dto.periodLabel ?? '',
+      sourceRecencyDays: dto.sourceRecencyDays ?? 0,
+      sourceName:        'CVM',
+    } : null,
+    pillar,
+    severity,
+    timeframeLabel: 'últimos 30 dias',
+    scope:          'Mercado',
+    source: {
+      name:      'CVM/B3/RI',
+      updatedAt: dto.metaLine ?? '—',
+      docLabel:  'Análise Fundamentalista',
+    },
+    filterPreset: {
+      pillar:    pillarKey,
+      signal:    'highlight',
+      severity:  severity === 'Forte' ? 'forte' : severity === 'Moderada' ? 'moderada' : 'leve',
+      timeframe: '30d',
+      scope:     'mercado',
+    },
+  };
+}
+
+// ─── Chamadas HTTP ────────────────────────────────────────────────────────────
+
+export async function getExplore(token?: string | null): Promise<ExploreResponse> {
+  return apiFetch<ExploreResponse>('/api/explore', {}, token);
 }
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────
@@ -451,7 +673,9 @@ export const companies: CompanyCard[] = [
     size: "Grande",
     status: "Saudável",
     pillarsScores: [82, 78, 74, 80, 62],
+    headline: "Consistência operacional mantida",
     shortDiagnosis: "Consistência operacional com margens sólidas.",
+    whyOpen: "Vale abrir para confirmar se a consistência se mantém no trimestre mais recente.",
     freshnessStatus: "Atualizado",
     updatedAt: "05/02",
     source: "CVM/B3/RI",
@@ -476,7 +700,9 @@ export const companies: CompanyCard[] = [
     size: "Grande",
     status: "Saudável",
     pillarsScores: [70, 76, 68, 74, 72],
+    headline: "Retorno e caixa dentro do padrão",
     shortDiagnosis: "Retorno estável e caixa resiliente.",
+    whyOpen: "Útil para validar se o retorno sustenta o nível atual de distribuição.",
     freshnessStatus: "Atualizado",
     updatedAt: "05/02",
     source: "CVM/B3/RI",
@@ -501,7 +727,9 @@ export const companies: CompanyCard[] = [
     size: "Média",
     status: "Atenção",
     pillarsScores: [56, 64, 52, 60, 78],
+    headline: "Dívida em observação",
     shortDiagnosis: "Proventos consistentes, mas dívida em atenção.",
+    whyOpen: "Vale verificar se o nível de dívida compromete a continuidade dos proventos.",
     freshnessStatus: "Atualizado",
     updatedAt: "05/02",
     source: "CVM/B3/RI",
@@ -526,7 +754,9 @@ export const companies: CompanyCard[] = [
     size: "Média",
     status: "Atenção",
     pillarsScores: [44, 58, 41, 52, 48],
+    headline: "Alavancagem oscilando",
     shortDiagnosis: "Oscilações recentes em alavancagem.",
+    whyOpen: "Útil para entender se as oscilações de alavancagem são sazonais ou estruturais.",
     freshnessStatus: "Antigo",
     updatedAt: "22/01",
     source: "CVM/B3/RI",
@@ -551,7 +781,9 @@ export const companies: CompanyCard[] = [
     size: "Média",
     status: "Saudável",
     pillarsScores: [68, 72, 66, 70, 54],
+    headline: "Margens e retorno estáveis",
     shortDiagnosis: "Margens e retorno dentro do esperado.",
+    whyOpen: "Vale confirmar se a estabilidade se mantém com o crescimento recente.",
     freshnessStatus: "Atualizado",
     updatedAt: "04/02",
     source: "CVM/B3/RI",
@@ -576,7 +808,9 @@ export const companies: CompanyCard[] = [
     size: "Média",
     status: "Risco",
     pillarsScores: [30, 42, 28, 34, 36],
+    headline: "Alavancagem elevada",
     shortDiagnosis: "Alavancagem elevada e retorno pressionado.",
+    whyOpen: "Ajuda a avaliar se a pressão sobre retorno é reversível no curto prazo.",
     freshnessStatus: "Antigo",
     updatedAt: "18/01",
     source: "CVM/B3/RI",

@@ -32,18 +32,10 @@ import {
 } from 'recharts';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/src/components/layout/Sidebar';
-import logoWeg from '@/src/assets/logos/weg.jpeg';
-import logoVale from '@/src/assets/logos/vale.png';
 import { API_BASE_URL } from '@/src/lib/api-base';
-import logoRenner from '@/src/assets/logos/renner.png';
-import logoMrv from '@/src/assets/logos/mrv.jpg';
-import logoTaesa from '@/src/assets/logos/taesa.png';
-import logoItau from '@/src/assets/logos/itau.png';
-import logoPetrobras from '@/src/assets/logos/petrobras.webp';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
-type QueueFilter = 'Todas' | 'Atencao' | 'Risco';
 type WindowSize = '5a' | '10a';
 type FeedWindow = '30 dias' | '60 dias' | '90 dias';
 type ChangesFocusFilter = 'Mais relevantes' | 'Rotina' | 'Estruturais';
@@ -100,15 +92,6 @@ type Contextual<T> = T & {
  ticker: string;
 };
 
-type CompanyQueueItem = {
- companyId: string;
- ticker: string;
- name: string;
- status: Status;
- logo?: string;
- initials?: string;
- description: string;
-};
 
 type Source = {
  name: string;
@@ -169,16 +152,6 @@ type PillarData = {
  cta?: { title: string; button: string };
  meaningText?: string;
 };
-const queueItems: CompanyQueueItem[] = [
- { companyId: 'VALE3', ticker: 'VALE3', name: 'Vale', status: 'Risco', logo: logoVale.src, description: 'Mineradora global com forte exposição a minério de ferro.' },
- { companyId: 'PETR4', ticker: 'PETR4', name: 'Petrobras', status: 'Atencao', logo: logoPetrobras.src, description: 'Empresa integrada de energia, com foco em exploração, produção e refino.' },
- { companyId: 'LREN3', ticker: 'LREN3', name: 'Lojas Renner', status: 'Atencao', logo: logoRenner.src, description: 'Varejo de moda com foco em omnichannel e escala nacional.' },
- { companyId: 'MRVE3', ticker: 'MRVE3', name: 'MRV Engenharia', status: 'Atencao', logo: logoMrv.src, description: 'Construtora focada no segmento residencial de média e baixa renda.' },
- { companyId: 'TAEE11', ticker: 'TAEE11', name: 'Transmissão Paulista', status: 'Saudavel', logo: logoTaesa.src, description: 'Empresa de transmissão de energia com receita regulada.' },
- { companyId: 'WEGE3', ticker: 'WEGE3', name: 'WEG', status: 'Atencao', logo: logoWeg.src, description: 'Empresa de equipamentos elétricos e automação industrial com presença global.' },
- { companyId: 'ITUB4', ticker: 'ITUB4', name: 'Itaú Unibanco', status: 'Saudavel', logo: logoItau.src, description: 'Banco universal com foco em crédito, serviços e seguros.' },
- { companyId: 'BBAS3', ticker: 'BBAS3', name: 'Banco do Brasil', status: 'Saudavel', initials: 'BB', description: 'Banco com forte exposição ao agronegócio e setor público.' },
-];
 
 const mainTabs: MainTab[] = ['Resumo', 'Pilares', 'Mudancas', 'Eventos', 'Preço', 'Fontes'];
 const EMPTY_RADAR_SCORES: Record<PillarName, number> = { Divida: 0, Caixa: 0, Margens: 0, Retorno: 0, Proventos: 0 };
@@ -517,6 +490,8 @@ const sourceRows = [
 type CompanyData = {
  companyId: string;
  ticker: string;
+ companyName?: string;
+ logoUrl?: string;
  radarScores: Record<PillarName, number>;
  radarPreviousScores?: Record<PillarName, number>;
  diagnosisHeadline: string;
@@ -587,12 +562,11 @@ function contextualize<T>(items: T[], companyId: string, ticker: string): Array<
 }
 
 function companyContextFromTicker(tickerParam?: string): CompanyContext {
- const normalizedTicker = (tickerParam ?? 'WEGE3').toUpperCase();
- const company = queueItems.find((item) => item.ticker === normalizedTicker) ?? queueItems[4];
+ const normalizedTicker = (tickerParam ?? '').toUpperCase();
  return {
- companyId: company.companyId,
- ticker: company.ticker,
- name: company.name,
+  companyId: normalizedTicker,
+  ticker: normalizedTicker,
+  name: normalizedTicker,
  };
 }
 
@@ -606,7 +580,7 @@ function toDisplayText(value: unknown): string {
 }
 
 function normalizeMojibake(text: string) {
- if (!/[\u00C2\u00C3]/.test(text)) return text;
+ if (!/[ÂÃ]/.test(text)) return text;
  try {
   const bytes = Uint8Array.from(text, (char) => char.charCodeAt(0) & 0xFF);
   const decoded = new TextDecoder('utf-8').decode(bytes);
@@ -881,9 +855,9 @@ function sanitizePayloadText<T>(value: T): T {
 function normalizeStatusLabel(value?: string, fallback: Status = 'Atencao'): Status {
  const raw = (value ?? '').trim().toLowerCase();
  if (!raw) return fallback;
- if (raw.includes('ris')) return 'Risco';
- if (raw.includes('aten') || raw.includes('monitor')) return 'Atencao';
- if (raw.includes('saud') || raw.includes('fort')) return 'Saudavel';
+ if (raw.includes('ris') || raw === 'negative') return 'Risco';
+ if (raw.includes('aten') || raw.includes('monitor') || raw === 'attention') return 'Atencao';
+ if (raw.includes('saud') || raw.includes('fort') || raw === 'positive') return 'Saudavel';
  return fallback;
 }
 
@@ -1273,14 +1247,25 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
   const trendObj = (pillar.trend as Record<string, unknown> | undefined) ?? {};
   const scoreObj = (pillar.score as Record<string, unknown> | undefined) ?? {};
 
+  // Java backend returns these fields as plain primitives; handle both plain and object shapes
+  const statusRaw = typeof pillar.status === 'string'
+   ? pillar.status
+   : safeMeta(statusObj.display) || safeMeta(statusObj.key);
+  const scoreRaw = typeof pillar.score === 'number'
+   ? pillar.score
+   : Number(scoreObj.raw ?? 50);
+  const trendRaw = typeof pillar.trend === 'string'
+   ? pillar.trend
+   : safeMeta(trendObj.display);
+
   return {
   companyId,
   ticker,
   name,
   displayName: safeMeta(pillar.displayName),
-  status: normalizeStatusLabel(safeMeta(statusObj.display) || safeMeta(statusObj.key), 'Atencao'),
-  score: Number(scoreObj.raw ?? 50),
-  trend: safeMeta(trendObj.display),
+  status: normalizeStatusLabel(statusRaw, 'Atencao'),
+  score: scoreRaw,
+  trend: trendRaw,
   summary: safeMeta(pillar.summary) || safeMeta(meaning.text),
   meaningText: safeMeta(meaning.text),
   trust: {
@@ -1509,9 +1494,13 @@ function adaptV1Payload(raw: Record<string, unknown>, companyId: string, ticker:
  const strongestScore = (strongest.score as Record<string, unknown> | undefined) ?? {};
  const watchoutScore = (watchout.score as Record<string, unknown> | undefined) ?? {};
 
+ const companyBlock = (raw.company as Record<string, unknown> | undefined) ?? {};
+
  return {
  companyId,
  ticker,
+ companyName: safeMeta(companyBlock.name) || safeMeta(companyBlock.displayName) || undefined,
+ logoUrl: safeMeta(companyBlock.logoUrl) || undefined,
  radarScores,
  radarPreviousScores,
   diagnosisHeadline: safeMeta(overview.diagnosisHeadline),
@@ -1649,6 +1638,8 @@ function normalizeLegacyCompanyData(raw: unknown, companyId: string, ticker: str
  return {
  companyId,
  ticker,
+ companyName: (payload as Record<string, unknown>).companyName as string | undefined,
+ logoUrl: (payload as Record<string, unknown>).logoUrl as string | undefined,
  radarScores: normalizedRadarScores,
  radarPreviousScores: normalizedPreviousScores,
  diagnosisHeadline: payload.diagnosisHeadline ?? '',
@@ -2263,7 +2254,6 @@ export function CompanyAnalysis() {
  const { ticker } = useParams() as { ticker: string };
  const searchParams = useSearchParams();
 
- const [queueFilter, setQueueFilter] = useState<QueueFilter>('Todas');
  const [activeTab, setActiveTab] = useState<MainTab>('Resumo');
  const [contentVisible, setContentVisible] = useState(true);
  const [companyContext, setCompanyContext] = useState<CompanyContext>(() => companyContextFromTicker(ticker));
@@ -2271,7 +2261,6 @@ export function CompanyAnalysis() {
  const [loadingTab, setLoadingTab] = useState(true);
  const [tabCache, setTabCache] = useState<Record<string, TabPayload>>({});
  const [actionError, setActionError] = useState<string | null>(null);
- const [watchlistCollapsed, setWatchlistCollapsed] = useState(true);
  const [showScoreInfo, setShowScoreInfo] = useState(false);
  const [showHeaderUpdateDetails, setShowHeaderUpdateDetails] = useState(false);
  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -2353,12 +2342,7 @@ export function CompanyAnalysis() {
  return () => window.clearTimeout(timer);
  }, [companyContext.companyId]);
 
- const filteredQueue = useMemo(() => {
- if (queueFilter === 'Todas') return queueItems;
- return queueItems.filter((item) => item.status === queueFilter);
- }, [queueFilter]);
 
- const activeCompany = queueItems.find((item) => item.companyId === companyContext.companyId) ?? queueItems[4];
  const tabKey = companyContext.companyId;
  const hasCachedTab = Boolean(tabCache[tabKey]);
 
@@ -2404,9 +2388,9 @@ export function CompanyAnalysis() {
  score: mapScores[pillar],
  status: pillarDataByName.get(pillar)?.status ?? 'Atencao',
  }));
- const companyStatus: Status = mapPillarEntries.some((entry) => entry.status === 'Risco')
+ const companyStatus: Status = scoreAverage < 45
  ? 'Risco'
- : mapPillarEntries.some((entry) => entry.status === 'Atencao')
+ : scoreAverage < 65
  ? 'Atencao'
  : 'Saudavel';
  const mapPillarData: PillarMapDatum[] = pillarOrder.map((pillar) => {
@@ -3128,8 +3112,14 @@ const changesCount = changesBySelectedWindow.length;
  <div className="px-6 pt-4 pb-3" style={{ background: 'linear-gradient(160deg, var(--muted) 0%, var(--card) 60%)' }}>
  <div className="flex min-w-0 items-start justify-between gap-4">
  <div className="flex min-w-0 items-start gap-3.5">
- <QueueLogo company={activeCompany} />
+ {activeData?.logoUrl
+           ? <img src={activeData.logoUrl} alt={companyContext.ticker} className="h-9 w-9 rounded-lg border border-[#E2EDF5] object-cover" />
+           : <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">{companyContext.ticker.slice(0, 2)}</div>
+         }
  <div className="min-w-0">
+ <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{companyContext.ticker}</p>
+ <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[#0B1220]">
+ {activeData?.companyName ?? companyContext.ticker}
  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{activeCompany.ticker}</p>
  <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-foreground">
  {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
