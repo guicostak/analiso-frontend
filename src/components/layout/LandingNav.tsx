@@ -20,7 +20,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-sm">
       {/* ── Barra principal ─────────────────────────────────────────────── */}
       <div className="mx-auto flex max-w-[1430px] flex-wrap items-center justify-between px-8 pt-8 max-md:px-4 max-md:pt-5">
 
@@ -40,7 +40,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
             <a
               key={label}
               href={href}
-              className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-[#5f5f5f]"
+              className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-muted-foreground transition-colors hover:text-foreground"
             >
               {label}
             </a>
@@ -52,7 +52,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
           {showAuthButton && (
             <a
               href="/login"
-              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#ececec] bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
+              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-border bg-card px-4 py-3.5 text-sm font-semibold leading-5 text-foreground shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-border-strong hover:ring-2 hover:ring-brand-surface hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-brand-surface focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
             >
               Entrar
             </a>
@@ -62,7 +62,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
-            className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-[#ececec] bg-white text-[#555] shadow-[0_4px_14px_rgba(0,0,0,0.04)] max-md:flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-card text-muted-foreground shadow-[0_4px_14px_rgba(0,0,0,0.04)] max-md:flex"
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={mobileOpen}
           >
@@ -73,14 +73,14 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
 
       {/* ── Menu mobile expandido ────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="mx-auto w-full max-w-[1430px] border-t border-[#f0f0f0] px-4 py-2 md:hidden">
+        <div className="mx-auto w-full max-w-[1430px] border-t border-border px-4 py-2 md:hidden">
           <nav className="flex flex-col">
             {navLinks.map(({ label, href }) => (
               <a
                 key={label}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
+                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-muted-foreground hover:bg-hover"
               >
                 {label}
               </a>
@@ -89,7 +89,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
               <a
                 href="/"
                 onClick={() => setMobileOpen(false)}
-                className="mt-1 rounded-[10px] px-3 py-3 text-sm font-semibold text-[#0E9384] hover:bg-[#f0fdfa]"
+                className="mt-1 rounded-[10px] px-3 py-3 text-sm font-semibold text-brand hover:bg-brand-surface"
               >
                 ← Voltar ao site
               </a>

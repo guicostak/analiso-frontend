@@ -16,7 +16,7 @@ import { ReadableCompanySection } from "./ReadableCompanySection";
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-card text-foreground" style={{ fontSize: '16px' }}>
       <main>
         <HeroSection />
         <ScrollReveal delay={0.02}>

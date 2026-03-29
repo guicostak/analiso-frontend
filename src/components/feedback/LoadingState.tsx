@@ -23,7 +23,7 @@ export function LoadingState() {
 
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-white border border-neutral-200 rounded-3xl p-8 ${className}`}>
+    <div className={`bg-card border border-neutral-200 dark:border-neutral-700 rounded-3xl p-8 ${className}`}>
       <div className="animate-pulse">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-neutral-200" />

@@ -3,14 +3,28 @@
 /** Remetente da mensagem */
 export type LuizMessageRole = "user" | "luiz";
 
+/** Tipos de comando que o Luiz pode executar */
+export type LuizCommandType =
+  | "navigate"
+  | "theme"
+  | "glossary"
+  | "watchlist_add"
+  | "watchlist_remove";
+
 /**
  * Comando que o Luiz pode executar na plataforma.
  * Retornado pela API quando o modelo decide acionar uma ferramenta.
  */
 export interface LuizCommand {
   /** Tipo de ação a executar */
-  type: "navigate";
-  /** Rota de destino (ex: "/explorar?pl_max=10") */
+  type: LuizCommandType;
+  /**
+   * Valor do comando:
+   * - navigate: rota de destino (ex: "/explorar?pl_max=10")
+   * - theme: "dark" | "light"
+   * - glossary: "" (sem valor)
+   * - watchlist_add/remove: ticker (ex: "PETR4")
+   */
   href: string;
 }
 

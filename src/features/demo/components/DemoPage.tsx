@@ -135,7 +135,7 @@ function DrawerPanel({ drawer, onClose }: { drawer: DrawerState; onClose: () => 
   return (
     <div className="fixed inset-0 z-[90]">
       <button className="absolute inset-0 bg-[#0B1220]/30" onClick={onClose} aria-label="Fechar" />
-      <aside className="absolute top-0 right-0 h-full w-[420px] border-l border-[#EAECF0] bg-white p-6 shadow-[-24px_0_60px_-40px_rgba(11,18,32,0.45)]">
+      <aside className="absolute top-0 right-0 h-full w-[420px] border-l border-border bg-card p-6 shadow-[-24px_0_60px_-40px_rgba(11,18,32,0.45)]">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-[16px] font-semibold">{title}</h3>
           <button onClick={onClose} className="grid size-8 place-items-center rounded-full border border-[#EAECF0] text-[#475467] hover:border-[#0E9384] hover:text-[#0E9384]">
@@ -205,7 +205,7 @@ function HistoryChart({ e }: { e: Evidence }) {
   const hi = min === max ? max + 1 : max;
   const pts = e.historico.map((v, i) => ({ ...v, x: px + (i / Math.max(e.historico.length - 1, 1)) * (w - px * 2), y: py + (1 - (v.value - lo) / (hi - lo)) * (h - py * 2) }));
   return (
-    <div className="overflow-hidden rounded-xl border border-[#EAECF0] bg-white p-3">
+    <div className="overflow-hidden rounded-xl border border-border bg-card p-3">
       <svg viewBox={`0 0 ${w} ${h}`} className="h-[260px] w-full">
         {[0.2, 0.4, 0.6, 0.8].map((lv) => <line key={String(lv)} x1={px} y1={py + lv * (h - py * 2)} x2={w - px} y2={py + lv * (h - py * 2)} stroke="#EAECF0" strokeDasharray="4 6" />)}
         <polyline points={pts.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#0E9384" strokeWidth="3" />
@@ -310,8 +310,8 @@ export function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1220]">
-      <header className="sticky top-0 z-50 border-b border-[#EAECF0] bg-white/95 backdrop-blur-sm">
+    <div className="min-h-screen bg-card text-foreground">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-10">
           <div className="flex items-center gap-5">
             <AppLogo />
@@ -333,7 +333,7 @@ export function DemoPage() {
               <h1 className="text-[38px] leading-tight font-semibold tracking-[-0.03em]">Veja um diagnóstico em 60 segundos.</h1>
               <p className="mx-auto mt-4 max-w-[740px] text-[14px] text-[#475467]">5 pilares fixos + fontes oficiais. Sem se perder em indicadores.</p>
             </div>
-            <div className="mx-auto mt-9 w-full max-w-[760px] rounded-2xl border border-[#EAECF0] bg-white p-6 shadow-[0_20px_40px_-34px_rgba(11,18,32,0.45)]">
+            <div className="mx-auto mt-9 w-full max-w-[760px] rounded-2xl border border-border bg-card p-6 shadow-[0_20px_40px_-34px_rgba(11,18,32,0.45)]">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -363,7 +363,7 @@ export function DemoPage() {
         <section ref={coreRef} className="px-10 py-12">
           <div className="mx-auto grid max-w-[1200px] grid-cols-12 gap-6">
             <aside className="col-span-3">
-              <div className="sticky top-24 rounded-2xl border border-[#EAECF0] bg-white p-4">
+              <div className="sticky top-24 rounded-2xl border border-border bg-card p-4">
                 <p className="text-[12px] font-semibold">Progresso da demo</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#EAECF0]">
                   <div className="h-full rounded-full bg-[#0E9384] transition-all duration-500" style={{ width: step === "resumo" ? "33%" : step === "evidencias" ? "66%" : "100%" }} />
@@ -378,7 +378,7 @@ export function DemoPage() {
 
             <div className="col-span-9 space-y-9">
               <section ref={summaryRef} className="space-y-4">
-                <div className="grid grid-cols-2 gap-6 rounded-2xl border border-[#EAECF0] bg-white p-6">
+                <div className="grid grid-cols-2 gap-6 rounded-2xl border border-border bg-card p-6">
                   {loading ? (
                     <>
                       <div className="space-y-3">
@@ -422,7 +422,7 @@ export function DemoPage() {
                   {company.evidencias.map((e) => {
                     const open = expanded === e.id;
                     return (
-                      <article key={e.id} className="rounded-2xl border border-[#EAECF0] bg-white p-4">
+                      <article key={e.id} className="rounded-2xl border border-border bg-card p-4">
                         <button onClick={() => setExpanded((x) => x === e.id ? null : e.id)} className="w-full text-left">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -459,7 +459,7 @@ export function DemoPage() {
                 <h2 className="text-[20px] font-semibold">Mudanças que importam</h2>
                 <div className="space-y-3">
                   {company.feed.slice(0, 6).map((f) => (
-                    <article key={f.id} className="rounded-2xl border border-[#EAECF0] bg-white p-4">
+                    <article key={f.id} className="rounded-2xl border border-border bg-card p-4">
                       <div className="grid grid-cols-[1fr_auto] gap-4">
                         <div>
                           <div className="mb-2 flex items-center gap-2">
@@ -493,7 +493,7 @@ export function DemoPage() {
             </ul>
             <div className="mt-6 flex gap-3">
               <Link href="/login" className="inline-flex h-11 items-center justify-center rounded-full bg-[#0E9384] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#0A7D72] active:bg-[#07665D]">Criar conta grátis</Link>
-              <button className="inline-flex h-11 items-center justify-center rounded-full border border-[#0E9384] bg-white px-6 text-[14px] font-semibold text-[#0E9384] hover:bg-[#F4FBF9]">Ver planos</button>
+              <button className="inline-flex h-11 items-center justify-center rounded-full border border-brand bg-card px-6 text-[14px] font-semibold text-[#0E9384] hover:bg-[#F4FBF9]">Ver planos</button>
             </div>
           </div>
         </section>
@@ -507,7 +507,7 @@ export function DemoPage() {
                 { title: "Atualização por documento", subtitle: "Com data visível", icon: Waves, lines: ["Quando entra documento novo, o card atualiza.", "Frescor aparece junto de cada insight.", "Você entende o que mudou rapidamente."] },
                 { title: "Metodologia clara", subtitle: "Sem caixa-preta", icon: ShieldCheck, lines: ["Cada pilar tem regra curta e explicada.", "Metricas sao normalizadas para comparacao justa.", "Interpretacao em linguagem simples."] },
               ].map((card) => (
-                <button key={card.title} onClick={() => setDrawer({ kind: "trust", title: card.title, lines: card.lines })} className="rounded-2xl border border-[#EAECF0] bg-white p-5 text-left hover:border-[#0E9384]/45">
+                <button key={card.title} onClick={() => setDrawer({ kind: "trust", title: card.title, lines: card.lines })} className="rounded-2xl border border-border bg-card p-5 text-left hover:border-[#0E9384]/45">
                   <span className="grid size-10 place-items-center rounded-xl border border-[#CFE9E5] bg-[#E7F6F3] text-[#0E9384]"><card.icon className="size-5" /></span>
                   <p className="mt-3 text-[16px] font-semibold">{card.title}</p>
                   <p className="mt-1 text-[14px] text-[#475467]">{card.subtitle}</p>

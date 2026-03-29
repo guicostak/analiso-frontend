@@ -205,7 +205,7 @@ export function ReadableCompanySection() {
           Veja como a Analiso transforma dados soltos em uma leitura mais clara, guiada e verificável.
         </p>
 
-        <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
+        <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-card px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
           Ver como funciona
         </button>
       </div>
@@ -260,14 +260,14 @@ export function ReadableCompanySection() {
           />
         ))}
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-[140px] bg-gradient-to-b from-white via-white/72 to-transparent max-sm:h-[90px]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[180px] bg-gradient-to-t from-white via-white/80 to-transparent max-sm:h-[120px]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-[140px] bg-gradient-to-b from-card via-card/72 to-transparent max-sm:h-[90px]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[180px] bg-gradient-to-t from-card via-card/80 to-transparent max-sm:h-[120px]" />
 
         <div className="absolute inset-0">
           {activeState.sideCards.map((card, index) => (
             <motion.div
               key={`${activeState.id}-${card.title}`}
-              className="absolute hidden rounded-[18px] border border-white/70 bg-white/74 p-4 shadow-[0_18px_40px_rgba(22,26,29,0.05)] backdrop-blur-xl md:block"
+              className="absolute hidden rounded-[18px] border border-white/70 bg-card/74 p-4 shadow-[0_18px_40px_rgba(22,26,29,0.05)] backdrop-blur-xl md:block"
               initial={
                 prefersReducedMotion
                   ? false
@@ -309,7 +309,7 @@ export function ReadableCompanySection() {
 
         <div className="absolute inset-x-0 bottom-[22px] z-[4] flex flex-col items-center gap-4 max-sm:bottom-[12px]">
           <motion.div
-            className="relative w-full max-w-[760px] rounded-[28px] border border-white/85 bg-white/94 p-5 shadow-[0_38px_100px_rgba(29,35,41,0.14)] backdrop-blur-xl max-md:max-w-[640px] max-sm:max-w-full max-sm:rounded-[22px] max-sm:p-3"
+            className="relative w-full max-w-[760px] rounded-[28px] border border-white/85 bg-card/94 p-5 shadow-[0_38px_100px_rgba(29,35,41,0.14)] backdrop-blur-xl max-md:max-w-[640px] max-sm:max-w-full max-sm:rounded-[22px] max-sm:p-3"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 10, scale: 0.995 }}
             animate={
               prefersReducedMotion
@@ -380,7 +380,7 @@ export function ReadableCompanySection() {
                   {activeState.metrics.map((metric) => (
                     <div
                       key={metric.label}
-                      className="rounded-[14px] border border-[#eef1f4] bg-white/82 px-2 py-2 md:rounded-[18px] md:px-3 md:py-3"
+                      className="rounded-[14px] border border-[#eef1f4] bg-card/82 px-2 py-2 md:rounded-[18px] md:px-3 md:py-3"
                     >
                       <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[#9aa1a8] md:text-[11px] md:tracking-[0.08em]">
                         {metric.label}
@@ -411,7 +411,7 @@ export function ReadableCompanySection() {
                     {activeState.summary.map((line) => (
                       <div
                         key={line}
-                        className="flex items-start gap-2 rounded-[12px] bg-white px-2.5 py-2 text-[12px] leading-[1.4] text-[#293036] shadow-[0_6px_18px_rgba(28,33,36,0.03)] md:rounded-[16px] md:px-3 md:py-2.5 md:leading-5"
+                        className="flex items-start gap-2 rounded-[12px] bg-card px-2.5 py-2 text-[12px] leading-[1.4] text-[#293036] shadow-[0_6px_18px_rgba(28,33,36,0.03)] md:rounded-[16px] md:px-3 md:py-2.5 md:leading-5"
                       >
                         <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0f9f8f] md:h-4 md:w-4" />
                         <span>{line}</span>
@@ -420,7 +420,7 @@ export function ReadableCompanySection() {
                   </div>
                 </div>
 
-                <div className="rounded-[18px] border border-[#eef1f4] bg-white/82 p-3 md:rounded-[22px] md:p-4">
+                <div className="rounded-[18px] border border-[#eef1f4] bg-card/82 p-3 md:rounded-[22px] md:p-4">
                   <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-[#7f8991] md:mb-3">
                     {activeState.id === "attention" ? (
                       <CircleAlert className="h-4 w-4" />
@@ -448,8 +448,8 @@ export function ReadableCompanySection() {
                 onClick={() => setActiveIndex(index)}
                 className={`rounded-full border px-3 py-2 text-[12px] font-semibold transition-all ${
                   index === activeIndex
-                    ? "border-transparent bg-white text-[#171c20] shadow-[0_10px_24px_rgba(29,35,41,0.08)]"
-                    : "border-white/70 bg-white/45 text-[#7b838b]"
+                    ? "border-transparent bg-card text-[#171c20] shadow-[0_10px_24px_rgba(29,35,41,0.08)]"
+                    : "border-white/70 bg-card/45 text-[#7b838b]"
                 }`}
                 style={
                   index === activeIndex

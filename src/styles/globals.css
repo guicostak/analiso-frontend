@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
+  --font-size: 15px;
   --font-sans: "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
@@ -41,6 +41,12 @@
   --brand-surface: #F0FDFA;  /* fundo com toque da marca                       */
   --brand-border:  #99F6E0;  /* borda com toque da marca                       */
   --brand-text:    #0F766E;  /* texto com cor da marca                         */
+
+  /* ─── Compare (Company B accent) ──────────────────────────────────────── */
+  --compare-b:         #5B8DEF;  /* cor do traço/ponto da Empresa B             */
+  --compare-b-surface: #EEF6FF;  /* fundo do label da Empresa B                 */
+  --compare-b-border:  #D9E8FF;  /* borda do label da Empresa B                 */
+  --compare-b-text:    #3965B8;  /* texto do label da Empresa B                 */
 
   /* ─── Status / Semáforo ─────────────────────────────────────────────────── */
   --success-surface: #ECFDF5;   /* Saudável – fundo                            */
@@ -147,6 +153,12 @@
   --brand-surface: #0F2B2A;
   --brand-border:  #134E48;
   --brand-text:    #5EEAD4;
+
+  /* ─── Compare (Company B accent) ──────────────────────────────────────── */
+  --compare-b:         #6B9DF5;  /* mais claro para contraste no escuro        */
+  --compare-b-surface: #172554;  /* fundo do label da Empresa B (dark)         */
+  --compare-b-border:  #1E3A5F;  /* borda do label da Empresa B (dark)         */
+  --compare-b-text:    #93B8F7;  /* texto do label da Empresa B (dark)         */
 
   /* ─── Status / Semáforo ─────────────────────────────────────────────────── */
   --success-surface: #022c22;

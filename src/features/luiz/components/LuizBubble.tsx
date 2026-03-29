@@ -9,7 +9,7 @@
  */
 
 import { ArrowRight } from "lucide-react";
-import type { LuizMessage } from "../interfaces";
+import type { LuizCommand, LuizMessage } from "../interfaces";
 import { LuizAvatar } from "./LuizAvatar";
 
 const NEON = "linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)";
@@ -22,7 +22,7 @@ function parseContent(content: string): React.ReactElement[] {
   chunks.forEach((chunk, ci) => {
     if (chunk.startsWith("**") && chunk.endsWith("**")) {
       result.push(
-        <strong key={`b-${ci}`} className="font-semibold text-[#0D0D0D]">
+        <strong key={`b-${ci}`} className="font-semibold text-foreground">
           {chunk.slice(2, -2)}
         </strong>,
       );
@@ -34,6 +34,27 @@ function parseContent(content: string): React.ReactElement[] {
     }
   });
   return result;
+}
+
+// ─── Label do chip de ação ──────────────────────────────────────────────────
+
+function getCommandLabel(command: LuizCommand): string {
+  switch (command.type) {
+    case "navigate": {
+      const page = command.href.split("?")[0].replace("/", "") || "início";
+      return `Navegando para ${page}…`;
+    }
+    case "theme":
+      return command.href === "dark" ? "Ativando modo escuro…" : "Ativando modo claro…";
+    case "glossary":
+      return "Abrindo glossário…";
+    case "watchlist_add":
+      return `Adicionando ${command.href} na watchlist…`;
+    case "watchlist_remove":
+      return `Removendo ${command.href} da watchlist…`;
+    default:
+      return "Executando…";
+  }
 }
 
 // ─── Componente ────────────────────────────────────────────────────────────
@@ -69,15 +90,15 @@ export function LuizBubble({ message, onSuggestion }: LuizBubbleProps) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-2.5">
         {/* Texto limpo, sem fundo */}
-        <p className="text-[13.5px] leading-relaxed text-[#2A2A3A]">
+        <p className="text-[13.5px] leading-relaxed text-foreground">
           {parseContent(message.content)}
         </p>
 
-        {/* Chip de navegação */}
-        {message.command?.type === "navigate" && (
-          <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[12px] font-medium text-purple-700">
+        {/* Chip de ação */}
+        {message.command && (
+          <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[12px] font-medium text-purple-700 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300">
             <ArrowRight className="h-3 w-3" />
-            Navegando para {message.command.href.split("?")[0].replace("/", "") || "início"}…
+            {getCommandLabel(message.command)}
           </div>
         )}
 
@@ -88,7 +109,7 @@ export function LuizBubble({ message, onSuggestion }: LuizBubbleProps) {
               <button
                 key={s}
                 onClick={() => onSuggestion?.(s)}
-                className="rounded-full border border-[#E0E0EA] bg-white px-3 py-1 text-[12px] font-medium text-[#4A4A5A] shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 active:scale-95"
+                className="rounded-full border border-border bg-card px-3 py-1 text-[12px] font-medium text-muted-foreground shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 active:scale-95"
               >
                 {s}
               </button>

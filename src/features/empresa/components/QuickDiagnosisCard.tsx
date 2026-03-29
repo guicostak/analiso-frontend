@@ -27,15 +27,15 @@ interface QuickDiagnosisCardProps {
 
 export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDiagnosisCardProps) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-3xl p-8">
+    <div className="bg-card border border-border rounded-3xl p-8">
       <div className="mb-6">
-        <h3 className="text-neutral-900 mb-1">Diagnóstico Rápido</h3>
-        <p className="text-sm text-neutral-500">Principais insights em um olhar</p>
+        <h3 className="text-foreground mb-1">Diagnóstico Rápido</h3>
+        <p className="text-sm text-muted-foreground">Principais insights em um olhar</p>
       </div>
 
       {/* Strengths */}
       <div className="mb-8">
-        <h4 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-4">
+        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
           Pontos Fortes
         </h4>
         <div className="space-y-4">
@@ -52,10 +52,10 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-medium text-neutral-900">{strength.title}</span>
+                  <span className="font-medium text-foreground">{strength.title}</span>
                   <span className="text-sm font-semibold text-emerald-600">{strength.metric}</span>
                 </div>
-                <p className="text-sm text-neutral-600">{strength.description}</p>
+                <p className="text-sm text-dim">{strength.description}</p>
               </div>
             </motion.div>
           ))}
@@ -64,7 +64,7 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
 
       {/* Watchouts */}
       <div className="mb-8">
-        <h4 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-4">
+        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
           Pontos de Atenção
         </h4>
         <div className="space-y-4">
@@ -81,10 +81,10 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-medium text-neutral-900">{watchout.title}</span>
+                  <span className="font-medium text-foreground">{watchout.title}</span>
                   <span className="text-sm font-semibold text-amber-600">{watchout.metric}</span>
                 </div>
-                <p className="text-sm text-neutral-600">{watchout.description}</p>
+                <p className="text-sm text-dim">{watchout.description}</p>
               </div>
             </motion.div>
           ))}
@@ -92,8 +92,8 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
       </div>
 
       {/* What Changed */}
-      <div className="pt-6 border-t border-neutral-200">
-        <h4 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-4">
+      <div className="pt-6 border-t border-border">
+        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
           O Que Mudou Desde Sua Última Visita
         </h4>
         <div className="bg-mint-50 border border-mint-200 rounded-2xl p-4">
@@ -107,10 +107,10 @@ export function QuickDiagnosisCard({ strengths, watchouts, lastVisit }: QuickDia
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2 mb-1">
-                <span className="font-medium text-neutral-900">{lastVisit.metric}</span>
+                <span className="font-medium text-foreground">{lastVisit.metric}</span>
                 <span className="text-sm font-semibold text-mint-700">{lastVisit.change}</span>
               </div>
-              <p className="text-sm text-neutral-600 mb-3">{lastVisit.context}</p>
+              <p className="text-sm text-dim mb-3">{lastVisit.context}</p>
               <Button variant="link-mint" className="flex items-center gap-1">
                 Ver linha do tempo completa
                 <ArrowRight className="w-3.5 h-3.5" />

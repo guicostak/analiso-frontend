@@ -6,24 +6,24 @@ import type { WatchlistQuickOverviewDto } from "../services";
 function getAlertStyle(severity: AlertItem["severity"]) {
   if (severity === "Risco") {
     return {
-      shell: "border-[#F2D8DE] bg-[linear-gradient(180deg,#FDEFF2_0%,#FFF8FA_100%)]",
-      badge: "border-[#F2D8DE] bg-white/80 text-[#B54768]",
-      accent: "bg-[#F4D7DE]",
+      shell: "border-danger-border bg-danger-surface dark:bg-danger-surface",
+      badge: "border-danger-border bg-danger-surface/80 text-danger-text",
+      accent: "bg-danger-surface",
     };
   }
 
   if (severity === "Atenção") {
     return {
-      shell: "border-[#F4E1B8] bg-[linear-gradient(180deg,#FFF6E8_0%,#FFFBF4_100%)]",
-      badge: "border-[#F4E1B8] bg-white/80 text-[#B27300]",
-      accent: "bg-[#F2E4C5]",
+      shell: "border-warning-border bg-warning-surface dark:bg-warning-surface",
+      badge: "border-warning-border bg-warning-surface/80 text-warning-text",
+      accent: "bg-warning-surface",
     };
   }
 
   return {
-    shell: "border-[#D8EEE4] bg-[linear-gradient(180deg,#EFFAF6_0%,#F9FCFB_100%)]",
-    badge: "border-[#D8EEE4] bg-white/80 text-[#17825B]",
-    accent: "bg-[#D6EFE3]",
+    shell: "border-success-border bg-success-surface dark:bg-success-surface",
+    badge: "border-success-border bg-success-surface/80 text-success-text",
+    accent: "bg-success-surface",
   };
 }
 
@@ -53,35 +53,35 @@ export function WatchlistSidebar({
   return (
     <aside className="space-y-6 lg:col-span-4">
       <div className="space-y-6 lg:sticky lg:top-24">
-        <div className="rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.05)]">
+        <div className="rounded-[28px] border border-border bg-card p-6 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                 {quickOverview?.title ?? "Panorama rápido"}
               </p>
-              <h3 className="mt-2 text-[20px] font-semibold leading-[26px] tracking-[-0.02em] text-[#0F1728]">
+              <h3 className="mt-2 text-[20px] font-semibold leading-[26px] tracking-[-0.02em] text-foreground">
                 Hoje
               </h3>
             </div>
-            <span className="rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-3 py-1 text-[11px] font-medium text-[#3965B8]">
+            <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-700 dark:border-blue-800/50 dark:bg-blue-900/30 dark:text-blue-300">
               {quickOverview?.metrics.length ?? 0}
             </span>
           </div>
 
           {quickOverview && (
             <>
-              <p className="mt-3 text-[15px] leading-6 text-[#667085]">{quickOverview.body}</p>
+              <p className="mt-3 text-[15px] leading-6 text-muted-foreground">{quickOverview.body}</p>
               <div className="mt-5 grid grid-cols-3 gap-3">
                 {quickOverview.metrics.map((metric, index) => (
                   <button
                     key={metric.label}
                     onClick={metricHandlers[index]}
-                    className="rounded-[20px] border border-[#E7EEF5] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFD_100%)] px-3 py-4 text-left transition hover:bg-[#F8FBFD]"
+                    className="rounded-[20px] border border-border bg-card px-3 py-4 text-left transition hover:bg-muted"
                   >
-                    <p className="text-[24px] font-semibold leading-none tracking-[-0.03em] text-[#0F1728]">
+                    <p className="text-[24px] font-semibold leading-none tracking-[-0.03em] text-foreground">
                       {metric.value}
                     </p>
-                    <p className="mt-2 text-[12px] leading-4 text-[#98A2B3]">{metric.label}</p>
+                    <p className="mt-2 text-[12px] leading-4 text-muted-foreground">{metric.label}</p>
                   </button>
                 ))}
               </div>
@@ -89,13 +89,13 @@ export function WatchlistSidebar({
           )}
         </div>
 
-        <div className="rounded-[28px] border border-[#E7EEF5] bg-white p-6 shadow-[0_18px_40px_rgba(15,23,40,0.05)]">
+        <div className="rounded-[28px] border border-border bg-card p-6 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                 {alertsPanelHeader?.title ?? "Alertas"}
               </p>
-              <p className="mt-2 text-[15px] leading-6 text-[#667085]">
+              <p className="mt-2 text-[15px] leading-6 text-muted-foreground">
                 {alertsPanelHeader?.body ?? ""}
               </p>
             </div>
@@ -103,8 +103,8 @@ export function WatchlistSidebar({
               onClick={() => setShowAlertActionOnly(!showAlertActionOnly)}
               className={`shrink-0 rounded-full border px-3 py-1.5 text-[12px] font-medium ${
                 showAlertActionOnly
-                  ? "border-[#D9E8FF] bg-[#EEF6FF] text-[#3965B8]"
-                  : "border-[#E7EEF5] bg-[#F8FBFD] text-[#667085]"
+                  ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800/50 dark:bg-blue-900/30 dark:text-blue-300"
+                  : "border-border bg-muted text-muted-foreground"
               }`}
             >
               {showAlertActionOnly ? "Filtro ativo · Ação agora" : "Mostrando todos"}
@@ -120,25 +120,25 @@ export function WatchlistSidebar({
                   key={alert.id}
                   className={`overflow-hidden rounded-[24px] border ${style.shell} ${
                     index === 0
-                      ? "p-5 shadow-[0_20px_44px_rgba(15,23,40,0.08)]"
+                      ? "p-5 shadow-[0_20px_44px_rgba(15,23,40,0.08)] dark:shadow-none"
                       : index === 1
-                        ? "p-4 shadow-[0_14px_34px_rgba(15,23,40,0.05)]"
-                        : "p-4 shadow-[0_10px_24px_rgba(15,23,40,0.03)]"
+                        ? "p-4 shadow-[0_14px_34px_rgba(15,23,40,0.05)] dark:shadow-none"
+                        : "p-4 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none"
                   }`}
                 >
                   <div className={`mb-4 h-1.5 ${index === 0 ? "w-20" : "w-14"} rounded-full ${style.accent}`} />
                   <div className="flex items-start justify-between gap-3">
-                    <p className={`${index === 0 ? "text-[16px]" : "text-[15px]"} font-semibold leading-6 text-[#0F1728]`}>
+                    <p className={`${index === 0 ? "text-[16px]" : "text-[15px]"} font-semibold leading-6 text-foreground`}>
                       {alert.title}
                     </p>
                     <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${style.badge}`}>
                       {alert.severity}
                     </span>
                   </div>
-                  <p className={`mt-2 text-[#516071] ${index === 0 ? "text-[14px] leading-6" : "text-[13px] leading-6"}`}>
+                  <p className={`mt-2 text-muted-foreground ${index === 0 ? "text-[14px] leading-6" : "text-[13px] leading-6"}`}>
                     {alert.summary}
                   </p>
-                  <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-[#98A2B3]">
+                  <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
                     <span>{alert.time}</span>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export function WatchlistSidebar({
             })}
           </div>
 
-          <button className="mt-5 inline-flex w-full items-center justify-center rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] px-4 py-3 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#F1F6FA]">
+          <button className="mt-5 inline-flex w-full items-center justify-center rounded-[18px] border border-border bg-muted px-4 py-3 text-[13px] font-semibold text-foreground transition hover:bg-muted">
             {alertsPanelHeader?.ctaLabel ?? "Configurar alertas"}
           </button>
         </div>

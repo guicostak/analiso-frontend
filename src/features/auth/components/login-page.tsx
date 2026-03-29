@@ -49,7 +49,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FB] text-[#0B1220]">
+    <div className="min-h-screen bg-background text-foreground">
       <LandingNav showAuthButton={false} />
       <main className="max-w-[1200px] mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-24 flex items-center" style={{ minHeight: "calc(100vh - 73px)" }}>
         <div className="grid grid-cols-1 lg:grid-cols-[0.4fr_0.6fr] gap-16 lg:gap-40 w-full items-center">
@@ -58,7 +58,7 @@ export function LoginPage() {
           <div className="flex flex-col gap-10 w-full max-w-sm mx-auto lg:mx-0">
             <a
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-[#667085] hover:text-[#0B1220] transition-colors w-fit group"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit group"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               Voltar
@@ -67,11 +67,11 @@ export function LoginPage() {
             <div className="space-y-3">
               <h1 className="text-4xl sm:text-5xl font-semibold leading-tight tracking-tight">
                 <span className="block">Boas vindas ao</span>
-                <span className="block text-[#0E9384] brand-shimmer">
+                <span className="block text-brand brand-shimmer">
                   Analiso.
                 </span>
               </h1>
-              <p className="text-sm sm:text-base text-[#475467] leading-relaxed">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 Acesse gratuitamente e comece a analisar o mercado.
               </p>
             </div>
@@ -81,19 +81,19 @@ export function LoginPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-4">
-              <hr className="flex-1 border-[#EAECF0]" />
-              <span className="text-xs text-[#C0C6D0] whitespace-nowrap tracking-wide">ou continue com e-mail</span>
-              <hr className="flex-1 border-[#EAECF0]" />
+              <hr className="flex-1 border-border" />
+              <span className="text-xs text-muted-foreground/60 whitespace-nowrap tracking-wide">ou continue com e-mail</span>
+              <hr className="flex-1 border-border" />
             </div>
 
             {/* Email form */}
             <EmailAuthForm onSuccess={handleSuccess} />
 
-            <p className="text-xs text-[#98A2B3] leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Ao entrar, você concorda com nossos{" "}
               <a
                 href="/terms"
-                className="text-[#0E9384] font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40 focus:ring-offset-2 focus:ring-offset-[#F7F8FB] rounded"
+                className="text-brand font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-2 focus:ring-offset-background rounded"
               >
                 termos e condições
               </a>

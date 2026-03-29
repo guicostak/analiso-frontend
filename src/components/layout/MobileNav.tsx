@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   Menu,
   NotebookPen,
+  SearchCheck,
   Users,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -46,6 +47,7 @@ const navGroups: NavGroup[] = [
       { id: "explorar", label: "Explorar mercado", href: "/explorar", icon: Compass },
       { id: "watchlist", label: "Watchlist", href: "/watchlist", icon: LayoutGrid },
       { id: "comparar", label: "Comparar empresas", href: "/comparar", icon: GitCompare },
+      { id: "busca",    label: "Busca avançada",    href: "/busca",     icon: SearchCheck },
     ],
   },
   {
@@ -79,17 +81,17 @@ export function MobileNav({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-[280px] p-0">
           <SheetHeader className="border-b border-border px-5 py-5">
-            <SheetTitle className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">
+            <SheetTitle className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               Contexto
             </SheetTitle>
-            <p className="text-[15px] font-semibold text-[#171717]">{contextLabel}</p>
+            <p className="text-[15px] font-semibold text-foreground">{contextLabel}</p>
           </SheetHeader>
 
           <nav className="flex-1 overflow-y-auto px-5 py-4">
             <div className="space-y-8">
               {navGroups.map((group) => (
                 <div key={group.title}>
-                  <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">
+                  <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     {group.title}
                   </p>
                   <div className="space-y-1">
@@ -97,14 +99,14 @@ export function MobileNav({
                       const Icon = item.icon;
                       const isActive = item.id === currentPage;
                       const content = (
-                        <span className="relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14px] transition hover:bg-[#FAFAFA]">
+                        <span className="relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14px] transition hover:bg-hover">
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#12A594]" />
+                            <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
                           )}
-                          <span className={isActive ? "text-[#171717]" : "text-[#8A8A8A]"}>
+                          <span className={isActive ? "text-foreground" : "text-muted-foreground"}>
                             <Icon className="h-[18px] w-[18px]" />
                           </span>
-                          <span className={isActive ? "font-semibold text-[#171717]" : "font-medium text-[#7A7A7A]"}>
+                          <span className={isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground"}>
                             {item.label}
                           </span>
                         </span>

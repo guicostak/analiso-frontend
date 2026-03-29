@@ -112,13 +112,46 @@ export function useLuizAssistant() {
           },
         ]);
 
-        // Executar comando de navegação se retornado
-        if (response.command?.type === "navigate" && response.command.href) {
-          // Pequeno delay para o usuário ler a resposta antes de navegar
-          setTimeout(() => {
-            close();
-            router.push(response.command!.href);
-          }, 1200);
+        // Executar comando da plataforma se retornado
+        if (response.command) {
+          const cmd = response.command;
+
+          switch (cmd.type) {
+            case "navigate":
+              // Delay para o usuário ler a resposta antes de navegar
+              setTimeout(() => {
+                close();
+                router.push(cmd.href);
+              }, 1200);
+              break;
+
+            case "theme":
+              // Dispara evento global para o ThemeProvider reagir
+              window.dispatchEvent(
+                new CustomEvent("luiz:theme", { detail: { theme: cmd.href } }),
+              );
+              break;
+
+            case "glossary":
+              window.dispatchEvent(new CustomEvent("luiz:glossary"));
+              break;
+
+            case "watchlist_add":
+              window.dispatchEvent(
+                new CustomEvent("luiz:watchlist", {
+                  detail: { action: "add", ticker: cmd.href },
+                }),
+              );
+              break;
+
+            case "watchlist_remove":
+              window.dispatchEvent(
+                new CustomEvent("luiz:watchlist", {
+                  detail: { action: "remove", ticker: cmd.href },
+                }),
+              );
+              break;
+          }
         }
       } catch {
         setIsTyping(false);

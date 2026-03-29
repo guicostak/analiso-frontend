@@ -112,29 +112,6 @@ export interface CompanyFinancials {
   lpa: number | null;          // LPA (Lucro por Ação)
 }
 
-export interface AdvancedSearchFilters {
-  plMin: number | null;
-  plMax: number | null;
-  pvpMin: number | null;
-  pvpMax: number | null;
-  dividendYieldMin: number | null;
-  dividendYieldMax: number | null;
-  roeMin: number | null;
-  roeMax: number | null;
-  roicMin: number | null;
-  roicMax: number | null;
-  margemLiquidaMin: number | null;
-  margemLiquidaMax: number | null;
-  margemEbitdaMin: number | null;
-  margemEbitdaMax: number | null;
-  dividaLiquidaEbitdaMin: number | null;
-  dividaLiquidaEbitdaMax: number | null;
-  evEbitdaMin: number | null;
-  evEbitdaMax: number | null;
-  lpaMin: number | null;
-  lpaMax: number | null;
-}
-
 export interface CompanyCard {
   name: string;
   ticker: string;

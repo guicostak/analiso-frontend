@@ -5,28 +5,28 @@ import Link from "next/link";
 import type { CompanyCard, FilterKey, Filters, HighlightPreset } from "../interfaces";
 
 const statusColors: Record<CompanyCard["status"], string> = {
-  Saudável: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
-  Atenção: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
-  Risco: "border-[#F3D8DF] bg-[#FDEFF2] text-[#B54768]",
+  Saudável: "border-success-border bg-success-surface text-success-text",
+  Atenção: "border-warning-border bg-warning-surface text-warning-text",
+  Risco: "border-danger-border bg-danger-surface text-danger-text",
 };
 
 const freshnessColors: Record<CompanyCard["freshnessStatus"], string> = {
-  Atualizado: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
-  Antigo: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
+  Atualizado: "border-success-border bg-success-surface text-success-text",
+  Antigo: "border-warning-border bg-warning-surface text-warning-text",
 };
 
 function getCardShellColor(status: CompanyCard["status"]) {
   const statusText = String(status);
-  if (statusText.startsWith("R")) return "bg-[linear-gradient(180deg,#FFF7F9_0%,#FFFFFF_34%)]";
-  if (statusText.startsWith("S")) return "bg-[linear-gradient(180deg,#F7FCFA_0%,#FFFFFF_34%)]";
-  return "bg-[linear-gradient(180deg,#FFF9F1_0%,#FFFFFF_34%)]";
+  if (statusText.startsWith("R")) return "bg-card";
+  if (statusText.startsWith("S")) return "bg-card";
+  return "bg-card";
 }
 
 function getCardAccentColor(status: CompanyCard["status"]) {
   const statusText = String(status);
-  if (statusText.startsWith("R")) return "bg-[linear-gradient(90deg,#FADCE5_0%,rgba(250,220,229,0)_88%)]";
-  if (statusText.startsWith("S")) return "bg-[linear-gradient(90deg,#DDF6EC_0%,rgba(221,246,236,0)_88%)]";
-  return "bg-[linear-gradient(90deg,#FFEACC_0%,rgba(255,234,204,0)_88%)]";
+  if (statusText.startsWith("R")) return "bg-[linear-gradient(90deg,#FADCE5_0%,rgba(250,220,229,0)_88%)] dark:bg-[linear-gradient(90deg,rgba(250,220,229,0.1)_0%,rgba(250,220,229,0)_88%)]";
+  if (statusText.startsWith("S")) return "bg-[linear-gradient(90deg,#DDF6EC_0%,rgba(221,246,236,0)_88%)] dark:bg-[linear-gradient(90deg,rgba(221,246,236,0.1)_0%,rgba(221,246,236,0)_88%)]";
+  return "bg-[linear-gradient(90deg,#FFEACC_0%,rgba(255,234,204,0)_88%)] dark:bg-[linear-gradient(90deg,rgba(255,234,204,0.1)_0%,rgba(255,234,204,0)_88%)]";
 }
 
 function getCardAccentVariant(index: number) {
@@ -109,22 +109,22 @@ export function ExploreCompanyCatalog({
     <section className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descoberta guiada</p>
-          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-[#0F1728]">
+          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Descoberta guiada</p>
+          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">
             Empresas para você analisar
           </h2>
-          <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-[#667085]">
+          <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-muted-foreground">
             Catálogo para aprofundar a leitura depois da curadoria principal, mantendo foco em tese, qualidade de fonte e pilar mais relevante.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[11px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]">
+        <div className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-[11px] font-medium text-muted-foreground shadow-[0_10px_28px_rgba(15,23,40,0.05)] dark:shadow-none">
           <Filter className="h-4 w-4" />
           {filteredCompanies.length} empresas
         </div>
       </div>
 
       <div className="space-y-3">
-        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descobrir por tese</p>
+        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Descobrir por tese</p>
         <div className="flex flex-wrap items-center gap-2.5">
           {thesisCollections.map((entry) => (
             <button
@@ -132,15 +132,15 @@ export function ExploreCompanyCatalog({
               onClick={() => toggleEntryPoint(entry)}
               className={`rounded-full border px-4 py-2.5 text-[12px] font-medium transition ${
                 selectedEntryPoints.includes(entry)
-                  ? "border-[#CDECDD] bg-[#EFFAF6] text-[#0E9384] shadow-[0_10px_24px_rgba(15,23,40,0.05)]"
-                  : "border-[#E7EEF5] bg-white text-[#667085] hover:border-[#D7E3EE] hover:text-[#0F1728]"
+                  ? "border-success-border bg-success-surface text-brand shadow-[0_10px_24px_rgba(15,23,40,0.05)] dark:shadow-none"
+                  : "border-border bg-card text-muted-foreground hover:border-border hover:text-foreground"
               }`}
             >
               {entry}
             </button>
           ))}
           {selectedEntryPoints.length > 0 ? (
-            <button onClick={clearEntryPoints} className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
+            <button onClick={clearEntryPoints} className="text-[13px] font-medium text-muted-foreground transition hover:text-foreground">
               Limpar seleção
             </button>
           ) : null}
@@ -148,44 +148,44 @@ export function ExploreCompanyCatalog({
       </div>
 
       {activePreset && (
-        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[#E7EEF5] bg-white px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
+        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-border bg-card px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
           {appliedChips.map((chip) => (
             <span
               key={chip}
-              className="inline-flex items-center gap-2 rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-4 py-2 text-[12px] font-medium text-[#3965B8]"
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 text-[12px] font-medium text-blue-700 dark:text-blue-300"
             >
               {chip}
-              <button onClick={clearPreset} className="text-[#667085] transition hover:text-[#0F1728]" aria-label={`Remover ${chip}`}>
+              <button onClick={clearPreset} className="text-muted-foreground transition hover:text-foreground" aria-label={`Remover ${chip}`}>
                 <X className="h-3.5 w-3.5" />
               </button>
             </span>
           ))}
-          <button onClick={clearPreset} className="ml-auto text-[12px] font-semibold text-[#0E9384] transition hover:text-[#0F1728]">
+          <button onClick={clearPreset} className="ml-auto text-[12px] font-semibold text-brand transition hover:text-foreground">
             Limpar
           </button>
         </div>
       )}
 
       {showStaleBanner && (
-        <div className="flex flex-col gap-3 rounded-[18px] border border-[#F0D7A8] bg-[#FFF7E8] px-5 py-4 text-[13px] leading-6 text-[#8A5A00] lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 rounded-[18px] border border-warning-border bg-warning-surface px-5 py-4 text-[13px] leading-6 text-warning-text lg:flex-row lg:items-center lg:justify-between">
           <p>Qualidade dos dados: {staleCount} empresas com fonte atrasada. Vale confirmar antes de comparar decisões recentes.</p>
-          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="text-left font-semibold transition hover:text-[#6E4700]">
+          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="text-left font-semibold transition hover:text-warning-text">
             Ver apenas antigas
           </button>
         </div>
       )}
 
-      <div className="rounded-[22px] border border-[#E7EEF5] bg-white p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+      <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
             <label className="relative block xl:min-w-[260px] xl:flex-1">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Buscar empresa ou ticker"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-11 w-full rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] pl-11 pr-4 text-[13px] text-[#0F1728] outline-none transition placeholder:text-[#98A2B3] focus:border-[#D9E8FF]"
+                className="h-11 w-full rounded-[14px] border border-border bg-muted pl-11 pr-4 text-[13px] text-foreground outline-none transition placeholder:text-muted-foreground focus:border-blue-200 dark:focus:border-blue-800/50"
               />
             </label>
 
@@ -205,7 +205,7 @@ export function ExploreCompanyCatalog({
                   <select
                     value={filters[filter.key]}
                     onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                    className="h-11 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                    className="h-11 w-full appearance-none rounded-[14px] border border-border bg-muted px-4 pr-10 text-[12px] font-medium text-foreground outline-none transition focus:border-blue-200 dark:focus:border-blue-800/50"
                   >
                     {filter.options.map((option) => (
                       <option key={option} value={option}>
@@ -213,17 +213,17 @@ export function ExploreCompanyCatalog({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-[#EEF3F7] pt-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-3 border-t border-border pt-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                className="inline-flex h-10 items-center rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 text-[12px] font-medium text-[#0F1728] transition hover:bg-[#F1F6FA]"
+                className="inline-flex h-10 items-center rounded-[14px] border border-border bg-muted px-4 text-[12px] font-medium text-foreground transition hover:bg-muted"
               >
                 {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
               </button>
@@ -240,7 +240,7 @@ export function ExploreCompanyCatalog({
                       <select
                         value={filters[filter.key]}
                         onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                        className="h-10 appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                        className="h-10 appearance-none rounded-[14px] border border-border bg-muted px-4 pr-10 text-[12px] font-medium text-foreground outline-none transition focus:border-blue-200 dark:focus:border-blue-800/50"
                       >
                         {filter.options.map((option) => (
                           <option key={option} value={option}>
@@ -248,7 +248,7 @@ export function ExploreCompanyCatalog({
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     </div>
                   ))}
                 </>
@@ -256,13 +256,13 @@ export function ExploreCompanyCatalog({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="h-6 w-px bg-[#EEF3F7]" />
+              <div className="h-6 w-px bg-border" />
               <div className="relative min-w-[204px]">
-                <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <select
                   value={filters.sort}
                   onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
-                  className="h-10 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-11 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+                  className="h-10 w-full appearance-none rounded-[14px] border border-border bg-muted px-11 pr-10 text-[12px] font-medium text-foreground outline-none transition focus:border-blue-200 dark:focus:border-blue-800/50"
                 >
                   {[
                     ...(activePreset ? ["Mais relevantes para este destaque"] : []),
@@ -275,7 +275,7 @@ export function ExploreCompanyCatalog({
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
             </div>
           </div>
@@ -285,24 +285,24 @@ export function ExploreCompanyCatalog({
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="min-h-[212px] rounded-[22px] border border-[#E7EEF5] bg-white p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
-              <div className="h-4 w-32 rounded bg-[#EAF1F7]" />
-              <div className="mt-4 h-3 w-28 rounded bg-[#EEF3F7]" />
-              <div className="mt-6 h-20 rounded-[18px] bg-[#F4F8FB]" />
-              <div className="mt-6 h-3 w-40 rounded bg-[#EEF3F7]" />
+            <div key={item} className="min-h-[212px] rounded-[22px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
+              <div className="h-4 w-32 rounded bg-muted" />
+              <div className="mt-4 h-3 w-28 rounded bg-border" />
+              <div className="mt-6 h-20 rounded-[18px] bg-muted" />
+              <div className="mt-6 h-3 w-40 rounded bg-border" />
             </div>
           ))}
         </div>
       ) : filteredCompanies.length === 0 ? (
-        <div className="rounded-[28px] border border-[#E7EEF5] bg-white px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
-          <p className="text-[15px] leading-7 text-[#475467]">Nenhuma empresa encontrada com esses filtros.</p>
+        <div className="rounded-[28px] border border-border bg-card px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
+          <p className="text-[15px] leading-7 text-muted-foreground">Nenhuma empresa encontrada com esses filtros.</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={resetFilters} className="rounded-[16px] border border-[#E7EEF5] bg-[#F8FBFD] px-4 py-2.5 text-[14px] font-medium text-[#0F1728]">
+            <button onClick={resetFilters} className="rounded-[16px] border border-border bg-muted px-4 py-2.5 text-[14px] font-medium text-foreground">
               Limpar filtros
             </button>
             <button
               onClick={() => setFilters((p) => ({ ...p, sector: "Bancos" }))}
-              className="rounded-[16px] bg-[#0E9384] px-4 py-2.5 text-[14px] font-semibold text-white"
+              className="rounded-[16px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-white"
             >
               Explorar por setor
             </button>
@@ -316,7 +316,7 @@ export function ExploreCompanyCatalog({
             return (
             <article
               key={company.ticker}
-              className={`group relative flex min-h-[212px] flex-col justify-between overflow-hidden rounded-[22px] border border-[#E7EEF5] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] ${getCardShellColor(company.status)}`}
+              className={`group relative flex min-h-[212px] flex-col justify-between overflow-hidden rounded-[22px] border border-border p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] dark:shadow-none ${getCardShellColor(company.status)}`}
             >
               <div className={`pointer-events-none absolute inset-x-0 top-0 ${accentVariant.band} ${getCardAccentColor(company.status)} opacity-90`} />
               <div className={`pointer-events-none absolute ${accentVariant.shape} ${getCardAccentColor(company.status)} opacity-45`} />
@@ -328,14 +328,14 @@ export function ExploreCompanyCatalog({
                       <img
                         src={getCompanyLogo(company.ticker)}
                         alt={`Logo ${company.ticker}`}
-                        className="h-12 w-12 rounded-[18px] border border-[#EEF3F7] bg-[#F8FBFD] object-cover p-1"
+                        className="h-12 w-12 rounded-[18px] border border-border bg-muted object-cover p-1"
                       />
                     )}
                     <div className="min-w-0">
-                      <h3 className="truncate text-[20px] font-semibold leading-7 text-[#0F1728]">
-                        {company.name} <span className="text-[#98A2B3]">{company.ticker}</span>
+                      <h3 className="truncate text-[20px] font-semibold leading-7 text-foreground">
+                        {company.name} <span className="text-muted-foreground">{company.ticker}</span>
                       </h3>
-                      <p className="mt-1 text-[13px] font-medium text-[#98A2B3]">{company.sector}</p>
+                      <p className="mt-1 text-[13px] font-medium text-muted-foreground">{company.sector}</p>
                     </div>
                   </div>
 
@@ -349,20 +349,20 @@ export function ExploreCompanyCatalog({
                   </div>
                 </div>
 
-                <p className="mt-6 text-[15px] leading-7 text-[#475467]">{company.shortDiagnosis}</p>
+                <p className="mt-6 text-[15px] leading-7 text-muted-foreground">{company.shortDiagnosis}</p>
 
                 <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-3 py-1 text-[11px] font-medium text-[#3965B8]">
+                  <span className="inline-flex rounded-full border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-[11px] font-medium text-blue-700 dark:text-blue-300">
                     Pilar em foco: {company.highlightPillar}
                   </span>
-                  <span className="inline-flex rounded-full border border-[#EEF3F7] bg-[#F8FBFD] px-3 py-1 text-[11px] font-medium text-[#667085]">
+                  <span className="inline-flex rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium text-muted-foreground">
                     Porte: {company.size}
                   </span>
                 </div>
               </div>
 
-              <div className="relative mt-7 flex flex-col gap-4 border-t border-[#EEF3F7] pt-5">
-                <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#98A2B3]">
+              <div className="relative mt-7 flex flex-col gap-4 border-t border-border pt-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-muted-foreground">
                   <span>
                     Fonte: {company.source} . Atualizado em {company.updatedAt}
                   </span>
@@ -371,25 +371,25 @@ export function ExploreCompanyCatalog({
                 <div className="flex flex-wrap items-center gap-3">
                   <Link
                     href={`/empresa/${company.ticker}`}
-                    className="inline-flex h-11 items-center rounded-[16px] bg-[#0E9384] px-4 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition group-hover:-translate-y-0.5 group-hover:px-5 group-hover:shadow-[0_18px_36px_rgba(14,147,132,0.22)] hover:opacity-90"
+                    className="inline-flex h-11 items-center rounded-[16px] bg-brand px-4 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition group-hover:-translate-y-0.5 group-hover:px-5 group-hover:shadow-[0_18px_36px_rgba(14,147,132,0.22)] dark:shadow-none hover:opacity-90"
                   >
                     Abrir análise
                   </Link>
                   <Link
                     href={`/empresa/${company.ticker}`}
-                    className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]"
+                    className="text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
                   >
                     Ver pilares
                   </Link>
                   <button
                     onClick={() => toggleCompare(company.ticker)}
                     className={`text-[13px] font-medium transition ${
-                      compareTickers.includes(company.ticker) ? "text-[#0E9384]" : "text-[#667085] hover:text-[#0F1728]"
+                      compareTickers.includes(company.ticker) ? "text-brand" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     Comparar
                   </button>
-                  <button className="inline-flex items-center gap-1 text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
+                  <button className="inline-flex items-center gap-1 text-[13px] font-medium text-muted-foreground transition hover:text-foreground">
                     <Star className="h-3.5 w-3.5" />
                     Favoritar
                   </button>

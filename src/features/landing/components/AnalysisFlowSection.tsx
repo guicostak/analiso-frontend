@@ -104,7 +104,7 @@ const analysisStates: AnalysisState[] = [
 
 function UnderstandMockup({ state }: { state: AnalysisState }) {
   return (
-    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
+    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-card p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="rounded-full border border-[#edf1f0] bg-[#fbfcfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5f6d69]">
@@ -142,7 +142,7 @@ function UnderstandMockup({ state }: { state: AnalysisState }) {
           </div>
         </div>
 
-        <div className="rounded-[18px] border border-[#eef2f1] bg-white p-4">
+        <div className="rounded-[18px] border border-[#eef2f1] bg-card p-4">
           <div className="text-[11px] font-medium text-[#7b8683]">Microinsight</div>
           <div className="mt-2 text-[14px] font-medium text-[#1f2937]">
             O essencial já fica legível na primeira leitura.
@@ -155,7 +155,7 @@ function UnderstandMockup({ state }: { state: AnalysisState }) {
 
 function ContextMockup({ state }: { state: AnalysisState }) {
   return (
-    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
+    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-card p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
       <div className="flex items-center justify-between gap-4">
         <div>
           <div className="rounded-full border border-[#edf1f0] bg-[#fbfcfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5f6d69]">
@@ -188,7 +188,7 @@ function ContextMockup({ state }: { state: AnalysisState }) {
           ].map((row) => (
             <div
               key={row.period}
-              className="grid grid-cols-[72px_1fr_80px] items-center gap-3 rounded-[14px] bg-white px-3 py-2.5"
+              className="grid grid-cols-[72px_1fr_80px] items-center gap-3 rounded-[14px] bg-card px-3 py-2.5"
             >
               <span className="text-[11px] font-medium text-[#73808d]">{row.period}</span>
               <div className="h-2 overflow-hidden rounded-full bg-[#ebeff8]">
@@ -207,13 +207,13 @@ function ContextMockup({ state }: { state: AnalysisState }) {
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[18px] border border-[#eef2f1] bg-white p-4">
+        <div className="rounded-[18px] border border-[#eef2f1] bg-card p-4">
           <div className="text-[11px] font-medium text-[#7b8683]">Leitura guiada</div>
           <div className="mt-2 text-[14px] font-medium text-[#1f2937]">
             Receita cresce acima do setor há 3 ciclos, com margem estável.
           </div>
         </div>
-        <div className="rounded-[18px] border border-[#eef2f1] bg-white p-4">
+        <div className="rounded-[18px] border border-[#eef2f1] bg-card p-4">
           <div className="text-[11px] font-medium text-[#7b8683]">Comparação</div>
           <div className="mt-2 text-[14px] font-medium text-[#1f2937]">
             Histórico e setor deixam a leitura mais concreta.
@@ -226,7 +226,7 @@ function ContextMockup({ state }: { state: AnalysisState }) {
 
 function ChangesMockup({ state }: { state: AnalysisState }) {
   return (
-    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
+    <div className="relative h-[250px] rounded-[22px] border border-[#edf1f0] bg-card p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
       <div className="flex items-center justify-between gap-4">
         <div>
           <div className="rounded-full border border-[#edf1f0] bg-[#fbfcfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5f6d69]">
@@ -271,7 +271,7 @@ function ChangesMockup({ state }: { state: AnalysisState }) {
               <div className="text-[14px] font-semibold text-[#18202f]">{item.title}</div>
               <div className="mt-1 text-[13px] text-[#5f6b68]">{item.note}</div>
             </div>
-            <div className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#6d7775]">
+            <div className="rounded-full bg-card px-2.5 py-1 text-[11px] font-semibold text-[#6d7775]">
               {index === 0 ? "Novo" : index === 1 ? "Atenção" : "Estável"}
             </div>
           </div>
@@ -283,7 +283,7 @@ function ChangesMockup({ state }: { state: AnalysisState }) {
 
 function ContextMockupRefined({ state }: { state: AnalysisState }) {
   return (
-    <div className="relative h-[250px] overflow-hidden rounded-[22px] border border-[#edf1f0] bg-white p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
+    <div className="relative h-[250px] overflow-hidden rounded-[22px] border border-[#edf1f0] bg-card p-5 shadow-[0_18px_45px_rgba(0,0,0,0.04)] max-md:h-auto">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="rounded-full border border-[#edf1f0] bg-[#fbfcfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5f6d69]">
@@ -301,7 +301,7 @@ function ContextMockupRefined({ state }: { state: AnalysisState }) {
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-[20px] border border-[#edf1f0] bg-white p-5 max-md:max-h-[260px]">
+      <div className="mt-6 overflow-hidden rounded-[20px] border border-[#edf1f0] bg-card p-5 max-md:max-h-[260px]">
         <div className="flex flex-col gap-1">
           <span className="text-[11px] font-medium leading-4 text-[#7b8683]">Comparativo central</span>
           <p className="text-[16px] font-semibold leading-[22px] tracking-[-0.16px] text-[#1f2937]">
@@ -339,10 +339,10 @@ function ContextMockupRefined({ state }: { state: AnalysisState }) {
           ))}
         </div>
 
-        <div className="pointer-events-none absolute bottom-0 right-0 h-[84px] w-[70%] bg-gradient-to-b from-transparent via-white/80 to-white max-md:hidden" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-[84px] w-[70%] bg-gradient-to-b from-transparent via-card/80 to-card max-md:hidden" />
       </div>
 
-      <div className="absolute left-[64%] top-[22px] z-10 hidden w-[168px] overflow-hidden rounded-[18px] border border-[#edf1f0] bg-white p-4 shadow-[0px_5px_36px_0px_rgba(0,0,0,0.06)] md:flex md:flex-col md:gap-[14px]">
+      <div className="absolute left-[64%] top-[22px] z-10 hidden w-[168px] overflow-hidden rounded-[18px] border border-[#edf1f0] bg-card p-4 shadow-[0px_5px_36px_0px_rgba(0,0,0,0.06)] md:flex md:flex-col md:gap-[14px]">
         <div className="flex items-center gap-[6px]">
           <ScanSearch className="h-[18px] w-[18px]" style={{ color: state.accent }} />
           <p className="text-[15px] font-medium tracking-[-0.2px] text-[#1f2937]">Acima do setor</p>
@@ -354,13 +354,13 @@ function ContextMockupRefined({ state }: { state: AnalysisState }) {
             </span>
             <span className="text-[#667085]"> com margem preservada.</span>
           </div>
-          <button className="flex h-[24px] items-center justify-center rounded-[10px] border border-[#edf1f0] bg-white px-[8px] text-[10px] font-semibold text-[#1f2937] shadow-small">
+          <button className="flex h-[24px] items-center justify-center rounded-[10px] border border-[#edf1f0] bg-card px-[8px] text-[10px] font-semibold text-[#1f2937] shadow-small">
             Ver leitura
           </button>
         </div>
       </div>
 
-      <div className="absolute right-0 top-0 h-full w-[132px] bg-gradient-to-l from-white to-transparent max-md:hidden" />
+      <div className="absolute right-0 top-0 h-full w-[132px] bg-gradient-to-l from-card to-transparent max-md:hidden" />
     </div>
   );
 }
@@ -500,16 +500,16 @@ export function AnalysisFlowSection() {
             style={{ borderColor: activeState.ring }}
           />
 
-          <div className="pointer-events-none absolute left-[4%] top-[110px] hidden h-[132px] w-[182px] rounded-[22px] border border-white/70 bg-white/55 opacity-70 blur-[1px] md:block" />
-          <div className="pointer-events-none absolute right-[4%] top-[148px] hidden h-[118px] w-[170px] rounded-[22px] border border-white/70 bg-white/55 opacity-70 blur-[1px] md:block" />
-          <div className="pointer-events-none absolute left-[12%] top-[318px] hidden h-[108px] w-[160px] rounded-[22px] border border-white/70 bg-white/55 opacity-60 blur-[1px] md:block" />
-          <div className="pointer-events-none absolute right-[12%] top-[336px] hidden h-[100px] w-[156px] rounded-[22px] border border-white/70 bg-white/55 opacity-60 blur-[1px] md:block" />
+          <div className="pointer-events-none absolute left-[4%] top-[110px] hidden h-[132px] w-[182px] rounded-[22px] border border-white/70 bg-card/55 opacity-70 blur-[1px] md:block" />
+          <div className="pointer-events-none absolute right-[4%] top-[148px] hidden h-[118px] w-[170px] rounded-[22px] border border-white/70 bg-card/55 opacity-70 blur-[1px] md:block" />
+          <div className="pointer-events-none absolute left-[12%] top-[318px] hidden h-[108px] w-[160px] rounded-[22px] border border-white/70 bg-card/55 opacity-60 blur-[1px] md:block" />
+          <div className="pointer-events-none absolute right-[12%] top-[336px] hidden h-[100px] w-[156px] rounded-[22px] border border-white/70 bg-card/55 opacity-60 blur-[1px] md:block" />
 
           <div
             className="relative overflow-hidden rounded-[30px] border shadow-[0_30px_80px_rgba(16,24,40,0.08)] transition-all duration-500"
             style={{ borderColor: activeState.border, backgroundColor: activeState.softBg }}
           >
-            <div className="rounded-[28px] border-b border-white/60 bg-white/92 p-6 backdrop-blur-sm md:p-7">
+            <div className="rounded-[28px] border-b border-white/60 bg-card/92 p-6 backdrop-blur-sm md:p-7">
               <div className="grid gap-6 md:grid-cols-[1.08fr_0.92fr]">
               <div className="flex flex-col justify-between gap-5">
                 <div>

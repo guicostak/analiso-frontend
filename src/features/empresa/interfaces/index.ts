@@ -232,9 +232,27 @@ export type CompanyData = {
   }>;
   sourceRows: Array<Contextual<SourceRow>>;
   sourceConfidence?: { title?: string; level?: string; summary?: string };
-  changesSummaryByWindow?: Record<string, Record<string, unknown>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  changesSummary?: any;
+  changesSummaryByWindow?: Record<string, ChangesSummaryEntry>;
+  changesSummary?: ChangesSummaryEntry;
+};
+
+// ─── Changes summary entry ──────────────────────────────────────────────────
+
+export type ChangesSummaryEntry = {
+  windowDays?: number;
+  summaryText?: string;
+  mostAffectedPillar?: string;
+  structuralCount?: number;
+  relevantCount?: number;
+  routineCount?: number;
+  isWindowFallback?: boolean;
+  principalChange?: {
+    title?: string;
+    type?: string;
+    impact?: string;
+    pillar?: string;
+    whyItMatters?: string;
+  };
 };
 
 // ─── Tab payload ──────────────────────────────────────────────────────────────

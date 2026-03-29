@@ -104,7 +104,7 @@ export function LuizChatPanel() {
 
       {/* Drawer */}
       <div
-        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white md:w-[440px] md:rounded-l-[20px]"
+        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-card md:w-[440px] md:rounded-l-[20px]"
         style={{
           boxShadow: "-12px 0 64px rgba(0,0,0,0.10), -1px 0 0 rgba(0,0,0,0.04)",
           animation: "luizSlideIn 240ms cubic-bezier(0.22,1,0.36,1) both",
@@ -114,13 +114,13 @@ export function LuizChatPanel() {
       >
 
         {/* ── Header ── */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-[#F0F0F4] px-5 py-4">
+        <div className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
           {/* Avatar neon com glow */}
           <LuizAvatar size="sm" showStatus />
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] font-bold tracking-[-0.02em] text-[#0D0D0D]">
+              <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground">
                 Luiz
               </span>
               {/* Badge online com dot verde */}
@@ -129,7 +129,7 @@ export function LuizChatPanel() {
                 online
               </span>
             </div>
-            <p className="mt-0.5 text-[12px] text-[#9898AA]">
+            <p className="mt-0.5 text-[12px] text-muted-foreground">
               assistente de análise fundamentalista
             </p>
           </div>
@@ -139,7 +139,7 @@ export function LuizChatPanel() {
               <button
                 onClick={clear}
                 title="Nova conversa"
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium text-[#9898AA] transition hover:bg-[#F5F5FA] hover:text-[#444]"
+                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Recomeçar</span>
@@ -148,7 +148,7 @@ export function LuizChatPanel() {
             <button
               onClick={close}
               title="Fechar"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#C0C0CC] transition hover:bg-[#F5F5FA] hover:text-[#444]"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -162,7 +162,7 @@ export function LuizChatPanel() {
         />
 
         {/* ── Área de mensagens ── */}
-        <div className="flex-1 overflow-y-auto scroll-smooth bg-white">
+        <div className="flex-1 overflow-y-auto scroll-smooth bg-card">
           {messages.length === 0 && !isTyping ? (
 
             /* ── Empty state ── */
@@ -183,10 +183,10 @@ export function LuizChatPanel() {
                 </div>
               </div>
 
-              <h2 className="text-center text-[22px] font-bold tracking-[-0.03em] text-[#0D0D0D]">
+              <h2 className="text-center text-[22px] font-bold tracking-[-0.03em] text-foreground">
                 Olá, eu sou o Luiz
               </h2>
-              <p className="mx-auto mt-2 max-w-[280px] text-center text-[13.5px] leading-snug text-[#9090A0]">
+              <p className="mx-auto mt-2 max-w-[280px] text-center text-[13.5px] leading-snug text-muted-foreground">
                 Seu assistente de análise fundamentalista. Como posso ajudar hoje?
               </p>
 
@@ -196,10 +196,10 @@ export function LuizChatPanel() {
                   <button
                     key={s.text}
                     onClick={() => sendMessage(s.text)}
-                    className="group flex items-center gap-3 rounded-[14px] border border-[#EBEBF0] bg-[#FAFAFA] px-4 py-3.5 text-left transition-all hover:border-transparent hover:shadow-[0_0_0_1.5px_rgba(168,85,247,0.35)] active:scale-[0.99]"
+                    className="group flex items-center gap-3 rounded-[14px] border border-border bg-muted px-4 py-3.5 text-left transition-all hover:border-transparent hover:shadow-[0_0_0_1.5px_rgba(168,85,247,0.35)] active:scale-[0.99]"
                   >
                     <span className="text-[18px] leading-none">{s.icon}</span>
-                    <span className="text-[13.5px] font-medium text-[#2A2A3A] group-hover:text-[#6D28D9]">
+                    <span className="text-[13.5px] font-medium text-foreground group-hover:text-[#6D28D9]">
                       {s.text}
                     </span>
                   </button>
@@ -222,15 +222,15 @@ export function LuizChatPanel() {
         </div>
 
         {/* ── Input ── */}
-        <div className="shrink-0 border-t border-[#F0F0F4] bg-white px-4 pb-6 pt-3">
+        <div className="shrink-0 border-t border-border bg-card px-4 pb-6 pt-3">
           <div
             className="flex items-end gap-2 rounded-[16px] border px-4 py-3 transition-all duration-150"
             style={{
-              borderColor: focused ? "rgba(168,85,247,0.50)" : "#E5E5EA",
+              borderColor: focused ? "rgba(168,85,247,0.50)" : "var(--border)",
               boxShadow:   focused
                 ? "0 0 0 3px rgba(168,85,247,0.10), 0 0 12px rgba(168,85,247,0.08)"
                 : "none",
-              background: focused ? "#fff" : "#FAFAFA",
+              background: focused ? "var(--card)" : "var(--muted)",
             }}
           >
             <textarea
@@ -242,7 +242,7 @@ export function LuizChatPanel() {
               onBlur={() => setFocused(false)}
               placeholder="Como posso ajudar hoje?"
               rows={1}
-              className="flex-1 resize-none bg-transparent text-[14px] leading-relaxed text-[#0D0D0D] outline-none placeholder:text-[#B8B8C4]"
+              className="flex-1 resize-none bg-transparent text-[14px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/60"
               style={{ maxHeight: 120 }}
               aria-label="Mensagem"
             />
@@ -254,7 +254,7 @@ export function LuizChatPanel() {
               aria-label="Enviar"
               className="mb-[1px] flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150"
               style={{
-                background: input.trim() && !isTyping ? NEON : "#EBEBF0",
+                background: input.trim() && !isTyping ? NEON : "var(--muted)",
                 boxShadow:  input.trim() && !isTyping
                   ? "0 2px 12px rgba(168,85,247,0.45), 0 1px 4px rgba(236,72,153,0.25)"
                   : "none",
@@ -268,7 +268,7 @@ export function LuizChatPanel() {
             </button>
           </div>
 
-          <p className="mt-2 text-center text-[11px] text-[#C4C4CC]">
+          <p className="mt-2 text-center text-[11px] text-muted-foreground/50">
             Luiz não recomenda compra ou venda de ativos
           </p>
         </div>

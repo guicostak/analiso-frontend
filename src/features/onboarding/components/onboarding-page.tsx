@@ -55,7 +55,7 @@ function Icon3D({ name }: { name: string }) {
   };
 
   return (
-    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAECF0] shadow-sm flex items-center justify-center">
+    <div className="w-12 h-12 rounded-xl bg-card border border-border shadow-sm flex items-center justify-center">
       <svg viewBox="0 0 64 64" className="w-8 h-8" aria-hidden="true">
         <path
           d="M32 6l22 12v28L32 58 10 46V18L32 6z"
@@ -132,7 +132,7 @@ function TileGrid({
             onKeyDown={(event) => handleKeyDown(event, index)}
             aria-pressed={isSelected}
             aria-disabled={isLocked}
-            className={`text-center rounded-2xl border p-4 transition-all shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40 ${
+            className={`text-center rounded-2xl border p-4 transition-all shadow-sm bg-card focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40 ${
               isSelected ? "border-[#0E9384] bg-[#0E9384]/5" : "border-[#EAECF0] hover:border-[#D0D5DD]"
             } ${isLocked ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:-translate-y-0.5"}`}
           >
@@ -328,7 +328,7 @@ export function OnboardingPage() {
                 key={item.ticker}
                 type="button"
                 onClick={() => addTicker(item.ticker, "grid")}
-                className={`cursor-pointer text-left rounded-2xl border p-4 transition-all shadow-sm bg-white hover:border-[#D0D5DD] ${
+                className={`cursor-pointer text-left rounded-2xl border p-4 transition-all shadow-sm bg-card hover:border-border ${
                   draft.watchlistTickers.includes(item.ticker)
                     ? "border-[#0E9384] bg-[#0E9384]/5"
                     : "border-[#EAECF0]"
@@ -378,7 +378,7 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#0B1220]">
+    <div className="min-h-screen bg-background text-foreground">
       <LandingNav showAuthButton={false} />
 
       <div className="max-w-[1200px] mx-auto px-6 py-8">
@@ -398,7 +398,7 @@ export function OnboardingPage() {
         </div>
 
         <div className="flex justify-center">
-          <div className="w-full max-w-[720px] bg-white border border-[#EAECF0] rounded-3xl shadow-sm p-8 md:p-12">
+          <div className="w-full max-w-[720px] bg-card border border-border rounded-3xl shadow-sm p-8 md:p-12">
             <div className="text-center">
               {step === 4 && (
                 <img

@@ -90,7 +90,7 @@ function ScoreBar({ score, max = 6, color }: { score: number; max?: number; colo
 
 function SectionCard({ title, subtitle, children, className = '' }: { title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-neutral-200 p-6 ${className}`}>
+    <div className={`bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 ${className}`}>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
         {subtitle && <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>}
@@ -990,7 +990,7 @@ function OverviewTab({ data }: { data: AnalysisData }) {
   return (
     <div className="space-y-6">
       {/* Company Header */}
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
             {data.company.ticker.slice(0, 2)}
@@ -1173,7 +1173,7 @@ function ValueTab({ data }: { data: AnalysisData }) {
   return (
     <div className="space-y-6">
       {/* Dimension Header */}
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.value}15` }}>
@@ -1403,7 +1403,7 @@ function FutureTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.future}15` }}>
@@ -1520,7 +1520,7 @@ function PastTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.past}15` }}>
@@ -1591,7 +1591,7 @@ function PastTab({ data }: { data: AnalysisData }) {
           { label: 'ROA Atual', value: `${p.currentROA}%`, color: p.currentROA >= p.industryROA ? COLORS.positive : COLORS.negative },
           { label: 'Cresc. LPA 5a', value: `${p.epsGrowth5y}% a.a.`, color: COLORS.past },
         ].map((m) => (
-          <div key={m.label} className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+          <div key={m.label} className="bg-card rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-center">
             <div className="text-2xl font-bold" style={{ color: m.color }}>{m.value}</div>
             <div className="text-xs text-neutral-500 mt-1">{m.label}</div>
           </div>
@@ -1652,7 +1652,7 @@ function HealthTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.health}15` }}>
@@ -1778,7 +1778,7 @@ function DividendTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.dividend}15` }}>
@@ -2019,7 +2019,7 @@ export function AnalysisPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top Bar */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-200">
+      <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-700">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-neutral-400 hover:text-neutral-700 transition-colors">
@@ -2047,7 +2047,7 @@ export function AnalysisPage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="sticky top-[57px] z-20 bg-white border-b border-neutral-200">
+      <div className="sticky top-[57px] z-20 bg-card border-b border-neutral-200 dark:border-neutral-700">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex gap-1 overflow-x-auto py-1 -mb-px">
             {TABS.map((tab) => {

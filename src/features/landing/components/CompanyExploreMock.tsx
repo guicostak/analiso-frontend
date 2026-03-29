@@ -77,7 +77,7 @@ export function CompanyExploreMock() {
   const compactCompanies = filteredCompanies.slice(0, 4);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-[#E2EDF5] bg-[#F6FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
+    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-[#F6FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
       <div className="flex-1 overflow-y-auto px-5 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <style jsx>{`
           :global(.company-explore-filters .xl\:flex-row) {
@@ -99,10 +99,10 @@ export function CompanyExploreMock() {
           }
         `}</style>
         <header className="mb-4 space-y-2">
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Explorar mercado</p>
+          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Explorar mercado</p>
           <div className="max-w-[640px] space-y-2">
-            <h1 className="text-[26px] font-semibold leading-[30px] tracking-[-0.04em] text-[#0F1728]">Explorar</h1>
-            <p className="text-[13px] leading-6 text-[#667085]">
+            <h1 className="text-[26px] font-semibold leading-[30px] tracking-[-0.04em] text-foreground">Explorar</h1>
+            <p className="text-[13px] leading-6 text-muted-foreground">
               Descubra empresas e movimentos com uma leitura guiada, priorizando o que merece abertura agora e deixando a exploração mais leve ao longo da página.
             </p>
           </div>

@@ -1,0 +1,89 @@
+/*
+ * themes.css — Sistema de Temas da Analiso
+ *
+ * Este arquivo centraliza os tokens de design para light e dark mode.
+ * Todos os componentes devem consumir estas variáveis via classes Tailwind
+ * ou via `var(--nome-da-variavel)`.
+ *
+ * As variáveis aqui complementam as definidas em globals.css.
+ * NÃO duplicar — este arquivo adiciona documentação e organização.
+ */
+
+/*
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  LIGHT MODE  (padrão — :root)                                           │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * Superfícies:
+ *   --background   → Fundo da página         (#F8FAFC)
+ *   --card         → Cards / painéis          (#ffffff)
+ *   --muted        → Painéis secundários      (#F1F5F9)
+ *   --accent       → Hover dentro de cards    (#F1F5F9)
+ *
+ * Texto:
+ *   --foreground          → Texto primário     (#0F172A)
+ *   --muted-foreground    → Texto secundário   (#64748B)
+ *   --dim                 → Texto intermediário(#475569)
+ *
+ * Bordas:
+ *   --border        → Borda padrão            (#E2E8F0)
+ *   --border-strong → Borda pronunciada       (#CBD5E1)
+ *
+ * Interação:
+ *   --hover         → Hover em linhas/botões  (#F1F5F9)
+ *
+ * Marca (Mint–Teal):
+ *   --brand         → Cor principal           (#0E9384)
+ *   --brand-hover   → Hover sobre marca       (#0B7A6E)
+ *   --brand-surface → Fundo com toque de marca(#F0FDFA)
+ *   --brand-border  → Borda com toque de marca(#99F6E0)
+ *   --brand-text    → Texto com cor da marca  (#0F766E)
+ *
+ * Status:
+ *   --success-surface / --success-border / --success-text
+ *   --warning-surface / --warning-border / --warning-text
+ *   --danger-surface  / --danger-border  / --danger-text
+ */
+
+/*
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  DARK MODE  (.dark aplicado no <html>)                                  │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * Superfícies:
+ *   --background   → #020617   (navy profundo)
+ *   --card         → #0B1220   (azul-carvão)
+ *   --muted        → #0F172A   (slate escuro)
+ *
+ * Texto:
+ *   --foreground          → #E5E7EB  (quase branco)
+ *   --muted-foreground    → #94A3B8  (azul-cinza)
+ *   --dim                 → #CBD5E1
+ *
+ * Bordas:
+ *   --border        → #1F2937
+ *   --border-strong → #334155
+ *
+ * Marca:
+ *   --brand-text → #5EEAD4  (mint claro para contraste no escuro)
+ */
+
+/*
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  COMO USAR                                                              │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * Via Tailwind (preferido):
+ *   bg-background      text-foreground      border-border
+ *   bg-card            text-muted-foreground bg-muted
+ *   bg-brand-surface   text-brand           text-brand-text
+ *   bg-success-surface text-success-text    border-success-border
+ *   bg-warning-surface text-warning-text    border-warning-border
+ *   bg-danger-surface  text-danger-text     border-danger-border
+ *   bg-hover           bg-brand             text-dim
+ *
+ * Via CSS puro:
+ *   background-color: var(--background);
+ *   color: var(--foreground);
+ *   border-color: var(--border);
+ */

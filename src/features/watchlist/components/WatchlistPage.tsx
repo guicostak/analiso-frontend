@@ -102,8 +102,8 @@ export function WatchlistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6FAFC] text-[#0F1728]">
-      <Sidebar currentPage="watchlist" contextLabel="Minha watchlist" />
+    <div className="min-h-screen bg-background text-foreground">
+      <Sidebar currentPage="watchlist" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
       <MainContent className="relative overflow-hidden pt-20">
@@ -132,8 +132,8 @@ export function WatchlistPage() {
                       onClick={() => setActiveTab(tab.key as "updates" | "list")}
                       className={`rounded-full border px-4.5 py-2 text-[12px] font-semibold transition ${
                         activeTab === tab.key
-                          ? "border-[#D9E8FF] bg-[#EEF6FF] text-[#3965B8] shadow-[0_10px_24px_rgba(15,23,40,0.04)]"
-                          : "border-[#E7EEF5] bg-white text-[#667085] hover:bg-[#F8FBFD] hover:text-[#0F1728]"
+                          ? "border-border bg-muted text-blue-700 dark:text-blue-400"
+                          : "border-border bg-card text-muted-foreground hover:bg-hover hover:text-foreground"
                       }`}
                     >
                       {tab.label}
@@ -142,25 +142,25 @@ export function WatchlistPage() {
                 </div>
 
                 {uiState === "empty" ? (
-                  <div className="rounded-[24px] border border-[#E7EEF5] bg-white p-7 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-                    <h2 className="text-[24px] font-semibold leading-[30px] tracking-[-0.02em] text-[#0F1728]">
+                  <div className="rounded-[24px] border border-border bg-card p-7 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                    <h2 className="text-[24px] font-semibold leading-[30px] tracking-[-0.02em] text-foreground">
                       Comece pela sua primeira watchlist
                     </h2>
-                    <p className="mt-3 text-[14px] leading-6 text-[#667085]">
+                    <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
                       Escolha 3 empresas para acompanhar mudanças sem ruído.
                     </p>
                     <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                       <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
                           type="text"
                           placeholder="Buscar empresa ou ticker..."
-                          className="h-11 w-full rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] pl-10 pr-3 text-[13px] text-[#0F1728] outline-none transition focus:ring-2 focus:ring-[#DDF6F0]"
+                          className="h-11 w-full rounded-[18px] border border-border bg-muted pl-10 pr-3 text-[13px] text-foreground outline-none transition focus:ring-2 focus:ring-brand-border"
                         />
                       </div>
                       <Link
                         href="/explorar"
-                        className="inline-flex h-11 items-center justify-center rounded-[18px] bg-[#12A594] px-4.5 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)]"
+                        className="inline-flex h-11 items-center justify-center rounded-[18px] bg-brand px-4.5 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] dark:shadow-none"
                       >
                         Explorar mercado
                       </Link>
@@ -169,7 +169,7 @@ export function WatchlistPage() {
                       {suggestedCompanies.map((ticker) => (
                         <button
                           key={ticker}
-                          className="rounded-full border border-[#E7EEF5] bg-[#F8FBFD] px-3.5 py-2 text-[11px] font-medium text-[#667085] transition hover:bg-white"
+                          className="rounded-full border border-border bg-muted px-3.5 py-2 text-[11px] font-medium text-muted-foreground transition hover:bg-card"
                         >
                           {ticker}
                         </button>
@@ -178,17 +178,17 @@ export function WatchlistPage() {
                   </div>
                 ) : uiState === "loading" ? (
                   <div className="space-y-4">
-                    <div className="space-y-4 rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-                      <div className="h-4 w-32 rounded bg-[#EDF2F7]" />
-                      <div className="h-10 w-4/5 rounded-full bg-[#EDF2F7]" />
-                      <div className="h-4 w-3/4 rounded-full bg-[#EDF2F7]" />
+                    <div className="space-y-4 rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                      <div className="h-4 w-32 rounded bg-muted" />
+                      <div className="h-10 w-4/5 rounded-full bg-muted" />
+                      <div className="h-4 w-3/4 rounded-full bg-muted" />
                     </div>
-                    <div className="space-y-4 rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-                      <div className="h-4 w-40 rounded bg-[#EDF2F7]" />
-                      <div className="h-20 w-full rounded-[20px] bg-[#EDF2F7]" />
+                    <div className="space-y-4 rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                      <div className="h-4 w-40 rounded bg-muted" />
+                      <div className="h-20 w-full rounded-[20px] bg-muted" />
                     </div>
-                    <div className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-                      <div className="h-14 w-full rounded-[18px] bg-[#EDF2F7]" />
+                    <div className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                      <div className="h-14 w-full rounded-[18px] bg-muted" />
                     </div>
                   </div>
                 ) : activeTab === "updates" ? (

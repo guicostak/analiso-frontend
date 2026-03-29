@@ -74,7 +74,7 @@ export function LargeRadarChart({ dimensions, confidence, lastRefreshed }: Large
   ];
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-3xl p-8">
+    <div className="bg-card border border-neutral-200 dark:border-neutral-700 rounded-3xl p-8">
       <div className="mb-6">
         <h3 className="text-neutral-900 mb-1">Avaliação 5 Dimensões</h3>
         <p className="text-sm text-neutral-500">Score de saúde abrangente em métricas-chave</p>

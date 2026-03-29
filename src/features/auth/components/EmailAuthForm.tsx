@@ -31,7 +31,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
   return (
     <div className="w-full">
       {/* Mode tabs */}
-      <div className="flex rounded-xl border border-[#EAECF0] bg-[#F7F8FB] p-1 mb-6">
+      <div className="flex rounded-xl border border-border bg-muted p-1 mb-6">
         <TabButton
           label="Entrar"
           active={mode === "login"}
@@ -81,7 +81,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
         />
 
         {error && (
-          <p role="alert" className="text-xs text-[#DC2626] bg-[#FEF2F2] border border-[#FECACA] rounded-lg px-3 py-2">
+          <p role="alert" className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
             {error}
           </p>
         )}
@@ -89,10 +89,10 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full mt-3 py-3.5 px-4 rounded-full bg-[#0E9384] text-white text-sm font-semibold tracking-wide
-            hover:bg-[#0B7A6E] active:scale-[0.98] transition-all
+          className="w-full mt-3 py-3.5 px-4 rounded-full bg-brand text-white text-sm font-semibold tracking-wide
+            hover:bg-brand/90 active:scale-[0.98] transition-all
             disabled:opacity-60 disabled:cursor-not-allowed
-            focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40 focus:ring-offset-2 focus:ring-offset-[#F7F8FB]"
+            focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-2 focus:ring-offset-muted"
         >
           {isLoading
             ? mode === "register"
@@ -123,11 +123,11 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors
-        focus:outline-none focus:ring-2 focus:ring-[#0E9384]/40
+        focus:outline-none focus:ring-2 focus:ring-brand/40
         ${
           active
-            ? "bg-white text-[#0B1220] shadow-sm"
-            : "text-[#98A2B3] hover:text-[#344054]"
+            ? "bg-card text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
         }`}
     >
       {label}
@@ -160,7 +160,7 @@ function FormField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs font-semibold text-[#344054] tracking-wide uppercase">
+      <label htmlFor={id} className="text-xs font-semibold text-foreground tracking-wide uppercase">
         {label}
       </label>
       <div className="relative">
@@ -172,9 +172,9 @@ function FormField({
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
-          className={`w-full px-4 py-3 rounded-xl border border-[#EAECF0] bg-white
-            text-sm text-[#0B1220] placeholder:text-[#C0C6D0]
-            focus:outline-none focus:ring-2 focus:ring-[#0E9384]/30 focus:border-[#0E9384]
+          className={`w-full px-4 py-3 rounded-xl border border-border bg-card
+            text-sm text-foreground placeholder:text-muted-foreground/60
+            focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand
             transition-colors ${isPassword ? "pr-11" : ""}`}
         />
         {isPassword && (
@@ -182,7 +182,7 @@ function FormField({
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-[#98A2B3] hover:text-[#475467] transition-colors focus:outline-none"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
           >
             {showPassword ? <EyeOffIcon /> : <EyeIcon />}
           </button>

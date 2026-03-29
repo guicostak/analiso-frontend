@@ -15,6 +15,7 @@ import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/components/ui/utils";
 import { useDashboardInbox, allPillars, allSources, allStatuses } from "../hooks/useDashboardInbox";
 import type { InboxItem, Pillar, Status, WindowRange } from "../interfaces";
+import { statusBadgeClasses, SURFACE_BASE, SURFACE_MEDIUM } from "../mappers/dashboard.mapper";
 
 import logoItau from "@/src/assets/logos/itau.png";
 import logoMrv from "@/src/assets/logos/mrv.jpg";
@@ -32,15 +33,9 @@ const logoByTicker: Record<string, string> = {
   WEGE3: logoWeg.src,
 };
 
-const surfaceBase =
-  "rounded-[24px] border border-[#E8EEF5] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]";
-const mediumSurface = "rounded-[20px] border border-[#E8EEF5] bg-white";
-
-const statusClasses: Record<Status, string> = {
-  "Saud\u00e1vel": "border-[#CDECDD] bg-[#EAF9F0] text-[#17825B]",
-  "Aten\u00e7\u00e3o": "border-[#F8E1B1] bg-[#FFF4DE] text-[#B27300]",
-  Risco: "border-[#F4D7DE] bg-[#FDECEF] text-[#B54768]",
-};
+const surfaceBase = SURFACE_BASE;
+const mediumSurface = SURFACE_MEDIUM;
+const statusClasses = statusBadgeClasses;
 
 function pluralize(value: number, singular: string, plural: string) {
   return `${value} ${value === 1 ? singular : plural}`;
@@ -71,10 +66,10 @@ function SegmentedHealthBar({
   const total = Math.max(healthy + attention + risk, 1);
 
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#EEF2F6]">
-      <div className="h-full bg-[#1FA971]" style={{ width: `${(healthy / total) * 100}%`, float: "left" }} />
-      <div className="h-full bg-[#F3B746]" style={{ width: `${(attention / total) * 100}%`, float: "left" }} />
-      <div className="h-full bg-[#E6728C]" style={{ width: `${(risk / total) * 100}%`, float: "left" }} />
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+      <div className="h-full bg-emerald-500" style={{ width: `${(healthy / total) * 100}%`, float: "left" }} />
+      <div className="h-full bg-amber-400" style={{ width: `${(attention / total) * 100}%`, float: "left" }} />
+      <div className="h-full bg-rose-400" style={{ width: `${(risk / total) * 100}%`, float: "left" }} />
     </div>
   );
 }
@@ -107,19 +102,19 @@ const summaryToneStyles: Record<
   }
 > = {
   balanced: {
-    shell: "from-[#EEF7FF] via-[#F7FBFF] to-white",
+    shell: "from-muted via-card to-card",
     glow: "bg-[radial-gradient(circle_at_top_left,rgba(91,141,239,0.22),transparent_58%)]",
-    pill: "bg-[#EAF2FF] text-[#3965B8]",
+    pill: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400",
   },
   positive: {
-    shell: "from-[#F3FAF8] via-[#F9FCFB] to-white",
+    shell: "from-brand-surface/30 via-card to-card",
     glow: "bg-[radial-gradient(circle_at_top_left,rgba(18,165,148,0.20),transparent_58%)]",
-    pill: "bg-[#DDF6F0] text-[#0F9485]",
+    pill: "bg-brand-surface text-brand",
   },
   pressure: {
-    shell: "from-[#FDEFF1] via-[#FFF8FA] to-white",
+    shell: "from-danger-surface via-card to-card",
     glow: "bg-[radial-gradient(circle_at_top_left,rgba(214,85,121,0.16),transparent_56%)]",
-    pill: "bg-[#FDECEF] text-[#B54768]",
+    pill: "bg-danger-surface text-danger-text",
   },
 };
 
@@ -255,12 +250,11 @@ export function Dashboard() {
 
   return (
     <div
-      className="min-h-screen bg-[#F7FAFC] text-[#0F1728]"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      className="min-h-screen bg-background text-foreground"
       data-day-template={dashboardData?.dayTemplate ?? "fallback"}
       data-manifest-version={dashboardData?.manifestVersion ?? "fallback"}
     >
-      <Sidebar currentPage="dashboard" contextLabel="Minha watchlist" />
+      <Sidebar currentPage="dashboard" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
       <MainContent className="px-5 pb-8 pt-20 xl:px-7 xl:pt-20">
@@ -268,53 +262,53 @@ export function Dashboard() {
           <section>
             <article
               className={cn(
-                "rounded-[24px] border border-[#C9DFFA] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]",
-                "relative min-h-[196px] overflow-hidden bg-[linear-gradient(180deg,#F7FBFF_0%,#FFFFFF_100%)]",
+                "rounded-[24px] border border-border bg-card shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none",
+                "relative min-h-[196px] overflow-hidden bg-card",
               )}
             >
-              <div className="absolute inset-x-0 top-0 h-[68px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)]" />
-              <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-[#2F6FD6]">Resumo do dia</span>
+              <div className="absolute inset-x-0 top-0 h-[68px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)] dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.15)_0%,transparent_100%)]" />
+              <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-blue-600 dark:text-blue-400">Resumo do dia</span>
 
               <div className="relative grid h-full gap-6 px-6 pb-5 pt-[84px] xl:grid-cols-[minmax(0,1.6fr)_auto] xl:items-end">
                 <div>
                   {dashboardLoading ? (
                     <div className="space-y-3">
-                      <div className="h-4 w-32 animate-pulse rounded-full bg-[#E8F0FB]" />
-                      <div className="h-8 w-4/5 animate-pulse rounded-full bg-[#E8F0FB]" />
-                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-[#EEF4FC]" />
+                      <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+                      <div className="h-8 w-4/5 animate-pulse rounded-full bg-muted" />
+                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-muted" />
                     </div>
                   ) : dashboardError === "not_ready" ? (
                     <div className="space-y-2.5">
-                      <h1 className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0F1728]">
+                      <h1 className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground">
                         Preparando seu dashboard
                       </h1>
-                      <p className="max-w-[30ch] text-[15px] leading-6 text-[#667085]">
+                      <p className="max-w-[30ch] text-[15px] leading-6 text-muted-foreground">
                         Estamos analisando sua watchlist pela primeira vez. Isso costuma levar menos de um minuto.
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <h1 className="max-w-[32ch] text-[25px] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0F1728]">
+                      <h1 className="max-w-[32ch] text-[25px] font-semibold leading-[1.08] tracking-[-0.04em] text-foreground">
                         {heroHeadline}
                       </h1>
-                      <p className="max-w-[96ch] text-[14px] leading-6 text-[#526070]">{heroBody}</p>
+                      <p className="max-w-[96ch] text-[14px] leading-6 text-dim">{heroBody}</p>
                     </div>
                   )}
                 </div>
 
                 <div className="flex flex-col items-start gap-3 xl:items-end">
-                  <span className="text-[12px] font-medium text-[#98A2B3]">
+                  <span className="text-[12px] font-medium text-muted-foreground">
                       {"Refer\u00eancia "}{dashboardData?.referenceDate ?? "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"}
                     </span>
 
                   <div className="flex items-center gap-3">
                     <Button
                       onClick={focusInboxRecentImpact}
-                      className="h-10 rounded-[18px] bg-[#12A594] px-4 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] hover:bg-[#0F9485]"
+                      className="h-10 rounded-[18px] bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] dark:shadow-brand/20 hover:bg-brand-hover"
                     >
                       {dashboardData?.summary.ctaPrimary ?? "Abrir prioridade"}
                     </Button>
-                    <span className="text-[12px] font-medium text-[#98A2B3]">Renderizado {renderedLabel}</span>
+                    <span className="text-[12px] font-medium text-muted-foreground">Renderizado {renderedLabel}</span>
                   </div>
                 </div>
               </div>
@@ -325,92 +319,92 @@ export function Dashboard() {
             <div className="col-span-1 grid gap-5 xl:col-span-5">
               <button
                 onClick={() => (topRiskItem ? openInboxItem(topRiskItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-white px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(181,71,104,0.10)]"
+                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-danger-border bg-card px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(181,71,104,0.10)] dark:hover:shadow-none"
               >
-                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#F7D9E2_0%,#FCECEF_100%)]" />
-                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">Maior atenção</p>
+                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#F7D9E2_0%,#FCECEF_100%)] dark:bg-[linear-gradient(180deg,rgba(239,68,68,0.15)_0%,transparent_100%)]" />
+                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-danger-text">Maior atenção</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(181,71,104,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 pr-2">
-                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-foreground">
                       {topRiskItem ? topRiskItem.ticker : "Sem risco novo"}
                     </p>
                   </div>
                   {topRiskItem?.extraBadge ? (
-                    <span className="rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#B54768]">
+                    <span className="rounded-full bg-card/80 px-3 py-1 text-[11px] font-semibold text-danger-text">
                       {topRiskItem.extraBadge}
                     </span>
                   ) : topRiskItem ? <StatusBadge status={topRiskItem.severity} /> : null}
                 </div>
-                <p className="max-w-none pr-2 text-[13px] leading-5 text-[#5F6673]">
+                <p className="max-w-none pr-2 text-[13px] leading-5 text-muted-foreground">
                   {topRiskItem
                     ? topRiskItem.benefitNow ?? topRiskItem.whyItMatters
                     : "Nenhum sinal cr\u00edtico novo entrou na watchlist nas \u00faltimas 24h."}
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-[#7E5A66]">{topRiskItem?.entryReason ?? "Press\u00e3o concentrada no topo da leitura"}</span>
-                    <span className="font-semibold text-[#B54768]">{topRiskItem?.priorityRank ?? todayRiskCount}</span>
+                    <span className="text-muted-foreground">{topRiskItem?.entryReason ?? "Press\u00e3o concentrada no topo da leitura"}</span>
+                    <span className="font-semibold text-danger-text">{topRiskItem?.priorityRank ?? todayRiskCount}</span>
                   </div>
                 </div>
               </button>
 
               <button
                 onClick={() => (topImproveItem ? openInboxItem(topImproveItem) : focusInboxRecentImpact())}
-                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-white px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(18,165,148,0.10)]"
+                className="relative flex min-h-[164px] flex-col justify-between overflow-hidden rounded-[20px] border border-success-border bg-card px-5 py-5 text-left transition hover:shadow-[0_14px_26px_rgba(18,165,148,0.10)] dark:hover:shadow-none"
               >
-                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#D9EFE8_0%,#ECF8F4_100%)]" />
-                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#0F9485]">Maior melhora</p>
+                <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#D9EFE8_0%,#ECF8F4_100%)] dark:bg-[linear-gradient(180deg,rgba(16,185,129,0.15)_0%,transparent_100%)]" />
+                <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-brand">Maior melhora</p>
                 <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(18,165,148,0.08)] blur-2xl" />
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 pr-2">
-                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                    <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-foreground">
                       {topImproveItem ? topImproveItem.ticker : "Sem melhora nova"}
                     </p>
                   </div>
                   {topImproveItem?.extraBadge ? (
-                    <span className="rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#0F9485]">
+                    <span className="rounded-full bg-card/80 px-3 py-1 text-[11px] font-semibold text-brand">
                       {topImproveItem.extraBadge}
                     </span>
                   ) : topImproveItem ? <StatusBadge status={topImproveItem.severity} /> : null}
                 </div>
-                <p className="max-w-none pr-2 text-[13px] leading-5 text-[#56666A]">
+                <p className="max-w-none pr-2 text-[13px] leading-5 text-muted-foreground">
                   {topImproveItem
                     ? topImproveItem.benefitNow ?? topImproveItem.whyItMatters
                     : "Ainda n\u00e3o apareceu uma recupera\u00e7\u00e3o relevante suficiente para liderar a sess\u00e3o."}
                 </p>
                 <div className="flex items-center justify-between text-[12px]">
-                  <span className="text-[#5F7476]">{topImproveItem?.entryReason ?? "Recupera\u00e7\u00e3o com leitura mais limpa"}</span>
-                  <span className="font-semibold text-[#0F9485]">{topImproveItem?.priorityRank ?? todayHealthyCount}</span>
+                  <span className="text-muted-foreground">{topImproveItem?.entryReason ?? "Recupera\u00e7\u00e3o com leitura mais limpa"}</span>
+                  <span className="font-semibold text-brand">{topImproveItem?.priorityRank ?? todayHealthyCount}</span>
                 </div>
               </button>
             </div>
 
-            <article className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-5 xl:col-span-7")}>
+            <article className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-card p-5 xl:col-span-7")}>
               <div className="space-y-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[14px] font-medium text-[#98A2B3]">Prioridade do dia</p>
-                      <h2 className="max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                      <p className="text-[14px] font-medium text-muted-foreground">Prioridade do dia</p>
+                      <h2 className="max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
                         {priorityItem
                           ? `${priorityItem.ticker} \u00e9 o melhor ponto de entrada para entender o que mudou hoje.`
                           : `O pilar ${leadingPillarMovement.pillar.toLowerCase()} concentra o melhor ponto de leitura do dia.`}
                       </h2>
                     </div>
-                    <span className="rounded-full bg-[#F3FAF8] px-3 py-1 text-[11px] font-semibold text-[#0F9485]">{"Sess\u00e3o guiada"}</span>
+                    <span className="rounded-full bg-brand-surface px-3 py-1 text-[11px] font-semibold text-brand">{"Sess\u00e3o guiada"}</span>
                   </div>
 
-                  <p className="max-w-[46ch] text-[14px] leading-6 text-[#667085]">
+                  <p className="max-w-[46ch] text-[14px] leading-6 text-muted-foreground">
                     {dashboardData?.nextStep.headline ??
                       (priorityItem
                         ? `Abra ${priorityItem.ticker}, confirme o impacto no pilar ${priorityItem.pillarKey ?? leadingPillarMovement.pillar} e depois avance para os acompanhamentos relevantes.`
                         : `Use o feed principal para confirmar onde a aten\u00e7\u00e3o est\u00e1 concentrada e deixe os blocos laterais como apoio.`)}
                   </p>
                   {dashboardData?.nextStep.body ? (
-                    <p className="max-w-[42ch] text-[13px] leading-5 text-[#667085]">{dashboardData.nextStep.body}</p>
+                    <p className="max-w-[42ch] text-[13px] leading-5 text-muted-foreground">{dashboardData.nextStep.body}</p>
                   ) : null}
 
-                  <div className="rounded-[18px] bg-[#F5F9FC] p-3">
+                  <div className="rounded-[18px] bg-muted p-3">
                     <div className="grid gap-3 md:grid-cols-3">
                       {progressStates.map((step, index) => {
                         const isCurrent = index === currentProgressStep;
@@ -420,10 +414,10 @@ export function Dashboard() {
                             className={cn(
                               "rounded-[18px] p-3.5",
                               step.done
-                                ? "bg-[#F7FAFC]"
+                                ? "bg-muted"
                                 : isCurrent
-                                  ? "bg-[#EEF7FF]"
-                                  : "bg-[#FAFCFD]",
+                                  ? "bg-muted dark:bg-muted/50"
+                                  : "bg-card",
                             )}
                           >
                             <div className="flex items-center gap-2">
@@ -431,15 +425,15 @@ export function Dashboard() {
                                 className={cn(
                                   "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold",
                                   step.done
-                                    ? "bg-white text-[#12A594]"
+                                    ? "bg-card text-brand"
                                     : isCurrent
-                                      ? "bg-white text-[#5B8DEF]"
-                                      : "bg-white text-[#98A2B3]",
+                                      ? "bg-card text-blue-500 dark:text-blue-400"
+                                      : "bg-card text-muted-foreground",
                                 )}
                               >
                                 {step.done ? "OK" : index + 1}
                               </span>
-                              <p className="text-[13px] font-medium text-[#0F1728]">{step.label}</p>
+                              <p className="text-[13px] font-medium text-foreground">{step.label}</p>
                             </div>
                           </div>
                         );
@@ -450,55 +444,55 @@ export function Dashboard() {
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                     <button
                       onClick={focusInboxRecentImpact}
-                      className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#EEF2F6]"
+                      className="inline-flex items-center gap-2 rounded-[18px] bg-muted px-4 py-2.5 text-[13px] font-semibold text-foreground transition hover:bg-hover"
                     >
                       Abrir leitura guiada
-                      <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </button>
-                    <button className="text-[13px] font-medium text-[#12A594] transition hover:text-[#0F9485]">Ver fontes do dia</button>
+                    <button className="text-[13px] font-medium text-brand transition hover:text-brand">Ver fontes do dia</button>
                   </div>
               </div>
             </article>
           </section>
 
-          <section className="rounded-[20px] border border-[#E8EEF5] bg-[#EEF7FF] px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
+          <section className="rounded-[20px] border border-border bg-muted dark:bg-muted/50 px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">{"Por onde come\u00e7ar"}</p>
-                <p className="mt-1 text-[15px] font-semibold leading-6 text-[#0F1728]">{editorialText}</p>
+                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-blue-500 dark:text-blue-400">{"Por onde come\u00e7ar"}</p>
+                <p className="mt-1 text-[15px] font-semibold leading-6 text-foreground">{editorialText}</p>
               </div>
 
               <button
                 onClick={focusInboxRecentImpact}
-                className="inline-flex items-center gap-2 self-start rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-[#0F1728] transition hover:bg-[#F8FBFD] lg:self-auto"
+                className="inline-flex items-center gap-2 self-start rounded-full bg-card px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-hover lg:self-auto"
               >
                 Ir para o feed
-                <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
           </section>
 
           <section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
             <article className={cn(surfaceBase, "col-span-1 min-h-[540px] overflow-hidden xl:col-span-7")}>
-              <div className="border-b border-[#EEF2F6] px-6 py-5">
+              <div className="border-b border-border px-6 py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="max-w-[44ch]">
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">{"Explora\u00e7\u00e3o principal"}</p>
-                    <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{"Explora\u00e7\u00e3o principal"}</p>
+                    <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
                       {"Atualiza\u00e7\u00f5es da watchlist"}
                     </h2>
-                    <p className="mt-2 text-[14px] leading-6 text-[#667085]">
+                    <p className="mt-2 text-[14px] leading-6 text-muted-foreground">
                       {"Triagem primeiro. Organiza\u00e7\u00e3o depois. O item principal abre a leitura e o restante ajuda a confirmar o contexto."}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex rounded-full bg-[#F7FAFC] p-1">
+                    <div className="inline-flex rounded-full bg-muted p-1">
                       <button
                         onClick={setImpactMode}
                         className={cn(
                           "rounded-full px-3.5 py-2 text-[12px] font-semibold transition",
-                          inboxMode === "top-impacto" ? "bg-white text-[#0F1728]" : "text-[#667085] hover:text-[#0F1728]",
+                          inboxMode === "top-impacto" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground",
                         )}
                       >
                         Top impacto
@@ -507,7 +501,7 @@ export function Dashboard() {
                         onClick={setRealTimeMode}
                         className={cn(
                           "rounded-full px-4 py-2 text-[13px] font-semibold transition",
-                          inboxMode === "tempo-real" ? "bg-white text-[#0F1728]" : "text-[#667085] hover:text-[#0F1728]",
+                          inboxMode === "tempo-real" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground",
                         )}
                       >
                         Tempo real
@@ -516,7 +510,7 @@ export function Dashboard() {
                     <button
                       onClick={refreshInboxNow}
                       disabled={isRefreshing}
-                      className="rounded-full bg-[#F7FAFC] px-3.5 py-2 text-[12px] font-medium text-[#667085] transition hover:text-[#0F1728]"
+                      className="rounded-full bg-muted px-3.5 py-2 text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
                     >
                       {isRefreshing ? "Atualizando..." : "Atualizar agora"}
                     </button>
@@ -532,8 +526,8 @@ export function Dashboard() {
                         className={cn(
                           "rounded-full px-4 py-2 text-[13px] font-medium transition",
                           inboxFilters.period === range
-                            ? "bg-[#DDF6F0] text-[#0F9485]"
-                            : "bg-[#F7FAFC] text-[#667085] hover:text-[#0F1728]",
+                            ? "bg-brand-surface text-brand"
+                            : "bg-muted text-muted-foreground hover:text-foreground",
                         )}
                       >
                         {range}
@@ -541,25 +535,25 @@ export function Dashboard() {
                     ))}
                     <button
                       onClick={() => setFiltersOpen(!filtersOpen)}
-                      className="ml-auto rounded-full bg-[#F7FAFC] px-4 py-2 text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]"
+                      className="ml-auto rounded-full bg-muted px-4 py-2 text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
                     >
                       {showFiltersCount ? `Filtros (${advancedFiltersCount})` : "Filtros"}
                     </button>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#98A2B3]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-muted-foreground">
                     <p>
                       {inboxRows.length}{" atualiza\u00e7\u00f5es \u00b7 ordenado por "}{inboxMode === "tempo-real" ? "tempo real" : "impacto"}
                     </p>
                     <p>{"\u00daltima leitura sincronizada "}{refreshLabel}</p>
                   </div>
 
-                  {refreshError ? <p className="text-[12px] font-medium text-[#B54768]">{refreshError}</p> : null}
+                  {refreshError ? <p className="text-[12px] font-medium text-danger-text">{refreshError}</p> : null}
 
                   {filtersOpen ? (
-                    <div className="rounded-[20px] bg-[#F7FAFC] p-4">
+                    <div className="rounded-[20px] bg-muted p-4">
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[12px] font-medium text-[#98A2B3]">Severidade</p>
+                          <p className="text-[12px] font-medium text-muted-foreground">Severidade</p>
                           {allStatuses.map((status) => (
                             <button
                               key={status}
@@ -567,8 +561,8 @@ export function Dashboard() {
                               className={cn(
                                 "rounded-full px-3.5 py-2 text-[12px] font-medium transition",
                                 activeSeverities.includes(status)
-                                  ? "bg-white text-[#0F1728]"
-                                  : "text-[#667085] hover:bg-white hover:text-[#0F1728]",
+                                  ? "bg-card text-foreground"
+                                  : "text-muted-foreground hover:bg-card hover:text-foreground",
                               )}
                             >
                               {status}
@@ -577,7 +571,7 @@ export function Dashboard() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[12px] font-medium text-[#98A2B3]">Pilar</p>
+                          <p className="text-[12px] font-medium text-muted-foreground">Pilar</p>
                           {allPillars.map((pillar) => (
                             <button
                               key={pillar}
@@ -585,8 +579,8 @@ export function Dashboard() {
                               className={cn(
                                 "rounded-full px-3.5 py-2 text-[12px] font-medium transition",
                                 activePillars.includes(pillar)
-                                  ? "bg-white text-[#0F1728]"
-                                  : "text-[#667085] hover:bg-white hover:text-[#0F1728]",
+                                  ? "bg-card text-foreground"
+                                  : "text-muted-foreground hover:bg-card hover:text-foreground",
                               )}
                             >
                               {pillar}
@@ -595,7 +589,7 @@ export function Dashboard() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[12px] font-medium text-[#98A2B3]">Fonte</p>
+                          <p className="text-[12px] font-medium text-muted-foreground">Fonte</p>
                           {allSources.map((source) => (
                             <button
                               key={source}
@@ -603,8 +597,8 @@ export function Dashboard() {
                               className={cn(
                                 "rounded-full px-3.5 py-2 text-[12px] font-medium transition",
                                 activeSources.includes(source)
-                                  ? "bg-white text-[#0F1728]"
-                                  : "text-[#667085] hover:bg-white hover:text-[#0F1728]",
+                                  ? "bg-card text-foreground"
+                                  : "text-muted-foreground hover:bg-card hover:text-foreground",
                               )}
                             >
                               {source}
@@ -613,7 +607,7 @@ export function Dashboard() {
                         </div>
 
                         <div className="flex justify-end">
-                          <button onClick={clearInboxFilters} className="text-[12px] font-semibold text-[#12A594]">
+                          <button onClick={clearInboxFilters} className="text-[12px] font-semibold text-brand">
                             Limpar
                           </button>
                         </div>
@@ -625,13 +619,13 @@ export function Dashboard() {
 
               <div className="px-7 pb-7 pt-5">
                 {hasAnyFilterOverride ? (
-                  <div className="mb-4 flex flex-wrap items-center gap-2 rounded-[20px] bg-[#F7FAFC] p-3.5">
+                  <div className="mb-4 flex flex-wrap items-center gap-2 rounded-[20px] bg-muted p-3.5">
                     {activeFilterChips.map((chip) => (
-                      <span key={chip} className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                      <span key={chip} className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                         {chip}
                       </span>
                     ))}
-                    <button onClick={clearInboxFilters} className="ml-auto text-[12px] font-semibold text-[#12A594]">
+                    <button onClick={clearInboxFilters} className="ml-auto text-[12px] font-semibold text-brand">
                       Limpar filtros
                     </button>
                   </div>
@@ -640,22 +634,22 @@ export function Dashboard() {
                 {isRefreshing ? (
                   <div className="space-y-3">
                     {[1, 2, 3, 4].map((item) => (
-                      <div key={item} className="h-20 animate-pulse rounded-[22px] bg-[#F7FAFC]" />
+                      <div key={item} className="h-20 animate-pulse rounded-[22px] bg-muted" />
                     ))}
                   </div>
                 ) : inboxError ? (
-                  <div className="rounded-[24px] bg-[#FDECEF] px-5 py-5">
-                    <p className="text-[15px] font-medium text-[#B54768]">{"N\u00e3o foi poss\u00edvel carregar atualiza\u00e7\u00f5es."}</p>
-                    <button onClick={refreshInboxNow} className="mt-2 text-[13px] font-semibold text-[#B54768] underline">
+                  <div className="rounded-[24px] bg-danger-surface px-5 py-5">
+                    <p className="text-[15px] font-medium text-danger-text">{"N\u00e3o foi poss\u00edvel carregar atualiza\u00e7\u00f5es."}</p>
+                    <button onClick={refreshInboxNow} className="mt-2 text-[13px] font-semibold text-danger-text underline">
                       Tentar novamente
                     </button>
                   </div>
                 ) : inboxRows.length === 0 ? (
-                  <div className="rounded-[24px] bg-[#F7FAFC] px-5 py-5">
-                    <p className="text-[15px] text-[#667085]">{"Nenhuma atualiza\u00e7\u00e3o relevante no per\u00edodo."}</p>
+                  <div className="rounded-[24px] bg-muted px-5 py-5">
+                    <p className="text-[15px] text-muted-foreground">{"Nenhuma atualiza\u00e7\u00e3o relevante no per\u00edodo."}</p>
                     <button
                       onClick={() => setInboxFilters((prev) => ({ ...prev, period: "7d" }))}
-                      className="mt-2 text-[13px] font-semibold text-[#12A594]"
+                      className="mt-2 text-[13px] font-semibold text-brand"
                     >
                       Ampliar para 7 dias
                     </button>
@@ -676,17 +670,17 @@ export function Dashboard() {
                           className={cn(
                             "w-full text-left transition",
                             isPriority
-                              ? "rounded-[24px] border border-[#DDEADF] bg-[linear-gradient(180deg,#F2FBF7_0%,#FAFDFC_100%)] p-5 shadow-[0_16px_32px_rgba(18,165,148,0.06)]"
+                              ? "rounded-[24px] border border-success-border bg-brand-surface/30 dark:bg-brand-surface/10 p-5 shadow-[0_16px_32px_rgba(18,165,148,0.06)] dark:shadow-none"
                               : isRelevant
-                                ? "rounded-[20px] border border-transparent bg-[#FAFCFD] px-4 py-4 hover:border-[#E8EEF5] hover:bg-white"
-                                : "border-t border-[#F1F5F9] px-1 py-3 hover:bg-[#FAFCFD]",
+                                ? "rounded-[20px] border border-transparent bg-card px-4 py-4 hover:border-border hover:bg-card"
+                                : "border-t border-border px-1 py-3 hover:bg-card",
                           )}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex min-w-0 flex-1 items-start gap-3.5">
-                              <Avatar className={cn("border border-[#E8EEF5] bg-white", isPriority ? "h-11 w-11 rounded-[14px]" : isRelevant ? "h-10 w-10 rounded-[12px]" : "h-8 w-8 rounded-[12px]")}>
+                              <Avatar className={cn("border border-border bg-card", isPriority ? "h-11 w-11 rounded-[14px]" : isRelevant ? "h-10 w-10 rounded-[12px]" : "h-8 w-8 rounded-[12px]")}>
                                 <AvatarImage src={logoByTicker[item.ticker]} alt={item.ticker} className="object-cover" />
-                                <AvatarFallback className="bg-white text-[10px] text-[#667085]">
+                                <AvatarFallback className="bg-card text-[10px] text-muted-foreground">
                                   {item.ticker.slice(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
@@ -696,50 +690,50 @@ export function Dashboard() {
                                   <span
                                     className={cn(
                                       "rounded-full px-3 py-1 text-[11px] font-semibold",
-                                      isPriority ? "bg-white text-[#12A594]" : "bg-[#F7FAFC] text-[#667085]",
+                                      isPriority ? "bg-card text-brand" : "bg-muted text-muted-foreground",
                                     )}
                                   >
                                     {item.badge ?? (isPriority ? "Prioridade do dia" : sectionLabel)}
                                   </span>
                                   {isNew ? (
-                                    <span className="rounded-full bg-[#EAF2FF] px-3 py-1 text-[11px] font-semibold text-[#3965B8]">
+                                    <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-3 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
                                       Novo
                                     </span>
                                   ) : null}
                                 </div>
 
-                                <p className="mt-2 text-[13px] font-medium text-[#98A2B3]">
+                                <p className="mt-2 text-[13px] font-medium text-muted-foreground">
                                   {item.ticker} {!isStablePositive ? `\u00b7 ${item.companyName}` : ""}
                                 </p>
-                                <p className={cn("mt-1 font-semibold text-[#0F1728]", isPriority ? "text-[18px] leading-7" : isRelevant ? "text-[15px] leading-6" : "text-[14px] leading-5")}>
+                                <p className={cn("mt-1 font-semibold text-foreground", isPriority ? "text-[18px] leading-7" : isRelevant ? "text-[15px] leading-6" : "text-[14px] leading-5")}>
                                   {item.title}
                                 </p>
-                                <p className={cn("mt-2 max-w-[70ch] text-[#667085]", isStablePositive ? "text-[13px] leading-5" : "text-[14px] leading-6")}>
+                                <p className={cn("mt-2 max-w-[70ch] text-muted-foreground", isStablePositive ? "text-[13px] leading-5" : "text-[14px] leading-6")}>
                                   Por que isso importa: {item.whyItMatters}
                                 </p>
                                 {item.entryReason ? (
-                                  <p className="mt-2 text-[12px] leading-5 text-[#98A2B3]">{item.entryReason}</p>
+                                  <p className="mt-2 text-[12px] leading-5 text-muted-foreground">{item.entryReason}</p>
                                 ) : null}
                                 {item.extraLine ? (
-                                  <p className="mt-1 text-[12px] leading-5 text-[#B27300]">{item.extraLine}</p>
+                                  <p className="mt-1 text-[12px] leading-5 text-warning-text">{item.extraLine}</p>
                                 ) : null}
 
                                 <div className="mt-3 flex flex-wrap gap-2">
                                   {item.pillarKey ? (
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                    <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                       {item.pillarKey}
                                     </span>
                                   ) : null}
                                   {item.source ? (
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                    <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                       {item.source}
                                     </span>
                                   ) : null}
-                                  <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                  <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                     {item.relativeTime}
                                   </span>
                                   {item.extraBadge ? (
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                    <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                       {item.extraBadge}
                                     </span>
                                   ) : null}
@@ -749,9 +743,9 @@ export function Dashboard() {
 
                             <div className="flex shrink-0 flex-col items-end gap-3">
                               <StatusBadge status={item.severity} />
-                              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#12A594]">
+                              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand">
                                 {feedCtaLabel(item, isPriority)}
-                                <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                               </span>
                             </div>
                           </div>
@@ -767,17 +761,17 @@ export function Dashboard() {
               <article className={cn(surfaceBase, "min-h-[232px] p-6")}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Pilar em movimento</p>
-                    <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
+                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Pilar em movimento</p>
+                    <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                       {leadingPillarMovement.pillar}
                     </h3>
-                    <p className="mt-2 max-w-[34ch] text-[14px] leading-6 text-[#667085]">
+                    <p className="mt-2 max-w-[34ch] text-[14px] leading-6 text-muted-foreground">
                       {leadingPillarMovement.pillar} {pillarInsight[leadingPillarMovement.pillar]}.
                     </p>
                   </div>
                   <button
                     onClick={() => applySinglePillarFilter(leadingPillarMovement.pillar)}
-                    className="rounded-full bg-[#F7FAFC] px-3 py-2 text-[12px] font-semibold text-[#0F1728]"
+                    className="rounded-full bg-muted px-3 py-2 text-[12px] font-semibold text-foreground"
                   >
                     Filtrar pilar
                   </button>
@@ -788,21 +782,21 @@ export function Dashboard() {
                     <button
                       key={item.pillar}
                       onClick={() => applySinglePillarFilter(item.pillar)}
-                      className="w-full rounded-[22px] border border-[#EDF2F7] bg-[linear-gradient(180deg,#FBFDFE_0%,#F5F9FC_100%)] p-4 text-left transition hover:bg-[#F1F6FA]"
+                      className="w-full rounded-[22px] border border-border bg-muted/50 p-4 text-left transition hover:bg-hover"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-[15px] font-semibold text-[#0F1728]">{item.pillar}</p>
-                          <p className="mt-1 text-[13px] text-[#667085]">{item.events} eventos no dia</p>
+                          <p className="text-[15px] font-semibold text-foreground">{item.pillar}</p>
+                          <p className="mt-1 text-[13px] text-muted-foreground">{item.events} eventos no dia</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <div className="mt-3 rounded-[16px] bg-white/85 p-3">
+                      <div className="mt-3 rounded-[16px] bg-card/80 p-3">
                         <SegmentedHealthBar healthy={item.healthy} attention={item.attention} risk={item.risk} />
                         <div className="mt-1.5 flex items-center gap-2.5 text-[11px]">
-                          <span className="text-[#17825B]">{"Saud\u00e1vel "}{item.healthy}</span>
-                          <span className="text-[#B27300]">{"Aten\u00e7\u00e3o "}{item.attention}</span>
-                          <span className="text-[#B54768]">{"Risco "}{item.risk}</span>
+                          <span className="text-success-text">{"Saud\u00e1vel "}{item.healthy}</span>
+                          <span className="text-warning-text">{"Aten\u00e7\u00e3o "}{item.attention}</span>
+                          <span className="text-danger-text">{"Risco "}{item.risk}</span>
                         </div>
                       </div>
                     </button>
@@ -810,32 +804,32 @@ export function Dashboard() {
                 </div>
               </article>
 
-              <article className={cn(mediumSurface, "min-h-[170px] bg-[linear-gradient(180deg,#EEF7FF_0%,#F7FBFF_100%)] p-6")}>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">{"Sa\u00fade da watchlist"}</p>
-                <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
+              <article className={cn(mediumSurface, "min-h-[170px] bg-muted dark:bg-muted/30 p-6")}>
+                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-blue-500 dark:text-blue-400">{"Sa\u00fade da watchlist"}</p>
+                <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                   {healthyWatchlistCount} de {totalWatchlistCount} seguem estáveis
                 </h3>
-                <p className="mt-2 text-[14px] leading-6 text-[#667085]">
+                <p className="mt-2 text-[14px] leading-6 text-muted-foreground">
                   {"A press\u00e3o est\u00e1 concentrada em poucos nomes, o que ajuda a priorizar a leitura sem espalhar aten\u00e7\u00e3o demais."}
                 </p>
-                <div className="mt-5 grid grid-cols-[1fr_auto] gap-3 rounded-[18px] bg-white/80 p-3">
+                <div className="mt-5 grid grid-cols-[1fr_auto] gap-3 rounded-[18px] bg-card/80 p-3">
                   <div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-[#DCE8F8]">
+                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
                       <div className="flex h-full w-full">
-                        <div className="h-full bg-[#5B8DEF]" style={{ width: `${(healthyWatchlistCount / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
-                        <div className="h-full bg-[#A9C3F7]" style={{ width: `${(todayAttentionCount / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
-                        <div className="h-full bg-[#D9E5FB]" style={{ width: `${(Math.max(totalWatchlistCount - healthyWatchlistCount - todayAttentionCount, 0) / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
+                        <div className="h-full bg-blue-500 dark:bg-blue-400" style={{ width: `${(healthyWatchlistCount / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
+                        <div className="h-full bg-blue-200 dark:bg-blue-700" style={{ width: `${(todayAttentionCount / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
+                        <div className="h-full bg-blue-100 dark:bg-blue-900" style={{ width: `${(Math.max(totalWatchlistCount - healthyWatchlistCount - todayAttentionCount, 0) / Math.max(totalWatchlistCount, 1)) * 100}%` }} />
                       </div>
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[12px]">
-                      <span className="text-[#667085]">{"Base mais est\u00e1vel da sess\u00e3o"}</span>
-                      <span className="font-semibold text-[#3965B8]">{healthyWatchlistCount}/{totalWatchlistCount}</span>
+                      <span className="text-muted-foreground">{"Base mais est\u00e1vel da sess\u00e3o"}</span>
+                      <span className="font-semibold text-blue-700 dark:text-blue-400">{healthyWatchlistCount}/{totalWatchlistCount}</span>
                     </div>
                   </div>
-                  <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-[linear-gradient(180deg,#F4F8FF_0%,#E8F1FF_100%)] px-3 py-2 text-right">
-                    <span className="text-[10px] uppercase tracking-[0.08em] text-[#98A2B3]">Hoje</span>
-                    <span className="text-[18px] font-semibold text-[#3965B8]">{todayHealthyCount}</span>
-                    <span className="text-[11px] text-[#667085]">sinais positivos</span>
+                  <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-blue-50 dark:bg-blue-950/50 px-3 py-2 text-right">
+                    <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Hoje</span>
+                    <span className="text-[18px] font-semibold text-blue-700 dark:text-blue-400">{todayHealthyCount}</span>
+                    <span className="text-[11px] text-muted-foreground">sinais positivos</span>
                   </div>
                 </div>
               </article>
@@ -843,32 +837,32 @@ export function Dashboard() {
               <article
                 className={cn(
                   mediumSurface,
-                  "min-h-[210px] overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F3FAF8_100%)] p-6",
+                  "min-h-[210px] overflow-hidden bg-brand-surface/20 dark:bg-brand-surface/10 p-6",
                 )}
               >
-                <p className="relative text-[12px] font-medium uppercase tracking-[0.08em] text-[#12A594]">{"Pr\u00f3xima leitura"}</p>
-                <h3 className="relative mt-2 max-w-[18ch] text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
+                <p className="relative text-[12px] font-medium uppercase tracking-[0.08em] text-brand">{"Pr\u00f3xima leitura"}</p>
+                <h3 className="relative mt-2 max-w-[18ch] text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                   {dashboardData?.sessionClosing.headline ??
                     (completedSteps === progressStates.length
                       ? "Fluxo principal conclu\u00eddo. Feche a sess\u00e3o com uma revis\u00e3o r\u00e1pida."
                       : "Conclua a leitura principal antes de expandir para itens est\u00e1veis.")}
                 </h3>
-                <p className="relative mt-2 max-w-[30ch] text-[14px] leading-6 text-[#516071]">
+                <p className="relative mt-2 max-w-[30ch] text-[14px] leading-6 text-dim">
                   {dashboardData?.sessionClosing.body ??
                     (completedSteps === progressStates.length
                       ? "A sess\u00e3o j\u00e1 est\u00e1 organizada. Agora vale revisar rastreabilidade e contexto antes de encerrar."
                       : "Siga a ordem proposta para reduzir ru\u00eddo e validar primeiro o que realmente mudou.")}
                 </p>
 
-                <div className="relative mt-5 rounded-[20px] bg-white/80 p-4 shadow-[0_12px_24px_rgba(15,23,40,0.04)]">
+                <div className="relative mt-5 rounded-[20px] bg-card/80 p-4 shadow-[0_12px_24px_rgba(15,23,40,0.04)] dark:shadow-none">
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-[#F3FAF8] px-3 py-1.5 text-[12px] font-medium text-[#127A6E]">
+                    <span className="rounded-full bg-brand-surface px-3 py-1.5 text-[12px] font-medium text-brand-text">
                       {"Sess\u00e3o em "}{progressHeadlineStep}{" de "}{progressStates.length}
                     </span>
-                    <span className="rounded-full bg-[#F7FAFC] px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                    <span className="rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                       {pluralize(completedSteps, "etapa conclu\u00edda", "etapas conclu\u00eddas")}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F7FAFC] px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                       <Database className="h-3.5 w-3.5" />
                       {"Manifesto "}{dashboardData?.manifestVersion ?? "\u2014"}
                     </span>
@@ -877,13 +871,13 @@ export function Dashboard() {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => router.push("/watchlist")}
-                      className="rounded-full bg-[#12A594] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_14px_26px_rgba(18,165,148,0.18)] transition hover:bg-[#0F9485]"
+                      className="rounded-full bg-brand px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_14px_26px_rgba(18,165,148,0.18)] dark:shadow-none transition hover:bg-brand-hover"
                     >
                       Ver watchlist completa
                     </button>
                     <button
                       onClick={() => applySinglePillarFilter(focusedPillar)}
-                      className="rounded-full bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728]"
+                      className="rounded-full bg-muted px-4 py-2.5 text-[13px] font-semibold text-foreground"
                     >
                       Filtrar pilar
                     </button>
@@ -893,28 +887,28 @@ export function Dashboard() {
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#E8EEF5] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFD_100%)] px-7 py-10 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+          <section className="rounded-[28px] border border-border bg-card px-7 py-10 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">{"Fechamento da sess\u00e3o"}</p>
-                <div className="mt-3 h-px w-20 bg-[linear-gradient(90deg,#12A594,#DCEFEA)]" />
-                <p className="mt-3 max-w-[72ch] text-[18px] font-semibold leading-7 text-[#0F1728]">
+                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{"Fechamento da sess\u00e3o"}</p>
+                <div className="mt-3 h-px w-20 bg-[linear-gradient(90deg,var(--brand),var(--brand-border))]" />
+                <p className="mt-3 max-w-[72ch] text-[18px] font-semibold leading-7 text-foreground">
                   {showSessionClosing
                     ? "A sess\u00e3o j\u00e1 est\u00e1 organizada. Use este bloco como leitura final antes de sair do fluxo."
                     : "Encerramento calmo: a base segue est\u00e1vel e sem concentra\u00e7\u00e3o cr\u00edtica nova nesta sess\u00e3o."}
                 </p>
-                <p className="mt-2 max-w-[62ch] text-[14px] leading-6 text-[#667085]">
+                <p className="mt-2 max-w-[62ch] text-[14px] leading-6 text-muted-foreground">
                   {showSessionClosing
                     ? "A prioridade do dia j\u00e1 foi destacada acima. Se quiser aprofundar, siga pela watchlist completa ou filtre a leitura por pilar."
                     : "Voc\u00ea pode encerrar aqui ou seguir para uma explora\u00e7\u00e3o mais ampla sem perder o contexto j\u00e1 constru\u00eddo."}
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 rounded-[20px] bg-white/80 px-4 py-3 shadow-[0_12px_24px_rgba(15,23,40,0.04)]">
-                <span className="rounded-full bg-[#F3FAF8] px-3 py-1.5 text-[12px] font-medium text-[#127A6E]">
+              <div className="flex items-center gap-3 rounded-[20px] bg-card/80 px-4 py-3 shadow-[0_12px_24px_rgba(15,23,40,0.04)] dark:shadow-none">
+                <span className="rounded-full bg-brand-surface px-3 py-1.5 text-[12px] font-medium text-brand-text">
                   {pluralize(todayItems.length, "item lido", "itens lidos")}
                 </span>
-                <span className="text-[13px] font-medium text-[#667085]">Fluxo encerrado com rastreabilidade preservada</span>
+                <span className="text-[13px] font-medium text-muted-foreground">Fluxo encerrado com rastreabilidade preservada</span>
               </div>
             </div>
           </section>

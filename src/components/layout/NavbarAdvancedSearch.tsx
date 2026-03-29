@@ -125,7 +125,7 @@ export function NavbarAdvancedSearch() {
         onClick={() => setIsOpen((p) => !p)}
         className={`flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-medium transition-colors ${
           isOpen || activeCount > 0
-            ? "border-[#0E9384]/30 bg-[#0E9384]/8 text-[#0E9384]"
+            ? "border-brand/30 bg-brand/8 text-brand"
             : "border-border bg-muted text-muted-foreground hover:bg-hover hover:text-foreground"
         }`}
         aria-label="Busca avançada"
@@ -133,7 +133,7 @@ export function NavbarAdvancedSearch() {
         <SlidersHorizontal className="h-3.5 w-3.5" />
         <span className="hidden lg:inline">Busca avançada</span>
         {activeCount > 0 && (
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0E9384] px-1 text-[10px] font-bold text-white">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
             {activeCount}
           </span>
         )}
@@ -148,10 +148,10 @@ export function NavbarAdvancedSearch() {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-[#0E9384]" />
+              <SlidersHorizontal className="h-4 w-4 text-brand" />
               <span className="text-[13px] font-semibold text-foreground">Busca avançada por métricas</span>
               {activeCount > 0 && (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0E9384] px-1.5 text-[10px] font-bold text-white">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-bold text-white">
                   {activeCount}
                 </span>
               )}
@@ -187,13 +187,13 @@ export function NavbarAdvancedSearch() {
                   onClick={() => setActiveGroup(group)}
                   className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-[12px] font-medium transition-colors ${
                     activeGroup === group
-                      ? "border-b-2 border-[#0E9384] text-[#0E9384]"
+                      ? "border-b-2 border-brand text-brand"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {group}
                   {groupCount > 0 && (
-                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0E9384] px-1 text-[10px] font-bold text-white">
+                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
                       {groupCount}
                     </span>
                   )}
@@ -229,7 +229,7 @@ export function NavbarAdvancedSearch() {
                       value={f.min}
                       onChange={(e) => setRange(metric.key, "min", e.target.value)}
                       placeholder={metric.phMin}
-                      className="h-8 w-full rounded-[8px] border border-border bg-background px-2.5 text-[12px] text-foreground outline-none transition placeholder:text-muted-foreground/60 focus:border-[#0E9384]/50 focus:ring-1 focus:ring-[#0E9384]/20"
+                      className="h-8 w-full rounded-[8px] border border-border bg-background px-2.5 text-[12px] text-foreground outline-none transition placeholder:text-muted-foreground/60 focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                     />
                     <span className="shrink-0 text-[11px] text-muted-foreground">–</span>
                     <input
@@ -237,7 +237,7 @@ export function NavbarAdvancedSearch() {
                       value={f.max}
                       onChange={(e) => setRange(metric.key, "max", e.target.value)}
                       placeholder={metric.phMax}
-                      className="h-8 w-full rounded-[8px] border border-border bg-background px-2.5 text-[12px] text-foreground outline-none transition placeholder:text-muted-foreground/60 focus:border-[#0E9384]/50 focus:ring-1 focus:ring-[#0E9384]/20"
+                      className="h-8 w-full rounded-[8px] border border-border bg-background px-2.5 text-[12px] text-foreground outline-none transition placeholder:text-muted-foreground/60 focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                     />
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export function NavbarAdvancedSearch() {
                 return (
                   <span
                     key={m.key}
-                    className="inline-flex items-center gap-1 rounded-full border border-[#0E9384]/20 bg-[#0E9384]/8 px-2.5 py-1 text-[11px] font-medium text-[#0E9384]"
+                    className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/8 px-2.5 py-1 text-[11px] font-medium text-brand"
                   >
                     {m.label}: {label}
                     <button onClick={() => clearMetric(m.key)} className="opacity-60 transition hover:opacity-100">
@@ -278,7 +278,7 @@ export function NavbarAdvancedSearch() {
             </p>
             <button
               onClick={apply}
-              className="flex h-8 items-center gap-1.5 rounded-[10px] bg-[#0E9384] px-4 text-[12px] font-semibold text-white shadow-[0_4px_14px_rgba(14,147,132,0.25)] transition hover:opacity-90"
+              className="flex h-8 items-center gap-1.5 rounded-[10px] bg-brand px-4 text-[12px] font-semibold text-white shadow-[0_4px_14px_rgba(14,147,132,0.25)] transition hover:opacity-90"
             >
               <Search className="h-3.5 w-3.5" />
               Buscar empresas

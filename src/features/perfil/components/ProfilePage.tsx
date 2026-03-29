@@ -30,18 +30,18 @@ function ProfileSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-b border-[#EEF2F6] py-8 last:border-b-0">
+    <section className="border-b border-border py-8 last:border-b-0">
       <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr_auto]">
         <div>
-          <h2 className="text-[17px] font-semibold text-[#171717]">{title}</h2>
-          <p className="mt-2 text-[13px] text-[#8A8A8A]">{subtitle}</p>
+          <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
+          <p className="mt-2 text-[13px] text-muted-foreground">{subtitle}</p>
         </div>
 
         <div>{children}</div>
 
         {actionLabel ? (
           <div className="flex xl:justify-end">
-            <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-[#E8E8E8] bg-white px-4.5 text-[14px] font-semibold text-[#171717] shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
+            <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-border bg-card px-4.5 text-[14px] font-semibold text-foreground shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
               {actionLabel}
             </button>
           </div>
@@ -58,11 +58,11 @@ function FieldList({ fields }: { fields: AccountField[] }) {
         const Icon = field.icon;
         return (
           <div key={field.label} className="grid grid-cols-[220px_1fr] items-center gap-4">
-            <div className="flex items-center gap-3 text-[#8A8A8A]">
+            <div className="flex items-center gap-3 text-muted-foreground">
               <Icon className="h-4 w-4" />
               <span className="text-[13px]">{field.label}</span>
             </div>
-            <div className="text-[14px] font-medium text-[#171717]">{field.value}</div>
+            <div className="text-[14px] font-medium text-foreground">{field.value}</div>
           </div>
         );
       })}
@@ -77,16 +77,16 @@ export function ProfilePage() {
     <AccountShell activeTab="conta">
       <ProfileSection title="Foto de perfil" subtitle="Atualize sua foto de perfil">
         <div className="flex flex-col items-start gap-4">
-          <div className="h-[52px] w-[52px] overflow-hidden rounded-[16px] border border-[#E7EEF5] bg-white">
+          <div className="h-[52px] w-[52px] overflow-hidden rounded-[16px] border border-border bg-card">
             {user?.picture ? (
               <img src={user.picture} alt={user.name ?? "Perfil"} className="h-full w-full object-cover" />
             ) : null}
           </div>
           <div>
-            <p className="text-[15px] font-semibold text-[#171717]">Envie a foto</p>
-            <p className="mt-1 text-[14px] text-[#8A8A8A]">JPG ou PNG · até 1 MB · até 250x250 px</p>
+            <p className="text-[15px] font-semibold text-foreground">Envie a foto</p>
+            <p className="mt-1 text-[14px] text-muted-foreground">JPG ou PNG · até 1 MB · até 250x250 px</p>
           </div>
-          <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-[#E8E8E8] bg-white px-4.5 text-[14px] font-semibold text-[#171717] shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
+          <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-border bg-card px-4.5 text-[14px] font-semibold text-foreground shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
             Alterar foto
           </button>
         </div>

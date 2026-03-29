@@ -3,16 +3,18 @@
 import { Search, ChevronDown, X } from 'lucide-react';
 import { motion } from 'motion/react';
 
+export interface ExploreFilters {
+  sectors: string[];
+  statuses: string[];
+  sizes: string[];
+  dividend: boolean | null;
+}
+
 interface ExploreHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  selectedFilters: {
-    sectors: string[];
-    statuses: string[];
-    sizes: string[];
-    dividend: boolean | null;
-  };
-  onFilterChange: (filters: any) => void;
+  selectedFilters: ExploreFilters;
+  onFilterChange: (filters: ExploreFilters) => void;
   sortBy: string;
   onSortChange: (sort: string) => void;
 }
@@ -78,7 +80,7 @@ export function ExploreHeader({
           placeholder="Search companies, tickers, or sectors..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-mint-400 focus:outline-none focus:ring-2 focus:ring-mint-100 transition-all"
+          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
         />
       </div>
 
@@ -86,10 +88,10 @@ export function ExploreHeader({
       <div className="flex items-center gap-3 flex-wrap">
         {/* Sector Filter */}
         <div className="relative group">
-          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-dim flex items-center gap-2 transition-colors">
+          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground flex items-center gap-2 transition-colors">
             Sector
             {selectedFilters.sectors.length > 0 && (
-              <span className="bg-mint-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-brand text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                 {selectedFilters.sectors.length}
               </span>
             )}
@@ -100,8 +102,8 @@ export function ExploreHeader({
               <button
                 key={sector}
                 onClick={() => toggleSector(sector)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-hover transition-colors ${
-                  selectedFilters.sectors.includes(sector) ? 'bg-brand-surface text-brand-text font-medium' : 'text-dim'
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors ${
+                  selectedFilters.sectors.includes(sector) ? 'bg-brand-surface text-brand font-medium' : 'text-muted-foreground'
                 }`}
               >
                 {sector}
@@ -112,10 +114,10 @@ export function ExploreHeader({
 
         {/* Status Filter */}
         <div className="relative group">
-          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-dim flex items-center gap-2 transition-colors">
+          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground flex items-center gap-2 transition-colors">
             Status
             {selectedFilters.statuses.length > 0 && (
-              <span className="bg-mint-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-brand text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                 {selectedFilters.statuses.length}
               </span>
             )}
@@ -126,8 +128,8 @@ export function ExploreHeader({
               <button
                 key={status}
                 onClick={() => toggleStatus(status)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-hover transition-colors ${
-                  selectedFilters.statuses.includes(status) ? 'bg-brand-surface text-brand-text font-medium' : 'text-dim'
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors ${
+                  selectedFilters.statuses.includes(status) ? 'bg-brand-surface text-brand font-medium' : 'text-muted-foreground'
                 }`}
               >
                 {status}
@@ -138,10 +140,10 @@ export function ExploreHeader({
 
         {/* Size Filter */}
         <div className="relative group">
-          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-dim flex items-center gap-2 transition-colors">
+          <button className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground flex items-center gap-2 transition-colors">
             Size
             {selectedFilters.sizes.length > 0 && (
-              <span className="bg-mint-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-brand text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                 {selectedFilters.sizes.length}
               </span>
             )}
@@ -152,8 +154,8 @@ export function ExploreHeader({
               <button
                 key={size}
                 onClick={() => toggleSize(size)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-hover transition-colors ${
-                  selectedFilters.sizes.includes(size) ? 'bg-brand-surface text-brand-text font-medium' : 'text-dim'
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors ${
+                  selectedFilters.sizes.includes(size) ? 'bg-brand-surface text-brand font-medium' : 'text-muted-foreground'
                 }`}
               >
                 {size}
@@ -167,8 +169,8 @@ export function ExploreHeader({
           onClick={toggleDividend}
           className={`px-4 py-2 rounded-xl border text-sm font-medium flex items-center gap-2 transition-colors ${
             selectedFilters.dividend === true
-              ? 'border-brand-border bg-brand-surface text-brand-text'
-              : 'border-border hover:border-border/70 bg-card text-dim'
+              ? 'border-brand/30 bg-brand-surface text-brand'
+              : 'border-border hover:border-border/70 bg-card text-muted-foreground'
           }`}
         >
           Dividend
@@ -190,7 +192,7 @@ export function ExploreHeader({
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-dim focus:border-mint-400 focus:outline-none focus:ring-2 focus:ring-mint-100 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all cursor-pointer"
           >
             <option value="urgency">Sort by: Urgency</option>
             <option value="updated">Sort by: Most Updated</option>

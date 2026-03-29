@@ -262,8 +262,8 @@ function AnalisoLogo() {
     <div className="flex items-center gap-3">
       <span className="relative flex h-9 w-9 items-center justify-center">
         <span className="absolute inset-0 rounded-[12px] bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)] opacity-90" />
-        <span className="absolute left-[3px] top-[3px] h-4 w-4 rounded-[6px] bg-white/75 blur-[1px]" />
-        <span className="absolute bottom-[3px] right-[3px] h-4 w-4 rounded-[6px] bg-white/35" />
+        <span className="absolute left-[3px] top-[3px] h-4 w-4 rounded-[6px] bg-card/75 blur-[1px]" />
+        <span className="absolute bottom-[3px] right-[3px] h-4 w-4 rounded-[6px] bg-card/35" />
       </span>
       <span className="text-[22px] font-semibold tracking-[-0.04em] text-[#111111]">
         analiso
@@ -274,7 +274,7 @@ function AnalisoLogo() {
 
 function Header() {
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-[1430px] flex-wrap items-center justify-between px-8 pt-8 max-md:px-4 max-md:pt-5">
         <a href="/" className="order-1 flex shrink-0 items-center">
           <img
@@ -314,7 +314,7 @@ function Header() {
 
         <a
           href="/login"
-          className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#ececec] bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
+          className="order-3 flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#ececec] bg-card px-4 py-3.5 text-sm font-semibold leading-5 text-foreground shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-md:h-8 max-md:px-3 max-md:py-1.5 max-md:text-xs"
         >
           Entrar
         </a>
@@ -325,7 +325,7 @@ function Header() {
 
 function EmailForm() {
   return (
-    <div className="mx-auto flex w-full max-w-[370px] items-center rounded-[18px] border border-[#e7e7e7] bg-white p-2 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+    <div className="mx-auto flex w-full max-w-[370px] items-center rounded-[18px] border border-[#e7e7e7] bg-card p-2 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
       <div className="flex min-w-0 flex-1 items-center gap-3 px-4 text-[#a9a9a9]">
         <Mail className="h-4 w-4 shrink-0" />
         <span className="truncate text-[14px]">Seu e-mail</span>
@@ -416,27 +416,27 @@ function HeroDashboard() {
 function SegmentVisual({ index }: { index: number }) {
   if (index === 0) {
     return (
-      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-white">
+      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-card">
         <div className="absolute inset-x-[16px] top-[16px] bottom-[16px] rounded-[22px] border border-[#dff2ed] bg-[linear-gradient(180deg,#f4fcfa_0%,#ffffff_100%)] px-[18px] py-[18px] shadow-[0_10px_28px_rgba(15,159,143,0.08)]">
           <div className="flex items-center justify-between">
             <div className="h-[8px] w-[82px] rounded-full bg-[#d7ebe6]" />
             <div className="h-[22px] w-[64px] rounded-full border border-[#cdebe4] bg-[#e9faf6]" />
           </div>
           <div className="mt-5 grid grid-cols-3 gap-3">
-            <div className="rounded-[18px] border border-[#d9eee8] bg-white px-3 py-4 shadow-[0_2px_10px_rgba(15,159,143,0.04)]">
+            <div className="rounded-[18px] border border-[#d9eee8] bg-card px-3 py-4 shadow-[0_2px_10px_rgba(15,159,143,0.04)]">
               <div className="h-[8px] w-[34px] rounded-full bg-[#d7ebe6]" />
               <div className="mt-4 h-[44px] rounded-[14px] bg-[#eef8f5]" />
             </div>
-            <div className="rounded-[18px] border border-[#cdebe4] bg-white px-3 py-4 shadow-[0_8px_18px_rgba(15,159,143,0.10)]">
+            <div className="rounded-[18px] border border-[#cdebe4] bg-card px-3 py-4 shadow-[0_8px_18px_rgba(15,159,143,0.10)]">
               <div className="h-[8px] w-[40px] rounded-full bg-[#c3e8e0]" />
               <div className="mt-4 h-[52px] rounded-[14px] bg-[linear-gradient(180deg,#dff8f3_0%,#eefbf8_100%)]" />
             </div>
-            <div className="rounded-[18px] border border-[#d9eee8] bg-white px-3 py-4 shadow-[0_2px_10px_rgba(15,159,143,0.04)]">
+            <div className="rounded-[18px] border border-[#d9eee8] bg-card px-3 py-4 shadow-[0_2px_10px_rgba(15,159,143,0.04)]">
               <div className="h-[8px] w-[30px] rounded-full bg-[#d7ebe6]" />
               <div className="mt-4 h-[44px] rounded-[14px] bg-[#eef8f5]" />
             </div>
           </div>
-          <div className="mt-5 flex items-center justify-between rounded-[18px] border border-[#d8efe9] bg-white px-4 py-4">
+          <div className="mt-5 flex items-center justify-between rounded-[18px] border border-[#d8efe9] bg-card px-4 py-4">
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 rounded-full bg-[#0f9f8f]" />
               <div className="h-[8px] w-[92px] rounded-full bg-[#c8e9e2]" />
@@ -450,14 +450,14 @@ function SegmentVisual({ index }: { index: number }) {
 
   if (index === 1) {
     return (
-      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-white">
+      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-card">
         <div className="absolute inset-x-[16px] top-[16px] bottom-[16px] rounded-[22px] border border-[#dff2e4] bg-[linear-gradient(180deg,#f5fcf7_0%,#ffffff_100%)] px-[18px] py-[18px] shadow-[0_10px_28px_rgba(34,197,94,0.07)]">
           <div className="flex items-center justify-between">
             <div className="h-[8px] w-[96px] rounded-full bg-[#d7ebe0]" />
             <div className="h-[22px] w-[46px] rounded-full border border-[#d7efdf] bg-[#edf9f1]" />
           </div>
           <div className="mt-5 space-y-3">
-            <div className="rounded-[18px] border border-[#e5f3e8] bg-white px-4 py-3.5">
+            <div className="rounded-[18px] border border-[#e5f3e8] bg-card px-4 py-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#98a2a0]" />
@@ -466,7 +466,7 @@ function SegmentVisual({ index }: { index: number }) {
                 <div className="h-[18px] w-[42px] rounded-full bg-[#f1f3f2]" />
               </div>
             </div>
-            <div className="rounded-[18px] border border-[#cdeed8] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(34,197,94,0.10)]">
+            <div className="rounded-[18px] border border-[#cdeed8] bg-card px-4 py-4 shadow-[0_10px_24px_rgba(34,197,94,0.10)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
@@ -476,7 +476,7 @@ function SegmentVisual({ index }: { index: number }) {
               </div>
               <div className="mt-3 h-[8px] w-[146px] rounded-full bg-[#e7f3eb]" />
             </div>
-            <div className="rounded-[18px] border border-[#e5f3e8] bg-white px-4 py-3.5">
+            <div className="rounded-[18px] border border-[#e5f3e8] bg-card px-4 py-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#c26b2c]" />
@@ -486,7 +486,7 @@ function SegmentVisual({ index }: { index: number }) {
               </div>
             </div>
           </div>
-          <div className="mt-5 flex items-center justify-between rounded-[18px] border border-[#dff2e4] bg-white px-4 py-4">
+          <div className="mt-5 flex items-center justify-between rounded-[18px] border border-[#dff2e4] bg-card px-4 py-4">
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 rounded-full bg-[#16a34a]" />
               <div className="h-[8px] w-[84px] rounded-full bg-[#cfe9d8]" />
@@ -499,35 +499,35 @@ function SegmentVisual({ index }: { index: number }) {
   }
 
   return (
-    <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-white">
+    <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-card">
       <div className="absolute inset-x-[16px] top-[16px] bottom-[16px] rounded-[22px] border border-[#e1e8ff] bg-[linear-gradient(180deg,#f7f9ff_0%,#ffffff_100%)] px-[18px] py-[18px] shadow-[0_10px_28px_rgba(76,103,178,0.07)]">
         <div className="flex items-center justify-between">
           <div className="h-[8px] w-[88px] rounded-full bg-[#dde5fb]" />
           <div className="h-[22px] w-[70px] rounded-full border border-[#d9e2ff] bg-[#eef2ff]" />
         </div>
         <div className="mt-5 flex items-end gap-3">
-          <div className="flex-1 rounded-[18px] border border-[#e5ebfb] bg-white px-3 py-3">
+          <div className="flex-1 rounded-[18px] border border-[#e5ebfb] bg-card px-3 py-3">
             <div className="flex h-[72px] items-end rounded-[14px] bg-[#f5f7fd] px-2 pb-2">
               <div className="h-[38%] w-full rounded-[10px] bg-[#d6dfff]" />
             </div>
           </div>
-          <div className="flex-1 rounded-[18px] border border-[#dde5ff] bg-white px-3 py-3 shadow-[0_8px_20px_rgba(76,103,178,0.08)]">
+          <div className="flex-1 rounded-[18px] border border-[#dde5ff] bg-card px-3 py-3 shadow-[0_8px_20px_rgba(76,103,178,0.08)]">
             <div className="flex h-[88px] items-end rounded-[14px] bg-[#f5f7fd] px-2 pb-2">
               <div className="h-[58%] w-full rounded-[10px] bg-[#9eb7ff]" />
             </div>
           </div>
-          <div className="flex-1 rounded-[18px] border border-[#d2ddff] bg-white px-3 py-3 shadow-[0_10px_22px_rgba(76,103,178,0.10)]">
+          <div className="flex-1 rounded-[18px] border border-[#d2ddff] bg-card px-3 py-3 shadow-[0_10px_22px_rgba(76,103,178,0.10)]">
             <div className="flex h-[100px] items-end rounded-[14px] bg-[#f5f7fd] px-2 pb-2">
               <div className="h-[76%] w-full rounded-[10px] bg-[#4c67b2]" />
             </div>
           </div>
         </div>
         <div className="mt-4 flex gap-3">
-          <div className="flex-1 rounded-[18px] border border-[#e6ebf8] bg-white px-4 py-4">
+          <div className="flex-1 rounded-[18px] border border-[#e6ebf8] bg-card px-4 py-4">
             <div className="h-[8px] w-[70px] rounded-full bg-[#dae3fb]" />
             <div className="mt-3 h-[8px] w-[118px] rounded-full bg-[#edf2ff]" />
           </div>
-          <div className="w-[72px] rounded-[18px] border border-[#dce4ff] bg-white px-3 py-4">
+          <div className="w-[72px] rounded-[18px] border border-[#dce4ff] bg-card px-3 py-4">
             <div className="h-[10px] w-[10px] rounded-full bg-[#4c67b2]" />
             <div className="mt-4 h-[8px] w-full rounded-full bg-[#e5ebfb]" />
             <div className="mt-2 h-[8px] w-[70%] rounded-full bg-[#eef2ff]" />
@@ -550,7 +550,7 @@ function SegmentCard({
   if (false) {
     return (
     <div
-      className={`flex flex-1 flex-col items-center gap-6 bg-white pb-12 pt-10 max-md:gap-4 max-md:rounded-none max-md:pb-8 max-md:pt-6 ${
+      className={`flex flex-1 flex-col items-center gap-6 bg-card pb-12 pt-10 max-md:gap-4 max-md:rounded-none max-md:pb-8 max-md:pt-6 ${
         index === 0
           ? "rounded-r-[20px]"
           : index === 1
@@ -569,7 +569,7 @@ function SegmentCard({
 
   return (
     <div
-      className={`flex flex-1 flex-col items-center gap-6 bg-white pb-12 pt-10 max-md:gap-4 max-md:rounded-none max-md:pb-8 max-md:pt-6 ${
+      className={`flex flex-1 flex-col items-center gap-6 bg-card pb-12 pt-10 max-md:gap-4 max-md:rounded-none max-md:pb-8 max-md:pt-6 ${
         index === 0
           ? "rounded-r-[20px]"
           : index === 1
@@ -577,7 +577,7 @@ function SegmentCard({
             : "rounded-l-[20px]"
       }`}
     >
-      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-white">
+      <div className="relative h-[252px] w-[280px] overflow-hidden rounded-[20px] bg-card">
         {index === 0 && (
           <>
             <div className="absolute inset-x-[16px] top-[16px] bottom-[16px] rounded-[22px] border border-[#dff2ed] bg-[linear-gradient(180deg,#f4fcfa_0%,#ffffff_100%)] px-[18px] py-[18px] shadow-[0_10px_28px_rgba(15,159,143,0.08)]">
@@ -601,7 +601,7 @@ function SegmentCard({
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-[16px] border border-[#e5f3ef] bg-white px-3 py-3 text-center shadow-[0_2px_10px_rgba(15,159,143,0.04)]"
+                    className="rounded-[16px] border border-[#e5f3ef] bg-card px-3 py-3 text-center shadow-[0_2px_10px_rgba(15,159,143,0.04)]"
                   >
                     <div className="text-[10px] font-medium text-[#7f8b87]">{item.label}</div>
                     <div className="mt-2 text-[13px] font-semibold text-[#171717]">{item.value}</div>
@@ -609,7 +609,7 @@ function SegmentCard({
                 ))}
               </div>
 
-              <div className="mt-5 rounded-[18px] border border-[#d8efe9] bg-white px-4 py-4">
+              <div className="mt-5 rounded-[18px] border border-[#d8efe9] bg-card px-4 py-4">
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-[#0f9f8f]">
                   <Check className="h-4 w-4" />
                   Primeira leitura guiada
@@ -636,7 +636,7 @@ function SegmentCard({
                 </span>
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-[#e4f3e8] bg-white px-3 py-3">
+              <div className="mt-4 rounded-[18px] border border-[#e4f3e8] bg-card px-3 py-3">
                 <div className="mb-2 flex items-center justify-between text-[10px] font-medium text-[#7b8783]">
                   <span>Últimas mudanças</span>
                   <span className="text-[#16a34a]">continuidade ativa</span>
@@ -669,8 +669,8 @@ function SegmentCard({
                     key={item.label}
                     className={`rounded-[16px] border px-3 py-3 ${
                       item.active
-                        ? "border-[#cdeed8] bg-white shadow-[0_8px_22px_rgba(34,197,94,0.08)]"
-                        : "border-[#edf1f0] bg-white"
+                        ? "border-[#cdeed8] bg-card shadow-[0_8px_22px_rgba(34,197,94,0.08)]"
+                        : "border-[#edf1f0] bg-card"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -704,7 +704,7 @@ function SegmentCard({
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-[#dff2e4] bg-white px-4 py-4">
+              <div className="mt-4 rounded-[18px] border border-[#dff2e4] bg-card px-4 py-4">
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-[#16a34a]">
                   <RefreshCw className="h-4 w-4" />
                   Retomar análise
@@ -731,7 +731,7 @@ function SegmentCard({
                 </span>
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-[#e6ebf8] bg-white px-4 py-3">
+              <div className="mt-4 rounded-[18px] border border-[#e6ebf8] bg-card px-4 py-3">
                 <div className="mb-3 flex items-center justify-between text-[10px] font-medium text-[#7b87a0]">
                   <span>2022</span>
                   <span>2023</span>
@@ -757,7 +757,7 @@ function SegmentCard({
                 </div>
               </div>
 
-              {false && <div className="mt-4 h-[60px] rounded-[18px] border border-[#e1e8ff] bg-white px-4 py-3">
+              {false && <div className="mt-4 h-[60px] rounded-[18px] border border-[#e1e8ff] bg-card px-4 py-3">
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-[#4c67b2]">
                   <Presentation className="h-4 w-4" />
                   Leitura com contexto
@@ -767,13 +767,13 @@ function SegmentCard({
                 </p>
               </div>}
               <div className="mt-4 grid gap-3">
-                <div className="rounded-[16px] border border-[#e6ebf8] bg-white px-4 py-3.5">
+                <div className="rounded-[16px] border border-[#e6ebf8] bg-card px-4 py-3.5">
                   <div className="text-[11px] font-medium text-[#7b87a0]">Contexto adicional</div>
                   <div className="mt-2 text-[12px] leading-[18px] text-[#4e5d79]">
                     A leitura histórica continua acima da média do setor nos últimos 3 períodos.
                   </div>
                 </div>
-                <div className="rounded-[18px] border border-[#e1e8ff] bg-white px-4 py-3.5">
+                <div className="rounded-[18px] border border-[#e1e8ff] bg-card px-4 py-3.5">
                   <div className="flex items-center gap-2 text-[12px] font-semibold text-[#4c67b2]">
                     <Presentation className="h-4 w-4" />
                     Leitura com contexto
@@ -872,9 +872,9 @@ export function SolutionSection() {
         <div className="mt-16 flex flex-col items-center">
           <div className="z-[2] -mb-[68px] flex items-start max-md:mb-4">
             <div className="h-[68px] w-[76px] max-md:hidden [transform:scaleX(-1)]">
-              <div className="h-full w-full rounded-tr-[20px] bg-white" />
+              <div className="h-full w-full rounded-tr-[20px] bg-card" />
             </div>
-            <div className="h-[68px] w-[360px] overflow-hidden bg-white max-md:h-auto max-md:w-auto max-md:bg-transparent">
+            <div className="h-[68px] w-[360px] overflow-hidden bg-card max-md:h-auto max-md:w-auto max-md:bg-transparent">
               <div className="mx-auto flex h-10 w-[359px] items-start gap-[2px] rounded-xl border border-[#f0f0f0] bg-[#fafafa] p-[2px]">
                 <button
                   type="button"
@@ -897,17 +897,17 @@ export function SolutionSection() {
               </div>
             </div>
             <div className="h-[68px] w-[76px] max-md:hidden">
-              <div className="h-full w-full rounded-tl-[20px] bg-white" />
+              <div className="h-full w-full rounded-tl-[20px] bg-card" />
             </div>
           </div>
         </div>
 
-        <div className="relative z-[1] flex h-[620px] w-full max-w-[1430px] flex-col items-center justify-end overflow-hidden rounded-[20px] bg-gradient-to-b from-[#f5f5f5] to-white p-[60px] max-md:h-auto max-md:overflow-visible max-md:rounded-none max-md:bg-none max-md:p-0">
+        <div className="relative z-[1] flex h-[620px] w-full max-w-[1430px] flex-col items-center justify-end overflow-hidden rounded-[20px] bg-gradient-to-b from-[#f5f5f5] to-card dark:from-[#1a1a1a] p-[60px] max-md:h-auto max-md:overflow-visible max-md:rounded-none max-md:bg-none max-md:p-0">
           <div className="relative h-[442px] w-full max-w-[1430px] max-md:h-auto max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden">
             <div className="relative flex h-full w-full items-start gap-4 opacity-100 transition-opacity duration-500 max-md:h-auto max-md:w-max">
-              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:h-auto max-md:w-[88vw] max-md:min-w-[88vw] max-md:snap-start max-md:gap-8 max-md:overflow-visible max-md:rounded-[16px] max-md:p-6">
+              <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-card p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:h-auto max-md:w-[88vw] max-md:min-w-[88vw] max-md:snap-start max-md:gap-8 max-md:overflow-visible max-md:rounded-[16px] max-md:p-6">
                 <div className="flex w-full flex-col items-start gap-6">
-                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#dbecff] to-white">
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#dbecff] to-card dark:from-[#1a3a5c]">
                       {solutionMode === "analisar" ? (
                         <Sparkles className="h-5 w-5 text-[#0f9f8f]" />
                       ) : (
@@ -1057,12 +1057,12 @@ export function SolutionSection() {
                 </div>
               </div>
 
-              {false && <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
+              {false && <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-card shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.4))]" />
                 <div className="absolute left-0 top-0 grid h-full w-full grid-cols-[48px_120px_1fr]">
                   <div className="flex flex-col items-center gap-4 border-r border-[#eef2f8] py-4">
                     <div className="h-7 w-7 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-                    <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
+                    <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-card" />
                     <div className="h-7 w-7 rounded-full bg-[radial-gradient(circle,#9df0d8,#0f9f8f)] opacity-80" />
                   </div>
                   <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
@@ -1091,8 +1091,8 @@ export function SolutionSection() {
                   </div>
                 </div>
 
-                <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-white to-transparent" />
-                <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-white to-transparent" />
+                <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-card to-transparent" />
+                <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-card to-transparent" />
 
                 <div className="absolute bottom-[17px] right-[17px] z-[2] h-[195px] w-[198px] overflow-hidden rounded-[16px] border-4 border-white shadow-[0px_4px_28px_0px_rgba(0,0,0,0.05)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_22%,#dff8f3,#7bd8cb_18%,#edf6f4_19%,#edf6f4_60%,#7ba29a_61%,#21433f_100%)]" />
@@ -1117,7 +1117,7 @@ export function SolutionSection() {
                 </div>
               </div>}
 
-              <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:h-[420px] max-md:min-w-[88vw] max-md:w-[88vw] max-md:snap-start max-md:shrink-0">
+              <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-card shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:h-[420px] max-md:min-w-[88vw] max-md:w-[88vw] max-md:snap-start max-md:shrink-0">
                 <AnimatePresence mode="wait" initial={false}>
                   {solutionMode === "acompanhar" && activeAccompanyFeature === 0 ? (
                     <motion.div
@@ -1258,7 +1258,7 @@ export function SolutionSection() {
                         <div className="absolute left-0 top-0 grid h-full w-full grid-cols-[48px_120px_1fr]">
                           <div className="flex flex-col items-center gap-4 border-r border-[#eef2f8] py-4">
                             <div className="h-7 w-7 rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]" />
-                            <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-white" />
+                            <div className="h-7 w-7 rounded-full border border-[#e4e7eb] bg-card" />
                             <div className="h-7 w-7 rounded-full bg-[radial-gradient(circle,#9df0d8,#0f9f8f)] opacity-80" />
                           </div>
                           <div className="border-r border-[#eef2f8] px-3 py-4 text-[11px] text-[#727272]">
@@ -1293,8 +1293,8 @@ export function SolutionSection() {
                       </div>
                     ))}
 
-                    <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-white to-transparent" />
-                    <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-white to-transparent" />
+                    <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-card to-transparent" />
+                    <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-card to-transparent" />
 
                     <div className="absolute bottom-[17px] right-[17px] z-[2] h-[195px] w-[198px] overflow-hidden rounded-[16px] border-4 border-white shadow-[0px_4px_28px_0px_rgba(0,0,0,0.05)]">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_22%,#dff8f3,#7bd8cb_18%,#edf6f4_19%,#edf6f4_60%,#7ba29a_61%,#21433f_100%)]" />
@@ -1325,9 +1325,9 @@ export function SolutionSection() {
 
               <div className="pointer-events-none absolute inset-0 opacity-0">
                 <div className="flex h-full w-full items-start gap-4 max-md:h-auto max-md:flex-col">
-                  <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:hidden">
+                  <div className="flex h-[442px] w-[426px] shrink-0 flex-col items-start justify-between overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-card p-8 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-lg:w-[340px] max-md:hidden">
                     <div className="flex w-full flex-col items-start gap-6">
-                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#d4f5e0] to-white">
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#d4f5e0] to-card dark:from-[#1a3a2c]">
                         <DollarSign className="h-5 w-5 text-[#49a66d]" />
                       </div>
                       <div className="flex w-full flex-col items-start gap-[9px]">
@@ -1361,10 +1361,10 @@ export function SolutionSection() {
                     </div>
                   </div>
 
-                  <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
+                  <div className="relative h-[442px] flex-1 overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-card shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] max-md:hidden">
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,#eef8f1_0%,#ffffff_55%,#f5f7fa_100%)]" />
-                    <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-white to-transparent" />
-                    <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-white to-transparent" />
+                    <div className="pointer-events-none absolute bottom-[-1px] left-[-1px] z-[1] h-[200px] w-[calc(100%+2px)] rounded-b-[20px] bg-gradient-to-t from-card to-transparent" />
+                    <div className="pointer-events-none absolute right-[-1px] top-[-1px] z-[1] h-[calc(100%+2px)] w-[200px] rounded-r-[20px] bg-gradient-to-l from-card to-transparent" />
 
                     <div className="absolute bottom-[17px] right-[17px] z-[2] h-[195px] w-[198px] overflow-hidden rounded-[16px] border-4 border-white shadow-[0px_4px_28px_0px_rgba(0,0,0,0.05)]">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_22%,#dff6e7,#95d9ac_18%,#eef4ef_19%,#eef4ef_60%,#9ab59f_61%,#34483b_100%)]" />
@@ -1391,7 +1391,7 @@ function StepCards() {
       {steps.map((step, index) => (
         <div
           key={step.title}
-          className={`flex flex-1 flex-col justify-between gap-3 bg-white max-md:!rounded-none max-md:!p-6 ${
+          className={`flex flex-1 flex-col justify-between gap-3 bg-card max-md:!rounded-none max-md:!p-6 ${
             index === 0
               ? "rounded-br-[20px] rounded-tr-[20px] py-6 pr-6"
               : index === 1
@@ -1449,7 +1449,7 @@ function AIAgentsHero() {
     >
       <div className="relative z-10 flex flex-col items-center gap-6 pt-[64px] max-md:pt-10 max-sm:gap-4 max-sm:px-4">
         <div className="relative h-[88px] w-[88px] overflow-hidden rounded-full max-sm:h-[64px] max-sm:w-[64px]">
-          <div className="absolute inset-0 rounded-full bg-white" />
+          <div className="absolute inset-0 rounded-full bg-card" />
           <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.95)_0%,rgba(223,246,241,0.85)_30%,rgba(15,159,143,0.22)_62%,rgba(255,255,255,0)_100%)]" />
           <div className="absolute left-1/2 top-1/2 h-[53px] w-[53px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#9bf0de_0%,#0f9f8f_62%,#0c7a6d_100%)] shadow-[0_8px_26px_rgba(15,159,143,0.25)] max-sm:h-[40px] max-sm:w-[40px]" />
           <Sparkles className="absolute left-1/2 top-1/2 z-10 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-white max-sm:h-5 max-sm:w-5" />
@@ -1468,7 +1468,7 @@ function AIAgentsHero() {
           A Analiso organiza sinais, contexto e mudanças em uma leitura guiada para você entender o que importa sem se perder no ruído.
         </p>
 
-        <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
+        <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-card px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-sm:h-10 max-sm:px-3 max-sm:py-2.5 max-sm:text-xs">
           Ver como funciona
         </button>
       </div>
@@ -1476,8 +1476,8 @@ function AIAgentsHero() {
       <div className="relative mt-[-40px] max-md:mt-[-20px] max-sm:mt-[-10px]">
         <div className="pointer-events-none absolute bottom-0 top-0 left-1/2 z-0 w-screen -translate-x-1/2">
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,1)_0%,rgba(255,255,255,0.95)_15%,rgba(159,252,202,0.15)_35%,rgba(159,252,202,0.4)_60%,rgba(159,252,202,1)_100%)]" />
-          <div className="absolute left-0 right-0 top-0 z-[5] h-[28%] bg-gradient-to-b from-white to-transparent max-md:h-[130px] max-sm:h-[100px]" />
-          <div className="absolute bottom-[-20px] left-0 right-0 z-40 h-[45%] bg-gradient-to-t from-white/80 to-transparent max-md:h-[320px] max-md:from-white max-sm:h-[40%] max-sm:from-white" />
+          <div className="absolute left-0 right-0 top-0 z-[5] h-[28%] bg-gradient-to-b from-card to-transparent max-md:h-[130px] max-sm:h-[100px]" />
+          <div className="absolute bottom-[-20px] left-0 right-0 z-40 h-[45%] bg-gradient-to-t from-card/80 to-transparent max-md:h-[320px] max-md:from-card max-sm:h-[40%] max-sm:from-card" />
           <div
             className="absolute bottom-0 left-0 right-0 z-[50] h-[30px]"
             style={{
@@ -1539,8 +1539,8 @@ function AIAgentsHero() {
         </div>
 
         <div className="absolute bottom-[33px] left-0 right-0 z-[3] flex flex-col items-center gap-2 max-sm:bottom-[-30px]">
-          <div className="flex cursor-pointer items-center gap-3 rounded-full bg-white py-[6px] pl-[6px] pr-3 shadow-[0px_4px_20px_-8px_rgba(88,92,95,0.16)]">
-            <div className="relative h-[66px] w-[66px] shrink-0 rounded-full border border-[#f0f0f0] bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[50px] max-md:w-[50px]">
+          <div className="flex cursor-pointer items-center gap-3 rounded-full bg-card py-[6px] pl-[6px] pr-3 shadow-[0px_4px_20px_-8px_rgba(88,92,95,0.16)]">
+            <div className="relative h-[66px] w-[66px] shrink-0 rounded-full border border-[#f0f0f0] bg-card shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[50px] max-md:w-[50px]">
               <div className="absolute inset-0 overflow-hidden rounded-full">
                 <div className="absolute bottom-0 left-1/2 h-[66px] w-[54px] -translate-x-1/2 rounded-b-full bg-[radial-gradient(circle_at_50%_24%,#ebe6df_0%,#ccb29f_14%,#b0e7dc_15%,#f4f4f4_28%,#f4f4f4_100%)] max-md:h-[50px] max-md:w-[42px]" />
               </div>
@@ -1549,7 +1549,7 @@ function AIAgentsHero() {
               </span>
             </div>
 
-            <div className="flex h-[56px] items-center rounded-[74px] border border-[#f0f0f0] bg-white px-4 shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[44px] max-md:px-3">
+            <div className="flex h-[56px] items-center rounded-[74px] border border-[#f0f0f0] bg-card px-4 shadow-[0_4px_14px_rgba(0,0,0,0.05)] max-md:h-[44px] max-md:px-3">
               <div className="flex flex-col">
                 <span className="text-base font-semibold leading-6 text-[#171717] max-md:text-sm max-md:leading-5">
                   Angelina
@@ -1559,7 +1559,7 @@ function AIAgentsHero() {
             </div>
           </div>
 
-          <div className="rounded-[31px] bg-white p-2 shadow-[0px_2px_10px_0px_rgba(88,92,95,0.1)]">
+          <div className="rounded-[31px] bg-card p-2 shadow-[0px_2px_10px_0px_rgba(88,92,95,0.1)]">
             <div className="h-[3px] w-[27px] overflow-hidden rounded-full bg-[#ececec]">
               <div className="h-full w-full rounded-full bg-[#0f9f8f]" />
             </div>
@@ -1572,7 +1572,7 @@ function AIAgentsHero() {
 
 function AIWorkCard() {
   return (
-    <div className="mx-auto max-w-[690px] rounded-[22px] border border-[#d7f1ec] bg-white shadow-[0_20px_60px_rgba(15,159,143,0.12)]">
+    <div className="mx-auto max-w-[690px] rounded-[22px] border border-[#d7f1ec] bg-card shadow-[0_20px_60px_rgba(15,159,143,0.12)]">
       <div className="grid gap-6 p-6 md:grid-cols-[1fr_320px] md:p-8">
         <div>
           <div className="text-[12px] font-semibold text-[#0f9f8f]">
@@ -1586,7 +1586,7 @@ function AIWorkCard() {
           </p>
         </div>
         <div className="relative rounded-[18px] border border-[#e9edf5] bg-[#ffffff] p-4">
-          <div className="absolute right-5 top-[-16px] rounded-[18px] border border-[#ececec] bg-white px-5 py-4 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
+          <div className="absolute right-5 top-[-16px] rounded-[18px] border border-[#ececec] bg-card px-5 py-4 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
             <div className="mb-3 flex items-center gap-4 text-[12px] text-[#8d8d8d]">
               <span className="font-semibold text-[#3b3b3b]">B</span>
               <span>I</span>
@@ -1680,7 +1680,7 @@ function DarkMethodVisual({
         className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-sm ${nucleusWidth} ${nucleusPadding}`}
       >
         <div className="flex items-center justify-between">
-          <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
+          <div className="rounded-full border border-white/10 bg-card/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
             WEGE3 · WEG S.A.
           </div>
           <div
@@ -1690,36 +1690,36 @@ function DarkMethodVisual({
         </div>
 
         <div className="mt-4 grid gap-3 grid-cols-3">
-          <div className="rounded-[16px] border border-white/8 bg-white/5 px-3 py-3">
-            <div className="h-[7px] w-[46px] rounded-full bg-white/15" />
-            <div className="mt-3 h-[30px] rounded-[10px] bg-white/8" />
+          <div className="rounded-[16px] border border-white/8 bg-card/5 px-3 py-3">
+            <div className="h-[7px] w-[46px] rounded-full bg-card/15" />
+            <div className="mt-3 h-[30px] rounded-[10px] bg-card/8" />
           </div>
           <div
             className="rounded-[16px] border px-3 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
             style={{ borderColor: state.border, backgroundColor: state.soft }}
           >
-            <div className="h-[7px] w-[52px] rounded-full bg-white/45" />
-            <div className="mt-3 h-[34px] rounded-[10px] bg-white/30" />
+            <div className="h-[7px] w-[52px] rounded-full bg-card/45" />
+            <div className="mt-3 h-[34px] rounded-[10px] bg-card/30" />
           </div>
-          <div className="rounded-[16px] border border-white/8 bg-white/5 px-3 py-3">
-            <div className="h-[7px] w-[42px] rounded-full bg-white/15" />
-            <div className="mt-3 h-[30px] rounded-[10px] bg-white/8" />
+          <div className="rounded-[16px] border border-white/8 bg-card/5 px-3 py-3">
+            <div className="h-[7px] w-[42px] rounded-full bg-card/15" />
+            <div className="mt-3 h-[30px] rounded-[10px] bg-card/8" />
           </div>
         </div>
 
-        <div className="mt-4 rounded-[18px] border border-white/8 bg-white/5 p-4">
+        <div className="mt-4 rounded-[18px] border border-white/8 bg-card/5 p-4">
           <div className="flex items-center justify-between">
-            <div className="h-[8px] w-[116px] rounded-full bg-white/18" />
-            <div className="h-[8px] w-[52px] rounded-full bg-white/10" />
+            <div className="h-[8px] w-[116px] rounded-full bg-card/18" />
+            <div className="h-[8px] w-[52px] rounded-full bg-card/10" />
           </div>
-          <div className="mt-4 h-[2px] rounded-full bg-white/8" />
+          <div className="mt-4 h-[2px] rounded-full bg-card/8" />
           <div className="mt-4 flex items-end gap-2">
-            <div className="h-[44px] flex-1 rounded-[10px] bg-white/7" />
+            <div className="h-[44px] flex-1 rounded-[10px] bg-card/7" />
             <div
               className="h-[58px] flex-1 rounded-[10px]"
               style={{ backgroundColor: state.soft, boxShadow: `inset 0 0 0 1px ${state.border}` }}
             />
-            <div className="h-[38px] flex-1 rounded-[10px] bg-white/7" />
+            <div className="h-[38px] flex-1 rounded-[10px] bg-card/7" />
           </div>
         </div>
       </motion.div>
@@ -1739,8 +1739,8 @@ function DarkMethodVisual({
               style={{ borderColor: state.border, backgroundColor: "rgba(255,255,255,0.08)" }}
             >
               <div className="px-4 pt-4">
-                <div className="h-[7px] w-[44px] rounded-full bg-white/20" />
-                <div className="mt-3 h-[22px] rounded-[9px] bg-white/12" />
+                <div className="h-[7px] w-[44px] rounded-full bg-card/20" />
+                <div className="mt-3 h-[22px] rounded-[9px] bg-card/12" />
               </div>
             </div>
             <div
@@ -1748,8 +1748,8 @@ function DarkMethodVisual({
               style={{ borderColor: state.border, backgroundColor: "rgba(255,255,255,0.07)" }}
             >
               <div className="px-4 pt-4">
-                <div className="h-[7px] w-[38px] rounded-full bg-white/20" />
-                <div className="mt-3 h-[18px] rounded-[9px] bg-white/10" />
+                <div className="h-[7px] w-[38px] rounded-full bg-card/20" />
+                <div className="mt-3 h-[18px] rounded-[9px] bg-card/10" />
               </div>
             </div>
             <div
@@ -1757,8 +1757,8 @@ function DarkMethodVisual({
               style={{ borderColor: state.border, backgroundColor: "rgba(255,255,255,0.07)" }}
             >
               <div className="px-4 pt-4">
-                <div className="h-[7px] w-[48px] rounded-full bg-white/20" />
-                <div className="mt-3 h-[22px] rounded-[9px] bg-white/10" />
+                <div className="h-[7px] w-[48px] rounded-full bg-card/20" />
+                <div className="mt-3 h-[22px] rounded-[9px] bg-card/10" />
               </div>
             </div>
           </motion.div>
@@ -1779,7 +1779,7 @@ function DarkMethodVisual({
             <div className="absolute left-[14%] top-[32%] h-3 w-3 rounded-full" style={{ backgroundColor: state.accent, boxShadow: `0 0 16px ${state.accent}` }} />
             <div className="absolute left-[47.5%] top-[49%] h-3 w-3 rounded-full" style={{ backgroundColor: state.accent, boxShadow: `0 0 16px ${state.accent}` }} />
             <div className="absolute right-[16%] top-[28%] h-3 w-3 rounded-full" style={{ backgroundColor: state.accent, boxShadow: `0 0 16px ${state.accent}` }} />
-            <div className="absolute right-[12%] bottom-[18%] rounded-full border border-white/10 bg-white/8 px-4 py-2 text-[11px] font-medium text-white/75">
+            <div className="absolute right-[12%] bottom-[18%] rounded-full border border-white/10 bg-card/8 px-4 py-2 text-[11px] font-medium text-white/75">
               Acima do setor
             </div>
           </motion.div>
@@ -1798,18 +1798,18 @@ function DarkMethodVisual({
             >
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: state.accent }} />
-                <div className="h-[7px] w-[68px] rounded-full bg-white/24" />
+                <div className="h-[7px] w-[68px] rounded-full bg-card/24" />
               </div>
-              <div className="mt-3 h-[8px] w-[112px] rounded-full bg-white/16" />
-              <div className="mt-2 h-[8px] w-[88px] rounded-full bg-white/10" />
+              <div className="mt-3 h-[8px] w-[112px] rounded-full bg-card/16" />
+              <div className="mt-2 h-[8px] w-[88px] rounded-full bg-card/10" />
             </div>
-            <div className="absolute left-[11%] top-[26%] w-[118px] rounded-[16px] border border-white/10 bg-white/6 px-4 py-3">
-              <div className="h-[7px] w-[42px] rounded-full bg-white/16" />
-              <div className="mt-3 h-[16px] rounded-[8px] bg-white/10" />
+            <div className="absolute left-[11%] top-[26%] w-[118px] rounded-[16px] border border-white/10 bg-card/6 px-4 py-3">
+              <div className="h-[7px] w-[42px] rounded-full bg-card/16" />
+              <div className="mt-3 h-[16px] rounded-[8px] bg-card/10" />
             </div>
-            <div className="absolute bottom-[15%] right-[17%] w-[126px] rounded-[16px] border border-white/10 bg-white/6 px-4 py-3">
-              <div className="h-[7px] w-[48px] rounded-full bg-white/16" />
-              <div className="mt-3 h-[16px] rounded-[8px] bg-white/10" />
+            <div className="absolute bottom-[15%] right-[17%] w-[126px] rounded-[16px] border border-white/10 bg-card/6 px-4 py-3">
+              <div className="h-[7px] w-[48px] rounded-full bg-card/16" />
+              <div className="mt-3 h-[16px] rounded-[8px] bg-card/10" />
             </div>
           </motion.div>
         )}
@@ -1839,7 +1839,7 @@ function DarkMethodPhotoPanel({
 
         <div className="absolute left-1/2 top-[98px] w-[260px] -translate-x-1/2 rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-sm">
           <div className="flex items-center justify-between">
-            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
+            <div className="rounded-full border border-white/10 bg-card/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
               WEGE3 · WEG S.A.
             </div>
             <div
@@ -1864,13 +1864,13 @@ function DarkMethodPhotoPanel({
                       : { borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.05)" }
                   }
                 >
-                  <div className={`h-[7px] rounded-full ${idx === 1 ? "bg-white/45" : "bg-white/15"} ${idx === 0 ? "w-[46px]" : idx === 1 ? "w-[52px]" : "w-[42px]"}`} />
-                  <div className={`mt-3 rounded-[10px] ${idx === 1 ? "h-[34px] bg-white/30" : "h-[30px] bg-white/8"}`} />
+                  <div className={`h-[7px] rounded-full ${idx === 1 ? "bg-card/45" : "bg-card/15"} ${idx === 0 ? "w-[46px]" : idx === 1 ? "w-[52px]" : "w-[42px]"}`} />
+                  <div className={`mt-3 rounded-[10px] ${idx === 1 ? "h-[34px] bg-card/30" : "h-[30px] bg-card/8"}`} />
                 </div>
               ))}
             </div>
           ) : state.id === "context" ? (
-            <div className="mt-4 rounded-[18px] border border-white/8 bg-white/5 p-4">
+            <div className="mt-4 rounded-[18px] border border-white/8 bg-card/5 p-4">
               <svg className="h-[76px] w-full" viewBox="0 0 220 76" preserveAspectRatio="none">
                 <path d="M12 55C52 22 90 18 118 38C144 56 174 46 208 16" stroke={state.accent} strokeOpacity="0.8" strokeWidth="2" fill="none" />
                 <path d="M22 22C64 10 96 18 118 34" stroke="#9db0ff" strokeOpacity="0.45" strokeWidth="1.5" fill="none" />
@@ -1879,8 +1879,8 @@ function DarkMethodPhotoPanel({
                 <circle cx="208" cy="16" r="3" fill={state.accent} />
               </svg>
               <div className="mt-3 flex items-center justify-between">
-                <div className="h-[8px] w-[94px] rounded-full bg-white/16" />
-                <div className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[10px] font-medium text-white/70">
+                <div className="h-[8px] w-[94px] rounded-full bg-card/16" />
+                <div className="rounded-full border border-white/10 bg-card/8 px-3 py-1 text-[10px] font-medium text-white/70">
                   Acima do setor
                 </div>
               </div>
@@ -1893,19 +1893,19 @@ function DarkMethodPhotoPanel({
               >
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: state.accent }} />
-                  <div className="h-[7px] w-[68px] rounded-full bg-white/24" />
+                  <div className="h-[7px] w-[68px] rounded-full bg-card/24" />
                 </div>
-                <div className="mt-3 h-[8px] w-[112px] rounded-full bg-white/16" />
-                <div className="mt-2 h-[8px] w-[88px] rounded-full bg-white/10" />
+                <div className="mt-3 h-[8px] w-[112px] rounded-full bg-card/16" />
+                <div className="mt-2 h-[8px] w-[88px] rounded-full bg-card/10" />
               </div>
               <div className="flex gap-3">
-                <div className="w-[112px] rounded-[16px] border border-white/10 bg-white/6 px-4 py-3">
-                  <div className="h-[7px] w-[42px] rounded-full bg-white/16" />
-                  <div className="mt-3 h-[16px] rounded-[8px] bg-white/10" />
+                <div className="w-[112px] rounded-[16px] border border-white/10 bg-card/6 px-4 py-3">
+                  <div className="h-[7px] w-[42px] rounded-full bg-card/16" />
+                  <div className="mt-3 h-[16px] rounded-[8px] bg-card/10" />
                 </div>
-                <div className="w-[124px] rounded-[16px] border border-white/10 bg-white/6 px-4 py-3">
-                  <div className="h-[7px] w-[48px] rounded-full bg-white/16" />
-                  <div className="mt-3 h-[16px] rounded-[8px] bg-white/10" />
+                <div className="w-[124px] rounded-[16px] border border-white/10 bg-card/6 px-4 py-3">
+                  <div className="h-[7px] w-[48px] rounded-full bg-card/16" />
+                  <div className="mt-3 h-[16px] rounded-[8px] bg-card/10" />
                 </div>
               </div>
             </div>
@@ -2267,9 +2267,9 @@ function DarkCapabilitiesLegacyCurrent() {
               >
                 <div className="mb-24 h-16 w-16 rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
                   <div className="flex h-full items-end gap-1.5">
-                    <div className="h-[40%] w-full rounded-full bg-white/12" />
-                    <div className="h-[70%] w-full rounded-full bg-white/18" />
-                    <div className="h-[54%] w-full rounded-full bg-white/12" />
+                    <div className="h-[40%] w-full rounded-full bg-card/12" />
+                    <div className="h-[70%] w-full rounded-full bg-card/18" />
+                    <div className="h-[54%] w-full rounded-full bg-card/12" />
                   </div>
                 </div>
                 <div className="text-[18px] font-semibold text-white md:text-[20px]">
@@ -2630,7 +2630,7 @@ export function DarkCapabilities() {
                       }
                     />
                     <motion.div
-                      className="absolute left-[84px] top-[126px] h-[72px] w-[62px] rounded-[18px] border border-white/10 bg-white/5"
+                      className="absolute left-[84px] top-[126px] h-[72px] w-[62px] rounded-[18px] border border-white/10 bg-card/5"
                       animate={reducedMotion ? undefined : { opacity: hoveredSupportCard === index ? 0.14 : [0.22, 0.4, 0.22], scale: hoveredSupportCard === index ? 0.97 : [1, 0.985, 1] }}
                       transition={
                         reducedMotion
@@ -2641,7 +2641,7 @@ export function DarkCapabilities() {
                       }
                     />
                     <motion.div
-                      className="absolute right-[84px] top-[136px] h-[62px] w-[62px] rounded-[18px] border border-white/10 bg-white/5"
+                      className="absolute right-[84px] top-[136px] h-[62px] w-[62px] rounded-[18px] border border-white/10 bg-card/5"
                       animate={reducedMotion ? undefined : { opacity: hoveredSupportCard === index ? 0.14 : [0.22, 0.38, 0.22], scale: hoveredSupportCard === index ? 0.97 : [1, 0.985, 1] }}
                       transition={
                         reducedMotion
@@ -2731,7 +2731,7 @@ export function DarkCapabilities() {
                       </defs>
                     </svg>
                     <motion.div
-                      className="absolute left-[50px] top-[156px] h-[42px] w-[70px] rounded-[16px] border border-white/10 bg-white/5"
+                      className="absolute left-[50px] top-[156px] h-[42px] w-[70px] rounded-[16px] border border-white/10 bg-card/5"
                       animate={reducedMotion ? undefined : { opacity: [0.45, 0.55, 0.45] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
@@ -2743,12 +2743,12 @@ export function DarkCapabilities() {
                       animate={reducedMotion ? undefined : { boxShadow: hoveredSupportCard === index ? "0 12px 36px rgba(123,140,255,0.2)" : "0 8px 24px rgba(123,140,255,0.08)" }}
                     />
                     <motion.div
-                      className="absolute right-[44px] top-[120px] h-[78px] w-[74px] rounded-[16px] border border-white/10 bg-white/5"
+                      className="absolute right-[44px] top-[120px] h-[78px] w-[74px] rounded-[16px] border border-white/10 bg-card/5"
                       animate={reducedMotion ? undefined : { opacity: [0.45, 0.58, 0.45] }}
                       transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
                     />
                     <motion.div
-                      className="absolute right-[26px] top-[42px] rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[10px] font-medium text-white/70"
+                      className="absolute right-[26px] top-[42px] rounded-full border border-white/10 bg-card/8 px-3 py-1 text-[10px] font-medium text-white/70"
                       initial={reducedMotion ? false : { opacity: 0, y: 4 }}
                       whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
                       transition={{ duration: 0.45, delay: 0.62, ease: "easeOut" }}
@@ -2763,7 +2763,7 @@ export function DarkCapabilities() {
                   <div className="relative h-[243px] w-[317px] shrink-0 overflow-hidden rounded-[20px] bg-black">
                     <div className="absolute left-[14px] top-4 h-[212px] w-[288px] rounded-[20px] border border-white/6 bg-[radial-gradient(circle_at_top,rgba(255,183,77,0.14),transparent_50%),radial-gradient(circle_at_70%_30%,rgba(74,144,226,0.15),transparent_42%)]" />
                     <motion.div
-                      className="absolute left-[54px] top-[64px] h-[52px] w-[116px] rounded-[16px] border border-white/10 bg-white/6"
+                      className="absolute left-[54px] top-[64px] h-[52px] w-[116px] rounded-[16px] border border-white/10 bg-card/6"
                       initial={reducedMotion ? false : { opacity: 0, y: 8 }}
                       whileInView={reducedMotion ? undefined : { opacity: 0.78, y: 0 }}
                       transition={
@@ -2802,7 +2802,7 @@ export function DarkCapabilities() {
                       }}
                     />
                     <motion.div
-                      className="absolute right-[44px] top-[76px] h-[48px] w-[92px] rounded-[16px] border border-white/10 bg-white/6"
+                      className="absolute right-[44px] top-[76px] h-[48px] w-[92px] rounded-[16px] border border-white/10 bg-card/6"
                       initial={reducedMotion ? false : { opacity: 0, y: 8 }}
                       whileInView={reducedMotion ? undefined : { opacity: 0.72, y: 0 }}
                       transition={
@@ -2818,7 +2818,7 @@ export function DarkCapabilities() {
                       animate={reducedMotion ? undefined : { opacity: hoveredSupportCard === index ? 0.24 : [0.42, 0.62, 0.42], scale: hoveredSupportCard === index ? 0.96 : [1, 0.985, 1], y: hoveredSupportCard === index ? 1 : [0, 2, 0] }}
                     />
                     <motion.div
-                      className="absolute right-[58px] top-[138px] h-[56px] w-[74px] rounded-[16px] border border-white/10 bg-white/5"
+                      className="absolute right-[58px] top-[138px] h-[56px] w-[74px] rounded-[16px] border border-white/10 bg-card/5"
                       initial={reducedMotion ? false : { opacity: 0, y: 8 }}
                       whileInView={reducedMotion ? undefined : { opacity: 0.66, y: 0 }}
                       transition={
@@ -2914,14 +2914,14 @@ export function HeroSection() {
           <div className="order-3 flex shrink-0 items-center gap-2">
             <a
               href="/login"
-              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white px-4 py-3.5 text-sm font-semibold leading-5 text-black shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]"
+              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-card px-4 py-3.5 text-sm font-semibold leading-5 text-foreground shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98]"
             >
               Entrar
             </a>
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((v) => !v)}
-              className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-primary-gray-100 bg-white text-[#555] shadow-small max-md:flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-primary-gray-100 bg-card text-[#555] shadow-small max-md:flex"
               aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={isMobileMenuOpen}
             >
@@ -2997,7 +2997,7 @@ export function HeroSection() {
               <form
                 id="waitlist"
                 onSubmit={(event) => event.preventDefault()}
-                className="relative z-[2] flex w-full items-center gap-2.5 rounded-2xl border border-[#f0f0f0] bg-white py-2 pl-4 pr-2 shadow-[0_6px_18px_rgba(0,0,0,0.05)] max-sm:py-1.5 max-sm:pl-3 max-sm:pr-1.5"
+                className="relative z-[2] flex w-full items-center gap-2.5 rounded-2xl border border-[#f0f0f0] bg-card py-2 pl-4 pr-2 shadow-[0_6px_18px_rgba(0,0,0,0.05)] max-sm:py-1.5 max-sm:pl-3 max-sm:pr-1.5"
                 style={{ padding: "8px 8px 8px 16px" }}
                 aria-label="Formulário de lista de espera"
               >
@@ -3036,7 +3036,7 @@ export function HeroSection() {
                 />
                 <button
                   type="submit"
-                  className="shrink-0 cursor-pointer rounded-[10px] border border-[#0f9f8f] bg-[#0f9f8f] px-4 py-3.5 text-sm font-semibold leading-5 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:px-3 max-md:py-2.5 max-md:text-xs"
+                  className="shrink-0 cursor-pointer rounded-[10px] border border-[#0f9f8f] bg-[#0f9f8f] px-4 py-3.5 text-sm font-semibold leading-5 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-md:px-3 max-md:py-2.5 max-md:text-xs"
                 >
                   Explorar análise
                 </button>
@@ -3063,10 +3063,10 @@ export function HeroSection() {
                             setHeroQuery(featuredHeroResult.ticker);
                             setIsSearchFocused(false);
                           }}
-                          className="group flex w-full cursor-pointer items-start justify-between gap-4 rounded-[20px] border border-[#edf1f0] bg-[#fcfdfc] p-4 text-left transition-all duration-200 hover:-translate-y-[2px] hover:border-[#c7ddd6] hover:bg-white hover:shadow-[0_14px_30px_rgba(16,24,40,0.10)]"
+                          className="group flex w-full cursor-pointer items-start justify-between gap-4 rounded-[20px] border border-[#edf1f0] bg-[#fcfdfc] p-4 text-left transition-all duration-200 hover:-translate-y-[2px] hover:border-[#c7ddd6] hover:bg-card hover:shadow-[0_14px_30px_rgba(16,24,40,0.10)]"
                         >
                           <div className="min-w-0">
-                            <div className="inline-flex rounded-full border border-[#e7ecea] bg-white px-2.5 py-1 text-[11px] font-semibold tracking-[-0.01em] text-[#5e6b67]">
+                            <div className="inline-flex rounded-full border border-[#e7ecea] bg-card px-2.5 py-1 text-[11px] font-semibold tracking-[-0.01em] text-[#5e6b67]">
                               {featuredHeroResult.ticker}
                             </div>
                             <div className="mt-3 text-[18px] font-semibold leading-6 tracking-[-0.02em] text-[#171717]">
@@ -3078,7 +3078,7 @@ export function HeroSection() {
                           </div>
 
                           <div className="flex items-start gap-3">
-                            <div className="hidden rounded-[16px] border border-[#edf1f0] bg-white p-3 md:block">
+                            <div className="hidden rounded-[16px] border border-[#edf1f0] bg-card p-3 md:block">
                               <div className="flex items-center gap-2.5">
                                 <div className="flex h-10 w-11 flex-col justify-center gap-1.5 rounded-[12px] bg-[#eef8f5] px-2 transition-colors duration-200 group-hover:bg-[#e5f6f1]">
                                   <div className="h-[5px] w-4 rounded-full bg-[#0f9f8f]" />
@@ -3113,7 +3113,7 @@ export function HeroSection() {
                                 setHeroQuery(item.ticker);
                                 setIsSearchFocused(false);
                               }}
-                              className="flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#f0f2f1] bg-white px-4 py-3 text-left transition-all duration-200 hover:border-[#dde6e3] hover:bg-[#fcfdfc]"
+                              className="flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#f0f2f1] bg-card px-4 py-3 text-left transition-all duration-200 hover:border-[#dde6e3] hover:bg-[#fcfdfc]"
                             >
                               <div className="min-w-0">
                                 <div className="inline-flex rounded-full border border-[#edf1f0] bg-[#fbfcfb] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#5f6d69]">
@@ -3143,7 +3143,7 @@ export function HeroSection() {
               {heroChips.slice(0, 5).map((chip) => (
                 <span
                   key={chip}
-                  className="whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                  className="whitespace-nowrap rounded-full bg-card px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
                 >
                   {chip}
                 </span>
@@ -3153,7 +3153,7 @@ export function HeroSection() {
               {heroChips.slice(5).map((chip) => (
                 <span
                   key={chip}
-                  className="whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                  className="whitespace-nowrap rounded-full bg-card px-3 py-1 text-xs font-semibold leading-[18px] text-[#171717] shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
                 >
                   {chip}
                 </span>
@@ -3173,7 +3173,7 @@ export function HeroSection() {
 
             {/* Agent Card overlay */}
             <div className="absolute right-[62px] top-[28px] h-[260px] w-[236px] max-xl:right-4 max-lg:hidden">
-              <div className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#e6efff] bg-white shadow-[0_18px_48px_rgba(15,23,40,0.12)]">
+              <div className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#e6efff] bg-card shadow-[0_18px_48px_rgba(15,23,40,0.12)]">
                 {/* Animated border trace */}
                 <div className="pointer-events-none absolute inset-0 rounded-[20px]">
                   <svg className="absolute inset-0 h-full w-full" viewBox="0 0 236 260" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3256,7 +3256,7 @@ export function HeroSection() {
 
                 {/* Insight update card overlay */}
                 <div className="absolute right-[62px] top-[297px] h-[62px] w-[236px] max-xl:right-4 max-lg:hidden">
-                  <div className="flex h-full items-center gap-3 overflow-hidden rounded-[16px] border border-[#e6efff] bg-white px-4 shadow-[0_8px_24px_rgba(15,23,40,0.08)]">
+                  <div className="flex h-full items-center gap-3 overflow-hidden rounded-[16px] border border-[#e6efff] bg-card px-4 shadow-[0_8px_24px_rgba(15,23,40,0.08)]">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(140deg,#7fe4d6,#0f9f8f)]">
                       <FileText className="h-4 w-4 text-white" />
                     </div>
@@ -3375,7 +3375,7 @@ export function StepsSection() {
               </p>
             </div>
 
-            <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
+            <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-card px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98]">
               Conhecer a Analiso
             </button>
           </div>
@@ -3402,7 +3402,7 @@ export function FaqSection() {
               Dúvidas
             </span>
           </div>
-          <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-black max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
+          <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-foreground max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
             Perguntas frequentes
           </h2>
           <p className="max-w-[420px] text-center text-lg leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-base">
@@ -3410,7 +3410,7 @@ export function FaqSection() {
           </p>
         </div>
 
-        <div className="w-[868px] overflow-hidden rounded-[20px] border border-primary-gray-50 bg-white shadow-small max-lg:w-full max-md:rounded-[16px]">
+        <div className="w-[868px] overflow-hidden rounded-[20px] border border-primary-gray-50 bg-card shadow-small max-lg:w-full max-md:rounded-[16px]">
           {faqItems.map((faq, index) => {
             const isOpen = openFaq === index;
 
@@ -3497,9 +3497,9 @@ export function CtaSection() {
             />
           ))}
         </div>
-        <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-white via-white to-transparent" />
+        <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-card via-card to-transparent" />
         <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
-          <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-black max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
+          <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-foreground max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
             Pronto para transformar sua análise?
           </h2>
           <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
@@ -3507,7 +3507,7 @@ export function CtaSection() {
           </p>
           <button
             type="button"
-            className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-white focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
+            className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-card focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
           >
             Começar grátis
           </button>
@@ -3524,7 +3524,7 @@ export function LandingSections() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-card text-[#111111]">
       <main>
         <HeroSection />
         <ScrollReveal delay={0.02}>
@@ -3601,7 +3601,7 @@ export function LandingSections() {
                   </p>
                 </div>
 
-                <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-white px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98]">
+                <button className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#ececec] bg-card px-4 py-[14px] text-sm font-semibold leading-5 text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-[#d9d9d9] hover:ring-2 hover:ring-[#d7f5f0] hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-[#d7f5f0] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98]">
                   Conhecer a Analiso
                 </button>
               </div>
@@ -3665,7 +3665,7 @@ export function LandingSections() {
                   Dúvidas
                 </span>
               </div>
-              <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-black max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
+              <h2 className="pb-1 text-center text-[40px] font-semibold leading-[42px] tracking-[-0.4px] text-foreground max-md:text-[32px] max-md:leading-[36px] max-md:tracking-[-0.32px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.28px]">
                 Perguntas frequentes
               </h2>
               <p className="max-w-[279px] text-center text-lg leading-6 text-primary-gray-500 max-md:max-w-full max-md:text-base">
@@ -3673,7 +3673,7 @@ export function LandingSections() {
               </p>
             </div>
 
-            <div className="w-[868px] overflow-hidden rounded-[20px] border border-primary-gray-50 bg-white shadow-small max-lg:w-full max-md:rounded-[16px]">
+            <div className="w-[868px] overflow-hidden rounded-[20px] border border-primary-gray-50 bg-card shadow-small max-lg:w-full max-md:rounded-[16px]">
               {faqItems.map((faq, index) => {
                 const isOpen = openFaq === index;
 
@@ -3743,7 +3743,7 @@ export function LandingSections() {
               title="Perguntas frequentes"
               description="Algumas respostas sobre a Analiso e o acesso antecipado."
             />
-            <div className="mx-auto mt-12 max-w-[700px] overflow-hidden rounded-[22px] border border-[#ebebeb] bg-white shadow-[0_15px_45px_rgba(0,0,0,0.03)]">
+            <div className="mx-auto mt-12 max-w-[700px] overflow-hidden rounded-[22px] border border-[#ebebeb] bg-card shadow-[0_15px_45px_rgba(0,0,0,0.03)]">
               {faqs.map((faq) => (
                 <details key={faq} className="group border-b border-[#efefef] last:border-b-0">
                   <summary className="flex cursor-pointer list-none items-center justify-between px-7 py-8 text-[16px] font-semibold text-[#111] marker:content-none">
@@ -3783,9 +3783,9 @@ export function LandingSections() {
                 />
               ))}
             </div>
-            <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-white via-white to-transparent" />
+            <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-card via-card to-transparent" />
             <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
-              <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-black max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
+              <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-foreground max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
                 Pronto para transformar sua análise?
               </h2>
               <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
@@ -3793,7 +3793,7 @@ export function LandingSections() {
               </p>
               <button
                 type="button"
-                className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-white focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-white active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
+                className="w-full max-w-[466px] cursor-pointer rounded-[16px] border border-[#0f9f8f] bg-[#0f9f8f] px-8 py-5 text-base font-semibold leading-6 text-white transition-all duration-300 ease-out hover:border-[#18b6a4] hover:bg-[#18b6a4] hover:ring-2 hover:ring-[#bfeee6] hover:ring-offset-2 hover:ring-offset-card focus:border-[#0f9f8f] focus:outline-none focus:ring-2 focus:ring-[#bfeee6] focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98] max-md:max-w-[420px] max-md:px-6 max-md:py-4 max-md:text-sm"
               >
                 Começar grátis
               </button>

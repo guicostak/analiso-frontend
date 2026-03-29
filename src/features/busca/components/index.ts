@@ -1,0 +1,1 @@
+export { BuscaPage } from "./BuscaPage";

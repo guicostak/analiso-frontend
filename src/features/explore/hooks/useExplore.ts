@@ -47,7 +47,6 @@ import type {
   MoverRow,
   MovementInsight,
   Volatility,
-  AdvancedSearchFilters,
 } from "../interfaces";
 
 // ─── Tipo de retorno do hook ──────────────────────────────────────────────────
@@ -94,10 +93,6 @@ export interface UseExploreReturn {
   pillars:            readonly string[];
   highlights:         HighlightItem[];
 
-  // Pesquisa avançada
-  advancedSearchFilters: AdvancedSearchFilters;
-  advancedSearchActiveCount: number;
-
   // Helpers expostos
   getCompanyLogo: (ticker: string) => string | undefined;
 
@@ -120,34 +115,9 @@ export interface UseExploreReturn {
   clearPreset:            () => void;
   toggleCompare:          (ticker: string) => void;
   resetFilters:           () => void;
-  setAdvancedSearchFilters: (updater: AdvancedSearchFilters | ((prev: AdvancedSearchFilters) => AdvancedSearchFilters)) => void;
-  resetAdvancedSearch:    () => void;
 }
 
 // ─── Valores iniciais ─────────────────────────────────────────────────────────
-
-const DEFAULT_ADVANCED_SEARCH: AdvancedSearchFilters = {
-  plMin: null,
-  plMax: null,
-  pvpMin: null,
-  pvpMax: null,
-  dividendYieldMin: null,
-  dividendYieldMax: null,
-  roeMin: null,
-  roeMax: null,
-  roicMin: null,
-  roicMax: null,
-  margemLiquidaMin: null,
-  margemLiquidaMax: null,
-  margemEbitdaMin: null,
-  margemEbitdaMax: null,
-  dividaLiquidaEbitdaMin: null,
-  dividaLiquidaEbitdaMax: null,
-  evEbitdaMin: null,
-  evEbitdaMax: null,
-  lpaMin: null,
-  lpaMax: null,
-};
 
 const DEFAULT_FILTERS: Filters = {
   sector:    "Todos",
@@ -177,8 +147,6 @@ export function useExplore(): UseExploreReturn {
   const [showVolatilityDetails, setShowVolatilityDetails] = useState(false);
   const [showContextPanel,      setShowContextPanel]      = useState(false);
   const [filters,               setFilters]               = useState<Filters>(DEFAULT_FILTERS);
-  const [advancedSearchFilters, setAdvancedSearchFilters] = useState<AdvancedSearchFilters>(DEFAULT_ADVANCED_SEARCH);
-
   const isLoading = false; // pronto para ligar quando vier API
 
   // Dados da API (null até haver chamada HTTP real)
@@ -213,30 +181,6 @@ export function useExplore(): UseExploreReturn {
         if (filters.freshness !== "Todos" && company.freshnessStatus  !== filters.freshness) return false;
         if (filters.pillar    !== "Todos" && company.highlightPillar  !== filters.pillar)    return false;
 
-        // Pesquisa avançada por métricas financeiras
-        const f = company.financials;
-        const a = advancedSearchFilters;
-
-        const checks: [number | null, number | null, number | null][] = [
-          [f.pl,                  a.plMin,                  a.plMax],
-          [f.pvp,                 a.pvpMin,                 a.pvpMax],
-          [f.dividendYield,       a.dividendYieldMin,       a.dividendYieldMax],
-          [f.roe,                 a.roeMin,                 a.roeMax],
-          [f.roic,                a.roicMin,                a.roicMax],
-          [f.margemLiquida,       a.margemLiquidaMin,       a.margemLiquidaMax],
-          [f.margemEbitda,        a.margemEbitdaMin,        a.margemEbitdaMax],
-          [f.dividaLiquidaEbitda, a.dividaLiquidaEbitdaMin, a.dividaLiquidaEbitdaMax],
-          [f.evEbitda,            a.evEbitdaMin,            a.evEbitdaMax],
-          [f.lpa,                 a.lpaMin,                 a.lpaMax],
-        ];
-
-        for (const [value, min, max] of checks) {
-          if (min === null && max === null) continue;
-          if (value === null) return false;
-          if (min !== null && value < min) return false;
-          if (max !== null && value > max) return false;
-        }
-
         return true;
       })
       .sort((a, b) => {
@@ -250,7 +194,7 @@ export function useExplore(): UseExploreReturn {
         if (filters.sort === "Maior consistência") return a.status === "Saudável" ? -1 : 1;
         return 0;
       });
-  }, [filters, searchQuery, activePreset, advancedSearchFilters]);
+  }, [filters, searchQuery, activePreset]);
 
   const sortedHighlights = useMemo<HighlightItem[]>(
     () => getSortedHighlights(highlights),
@@ -267,17 +211,6 @@ export function useExplore(): UseExploreReturn {
     }
     return mockMovers;
   }, [exploreData]);
-
-  const advancedSearchActiveCount = useMemo(() => {
-    const keys = Object.keys(advancedSearchFilters) as (keyof AdvancedSearchFilters)[];
-    let count = 0;
-    for (let i = 0; i < keys.length; i += 2) {
-      const minVal = advancedSearchFilters[keys[i]];
-      const maxVal = advancedSearchFilters[keys[i + 1]];
-      if (minVal !== null || maxVal !== null) count++;
-    }
-    return count;
-  }, [advancedSearchFilters]);
 
   const staleCount        = filteredCompanies.filter((c) => c.freshnessStatus === "Antigo").length;
   const showStaleBanner   = staleCount >= 2;
@@ -333,17 +266,12 @@ export function useExplore(): UseExploreReturn {
     });
   }, []);
 
-  const resetAdvancedSearch = useCallback(() => {
-    setAdvancedSearchFilters(DEFAULT_ADVANCED_SEARCH);
-  }, []);
-
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setActivePreset(null);
     setAppliedChips([]);
     setSelectedEntryPoints([]);
     setFilters(DEFAULT_FILTERS);
-    setAdvancedSearchFilters(DEFAULT_ADVANCED_SEARCH);
   }, []);
 
   // ─── Retorno ───────────────────────────────────────────────────────────────
@@ -376,10 +304,6 @@ export function useExplore(): UseExploreReturn {
     hasSectorSelected,
     hasWatchlist,
     volatilityIsStale,
-
-    // Pesquisa avançada
-    advancedSearchFilters,
-    advancedSearchActiveCount,
 
     // Dados estáticos
     indexCards,
@@ -416,7 +340,5 @@ export function useExplore(): UseExploreReturn {
     clearPreset,
     toggleCompare,
     resetFilters,
-    setAdvancedSearchFilters,
-    resetAdvancedSearch,
   };
 }

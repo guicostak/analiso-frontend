@@ -24,16 +24,16 @@ export function ChangesFeedCard() {
 
   const freshnessConfig = {
     atualizado: { color: 'text-emerald-600', icon: '—' },
-    recente: { color: 'text-neutral-500', icon: '—' },
+    recente: { color: 'text-muted-foreground', icon: '—' },
     antigo: { color: 'text-amber-600', icon: '—' },
   };
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-3xl p-8">
+    <div className="bg-card border border-border rounded-3xl p-8">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-neutral-900 mb-1">Mudanças que importam</h2>
+          <h2 className="text-foreground mb-1">Mudanças que importam</h2>
           <p className="text-sm text-muted-foreground">Feed curado com impacto · fonte · data</p>
         </div>
         <button className="text-muted-foreground hover:text-dim transition-colors">
@@ -42,7 +42,7 @@ export function ChangesFeedCard() {
       </div>
 
       {/* Filters Row */}
-      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-neutral-200">
+      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Período:</span>
           {['7d', '30d', '90d'].map((period) => (
@@ -105,7 +105,7 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
 
   const freshnessConfig = {
     atualizado: { color: 'text-emerald-600', icon: '—' },
-    recente: { color: 'text-neutral-500', icon: '—' },
+    recente: { color: 'text-muted-foreground', icon: '—' },
     antigo: { color: 'text-amber-600', icon: '—' },
   };
 
@@ -114,7 +114,7 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
       {/* Header Row */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-neutral-900">{item.ticker}</span>
+          <span className="font-semibold text-foreground">{item.ticker}</span>
           <span className="text-sm text-muted-foreground">·</span>
           <span className="text-sm text-dim">{item.companyName}</span>
         </div>
@@ -129,7 +129,7 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
       </div>
 
       {/* What Changed */}
-      <h3 className="font-medium text-neutral-900 mb-2">{item.whatChanged}</h3>
+      <h3 className="font-medium text-foreground mb-2">{item.whatChanged}</h3>
 
       {/* Why Matters */}
       <p className="text-sm text-dim leading-relaxed mb-4">{item.whyMatters}</p>

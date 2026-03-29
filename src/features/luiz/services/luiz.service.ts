@@ -40,6 +40,155 @@ interface ResponsePattern {
 }
 
 const MOCK_PATTERNS: ResponsePattern[] = [
+  // ── AÇÕES (filtrar, navegar, comparar, analisar) — prioridade alta ─────
+
+  {
+    regex: /filtrar?.*(dy|dividend|dividendo).*(\d+)/i,
+    response: {
+      content: "Filtrando ações com **Dividend Yield** acima do valor indicado. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é DY?", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/busca?dy_min=5" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(p[/.]?l|preco.?lucro).*(\d+)/i,
+    response: {
+      content: "Filtrando ações por **P/L**. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é P/L?", "Filtrar por DY alto"],
+      command: { type: "navigate", href: "/busca?pl_max=15" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(p[/.]?l|preco.?lucro).*(baixo|menor)/i,
+    response: {
+      content: "Filtrando ações com **P/L** baixo (abaixo de 10). Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é P/L?", "Filtrar por DY alto"],
+      command: { type: "navigate", href: "/busca?pl_max=10" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(roe).*(alto|acima|\d+)/i,
+    response: {
+      content: "Filtrando ações com **ROE** alto. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é ROE?", "Filtrar por DY alto"],
+      command: { type: "navigate", href: "/busca?roe_min=15" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(pvp|p[/.]?vp).*(baixo|menor|\d+)/i,
+    response: {
+      content: "Filtrando ações com **P/VP** baixo. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é P/VP?", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/busca?pvp_max=1.5" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(d[ií]vida|endividamento).*(baixo|menor)/i,
+    response: {
+      content: "Filtrando ações com **endividamento baixo**. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é Dívida/EBITDA?", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/busca?divida_ebitda_max=2" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar?.*(margem).*(alta|acima|\d+)/i,
+    response: {
+      content: "Filtrando ações com **Margem Líquida** alta. Levando você para o Explorador!",
+      suggestions: ["Alterar filtros", "O que é Margem Líquida?", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/busca?margem_min=15" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /filtrar|buscar a[çc][õo]es|encontrar a[çc][õo]es/i,
+    response: {
+      content: "Levando você para o Explorador com filtros avançados!",
+      suggestions: ["Filtrar por P/L baixo", "Filtrar por DY alto", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/explorar" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /\b(ir|abrir|acessar|navegar|leva|vai).*(dashboard|painel)/i,
+    response: {
+      content: "Levando você para o Painel de Hoje!",
+      suggestions: ["Ver watchlist", "Explorar ações", "Comparar empresas"],
+      command: { type: "navigate", href: "/dashboard" },
+      delay: 500,
+    },
+  },
+  {
+    regex: /\b(ir|abrir|acessar|navegar|leva|vai).*(explorar|explorador)/i,
+    response: {
+      content: "Levando você para o Explorador!",
+      suggestions: ["Filtrar por P/L baixo", "Filtrar por DY alto", "Filtrar por ROE alto"],
+      command: { type: "navigate", href: "/explorar" },
+      delay: 500,
+    },
+  },
+  {
+    regex: /\b(ir|abrir|acessar|navegar|leva|vai).*(watchlist|lista)/i,
+    response: {
+      content: "Levando você para a Watchlist!",
+      suggestions: ["Comparar ações da lista", "Explorar mais ações", "Ver dashboard"],
+      command: { type: "navigate", href: "/watchlist" },
+      delay: 500,
+    },
+  },
+  {
+    regex: /\b(ir|abrir|acessar|navegar|leva|vai).*(comparar|compara[çc][ãa]o)/i,
+    response: {
+      content: "Levando você para a página de Comparação!",
+      suggestions: ["Comparar PETR4 e VALE3", "Comparar por ROE", "Ver métricas"],
+      command: { type: "navigate", href: "/comparar" },
+      delay: 500,
+    },
+  },
+  {
+    regex: /\b(comparar?|versus|vs)\b.*\b([A-Z]{4}\d)\b.*\b([A-Z]{4}\d)\b/i,
+    response: {
+      content: "Abrindo a comparação entre as empresas!",
+      suggestions: ["Adicionar outra empresa", "Ver análise individual", "Voltar ao dashboard"],
+      command: { type: "navigate", href: "/comparar" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /\b(ver|abrir|analisar|mostra|quero ver)\b.*\b([A-Z]{4}\d{1,2})\b/i,
+    response: {
+      content: "Abrindo a análise da empresa!",
+      suggestions: ["Ver watchlist", "Comparar com outra empresa", "Voltar ao dashboard"],
+      command: { type: "navigate", href: "/empresa/TICKER" },
+      delay: 600,
+    },
+  },
+  {
+    regex: /\b(modo escuro|dark mode|tema escuro|ativar dark)/i,
+    response: {
+      content: "Ativando o modo escuro!",
+      suggestions: ["Voltar ao modo claro", "Ver dashboard"],
+      command: { type: "theme", href: "dark" },
+      delay: 400,
+    },
+  },
+  {
+    regex: /\b(modo claro|light mode|tema claro|ativar light)/i,
+    response: {
+      content: "Ativando o modo claro!",
+      suggestions: ["Ativar modo escuro", "Ver dashboard"],
+      command: { type: "theme", href: "light" },
+      delay: 400,
+    },
+  },
+
+  // ── EDUCATIVAS — prioridade baixa (matcham por último) ─────────────────
+
   {
     regex: /\b(p[/.]l|p\.l|preco[- ]lucro|preço[- ]lucro)\b/i,
     response: {
@@ -121,6 +270,9 @@ const MOCK_PATTERNS: ResponsePattern[] = [
       delay: 900,
     },
   },
+
+  // ── SAUDAÇÕES E AGRADECIMENTOS ─────────────────────────────────────────
+
   {
     regex: /^(oi|ol[aá]|hey|hello|bom dia|boa tarde|boa noite|salve|tudo)\b/i,
     response: {
@@ -150,7 +302,38 @@ const MOCK_FALLBACK: LuizServiceResponse = {
 function getMockResponse(message: string): LuizServiceResponse {
   const normalized = message.toLowerCase().trim();
   const match = MOCK_PATTERNS.find((p) => p.regex.test(normalized));
-  return match?.response ?? MOCK_FALLBACK;
+  if (!match) return MOCK_FALLBACK;
+
+  const response = { ...match.response };
+
+  // Extrair ticker da mensagem para comandos que precisam
+  if (response.command?.href === "/empresa/TICKER") {
+    const tickerMatch = message.match(/\b([A-Z]{4}\d{1,2})\b/i);
+    const ticker = tickerMatch?.[1]?.toUpperCase() ?? "";
+    if (ticker) {
+      response.command = { ...response.command, href: `/empresa/${ticker}` };
+      response.content = `Abrindo a análise de **${ticker}**!`;
+      response.suggestions = [
+        `Comparar ${ticker} com outra empresa`,
+        `Adicionar ${ticker} na watchlist`,
+        "Voltar ao dashboard",
+      ];
+    } else {
+      // Sem ticker identificado, navegar para explorar
+      response.command = { type: "navigate", href: "/explorar" };
+      response.content = "Não identifiquei o ticker. Levando você para o Explorador!";
+    }
+  }
+
+  // Extrair valor numérico para filtros de DY
+  if (response.command?.href === "/busca?dy_min=5") {
+    const numMatch = message.match(/(\d+)/);
+    if (numMatch) {
+      response.command = { ...response.command, href: `/busca?dy_min=${numMatch[1]}` };
+    }
+  }
+
+  return response;
 }
 
 // ─── Serviço público ──────────────────────────────────────────────────────────

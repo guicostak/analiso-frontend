@@ -11,6 +11,7 @@ import {
   Home,
   LayoutGrid,
   NotebookPen,
+  SearchCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,6 +41,7 @@ const GROUPS: NavGroup[] = [
       { id: "explorar",  label: "Explorar mercado",  href: "/explorar",  icon: Compass },
       { id: "watchlist", label: "Watchlist",          href: "/watchlist", icon: LayoutGrid },
       { id: "comparar",  label: "Comparar empresas", href: "/comparar",  icon: GitCompare },
+      { id: "busca",     label: "Busca avançada",    href: "/busca",     icon: SearchCheck },
     ],
   },
   {
@@ -71,19 +73,19 @@ function NavItemRow({
       title={isCollapsed ? item.label : undefined}
       className={`group relative flex items-center rounded-[10px] py-2 transition-all duration-150
         ${isActive
-          ? "bg-[#F3FAF9]"
-          : "hover:bg-[#F4F4F7] hover:shadow-[0_1px_3px_rgba(0,0,0,0.06)]"}
+          ? "bg-brand-surface"
+          : "hover:bg-hover hover:shadow-[0_1px_3px_rgba(0,0,0,0.05)]"}
         ${isCollapsed ? "justify-center px-2" : "gap-3 px-3"}
       `}
     >
       {isActive && !isCollapsed && (
-        <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#12A594]" />
+        <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
       )}
-      <span className={`transition-colors ${isActive ? "text-[#12A594]" : "text-[#9A9A9A] group-hover:text-[#555]"}`}>
+      <span className={`transition-colors ${isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"}`}>
         <Icon className="h-[17px] w-[17px] shrink-0" />
       </span>
       {!isCollapsed && (
-        <span className={`text-[13px] transition-colors ${isActive ? "font-semibold text-[#171717]" : "font-medium text-[#7A7A7A] group-hover:text-[#333]"}`}>
+        <span className={`text-[13px] transition-colors ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
           {item.label}
         </span>
       )}
@@ -103,20 +105,20 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-[#EEF2F6] bg-white transition-[width] duration-200 xl:block
+      className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-sidebar-border bg-sidebar transition-[width] duration-200 xl:block
         ${isCollapsed ? "w-[64px]" : "w-[240px]"}`}
     >
       <div className="flex min-h-full flex-col">
 
         {/* ── Topo minimalista com botão de colapso ── */}
         <div
-          className={`sticky top-0 z-10 flex h-14 shrink-0 items-center border-b border-[#EEF2F6] bg-white
+          className={`sticky top-0 z-10 flex h-14 shrink-0 items-center border-b border-sidebar-border bg-sidebar
             ${isCollapsed ? "justify-center px-0" : "justify-end px-3"}`}
         >
           <button
             onClick={toggle}
             title={isCollapsed ? "Expandir menu" : "Recolher menu"}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#C0C0C8] transition-colors hover:bg-[#F4F4F7] hover:text-[#555]"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
           >
             {isCollapsed
               ? <ChevronRight className="h-4 w-4" />
@@ -140,7 +142,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
 
         {/* ── Plano — sticky no rodapé ── */}
         {!isCollapsed && (
-          <div className="sticky bottom-0 shrink-0 border-t border-[#EEF2F6] bg-white px-3 py-3">
+          <div className="sticky bottom-0 shrink-0 border-t border-sidebar-border bg-sidebar px-3 py-3">
             <SidebarPlanCard />
           </div>
         )}
