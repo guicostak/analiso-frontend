@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   AnalysisMomentsSection,
   CtaSection,
@@ -13,10 +15,26 @@ import {
 } from "./LandingSections";
 import { AnalysisFlowSection } from "./AnalysisFlowSection";
 import { ReadableCompanySection } from "./ReadableCompanySection";
+import { useAuth } from "@/src/features/auth/AuthContext";
+import { LandingNav } from "@/src/components/layout/LandingNav";
 
 export function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/painel");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || isAuthenticated) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-card text-foreground" style={{ fontSize: '16px' }}>
+      <LandingNav />
       <main>
         <HeroSection />
         <ScrollReveal delay={0.02}>

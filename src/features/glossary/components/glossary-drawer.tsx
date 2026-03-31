@@ -66,7 +66,7 @@ function GlossaryContent({
               onClick={() => onSelectTerm(entry.term)}
               className={`px-3 py-2 rounded-xl text-left text-sm border transition ${
                 activeEntry?.term === entry.term
-                  ? 'border-[#0E9384] bg-[#E7F6F3] text-[#0E9384]'
+                  ? 'border-brand bg-brand-surface text-brand'
                   : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'
               }`}
             >
@@ -85,7 +85,7 @@ export function GlossaryDrawer({ open, onOpenChange, activeTerm, onSelectTerm }:
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="bg-white border-neutral-200">
+        <DrawerContent className="bg-card border-border">
           <DrawerHeader>
             <DrawerTitle className="text-base font-semibold text-neutral-900">Glossário</DrawerTitle>
           </DrawerHeader>
@@ -97,7 +97,7 @@ export function GlossaryDrawer({ open, onOpenChange, activeTerm, onSelectTerm }:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[420px] bg-white border-neutral-200">
+      <SheetContent side="right" className="w-[420px] bg-card border-border">
         <SheetHeader>
           <SheetTitle className="text-base font-semibold text-neutral-900">Glossário</SheetTitle>
         </SheetHeader>

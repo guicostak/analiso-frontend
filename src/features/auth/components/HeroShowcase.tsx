@@ -33,17 +33,17 @@ const pillars = [
 
 export function HeroShowcase() {
   return (
-    <div className="relative w-full rounded-[28px] border border-[#EAECF0] bg-gradient-to-br from-white via-[#F7F8FA] to-[#ECF6F4] shadow-xl overflow-hidden">
-      <div className="absolute -top-24 -right-24 w-56 h-56 rounded-full bg-[#0E9384]/10 blur-3xl" />
-      <div className="absolute -bottom-24 left-6 w-44 h-44 rounded-full bg-[#0E9384]/10 blur-3xl" />
+    <div className="relative w-full rounded-[28px] border border-border bg-gradient-to-br from-card via-muted to-brand-surface shadow-xl overflow-hidden">
+      <div className="absolute -top-24 -right-24 w-56 h-56 rounded-full bg-brand/10 blur-3xl" />
+      <div className="absolute -bottom-24 left-6 w-44 h-44 rounded-full bg-brand/10 blur-3xl" />
 
       <div className="relative p-8 lg:p-10">
         <div className="relative min-h-[340px]">
           {/* Card 1: Dashboard Mudanças */}
-          <div className="absolute left-0 top-6 w-[270px] bg-white border border-[#EAECF0] rounded-2xl shadow-lg p-4 rotate-[-3deg]">
+          <div className="absolute left-0 top-6 w-[270px] bg-card border border-border rounded-2xl shadow-lg p-4 rotate-[-3deg]">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-[#667085]">Mudanças que importam</p>
-              <span className="text-[10px] text-[#0E9384] font-medium">Atualizado</span>
+              <p className="text-xs text-muted-foreground">Mudanças que importam</p>
+              <span className="text-[10px] text-brand font-medium">Atualizado</span>
             </div>
             <div className="mt-3 space-y-2">
               {[
@@ -58,58 +58,58 @@ export function HeroShowcase() {
                   impact: "Impacta: Proventos • 01/02",
                 },
               ].map((item) => (
-                <div key={item.change} className="rounded-xl border border-[#EAECF0] p-3">
-                  <p className="text-[10px] text-[#667085]">{item.company}</p>
-                  <p className="text-xs font-semibold">{item.change}</p>
-                  <p className="text-[10px] text-[#98A2B3] mt-1">{item.impact}</p>
+                <div key={item.change} className="rounded-xl border border-border p-3">
+                  <p className="text-[10px] text-muted-foreground">{item.company}</p>
+                  <p className="text-xs font-semibold text-foreground">{item.change}</p>
+                  <p className="text-[10px] text-muted-foreground/70 mt-1">{item.impact}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Card 2: Resumo em 60s */}
-          <div className="absolute right-6 top-0 w-[320px] bg-white border border-[#EAECF0] rounded-2xl shadow-xl p-5 rotate-[2deg]">
+          <div className="absolute right-6 top-0 w-[320px] bg-card border border-border rounded-2xl shadow-xl p-5 rotate-[2deg]">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-[#667085]">Resumo em 60s</p>
-                <p className="text-sm font-semibold">WEG S.A. (WEGE3)</p>
+                <p className="text-xs text-muted-foreground">Resumo em 60s</p>
+                <p className="text-sm font-semibold text-foreground">WEG S.A. (WEGE3)</p>
               </div>
-              <span className="text-[10px] text-[#667085]">CVM • 05/02</span>
+              <span className="text-[10px] text-muted-foreground">CVM • 05/02</span>
             </div>
             <div className="mt-4 grid grid-cols-[120px_1fr] gap-3">
               <div className="flex flex-col items-center">
-                <div className="w-[110px] h-[110px] rounded-full border border-[#EAECF0] flex items-center justify-center bg-[#F7F8FA]">
+                <div className="w-[110px] h-[110px] rounded-full border border-border flex items-center justify-center bg-muted">
                   <svg viewBox="0 0 120 120" className="w-[90px] h-[90px]">
                     <polygon
                       points="60,12 92,38 78,82 42,82 28,38"
-                      fill="#0E9384"
+                      fill="var(--brand)"
                       opacity="0.15"
                     />
-                    <polygon points="60,22 84,40 72,76 48,76 36,40" fill="none" stroke="#0E9384" />
-                    <circle cx="60" cy="60" r="2" fill="#0E9384" />
+                    <polygon points="60,22 84,40 72,76 48,76 36,40" fill="none" stroke="var(--brand)" />
+                    <circle cx="60" cy="60" r="2" fill="var(--brand)" />
                   </svg>
                 </div>
-                <div className="mt-2 w-full space-y-1 text-[10px] text-[#475467]">
+                <div className="mt-2 w-full space-y-1 text-[10px] text-muted-foreground">
                   {pillars.map((item) => (
                     <div key={item.label} className="flex items-center justify-between">
                       <span>{item.label}</span>
-                      <span className="text-[#0B1220] font-medium">{item.value}</span>
+                      <span className="text-foreground font-medium">{item.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="rounded-lg border border-[#EAECF0] p-3">
-                  <p className="text-[11px] text-[#667085]">Ponto forte</p>
-                  <p className="text-xs font-semibold">Retorno acima da mediana</p>
-                  <p className="text-[10px] text-[#475467] mt-1">
+                <div className="rounded-lg border border-border p-3">
+                  <p className="text-[11px] text-muted-foreground">Ponto forte</p>
+                  <p className="text-xs font-semibold text-foreground">Retorno acima da mediana</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
                     Evidência: ROE 10a 18% • ITR 3T24
                   </p>
                 </div>
-                <div className="rounded-lg border border-[#EAECF0] p-3">
-                  <p className="text-[11px] text-[#667085]">Atenção</p>
-                  <p className="text-xs font-semibold">Margens sob pressão</p>
-                  <p className="text-[10px] text-[#475467] mt-1">
+                <div className="rounded-lg border border-border p-3">
+                  <p className="text-[11px] text-muted-foreground">Atenção</p>
+                  <p className="text-xs font-semibold text-foreground">Margens sob pressão</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
                     Evidência: -1,2 p.p. • ITR 3T24
                   </p>
                 </div>
@@ -118,10 +118,10 @@ export function HeroShowcase() {
           </div>
 
           {/* Card 3: Explorar */}
-          <div className="absolute left-16 bottom-0 w-[300px] bg-white border border-[#EAECF0] rounded-2xl shadow-lg p-4 rotate-[1deg]">
+          <div className="absolute left-16 bottom-0 w-[300px] bg-card border border-border rounded-2xl shadow-lg p-4 rotate-[1deg]">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-[#667085]">Explorar mercado</p>
-              <span className="text-[10px] text-[#667085]">B3</span>
+              <p className="text-xs text-muted-foreground">Explorar mercado</p>
+              <span className="text-[10px] text-muted-foreground">B3</span>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {[
@@ -129,15 +129,15 @@ export function HeroShowcase() {
                 { label: "Margens", value: "Estável" },
                 { label: "Retorno", value: "Alta" },
               ].map((card) => (
-                <div key={card.label} className="rounded-xl border border-[#EAECF0] p-2">
-                  <p className="text-[10px] text-[#667085]">{card.label}</p>
-                  <p className="text-xs font-semibold">{card.value}</p>
+                <div key={card.label} className="rounded-xl border border-border p-2">
+                  <p className="text-[10px] text-muted-foreground">{card.label}</p>
+                  <p className="text-xs font-semibold text-foreground">{card.value}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-3 rounded-xl border border-[#EAECF0] p-3">
-              <p className="text-[10px] text-[#667085]">Destaque do dia</p>
-              <p className="text-xs font-semibold">WEGE3 lidera em retorno ajustado</p>
+            <div className="mt-3 rounded-xl border border-border p-3">
+              <p className="text-[10px] text-muted-foreground">Destaque do dia</p>
+              <p className="text-xs font-semibold text-foreground">WEGE3 lidera em retorno ajustado</p>
             </div>
           </div>
         </div>
@@ -147,16 +147,16 @@ export function HeroShowcase() {
           {testimonials.map((item, index) => (
             <div
               key={`${item.name}-${index}`}
-              className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md px-4 py-3 shadow-sm"
+              className="rounded-2xl border border-card/40 bg-card/70 backdrop-blur-md px-4 py-3 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#0E9384]/15 border border-[#0E9384]/20" />
+                <div className="w-8 h-8 rounded-full bg-brand/15 border border-brand/20" />
                 <div>
-                  <p className="text-xs font-semibold">{item.name}</p>
-                  <p className="text-[10px] text-[#667085]">{item.role}</p>
+                  <p className="text-xs font-semibold text-foreground">{item.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{item.role}</p>
                 </div>
               </div>
-              <p className="text-xs text-[#344054] mt-2">{item.text}</p>
+              <p className="text-xs text-muted-foreground mt-2">{item.text}</p>
             </div>
           ))}
         </div>

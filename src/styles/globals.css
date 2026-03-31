@@ -4,8 +4,78 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Luiz neon color-cycling icon ──────────────────────────────────── */
+@keyframes luiz-neon {
+  0%   { filter: hue-rotate(0deg)   brightness(1); }
+  25%  { filter: hue-rotate(-40deg) brightness(1.1); }
+  50%  { filter: hue-rotate(50deg)  brightness(1); }
+  75%  { filter: hue-rotate(-20deg) brightness(1.15); }
+  100% { filter: hue-rotate(0deg)   brightness(1); }
+}
+
+.luiz-neon-icon {
+  background: linear-gradient(135deg, #EC4899 0%, #A855F7 50%, #6366F1 100%);
+  animation: luiz-neon 10s ease-in-out infinite;
+}
+
+/* ─── Custom Easing Curves (Emil Kowalski) ─────────────────────────── */
+/* Built-in CSS easings are too weak — use stronger custom curves       */
 :root {
-  --font-size: 16px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ─── Cursor pointer global para elementos interativos ──────────────── */
+button,
+[role="button"],
+a,
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="reset"],
+label[for] {
+  cursor: pointer;
+}
+
+/* ─── Button press feedback (Emil Kowalski) ─────────────────────────── */
+/* Every pressable element should feel responsive via subtle scale       */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ─── Global default easing override ────────────────────────────────── */
+/* All Tailwind transition utilities now use the strong ease-out curve  */
+/* instead of the weak built-in CSS ease. This applies project-wide.   */
+*,
+*::before,
+*::after {
+  transition-timing-function: var(--ease-out);
+}
+
+/* ─── Touch device hover protection ─────────────────────────────────── */
+/* Gate hover transforms behind pointer:fine to avoid false positives    */
+@media not (hover: hover) and (pointer: fine) {
+  .hover\:-translate-y-0\.5:hover {
+    transform: none !important;
+  }
+}
+
+/* ─── Reduced-motion support ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root {
+  --font-size: 15px;
   --font-sans: "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
@@ -41,6 +111,12 @@
   --brand-surface: #F0FDFA;  /* fundo com toque da marca                       */
   --brand-border:  #99F6E0;  /* borda com toque da marca                       */
   --brand-text:    #0F766E;  /* texto com cor da marca                         */
+
+  /* ─── Compare (Company B accent) ──────────────────────────────────────── */
+  --compare-b:         #5B8DEF;  /* cor do traço/ponto da Empresa B             */
+  --compare-b-surface: #EEF6FF;  /* fundo do label da Empresa B                 */
+  --compare-b-border:  #D9E8FF;  /* borda do label da Empresa B                 */
+  --compare-b-text:    #3965B8;  /* texto do label da Empresa B                 */
 
   /* ─── Status / Semáforo ─────────────────────────────────────────────────── */
   --success-surface: #ECFDF5;   /* Saudável – fundo                            */
@@ -147,6 +223,12 @@
   --brand-surface: #0F2B2A;
   --brand-border:  #134E48;
   --brand-text:    #5EEAD4;
+
+  /* ─── Compare (Company B accent) ──────────────────────────────────────── */
+  --compare-b:         #6B9DF5;  /* mais claro para contraste no escuro        */
+  --compare-b-surface: #172554;  /* fundo do label da Empresa B (dark)         */
+  --compare-b-border:  #1E3A5F;  /* borda do label da Empresa B (dark)         */
+  --compare-b-text:    #93B8F7;  /* texto do label da Empresa B (dark)         */
 
   /* ─── Status / Semáforo ─────────────────────────────────────────────────── */
   --success-surface: #022c22;
@@ -274,6 +356,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ─── Easing Curves (Emil Kowalski) ────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ─── Paleta Mint (escala completa) ─────────────────────────────────────── */
   --color-mint-50:  var(--mint-50);
@@ -648,6 +735,122 @@ html {
   }
 }
 
+/* ── Dashboard empty state — futuristic scoped styles ───────────────────── */
+.dash-empty-card {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-card) 95%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+  animation: dash-empty-slide-in 0.45s ease forwards;
+  animation-fill-mode: forwards;
+}
+.dash-empty-card:hover {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-brand) 20%, transparent);
+  transform: translateY(-2px);
+}
+.dash-empty-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-brand) 4%, transparent) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.dash-empty-card:hover::before {
+  opacity: 1;
+}
+.dash-empty-card:nth-child(1) { animation-delay: 0.08s; }
+.dash-empty-card:nth-child(2) { animation-delay: 0.16s; }
+.dash-empty-card:nth-child(3) { animation-delay: 0.24s; }
+.dash-empty-card:nth-child(4) { animation-delay: 0.32s; }
+
+.dash-empty-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-brand) 12%, transparent);
+  margin-bottom: 0.75rem;
+  transition: background 0.2s ease;
+}
+.dash-empty-card:hover .dash-empty-icon-wrap {
+  background: color-mix(in srgb, var(--color-brand) 20%, transparent);
+}
+
+.dash-empty-scan-line {
+  position: absolute;
+  inset-x: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-brand) 60%, transparent),
+    transparent
+  );
+  top: 0;
+  animation: dash-empty-scan 3s ease-in-out infinite;
+  animation-fill-mode: forwards;
+}
+
+@keyframes dash-empty-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes dash-empty-scan {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ── Dashboard fade-in ───────────────────────────────────────────────────── */
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-\[shimmer_2\.4s_ease-in-out_infinite\] {
     animation: none !important;
@@ -661,6 +864,23 @@ html {
     animation: none !important;
     opacity: 1;
     transform: none;
+  }
+  .animate-\[indeterminate_1\.5s_ease-in-out_infinite\] {
+    animation: none !important;
+  }
+  .animate-\[dashboard-fade-in_0\.4s_ease-out\] {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .dash-empty-card {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .dash-empty-scan-line {
+    animation: none !important;
   }
 }
 
@@ -804,4 +1024,17 @@ html {
   justify-content: flex-start;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* ─── Dashboard: pipeline loading animations ─────────────────────────────── */
+@keyframes step-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes connector-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+@keyframes spin-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
 }

@@ -78,13 +78,13 @@ const pillarMapStatusTone: Record<
     stroke: "#C78D21",
     fill: "#C78D21",
     label: "Atenção",
-    chip: "border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]",
+    chip: "border-[#F6DEA9] bg-[#FFFBEB] text-warning-text",
   },
   saudavel: {
     stroke: "#168E7D",
     fill: "#168E7D",
     label: "Saudável",
-    chip: "border-[#AEE3D8] bg-[#F1FCF9] text-[#0E9384]",
+    chip: "border-[#AEE3D8] bg-[#F1FCF9] text-brand",
   },
 };
 
@@ -130,14 +130,14 @@ function PillarMap({
             </div>
             <div className="min-w-0 flex-1">
               <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="text-[12px] font-semibold text-[#1F2937]">{entry.pillarLabel}</span>
+                <span className="text-[12px] font-semibold text-foreground">{entry.pillarLabel}</span>
                 <div className="flex items-center gap-1.5">
                   {hasDelta && (
                     <span
                       className={cx(
                         "text-[10px] font-medium tabular-nums",
                         deltaPositive
-                          ? "text-[#0E9384]"
+                          ? "text-brand"
                           : deltaNegative
                             ? "text-[#DC2626]"
                             : "text-[#9CA3AF]",
@@ -180,15 +180,15 @@ export function CompanyAnalysisSummaryMock() {
   const [showEvidence, setShowEvidence] = useState(false);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-[#E2EDF5] bg-[#F8FBFD] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
-      <div className="border-b border-[#E2EDF5] bg-white px-6 py-4">
+    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-muted shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
+      <div className="border-b border-border bg-card px-6 py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#D8EEE9] bg-[#F0FDFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#0E9384]">
+              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase text-brand">
                 Análise da empresa
               </span>
-              <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[10px] font-medium text-[#64748B]">
+              <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
                 Atualizado em {summaryMock.company.updatedAt}
               </span>
             </div>
@@ -198,36 +198,36 @@ export function CompanyAnalysisSummaryMock() {
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-[18px] font-semibold text-[#111827]">{summaryMock.company.name}</h3>
-                  <span className="text-[12px] font-medium text-[#64748B]">{summaryMock.company.ticker}</span>
+                  <h3 className="text-[18px] font-semibold text-foreground">{summaryMock.company.name}</h3>
+                  <span className="text-[12px] font-medium text-muted-foreground">{summaryMock.company.ticker}</span>
                 </div>
-                <p className="text-[12px] text-[#64748B]">{summaryMock.company.sector}</p>
+                <p className="text-[12px] text-muted-foreground">{summaryMock.company.sector}</p>
               </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[12px] font-semibold text-white transition-all hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-brand bg-brand px-3.5 py-2 text-[12px] font-semibold text-white transition-all hover:opacity-90"
             >
               <Check className="h-3.5 w-3.5" />
               Na Watchlist
             </button>
             <button
               type="button"
-              className="rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] font-medium text-[#374151] transition-all hover:bg-[#F6FAFC]"
+              className="rounded-xl border border-border bg-card px-3.5 py-2 text-[12px] font-medium text-dim transition-all hover:bg-muted"
             >
               Criar alerta
             </button>
             <button
               type="button"
-              className="rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] text-[#6B7280] transition-all hover:bg-[#F6FAFC]"
+              className="rounded-xl border border-border bg-card px-3.5 py-2 text-[12px] text-muted-foreground transition-all hover:bg-muted"
             >
               Comparar
             </button>
             <button
               type="button"
-              className="grid h-9 w-9 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] transition-all hover:bg-[#F6FAFC]"
+              className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:bg-muted"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
@@ -235,7 +235,7 @@ export function CompanyAnalysisSummaryMock() {
         </div>
       </div>
 
-      <div className="flex items-center gap-0 overflow-x-auto border-b border-[#E2EDF5] bg-white px-6">
+      <div className="flex items-center gap-0 overflow-x-auto border-b border-border bg-card px-6">
         {["Resumo", "Pilares", "O que mudou (4)", "Agenda (2)", "Preço", "Fontes"].map((tab, index) => (
           <button
             key={tab}
@@ -243,8 +243,8 @@ export function CompanyAnalysisSummaryMock() {
             className={cx(
               "flex-shrink-0 border-b-2 px-4 py-3.5 text-[13px] font-medium transition-all duration-150",
               index === 0
-                ? "border-[#0E9384] text-[#0B1220]"
-                : "border-transparent text-[#8494A9] hover:border-[#D0DDE8] hover:text-[#374151]",
+                ? "border-brand text-foreground"
+                : "border-transparent text-[#8494A9] hover:border-[#D0DDE8] hover:text-dim",
             )}
           >
             {tab}
@@ -254,21 +254,21 @@ export function CompanyAnalysisSummaryMock() {
 
       <section className="flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {showScoreInfo && (
-          <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+          <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Metodologia</p>
-                <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Como calculamos o placar</h3>
+                <p className="text-[10px] font-semibold uppercase text-[#A0AEC0]">Metodologia</p>
+                <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Como calculamos o placar</h3>
               </div>
               <button
                 type="button"
-                className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]"
+                className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted"
                 onClick={() => setShowScoreInfo(false)}
               >
                 Fechar
               </button>
             </div>
-            <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
+            <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
               <p>Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
               <p>Status com base em dados públicos recentes e leitura contextual.</p>
               <p>Fontes: CVM, B3 e RI da empresa.</p>
@@ -277,28 +277,28 @@ export function CompanyAnalysisSummaryMock() {
         )}
 
         {showEvidence && (
-          <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+          <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Evidência</p>
-                <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Painel de fonte · Resumo</h3>
+                <p className="text-[10px] font-semibold uppercase text-[#A0AEC0]">Evidência</p>
+                <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Painel de fonte · Resumo</h3>
               </div>
               <button
                 type="button"
-                className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]"
+                className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted"
                 onClick={() => setShowEvidence(false)}
               >
                 Fechar
               </button>
             </div>
-            <div className="mt-3 space-y-1.5 text-[13px] text-[#6B7280]">
+            <div className="mt-3 space-y-1.5 text-[13px] text-muted-foreground">
               <p>
-                <span className="font-medium text-[#374151]">Documento:</span> Release de resultados e ITR mais recente
+                <span className="font-medium text-dim">Documento:</span> Release de resultados e ITR mais recente
               </p>
               <p>
-                <span className="font-medium text-[#374151]">Atualizado em:</span> {summaryMock.summaryMeta.updatedAt}
+                <span className="font-medium text-dim">Atualizado em:</span> {summaryMock.summaryMeta.updatedAt}
               </p>
-              <button type="button" className="inline-flex items-center gap-1.5 text-[#0E9384] hover:underline">
+              <button type="button" className="inline-flex items-center gap-1.5 text-brand hover:underline">
                 Abrir fonte externa
                 <Share2 className="h-3.5 w-3.5" />
               </button>
@@ -307,24 +307,24 @@ export function CompanyAnalysisSummaryMock() {
         )}
 
         <div className="space-y-5">
-          <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Diagnóstico rápido</p>
-            <h2 className="mt-2 text-[22px] font-bold leading-snug text-[#0B1220]">
+          <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Diagnóstico rápido</p>
+            <h2 className="mt-2 text-[22px] font-bold leading-snug text-foreground">
               {summaryMock.diagnosisHeadline}
             </h2>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#64748B]">
+            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
               Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className="rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                className="rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Ver principal força
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-[#D97706] transition-opacity hover:opacity-80"
+                className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-warning-text transition-opacity hover:opacity-80"
               >
                 Ver principal atenção
               </button>
@@ -334,34 +334,34 @@ export function CompanyAnalysisSummaryMock() {
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12 space-y-4 xl:col-span-8">
               <article
-                className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-border bg-card p-5 shadow-sm"
                 style={{ borderTopWidth: "3px", borderTopColor: "#0E9384" }}
               >
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-[#0E9384]" />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Principal Força</p>
+                  <BarChart3 className="h-4 w-4 text-brand" />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand">Principal Força</p>
                 </div>
                 <div className="mt-3">
-                  <p className="text-[26px] font-bold leading-none text-[#0E9384]">{summaryMock.strongest.title}</p>
-                  <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+                  <p className="text-[26px] font-bold leading-none text-brand">{summaryMock.strongest.title}</p>
+                  <p className="mt-2.5 text-[14px] leading-relaxed text-dim">
                     A estrutura de caixa segue oferecendo conforto para atravessar oscilações e financiar execução com menos pressão.
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-                    <span className="rounded-full border border-[#C7F5EE] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">
+                    <span className="rounded-full border border-[#C7F5EE] bg-brand-surface px-2.5 py-1 font-semibold text-brand">
                       {summaryMock.strongest.score}
                     </span>
-                    <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">
+                    <span className="rounded-full border border-[#99F6E4] bg-brand-surface px-2.5 py-1 font-semibold text-brand">
                       {summaryMock.strongest.badge}
                     </span>
-                    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">
+                    <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">
                       Variação: {summaryMock.strongest.trend}
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <button type="button" className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]">
+                    <button type="button" className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted">
                       Ver pilar
                     </button>
-                    <button type="button" className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]">
+                    <button type="button" className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted">
                       Ver fonte
                     </button>
                   </div>
@@ -369,34 +369,34 @@ export function CompanyAnalysisSummaryMock() {
               </article>
 
               <article
-                className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-border bg-card p-5 shadow-sm"
                 style={{ borderTopWidth: "3px", borderTopColor: "#F59E0B" }}
               >
                 <div className="flex items-center gap-2">
-                  <TriangleAlert className="h-4 w-4 text-[#D97706]" />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Principal Atenção</p>
+                  <TriangleAlert className="h-4 w-4 text-warning-text" />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-warning-text">Principal Atenção</p>
                 </div>
                 <div className="mt-3">
-                  <p className="text-[26px] font-bold leading-none text-[#D97706]">{summaryMock.watchout.title}</p>
-                  <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+                  <p className="text-[26px] font-bold leading-none text-warning-text">{summaryMock.watchout.title}</p>
+                  <p className="mt-2.5 text-[14px] leading-relaxed text-dim">
                     O acompanhamento precisa se concentrar na pressão recente sobre margens para entender se foi algo pontual ou mais estrutural.
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-                    <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">
+                    <span className="rounded-full border border-warning-border bg-warning-surface px-2.5 py-1 font-semibold text-warning-text">
                       {summaryMock.watchout.score}
                     </span>
-                    <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">
+                    <span className="rounded-full border border-warning-border bg-warning-surface px-2.5 py-1 font-semibold text-warning-text">
                       {summaryMock.watchout.badge}
                     </span>
-                    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">
+                    <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">
                       Variação: {summaryMock.watchout.trend}
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <button type="button" className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]">
+                    <button type="button" className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted">
                       Ver pilar
                     </button>
-                    <button type="button" className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]">
+                    <button type="button" className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted">
                       Ver fonte
                     </button>
                   </div>
@@ -404,82 +404,82 @@ export function CompanyAnalysisSummaryMock() {
               </article>
             </div>
 
-            <article className="col-span-12 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm xl:col-span-4">
+            <article className="col-span-12 rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-[15px] font-semibold text-[#111827]">Mapa dos 5 pilares</h2>
+                <h2 className="text-[15px] font-semibold text-foreground">Mapa dos 5 pilares</h2>
                 <button
                   type="button"
-                  className="text-[11px] text-[#667085] hover:text-[#475467] hover:underline"
+                  className="text-[11px] text-muted-foreground hover:text-[#475467] hover:underline"
                   onClick={() => setShowScoreInfo(true)}
                 >
                   Como calculamos
                 </button>
               </div>
-              <p className="mt-1 text-[12px] text-[#94A3B8]">
+              <p className="mt-1 text-[12px] text-muted-foreground">
                 Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.
               </p>
               <div className="mt-3">
                 <PillarMap data={summaryMock.mapPillarData} />
               </div>
-              <p className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5 text-[12px] text-[#475467]">
+              <p className="mt-3 rounded-xl border border-border bg-muted px-3 py-2.5 text-[12px] text-[#475467]">
                 Atenção principal em {summaryMock.watchout.title}; força relativa em {summaryMock.strongest.title}.
               </p>
             </article>
           </div>
 
-          <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+          <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Resumo em 60s</p>
-                <h2 className="mt-1 text-[16px] font-semibold text-[#111827]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Resumo em 60s</p>
+                <h2 className="mt-1 text-[16px] font-semibold text-foreground">
                   Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.
                 </h2>
               </div>
               <button
                 type="button"
-                className="text-[12px] text-[#0E9384] hover:underline"
+                className="text-[12px] text-brand hover:underline"
                 onClick={() => setShowEvidence(true)}
               >
                 Ver fonte
               </button>
             </div>
-            <p className="mt-4 text-[14px] leading-relaxed text-[#1F2937]">{summaryMock.summaryNarrative}</p>
+            <p className="mt-4 text-[14px] leading-relaxed text-foreground">{summaryMock.summaryNarrative}</p>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Força principal</p>
-                <p className="mt-1 text-[13px] font-semibold text-[#111827]">{summaryMock.summaryScan.strength.pillar}</p>
+              <div className="rounded-xl border border-border bg-muted p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Força principal</p>
+                <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.strength.pillar}</p>
               </div>
-              <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Atenção principal</p>
-                <p className="mt-1 text-[13px] font-semibold text-[#111827]">{summaryMock.summaryScan.attention.pillar}</p>
+              <div className="rounded-xl border border-border bg-muted p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção principal</p>
+                <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.attention.pillar}</p>
               </div>
-              <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">O que monitorar</p>
-                <p className="mt-1 text-[13px] font-semibold text-[#111827]">{summaryMock.summaryScan.monitor.text}</p>
+              <div className="rounded-xl border border-border bg-muted p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">O que monitorar</p>
+                <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.monitor.text}</p>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
-              <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">
+              <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">
                 Atualizado em {summaryMock.summaryMeta.updatedAt}
               </span>
-              <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">
+              <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">
                 Fonte: {summaryMock.summaryMeta.source}
               </span>
-              <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
+              <span className="rounded-full border border-[#99F6E4] bg-brand-surface px-2.5 py-1 text-brand">Confiança: Alta</span>
             </div>
           </article>
 
           <article className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0E9384]">Próximas ações</p>
-                <h2 className="mt-1 text-[15px] font-semibold text-[#111827]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-brand">Próximas ações</p>
+                <h2 className="mt-1 text-[15px] font-semibold text-foreground">
                   Feche a leitura com um próximo passo útil e verificável.
                 </h2>
               </div>
               <button
                 type="button"
-                className="text-[12px] text-[#0E9384] hover:underline"
+                className="text-[12px] text-brand hover:underline"
                 onClick={() => setShowEvidence(true)}
               >
                 Ver fonte
@@ -488,19 +488,19 @@ export function CompanyAnalysisSummaryMock() {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className="rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                className="rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Criar alerta da principal atenção
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]"
+                className="rounded-xl border border-[#D1FAE5] bg-card px-4 py-2 text-[13px] font-medium text-foreground hover:bg-[#F0FDF4]"
               >
                 Ver pilares completos
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]"
+                className="rounded-xl border border-[#D1FAE5] bg-card px-4 py-2 text-[13px] font-medium text-foreground hover:bg-[#F0FDF4]"
               >
                 Comparar com outra empresa
               </button>

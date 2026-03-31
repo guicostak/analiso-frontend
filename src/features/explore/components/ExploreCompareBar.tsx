@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/src/components/ui/button";
 
 interface ExploreCompareBarProps {
@@ -28,8 +29,10 @@ export function ExploreCompareBar({ compareTickers, toggleCompare }: ExploreComp
           </span>
         ))}
       </div>
-      <Button variant="mint" size="xs" className="rounded-xl">
-        Comparar ({compareTickers.length}/4)
+      <Button variant="mint" size="xs" className="rounded-xl" asChild>
+        <Link href={`/comparar?tickers=${compareTickers.join(",")}`}>
+          Comparar ({compareTickers.length}/4)
+        </Link>
       </Button>
     </div>
   );

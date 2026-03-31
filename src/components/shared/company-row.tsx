@@ -30,7 +30,7 @@ export function CompanyRow({ company, isSelected, onSelect }: CompanyRowProps) {
       className={`w-full p-4 rounded-2xl border transition-all text-left ${
         isSelected
           ? 'bg-mint-50 border-mint-300 shadow-md'
-          : 'bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-sm'
+          : 'bg-card border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm'
       }`}
       initial={false}
       whileHover={{ scale: 1.005 }}

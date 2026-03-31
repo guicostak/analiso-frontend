@@ -12,7 +12,7 @@ interface PreviewPanelProps {
 export function PreviewPanel({ company }: PreviewPanelProps) {
   if (!company) {
     return (
-      <div className="sticky top-6 bg-white border border-neutral-200 rounded-3xl p-8 h-[calc(100vh-120px)] flex items-center justify-center">
+      <div className="sticky top-6 bg-card border border-neutral-200 dark:border-neutral-700 rounded-3xl p-8 h-[calc(100vh-120px)] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-neutral-100 mx-auto mb-4 flex items-center justify-center">
             <GitCompare className="w-8 h-8 text-neutral-400" />
@@ -29,7 +29,7 @@ export function PreviewPanel({ company }: PreviewPanelProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-6 bg-white border border-neutral-200 rounded-3xl p-8 h-[calc(100vh-120px)] overflow-y-auto"
+      className="sticky top-6 bg-card border border-neutral-200 dark:border-neutral-700 rounded-3xl p-8 h-[calc(100vh-120px)] overflow-y-auto"
     >
       {/* Header */}
       <div className="mb-6">

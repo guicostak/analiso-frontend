@@ -171,19 +171,19 @@ const sidebarGroups = [
 
 function MockSidebar() {
   return (
-    <aside className="w-[240px] shrink-0 border-r border-[#EEF2F6] bg-white">
+    <aside className="w-[240px] shrink-0 border-r border-border bg-card">
       <div className="flex h-full flex-col px-5 py-7">
         <div className="pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">
+          <p className="text-[11px] font-semibold uppercase text-muted-foreground">
             Contexto
           </p>
-          <p className="mt-2 text-[15px] font-semibold text-[#171717]">Minha watchlist</p>
+          <p className="mt-2 text-[15px] font-semibold text-foreground">Minha watchlist</p>
         </div>
 
         <div className="space-y-8">
           {sidebarGroups.map((group) => (
             <div key={group.title}>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">
+              <p className="mb-4 text-[11px] font-semibold uppercase text-muted-foreground">
                 {group.title}
               </p>
               <div className="space-y-1">
@@ -198,12 +198,12 @@ function MockSidebar() {
                       {isActive && (
                         <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#12A594]" />
                       )}
-                      <span className={isActive ? "text-[#171717]" : "text-[#8A8A8A]"}>
+                      <span className={isActive ? "text-foreground" : "text-[#8A8A8A]"}>
                         <Icon className="h-[18px] w-[18px]" />
                       </span>
                       <span
                         className={
-                          isActive ? "font-semibold text-[#171717]" : "font-medium text-[#7A7A7A]"
+                          isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground"
                         }
                       >
                         {item.label}
@@ -218,11 +218,11 @@ function MockSidebar() {
 
         {/* Plan card */}
         <div className="mt-auto pt-6">
-          <div className="rounded-[20px] border border-[#E7EEF5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FBFCFE_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,40,0.05)]">
+          <div className="rounded-[20px] border border-border bg-[linear-gradient(180deg,#FFFFFF_0%,#FBFCFE_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,40,0.05)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[13px] font-semibold text-[#0F1728]">Plano</p>
-                <p className="mt-1 text-[12px] text-[#667085]">Renovação em 12/11</p>
+                <p className="text-[13px] font-semibold text-foreground">Plano</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">Renovação em 12/11</p>
               </div>
               <span className="inline-flex items-center rounded-full bg-[#EEF6FF] px-2.5 py-1 text-[11px] font-semibold text-[#3965B8]">
                 PRO
@@ -232,7 +232,7 @@ function MockSidebar() {
               Atualizar plano
             </div>
           </div>
-          <div className="mt-5 space-y-1 text-[11px] leading-5 text-[#98A2B3]">
+          <div className="mt-5 space-y-1 text-[11px] leading-5 text-muted-foreground">
             <p>Todos direitos reservado</p>
             <p>Analiso - ©2025</p>
           </div>
@@ -246,28 +246,28 @@ function MockSidebar() {
 
 function MockTopBar() {
   return (
-    <header className="h-14 shrink-0 border-b border-[#E5E7EB] bg-white">
+    <header className="h-14 shrink-0 border-b border-border bg-card">
       <div className="flex h-full items-center justify-between px-6">
         {/* Search */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <div className="flex h-9 w-full max-w-[430px] items-center rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3">
+          <div className="flex h-9 w-full max-w-[430px] items-center rounded-lg border border-border bg-[#F9FAFB] px-3">
             <Search className="h-4 w-4 text-[#9CA3AF]" />
             <span className="ml-2 text-[13px] text-[#9CA3AF]">Busque empresa ou ticker...</span>
           </div>
         </div>
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7280]">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground">
             <Bell className="h-[18px] w-[18px]" />
             <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500" />
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7280]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground">
             <Settings className="h-[18px] w-[18px]" />
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7280]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground">
             <Moon className="h-[18px] w-[18px]" />
           </div>
-          <div className="ml-1 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#D1D5DB] bg-white">
+          <div className="ml-1 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#D1D5DB] bg-card">
             <UserCircle2 className="h-5 w-5 text-[#9CA3AF]" />
           </div>
         </div>
@@ -285,7 +285,7 @@ function MockDashboardMain() {
         {/* Row 1: 3 summary cards */}
         <section className="grid grid-cols-12 gap-5">
           {/* Summary card */}
-          <article className="relative col-span-4 min-h-[224px] overflow-hidden rounded-[24px] border border-[#C9DFFA] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+          <article className="relative col-span-4 min-h-[224px] overflow-hidden rounded-[24px] border border-[#C9DFFA] bg-card shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div className="absolute inset-x-0 top-0 h-[64px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)]" />
             <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-[#2F6FD6]">
               Resumo do dia
@@ -293,21 +293,21 @@ function MockDashboardMain() {
             <div className="relative flex h-full flex-col justify-between p-4.5">
               <div className="pt-[64px]">
                 <div className="space-y-3">
-                  <h1 className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-[#0F1728]">
+                  <h1 className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-foreground">
                     {MOCK.headline}
                   </h1>
                   <p className="max-w-[34ch] text-[14px] leading-6 text-[#526070]">{MOCK.body}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 border-t border-[#EEF3F7] pt-3.5">
-                <span className="text-[12px] font-medium text-[#98A2B3]">
+                <span className="text-[12px] font-medium text-muted-foreground">
                   Referência {MOCK.referenceDate}
                 </span>
                 <div className="flex items-center gap-3">
                   <div className="h-10 rounded-[18px] bg-[#12A594] px-4 flex items-center text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)]">
                     Abrir prioridade
                   </div>
-                  <span className="text-[12px] font-medium text-[#98A2B3]">
+                  <span className="text-[12px] font-medium text-muted-foreground">
                     Renderizado {MOCK.renderedLabel}
                   </span>
                 </div>
@@ -318,14 +318,14 @@ function MockDashboardMain() {
           {/* Risk + Improve cards */}
           <div className="col-span-3 grid gap-5">
             {/* Top risk */}
-            <div className="relative flex min-h-[100px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-white p-4.5 text-left">
+            <div className="relative flex min-h-[100px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#F0CCD7] bg-card p-4.5 text-left">
               <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#F7D9E2_0%,#FCECEF_100%)]" />
               <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#B54768]">
                 Maior risco
               </p>
               <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(181,71,104,0.08)] blur-2xl" />
               <div className="flex items-start justify-between gap-3">
-                <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-foreground">
                   {MOCK.topRisk.ticker}
                 </p>
                 <StatusBadge status={MOCK.topRisk.severity} />
@@ -340,14 +340,14 @@ function MockDashboardMain() {
             </div>
 
             {/* Top improve */}
-            <div className="relative flex min-h-[100px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-white p-4.5 text-left">
+            <div className="relative flex min-h-[100px] flex-col justify-between overflow-hidden rounded-[20px] border border-[#CFE9E2] bg-card p-4.5 text-left">
               <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-[linear-gradient(180deg,#D9EFE8_0%,#ECF8F4_100%)]" />
               <p className="absolute left-5 top-4 text-sm font-medium leading-5 text-[#0F9485]">
                 Maior melhora
               </p>
               <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[rgba(18,165,148,0.08)] blur-2xl" />
               <div className="flex items-start justify-between gap-3">
-                <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-[#0F1728]">
+                <p className="mt-9 text-[18px] font-semibold leading-[1.2] text-foreground">
                   {MOCK.topImprove.ticker}
                 </p>
                 <StatusBadge status={MOCK.topImprove.severity} />
@@ -363,15 +363,15 @@ function MockDashboardMain() {
           </div>
 
           {/* Session guide card */}
-          <article className="col-span-5 min-h-[224px] rounded-[24px] border border-[#E8EEF5] bg-white bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-6 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+          <article className="col-span-5 min-h-[224px] rounded-[24px] border border-border bg-card bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFCFD_100%)] p-6 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div className="flex h-full flex-col justify-between">
               <div className="space-y-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">
                       Prioridade do dia
                     </p>
-                    <h2 className="mt-2 max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                    <h2 className="mt-2 max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
                       {MOCK.priorityTicker} é o melhor ponto de entrada para entender o que mudou hoje.
                     </h2>
                   </div>
@@ -380,7 +380,7 @@ function MockDashboardMain() {
                   </span>
                 </div>
 
-                <p className="max-w-[46ch] text-[14px] leading-6 text-[#667085]">
+                <p className="max-w-[46ch] text-[14px] leading-6 text-muted-foreground">
                   Abra {MOCK.priorityTicker}, confirme o impacto no pilar{" "}
                   {MOCK.leadingPillar.toLowerCase()} e depois avance para os acompanhamentos
                   relevantes.
@@ -403,15 +403,15 @@ function MockDashboardMain() {
                           <span
                             className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${
                               step.done
-                                ? "bg-white text-[#12A594]"
+                                ? "bg-card text-[#12A594]"
                                 : step.isCurrent
-                                  ? "bg-white text-[#5B8DEF]"
-                                  : "bg-white text-[#98A2B3]"
+                                  ? "bg-card text-[#5B8DEF]"
+                                  : "bg-card text-muted-foreground"
                             }`}
                           >
                             {step.done ? "OK" : index + 1}
                           </span>
-                          <p className="text-[13px] font-medium text-[#0F1728]">{step.label}</p>
+                          <p className="text-[13px] font-medium text-foreground">{step.label}</p>
                         </div>
                       </div>
                     ))}
@@ -420,9 +420,9 @@ function MockDashboardMain() {
               </div>
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                <div className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-[#0F1728]">
+                <div className="inline-flex items-center gap-2 rounded-[18px] bg-[#F7FAFC] px-4 py-2.5 text-[13px] font-semibold text-foreground">
                   Abrir leitura guiada
-                  <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <span className="text-[13px] font-medium text-[#12A594]">Ver fontes do dia</span>
               </div>
@@ -431,22 +431,22 @@ function MockDashboardMain() {
         </section>
 
         {/* Editorial bar */}
-        <section className="rounded-[20px] border border-[#E8EEF5] bg-[#EEF7FF] px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
+        <section className="rounded-[20px] border border-border bg-[#EEF7FF] px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
           <div className="flex items-start gap-4">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-[#5B8DEF]">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-[#5B8DEF]">
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex-1">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">
+              <p className="text-[12px] font-medium uppercase text-[#5B8DEF]">
                 Por onde começar
               </p>
-              <p className="mt-1 text-[15px] font-semibold leading-6 text-[#0F1728]">
+              <p className="mt-1 text-[15px] font-semibold leading-6 text-foreground">
                 {MOCK.editorialText}
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 self-center rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-[#0F1728]">
+            <div className="inline-flex items-center gap-2 self-center rounded-full bg-card px-4 py-2 text-[13px] font-semibold text-foreground">
               Ir para o feed
-              <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
         </section>
@@ -454,31 +454,31 @@ function MockDashboardMain() {
         {/* Feed + Right rail */}
         <section className="grid grid-cols-12 gap-5">
           {/* Feed */}
-          <article className="col-span-7 min-h-[540px] overflow-hidden rounded-[24px] border border-[#E8EEF5] bg-white shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-            <div className="border-b border-[#EEF2F6] px-6 py-5">
+          <article className="col-span-7 min-h-[540px] overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+            <div className="border-b border-border px-6 py-5">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="max-w-[44ch]">
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">
                     Exploração principal
                   </p>
-                  <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#0F1728]">
+                  <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
                     Atualizações da watchlist
                   </h2>
-                  <p className="mt-2 text-[14px] leading-6 text-[#667085]">
+                  <p className="mt-2 text-[14px] leading-6 text-muted-foreground">
                     Triagem primeiro. Organização depois. O item principal abre a leitura e o
                     restante ajuda a confirmar o contexto.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="inline-flex rounded-full bg-[#F7FAFC] p-1">
-                    <div className="rounded-full bg-white px-3.5 py-2 text-[12px] font-semibold text-[#0F1728]">
+                    <div className="rounded-full bg-card px-3.5 py-2 text-[12px] font-semibold text-foreground">
                       Top impacto
                     </div>
-                    <div className="rounded-full px-4 py-2 text-[13px] font-semibold text-[#667085]">
+                    <div className="rounded-full px-4 py-2 text-[13px] font-semibold text-muted-foreground">
                       Tempo real
                     </div>
                   </div>
-                  <div className="rounded-full bg-[#F7FAFC] px-3.5 py-2 text-[12px] font-medium text-[#667085]">
+                  <div className="rounded-full bg-[#F7FAFC] px-3.5 py-2 text-[12px] font-medium text-muted-foreground">
                     Atualizar agora
                   </div>
                 </div>
@@ -491,17 +491,17 @@ function MockDashboardMain() {
                       className={`rounded-full px-4 py-2 text-[13px] font-medium ${
                         range === "24h"
                           ? "bg-[#DDF6F0] text-[#0F9485]"
-                          : "bg-[#F7FAFC] text-[#667085]"
+                          : "bg-[#F7FAFC] text-muted-foreground"
                       }`}
                     >
                       {range}
                     </div>
                   ))}
-                  <div className="ml-auto rounded-full bg-[#F7FAFC] px-4 py-2 text-[13px] font-medium text-[#667085]">
+                  <div className="ml-auto rounded-full bg-[#F7FAFC] px-4 py-2 text-[13px] font-medium text-muted-foreground">
                     Filtros
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-[12px] text-[#98A2B3]">
+                <div className="flex items-center justify-between text-[12px] text-muted-foreground">
                   <p>3 atualizações · ordenado por impacto</p>
                   <p>Última leitura sincronizada agora pouco</p>
                 </div>
@@ -527,7 +527,7 @@ function MockDashboardMain() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex min-w-0 flex-1 items-start gap-3.5">
                           <div
-                            className={`flex shrink-0 items-center justify-center rounded-[12px] border border-[#E8EEF5] bg-white text-[10px] font-semibold text-[#667085] ${
+                            className={`flex shrink-0 items-center justify-center rounded-[12px] border border-border bg-card text-[10px] font-semibold text-muted-foreground ${
                               isPriority ? "h-11 w-11" : isRelevant ? "h-10 w-10" : "h-8 w-8"
                             }`}
                           >
@@ -538,18 +538,18 @@ function MockDashboardMain() {
                               <span
                                 className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
                                   isPriority
-                                    ? "bg-white text-[#12A594]"
-                                    : "bg-[#F7FAFC] text-[#667085]"
+                                    ? "bg-card text-[#12A594]"
+                                    : "bg-[#F7FAFC] text-muted-foreground"
                                 }`}
                               >
                                 {item.badge ?? (isPriority ? "Prioridade do dia" : isRelevant ? "Acompanhamento relevante" : "Estáveis e positivos")}
                               </span>
                             </div>
-                            <p className="mt-2 text-[13px] font-medium text-[#98A2B3]">
+                            <p className="mt-2 text-[13px] font-medium text-muted-foreground">
                               {item.ticker} · {item.companyName}
                             </p>
                             <p
-                              className={`mt-1 font-semibold text-[#0F1728] ${
+                              className={`mt-1 font-semibold text-foreground ${
                                 isPriority
                                   ? "text-[18px] leading-7"
                                   : isRelevant
@@ -560,7 +560,7 @@ function MockDashboardMain() {
                               {item.title}
                             </p>
                             <p
-                              className={`mt-2 max-w-[70ch] text-[#667085] ${
+                              className={`mt-2 max-w-[70ch] text-muted-foreground ${
                                 isPriority ? "text-[14px] leading-6" : "text-[13px] leading-5"
                               }`}
                             >
@@ -568,16 +568,16 @@ function MockDashboardMain() {
                             </p>
                             <div className="mt-3 flex flex-wrap gap-2">
                               {item.pillarKey && (
-                                <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                   {item.pillarKey}
                                 </span>
                               )}
                               {item.source && (
-                                <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                                <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                   {item.source}
                                 </span>
                               )}
-                              <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#667085]">
+                              <span className="rounded-full bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                                 {item.relativeTime}
                               </span>
                             </div>
@@ -587,7 +587,7 @@ function MockDashboardMain() {
                           <StatusBadge status={item.severity} />
                           <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#12A594]">
                             {isPriority ? "Abrir prioridade" : isRelevant ? "Ler análise" : "Ver contexto"}
-                            <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
                           </span>
                         </div>
                       </div>
@@ -601,20 +601,20 @@ function MockDashboardMain() {
           {/* Right rail */}
           <div className="col-span-5 space-y-6 self-start">
             {/* Pillar card */}
-            <article className="min-h-[232px] rounded-[24px] border border-[#E8EEF5] bg-white p-6 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+            <article className="min-h-[232px] rounded-[24px] border border-border bg-card p-6 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">
                     Pilar em movimento
                   </p>
-                  <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
+                  <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                     {MOCK.leadingPillar}
                   </h3>
-                  <p className="mt-2 max-w-[34ch] text-[14px] leading-6 text-[#667085]">
+                  <p className="mt-2 max-w-[34ch] text-[14px] leading-6 text-muted-foreground">
                     {MOCK.leadingPillar} teve volume alto de mudanças com viés de atenção.
                   </p>
                 </div>
-                <div className="rounded-full bg-[#F7FAFC] px-3 py-2 text-[12px] font-semibold text-[#0F1728]">
+                <div className="rounded-full bg-[#F7FAFC] px-3 py-2 text-[12px] font-semibold text-foreground">
                   Filtrar pilar
                 </div>
               </div>
@@ -626,12 +626,12 @@ function MockDashboardMain() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[15px] font-semibold text-[#0F1728]">{item.pillar}</p>
-                        <p className="mt-1 text-[13px] text-[#667085]">{item.events} eventos no dia</p>
+                        <p className="text-[15px] font-semibold text-foreground">{item.pillar}</p>
+                        <p className="mt-1 text-[13px] text-muted-foreground">{item.events} eventos no dia</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-[#98A2B3]" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <div className="mt-3 rounded-[16px] bg-white/85 p-3">
+                    <div className="mt-3 rounded-[16px] bg-card/85 p-3">
                       <SegmentedHealthBar
                         healthy={item.healthy}
                         attention={item.attention}
@@ -649,18 +649,18 @@ function MockDashboardMain() {
             </article>
 
             {/* Watchlist health card */}
-            <article className="rounded-[20px] border border-[#E8EEF5] bg-[linear-gradient(180deg,#EEF7FF_0%,#F7FBFF_100%)] p-6">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">
+            <article className="rounded-[20px] border border-border bg-[linear-gradient(180deg,#EEF7FF_0%,#F7FBFF_100%)] p-6">
+              <p className="text-[12px] font-medium uppercase text-[#5B8DEF]">
                 Saúde da watchlist
               </p>
-              <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-[#0F1728]">
+              <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                 {MOCK.healthyWatchlistCount} de {MOCK.totalWatchlistCount} seguem estáveis
               </h3>
-              <p className="mt-2 text-[14px] leading-6 text-[#667085]">
+              <p className="mt-2 text-[14px] leading-6 text-muted-foreground">
                 A pressão está concentrada em poucos nomes, o que ajuda a priorizar a leitura sem
                 espalhar atenção demais.
               </p>
-              <div className="mt-5 grid grid-cols-[1fr_auto] gap-3 rounded-[18px] bg-white/80 p-3">
+              <div className="mt-5 grid grid-cols-[1fr_auto] gap-3 rounded-[18px] bg-card/80 p-3">
                 <div>
                   <div className="h-2.5 overflow-hidden rounded-full bg-[#DCE8F8]">
                     <div className="flex h-full w-full">
@@ -679,20 +679,20 @@ function MockDashboardMain() {
                     </div>
                   </div>
                   <div className="mt-2 flex items-center justify-between text-[12px]">
-                    <span className="text-[#667085]">Base mais estável da sessão</span>
+                    <span className="text-muted-foreground">Base mais estável da sessão</span>
                     <span className="font-semibold text-[#3965B8]">
                       {MOCK.healthyWatchlistCount}/{MOCK.totalWatchlistCount}
                     </span>
                   </div>
                 </div>
                 <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-[linear-gradient(180deg,#F4F8FF_0%,#E8F1FF_100%)] px-3 py-2 text-right">
-                  <span className="text-[10px] uppercase tracking-[0.08em] text-[#98A2B3]">
+                  <span className="text-[10px] uppercase text-muted-foreground">
                     Hoje
                   </span>
                   <span className="text-[18px] font-semibold text-[#3965B8]">
                     {MOCK.todayHealthyCount}
                   </span>
-                  <span className="text-[11px] text-[#667085]">sinais positivos</span>
+                  <span className="text-[11px] text-muted-foreground">sinais positivos</span>
                 </div>
               </div>
             </article>
@@ -711,7 +711,7 @@ export function HeroDashboardMock() {
 
   return (
     <div
-      className="relative ml-[60px] w-full max-w-[1148px] overflow-hidden rounded-[22px] border border-[#e6efff] bg-white shadow-[0_30px_80px_rgba(93,144,224,0.18)] max-xl:ml-0 max-xl:min-w-[1138px] max-xl:max-w-none max-md:ml-[5%] max-md:w-[160%] max-md:min-w-0 max-md:max-w-none"
+      className="relative ml-[60px] w-full max-w-[1148px] overflow-hidden rounded-[22px] border border-[#e6efff] bg-card shadow-[0_30px_80px_rgba(93,144,224,0.18)] max-xl:ml-0 max-xl:min-w-[1138px] max-xl:max-w-none max-md:ml-[5%] max-md:w-[160%] max-md:min-w-0 max-md:max-w-none"
       style={{ height: Math.round(naturalHeight * scale) }}
     >
       {/* Scaled dashboard */}

@@ -112,6 +112,20 @@ export interface HighlightItem {
   filterPreset: HighlightPreset;
 }
 
+export interface CompanyFinancials {
+  pl: number | null;           // P/L (Preço/Lucro)
+  pvp: number | null;          // P/VP (Preço/Valor Patrimonial)
+  dividendYield: number | null; // Dividend Yield (%)
+  roe: number | null;          // ROE (%)
+  roic: number | null;         // ROIC (%)
+  margemLiquida: number | null; // Margem Líquida (%)
+  margemEbitda: number | null;  // Margem EBITDA (%)
+  dividaLiquidaEbitda: number | null; // Dívida Líquida / EBITDA
+  evEbitda: number | null;     // EV/EBITDA
+  lpa: number | null;          // LPA (Lucro por Ação)
+  price: number | null;        // Preço atual da ação (R$)
+}
+
 export interface CompanyCard {
   name: string;
   ticker: string;
@@ -127,4 +141,5 @@ export interface CompanyCard {
   source: string;
   highlightPillar: HighlightPillar;
   logoUrl?: string | null;
+  financials: CompanyFinancials;
 }

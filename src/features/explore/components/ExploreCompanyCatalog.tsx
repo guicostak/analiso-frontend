@@ -1,66 +1,60 @@
 "use client";
 
-import { ChevronDown, Filter, ListFilter, Search, Star, X } from "lucide-react";
-import Link from "next/link";
-import type { CompanyCard, FilterKey, Filters, HighlightPreset } from "../interfaces";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Bookmark, BookmarkPlus, ChevronDown, Clock, Link2, ListFilter, Search, Share2, SlidersHorizontal, Trash2, X } from "lucide-react";
+import type { CompanyCard as CompanyCardData, CompanyFinancials, Filters, HighlightPreset } from "../interfaces";
+import type { CompanySearchFilters } from "../services/search.service";
+import { SearchAutocomplete, type SuggestResult } from "@/src/components/shared/SearchAutocomplete";
+import { BuscaFiltersPanel } from "@/src/features/busca/components/BuscaFiltersPanel";
+import { PaginationBar } from "@/src/components/shared/PaginationBar";
+import { CompanyCard } from "@/src/components/shared/CompanyCard";
+import { useAnimatedPlaceholder } from "@/src/hooks/useAnimatedPlaceholder";
+import type { SavedSearch } from "@/src/features/saved-searches";
+import { useSearchHistory } from "@/src/features/search-history";
 
-const statusColors: Record<CompanyCard["status"], string> = {
-  Saudável: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
-  Atenção: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
-  Risco: "border-[#F3D8DF] bg-[#FDEFF2] text-[#B54768]",
-};
+// ─── Cores de status / frescor ───────────────────────────────────────────────
 
-const freshnessColors: Record<CompanyCard["freshnessStatus"], string> = {
-  Atualizado: "border-[#CDECDD] bg-[#EFFAF6] text-[#17825B]",
-  Antigo: "border-[#F4DFC1] bg-[#FFF5E8] text-[#B27300]",
-};
-
-function getCardShellColor(status: CompanyCard["status"]) {
-  const statusText = String(status);
-  if (statusText.startsWith("R")) return "bg-[linear-gradient(180deg,#FFF7F9_0%,#FFFFFF_34%)]";
-  if (statusText.startsWith("S")) return "bg-[linear-gradient(180deg,#F7FCFA_0%,#FFFFFF_34%)]";
-  return "bg-[linear-gradient(180deg,#FFF9F1_0%,#FFFFFF_34%)]";
-}
-
-function getCardAccentColor(status: CompanyCard["status"]) {
-  const statusText = String(status);
-  if (statusText.startsWith("R")) return "bg-[linear-gradient(90deg,#FADCE5_0%,rgba(250,220,229,0)_88%)]";
-  if (statusText.startsWith("S")) return "bg-[linear-gradient(90deg,#DDF6EC_0%,rgba(221,246,236,0)_88%)]";
-  return "bg-[linear-gradient(90deg,#FFEACC_0%,rgba(255,234,204,0)_88%)]";
-}
-
-function getCardAccentVariant(index: number) {
-  if (index % 3 === 0) {
-    return {
-      band: "h-[78px]",
-      shape: "left-5 top-3 h-10 w-24 rounded-[28px_18px_22px_16px/18px_22px_16px_20px]",
-      divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.18),rgba(152,162,179,0))]",
-    };
-  }
-  if (index % 3 === 1) {
-    return {
-      band: "h-[64px]",
-      shape: "left-8 top-4 h-8 w-20 rounded-[18px_28px_16px_24px/20px_18px_22px_16px]",
-      divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.14),rgba(152,162,179,0))]",
-    };
-  }
-  return {
-    band: "h-[72px]",
-    shape: "left-6 top-2 h-9 w-16 rounded-[22px_16px_24px_18px/16px_20px_18px_22px]",
-    divider: "bg-[linear-gradient(90deg,rgba(152,162,179,0),rgba(152,162,179,0.16),rgba(152,162,179,0))]",
-  };
-}
-
-const freshnessLabelMap: Record<CompanyCard["freshnessStatus"], string> = {
-  Atualizado: "Fonte atualizada",
-  Antigo: "Fonte atrasada",
-};
 
 const pillars = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"];
 
+// ─── Chips de filtros de métricas ─────────────────────────────────────────────
+
+const METRIC_CHIP_LABELS: Record<string, { label: string; prefix: string }> = {
+  plMin:           { label: "P/L",         prefix: "≥" },
+  plMax:           { label: "P/L",         prefix: "≤" },
+  pvpMin:          { label: "P/VP",        prefix: "≥" },
+  pvpMax:          { label: "P/VP",        prefix: "≤" },
+  evEbitdaMax:     { label: "EV/EBITDA",   prefix: "≤" },
+  roeMin:          { label: "ROE",         prefix: "≥" },
+  roeMax:          { label: "ROE",         prefix: "≤" },
+  roicMin:         { label: "ROIC",        prefix: "≥" },
+  margemMin:       { label: "Mg.Líq.",     prefix: "≥" },
+  dividaEbitdaMax: { label: "Dív/EBITDA",  prefix: "≤" },
+  dyMin:           { label: "DY",          prefix: "≥" },
+  dyMax:           { label: "DY",          prefix: "≤" },
+};
+
+/** Converte CompanyFinancials para Record<string, number> usado pelo CompanyCard. */
+function financialsToMetrics(fin: CompanyFinancials): Record<string, number> {
+  const m: Record<string, number> = {};
+  if (fin.pl != null) m["pl"] = fin.pl;
+  if (fin.pvp != null) m["pvp"] = fin.pvp;
+  if (fin.dividendYield != null) m["dy"] = fin.dividendYield;
+  if (fin.roe != null) m["roe"] = fin.roe;
+  if (fin.roic != null) m["roic"] = fin.roic;
+  if (fin.margemLiquida != null) m["margem_liquida"] = fin.margemLiquida;
+  if (fin.dividaLiquidaEbitda != null) m["divida_ebitda"] = fin.dividaLiquidaEbitda;
+  if (fin.evEbitda != null) m["ev_ebitda"] = fin.evEbitda;
+  return m;
+}
+
+const SKIP_FILTER_KEYS = new Set(["page", "size", "sortBy", "sortOrder", "query", "sector"]);
+
+// ─── Props ───────────────────────────────────────────────────────────────────
+
 interface ExploreCompanyCatalogProps {
   isLoading: boolean;
-  filteredCompanies: CompanyCard[];
+  filteredCompanies: CompanyCardData[];
   filters: Filters;
   searchQuery: string;
   showAdvancedFilters: boolean;
@@ -80,7 +74,26 @@ interface ExploreCompanyCatalogProps {
   clearPreset: () => void;
   toggleCompare: (ticker: string) => void;
   resetFilters: () => void;
+  // props de busca via API
+  isSearchActive: boolean;
+  totalItems: number;
+  totalPages: number;
+  page: number;
+  companySearchFilters: CompanySearchFilters;
+  goToPage: (page: number) => void;
+  updateFilters: (partial: Partial<CompanySearchFilters>) => void;
+  clearApiFilters: () => void;
+  // favoritos
+  favoriteTickers: Set<string>;
+  onToggleFavorite: (ticker: string) => void;
+  // pesquisas salvas
+  savedSearches: SavedSearch[];
+  onSaveSearch: (name: string, filters: string) => Promise<SavedSearch | null>;
+  onDeleteSavedSearch: (id: number) => void;
+  onLoadSavedSearch: (filters: CompanySearchFilters) => void;
 }
+
+// ─── Componente ───────────────────────────────────────────────────────────────
 
 export function ExploreCompanyCatalog({
   isLoading,
@@ -104,304 +117,523 @@ export function ExploreCompanyCatalog({
   clearPreset,
   toggleCompare,
   resetFilters,
+  isSearchActive,
+  totalItems,
+  totalPages,
+  page,
+  companySearchFilters,
+  goToPage,
+  updateFilters,
+  clearApiFilters,
+  favoriteTickers,
+  onToggleFavorite,
+  savedSearches,
+  onSaveSearch,
+  onDeleteSavedSearch,
+  onLoadSavedSearch,
 }: ExploreCompanyCatalogProps) {
+  const [localQuery, setLocalQuery]         = useState(searchQuery);
+  const [showAutocomplete, setAutocomplete] = useState(false);
+  const [isFocused, setFocused]             = useState(false);
+  const [showMetricFilters, setMetricFilters] = useState(false);
+  const [showSaveModal, setShowSaveModal]   = useState(false);
+  const [saveName, setSaveName]             = useState("");
+  const [showSavedList, setShowSavedList]   = useState(false);
+  const savedListRef = useRef<HTMLDivElement>(null);
+  const [showHistory, setShowHistory]         = useState(false);
+  const [shareSearchOpen, setShareSearchOpen] = useState(false);
+  const searchHistory = useSearchHistory();
+
+  const animatedPlaceholder = useAnimatedPlaceholder(!localQuery && !isFocused);
+
+  // Chips de filtros de métricas ativos
+  const activeMetricChips = useMemo(() => {
+    return Object.entries(companySearchFilters)
+      .filter(([key, val]) => val != null && val !== "" && !SKIP_FILTER_KEYS.has(key))
+      .map(([key, val]) => ({ key, val, ...METRIC_CHIP_LABELS[key] }))
+      .filter((c) => c.label);
+  }, [companySearchFilters]);
+
+  const hasActiveQuery = !!companySearchFilters.query;
+  const hasActiveMetrics = activeMetricChips.length > 0;
+  const hasAnyApiFilter = hasActiveQuery || hasActiveMetrics;
+
+  const hasLocalSectorFilter = filters.sector !== "Todos";
+  const hasLocalPillarFilter = filters.pillar !== "Todos";
+  const localFilterCount = (hasLocalSectorFilter ? 1 : 0) + (hasLocalPillarFilter ? 1 : 0);
+  const hasLocalFilters = localFilterCount > 0;
+  const totalAdvancedCount = activeMetricChips.length + localFilterCount;
+
+  const displayCount = isSearchActive && totalItems > 0 ? totalItems : filteredCompanies.length;
+
+  function handleSelect(item: SuggestResult) {
+    setLocalQuery(item.ticker);
+    setAutocomplete(false);
+    setSearchQuery(item.ticker);
+    updateFilters({ query: item.ticker });
+  }
+
+  function handleQueryChange(value: string) {
+    setLocalQuery(value);
+    setSearchQuery(value);
+    setAutocomplete(value.length > 0);
+    if (!value) updateFilters({ query: undefined });
+    else searchHistory.recordSearch(value);
+  }
+
+  function removeMetricChip(key: string) {
+    updateFilters({ [key]: undefined });
+  }
+
   return (
     <section className="space-y-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descoberta guiada</p>
-          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-[#0F1728]">
-            Empresas para você analisar
-          </h2>
-          <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-[#667085]">
-            Catálogo para aprofundar a leitura depois da curadoria principal, mantendo foco em tese, qualidade de fonte e pilar mais relevante.
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[11px] font-medium text-[#667085] shadow-[0_10px_28px_rgba(15,23,40,0.05)]">
-          <Filter className="h-4 w-4" />
-          {filteredCompanies.length} empresas
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#98A2B3]">Descobrir por tese</p>
-        <div className="flex flex-wrap items-center gap-2.5">
-          {thesisCollections.map((entry) => (
-            <button
-              key={entry}
-              onClick={() => toggleEntryPoint(entry)}
-              className={`rounded-full border px-4 py-2.5 text-[12px] font-medium transition ${
-                selectedEntryPoints.includes(entry)
-                  ? "border-[#CDECDD] bg-[#EFFAF6] text-[#0E9384] shadow-[0_10px_24px_rgba(15,23,40,0.05)]"
-                  : "border-[#E7EEF5] bg-white text-[#667085] hover:border-[#D7E3EE] hover:text-[#0F1728]"
-              }`}
-            >
-              {entry}
-            </button>
-          ))}
-          {selectedEntryPoints.length > 0 ? (
-            <button onClick={clearEntryPoints} className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
-              Limpar seleção
-            </button>
-          ) : null}
-        </div>
-      </div>
-
+      {/* ── Chips de preset ativo ── */}
       {activePreset && (
-        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[#E7EEF5] bg-white px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)]">
+        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-border bg-card px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
           {appliedChips.map((chip) => (
             <span
               key={chip}
-              className="inline-flex items-center gap-2 rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-4 py-2 text-[12px] font-medium text-[#3965B8]"
+              className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/8 px-4 py-2 text-[12px] font-medium text-brand"
             >
               {chip}
-              <button onClick={clearPreset} className="text-[#667085] transition hover:text-[#0F1728]" aria-label={`Remover ${chip}`}>
+              <button onClick={clearPreset} className="text-muted-foreground transition hover:text-foreground" aria-label={`Remover ${chip}`}>
                 <X className="h-3.5 w-3.5" />
               </button>
             </span>
           ))}
-          <button onClick={clearPreset} className="ml-auto text-[12px] font-semibold text-[#0E9384] transition hover:text-[#0F1728]">
+          <button onClick={clearPreset} className="ml-auto text-[12px] font-semibold text-brand transition hover:text-foreground">
             Limpar
           </button>
         </div>
       )}
 
+      {/* ── Banner de dados antigos ── */}
       {showStaleBanner && (
-        <div className="flex flex-col gap-3 rounded-[18px] border border-[#F0D7A8] bg-[#FFF7E8] px-5 py-4 text-[13px] leading-6 text-[#8A5A00] lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 rounded-[18px] border border-warning-border bg-warning-surface px-5 py-4 text-[13px] leading-6 text-warning-text lg:flex-row lg:items-center lg:justify-between">
           <p>Qualidade dos dados: {staleCount} empresas com fonte atrasada. Vale confirmar antes de comparar decisões recentes.</p>
-          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="text-left font-semibold transition hover:text-[#6E4700]">
+          <button onClick={() => setFilters((p) => ({ ...p, freshness: "Antigo" }))} className="text-left font-semibold transition hover:text-warning-text">
             Ver apenas antigas
           </button>
         </div>
       )}
 
-      <div className="rounded-[22px] border border-[#E7EEF5] bg-white p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
+      {/* ── Painel de filtros ── */}
+      <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-            <label className="relative block xl:min-w-[260px] xl:flex-1">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
-              <input
-                type="text"
-                placeholder="Buscar empresa ou ticker"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-11 w-full rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] pl-11 pr-4 text-[13px] text-[#0F1728] outline-none transition placeholder:text-[#98A2B3] focus:border-[#D9E8FF]"
-              />
-            </label>
 
-            <div className="flex flex-1 flex-wrap items-center gap-3">
-              {(
-                [
-                  {
-                    label: "Setor",
-                    key: "sector",
-                    options: ["Todos", "Bancos", "Energia", "Indústria", "Saúde", "Consumo", "Construção"],
-                  },
-                  { label: "Status", key: "status", options: ["Todos", "Saudável", "Atenção", "Risco"] },
-                  { label: "Pilar em destaque", key: "pillar", options: ["Todos", ...pillars] },
-                ] as Array<{ label: string; key: FilterKey; options: string[] }>
-              ).map((filter) => (
-                <div key={filter.key} className="relative min-w-[152px] flex-1">
-                  <select
-                    value={filters[filter.key]}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                    className="h-11 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
+          {/* Linha 1: input de busca full-width */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={animatedPlaceholder ? `Procurar por ${animatedPlaceholder}` : "Procurar por"}
+              value={localQuery}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              onFocus={() => { setFocused(true); if (localQuery) setAutocomplete(true); else setShowHistory(true); }}
+              onBlur={() => { setFocused(false); setTimeout(() => setShowHistory(false), 150); }}
+              autoComplete="off"
+              className="h-11 w-full rounded-[14px] border border-border bg-muted pl-11 pr-4 text-[13px] text-foreground outline-none transition placeholder:text-muted-foreground focus:border-brand/50"
+            />
+            {showAutocomplete && (
+              <SearchAutocomplete
+                query={localQuery}
+                onSelect={handleSelect}
+                onClose={() => setAutocomplete(false)}
+              />
+            )}
+            {showHistory && !localQuery && searchHistory.items.length > 0 && (
+              <div className="absolute left-0 top-full z-30 mt-1.5 w-full rounded-[16px] border border-border bg-card p-2 shadow-[0_12px_32px_rgba(15,23,40,0.10)]">
+                <div className="flex items-center justify-between px-3 pb-1 pt-0.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buscas recentes</p>
+                  <button
+                    onClick={() => { searchHistory.clearAll(); setShowHistory(false); }}
+                    className="text-[10px] text-muted-foreground transition hover:text-foreground"
                   >
-                    {filter.options.map((option) => (
-                      <option key={option} value={option}>
-                        {filter.label}: {option}
-                      </option>
+                    Limpar
+                  </button>
+                </div>
+                {searchHistory.items.map((item) => (
+                  <div key={item.id} className="group flex w-full items-center gap-2 rounded-[12px] px-3 py-2 hover:bg-muted">
+                    <button
+                      onClick={() => { setLocalQuery(item.query); setSearchQuery(item.query); updateFilters({ query: item.query }); setShowHistory(false); }}
+                      className="flex flex-1 items-center gap-2 text-left text-[13px] text-foreground"
+                    >
+                      <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      {item.query}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); searchHistory.removeItem(item.id); }}
+                      className="opacity-0 transition group-hover:opacity-100 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Linha 2: Filtros avançados + Ordenar por */}
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+
+            {/* Botão Filtros avançados */}
+            <button
+              onClick={() => setMetricFilters((p) => !p)}
+              className={`inline-flex h-10 items-center gap-2 rounded-[14px] border px-4 text-[12px] font-medium shadow-[0_2px_6px_rgba(15,23,40,0.04)] transition hover:shadow-[0_4px_12px_rgba(15,23,40,0.08)] dark:shadow-none ${
+                showMetricFilters || hasActiveMetrics || hasLocalFilters
+                  ? "border-brand/30 bg-brand/8 text-brand"
+                  : "border-border bg-card text-muted-foreground hover:border-brand/30 hover:text-foreground"
+              }`}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filtros avançados
+              {(hasActiveMetrics || hasLocalFilters) && (
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
+                  {totalAdvancedCount}
+                </span>
+              )}
+            </button>
+
+            {/* Ordenar por */}
+            <div className="relative">
+              <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <select
+                value={filters.sort}
+                onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
+                className="h-10 appearance-none rounded-[14px] border border-border bg-card pl-11 pr-9 text-[12px] font-medium text-foreground shadow-[0_2px_6px_rgba(15,23,40,0.04)] outline-none transition hover:border-brand/30 focus:border-brand/50 dark:shadow-none"
+              >
+                {[
+                  "Nome (A-Z)",
+                  "Nome (Z-A)",
+                  "Maior preço",
+                  "Menor preço",
+                  ...(activePreset ? ["Mais relevantes para este destaque"] : []),
+                ].map((opt) => (
+                  <option key={opt} value={opt}>Ordenar por: {opt}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </div>
+
+          {/* Painel de filtros avançados */}
+          {showMetricFilters && (
+            <div className="flex flex-col gap-4 border-t border-border pt-4">
+
+              {/* Setor e Pilar */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Setor */}
+                <div className="relative">
+                  <select
+                    value={filters.sector}
+                    onChange={(e) => setFilters((prev) => ({ ...prev, sector: e.target.value }))}
+                    className={`h-10 w-full appearance-none rounded-[12px] border px-3 pr-9 text-[13px] font-medium outline-none transition focus:border-brand/50 ${
+                      hasLocalSectorFilter
+                        ? "border-brand/30 bg-brand/8 text-brand"
+                        : "border-border bg-muted text-foreground"
+                    }`}
+                  >
+                    <option value="Todos">Todos os setores</option>
+                    {["Bancos", "Energia", "Indústria", "Saúde", "Consumo", "Construção"].map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-3 border-t border-[#EEF3F7] pt-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                className="inline-flex h-10 items-center rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 text-[12px] font-medium text-[#0F1728] transition hover:bg-[#F1F6FA]"
-              >
-                {showAdvancedFilters ? "Menos filtros" : "Mais filtros"}
-              </button>
-
-              {showAdvancedFilters && (
-                <>
-                  {(
-                    [
-                      { label: "Tamanho", key: "size", options: ["Todos", "Grande", "Média", "Pequena"] },
-                      { label: "Frescor", key: "freshness", options: ["Todos", "Atualizado", "Antigo"] },
-                    ] as Array<{ label: string; key: FilterKey; options: string[] }>
-                  ).map((filter) => (
-                    <div key={filter.key} className="relative min-w-[152px]">
-                      <select
-                        value={filters[filter.key]}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, [filter.key]: event.target.value }))}
-                        className="h-10 appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-4 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
-                      >
-                        {filter.options.map((option) => (
-                          <option key={option} value={option}>
-                            {filter.label}: {option}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-px bg-[#EEF3F7]" />
-              <div className="relative min-w-[204px]">
-                <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
-                <select
-                  value={filters.sort}
-                  onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
-                  className="h-10 w-full appearance-none rounded-[14px] border border-[#EFF3F8] bg-[#F8FBFD] px-11 pr-10 text-[12px] font-medium text-[#0F1728] outline-none transition focus:border-[#D9E8FF]"
-                >
-                  {[
-                    ...(activePreset ? ["Mais relevantes para este destaque"] : []),
-                    "Mais atualizadas",
-                    "Mudanças recentes",
-                    "Maior consistência",
-                  ].map((option) => (
-                    <option key={option} value={option}>
-                      Ordenar: {option}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                {/* Pilar em destaque */}
+                <div className="relative">
+                  <select
+                    value={filters.pillar}
+                    onChange={(e) => setFilters((prev) => ({ ...prev, pillar: e.target.value }))}
+                    className={`h-10 w-full appearance-none rounded-[12px] border px-3 pr-9 text-[13px] font-medium outline-none transition focus:border-brand/50 ${
+                      hasLocalPillarFilter
+                        ? "border-brand/30 bg-brand/8 text-brand"
+                        : "border-border bg-muted text-foreground"
+                    }`}
+                  >
+                    <option value="Todos">Todos os pilares</option>
+                    {pillars.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                </div>
               </div>
+
+              {/* Métricas */}
+              <BuscaFiltersPanel
+                filters={companySearchFilters}
+                isLoading={isLoading}
+                onUpdateFilters={updateFilters}
+                onClearFilters={clearApiFilters}
+                isOpen={true}
+              />
             </div>
-          </div>
+          )}
+
+          {/* Chips de filtros ativos */}
+          {hasAnyApiFilter && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+              {hasActiveQuery && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/8 px-3 py-1 text-[12px] font-medium text-brand">
+                  Busca: {companySearchFilters.query}
+                  <button
+                    onClick={() => { setLocalQuery(""); setSearchQuery(""); updateFilters({ query: undefined }); }}
+                    className="opacity-60 transition hover:opacity-100"
+                    aria-label="Remover busca"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {activeMetricChips.map((chip) => (
+                <span
+                  key={chip.key}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/8 px-3 py-1 text-[12px] font-medium text-brand"
+                >
+                  {chip.label} {chip.prefix} {chip.val}
+                  <button
+                    onClick={() => removeMetricChip(chip.key)}
+                    className="opacity-60 transition hover:opacity-100"
+                    aria-label={`Remover filtro ${chip.label}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={() => { setLocalQuery(""); setSearchQuery(""); clearApiFilters(); }}
+                className="ml-auto text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
+              >
+                Limpar filtros
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* ── Contagem de resultados + pesquisas salvas ── */}
+      {!isLoading && (
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[12px] text-muted-foreground">
+            {displayCount} {displayCount === 1 ? "resultado encontrado" : "resultados encontrados"}
+          </span>
+
+          <div className="flex items-center gap-2">
+            {/* Botão salvar pesquisa atual */}
+            <button
+              onClick={() => { setShowSavedList(true); setShowSaveModal(true); }}
+              className="inline-flex items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground shadow-[0_1px_2px_rgba(15,23,40,0.04)] transition hover:border-brand/30 hover:text-brand dark:shadow-none"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              Salvar pesquisa
+            </button>
+
+            {/* Share search button */}
+            <div className="relative">
+              <button
+                onClick={() => setShareSearchOpen((v) => !v)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-card px-3 text-[13px] text-muted-foreground transition hover:border-brand hover:text-brand"
+                title="Compartilhar busca"
+              >
+                <Share2 className="h-4 w-4" />
+                Compartilhar
+              </button>
+              {shareSearchOpen && (
+                <div className="absolute right-0 z-40 mt-2 w-[200px] rounded-[18px] border border-border bg-card p-2 shadow-[0_16px_40px_rgba(15,23,40,0.12)]">
+                  <p className="px-3 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Compartilhar busca</p>
+                  <button onClick={() => { window.open(`https://wa.me/?text=${encodeURIComponent("Veja essa busca no Analiso: " + window.location.href)}`, "_blank"); setShareSearchOpen(false); }} className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted">
+                    <svg className="h-3.5 w-3.5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    WhatsApp
+                  </button>
+                  <button onClick={() => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent("Veja essa busca no Analiso!")}&url=${encodeURIComponent(window.location.href)}`, "_blank"); setShareSearchOpen(false); }} className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted">
+                    <svg className="h-3.5 w-3.5 text-foreground" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.733-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    X (Twitter)
+                  </button>
+                  <button onClick={() => { navigator.clipboard.writeText(window.location.href); setShareSearchOpen(false); }} className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted">
+                    <Link2 className="h-3.5 w-3.5" />
+                    Copiar link
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown de pesquisas salvas */}
+            <div className="relative" ref={savedListRef}>
+              <button
+                onClick={() => setShowSavedList((p) => !p)}
+                className="inline-flex items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground shadow-[0_1px_2px_rgba(15,23,40,0.04)] transition hover:border-brand/30 hover:text-foreground dark:shadow-none"
+              >
+                <BookmarkPlus className="h-3.5 w-3.5" />
+                Pesquisas salvas
+                {savedSearches.length > 0 && (
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-bold text-white">
+                    {savedSearches.length}
+                  </span>
+                )}
+                <ChevronDown className={`h-3 w-3 transition-transform ${showSavedList ? "rotate-180" : ""}`} />
+              </button>
+
+              {showSavedList && (
+                <div className="absolute right-0 top-[calc(100%+4px)] z-50 w-72 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+                  <div className="border-b border-border px-3 py-2.5">
+                    <p className="text-[12px] font-semibold text-foreground">Pesquisas salvas</p>
+                  </div>
+
+                  {savedSearches.length === 0 ? (
+                    <div className="px-3 py-4 text-center text-[12px] text-muted-foreground">
+                      Nenhuma pesquisa salva ainda
+                    </div>
+                  ) : (
+                    <div className="max-h-52 overflow-y-auto">
+                      {savedSearches.map((s) => (
+                        <div
+                          key={s.id}
+                          className="flex items-center justify-between gap-2 px-3 py-2 transition hover:bg-muted/60"
+                        >
+                          <button
+                            onClick={() => {
+                              try {
+                                const parsed = JSON.parse(s.filters);
+                                onLoadSavedSearch(parsed);
+                                setShowSavedList(false);
+                              } catch { /* filtros inválidos */ }
+                            }}
+                            className="min-w-0 flex-1 text-left"
+                          >
+                            <p className="truncate text-[12px] font-medium text-foreground">{s.name}</p>
+                            <p className="truncate text-[10px] text-muted-foreground">
+                              {new Date(s.createdAt).toLocaleDateString("pt-BR")}
+                            </p>
+                          </button>
+                          <button
+                            onClick={() => onDeleteSavedSearch(s.id)}
+                            className="shrink-0 rounded-md p-1 text-muted-foreground transition hover:bg-danger-surface hover:text-danger-text"
+                            aria-label="Excluir pesquisa"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Salvar pesquisa atual */}
+                  <div className="border-t border-border px-3 py-2.5">
+                    {showSaveModal ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={saveName}
+                          onChange={(e) => setSaveName(e.target.value)}
+                          placeholder="Nome da pesquisa"
+                          autoFocus
+                          className="h-8 flex-1 rounded-[8px] border border-border bg-muted px-2.5 text-[12px] text-foreground outline-none placeholder:text-muted-foreground focus:border-brand/50"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && saveName.trim()) {
+                              onSaveSearch(saveName.trim(), JSON.stringify(companySearchFilters));
+                              setSaveName("");
+                              setShowSaveModal(false);
+                            }
+                            if (e.key === "Escape") setShowSaveModal(false);
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (saveName.trim()) {
+                              onSaveSearch(saveName.trim(), JSON.stringify(companySearchFilters));
+                              setSaveName("");
+                              setShowSaveModal(false);
+                            }
+                          }}
+                          disabled={!saveName.trim()}
+                          className="h-8 rounded-[8px] bg-brand px-3 text-[11px] font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+                        >
+                          Salvar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowSaveModal(true)}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-dashed border-border py-1.5 text-[11px] font-medium text-muted-foreground transition hover:border-brand/30 hover:text-brand"
+                      >
+                        <BookmarkPlus className="h-3.5 w-3.5" />
+                        Salvar pesquisa atual
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Grid de cards / loading / vazio ── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="min-h-[212px] rounded-[22px] border border-[#E7EEF5] bg-white p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
-              <div className="h-4 w-32 rounded bg-[#EAF1F7]" />
-              <div className="mt-4 h-3 w-28 rounded bg-[#EEF3F7]" />
-              <div className="mt-6 h-20 rounded-[18px] bg-[#F4F8FB]" />
-              <div className="mt-6 h-3 w-40 rounded bg-[#EEF3F7]" />
+        <div className="grid grid-cols-1 gap-5">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="flex flex-col gap-4 rounded-[18px] border border-l-[3px] border-border border-l-muted bg-card p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-[14px] bg-muted" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-5 w-16 animate-pulse rounded-full bg-muted" />
+                  <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+                </div>
+              </div>
+              <div className="flex gap-6 border-t border-border pt-3">
+                {[1, 2, 3, 4, 5].map((m) => (
+                  <div key={m} className="space-y-1">
+                    <div className="h-2.5 w-10 animate-pulse rounded bg-muted" />
+                    <div className="h-3.5 w-14 animate-pulse rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2.5">
+                <div className="h-7 w-24 animate-pulse rounded-[10px] bg-muted" />
+                <div className="h-7 w-20 animate-pulse rounded-[10px] bg-muted" />
+              </div>
             </div>
           ))}
         </div>
       ) : filteredCompanies.length === 0 ? (
-        <div className="rounded-[28px] border border-[#E7EEF5] bg-white px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,40,0.04)]">
-          <p className="text-[15px] leading-7 text-[#475467]">Nenhuma empresa encontrada com esses filtros.</p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={resetFilters} className="rounded-[16px] border border-[#E7EEF5] bg-[#F8FBFD] px-4 py-2.5 text-[14px] font-medium text-[#0F1728]">
-              Limpar filtros
-            </button>
-            <button
-              onClick={() => setFilters((p) => ({ ...p, sector: "Bancos" }))}
-              className="rounded-[16px] bg-[#0E9384] px-4 py-2.5 text-[14px] font-semibold text-white"
-            >
-              Explorar por setor
-            </button>
-          </div>
+        <div className="rounded-[28px] border border-border bg-card px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
+          <p className="text-[15px] leading-7 text-muted-foreground">Nenhuma empresa encontrada para os filtros</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {filteredCompanies.map((company, index) => {
-            const accentVariant = getCardAccentVariant(index);
+        <>
+          <div className="grid grid-cols-1 gap-5">
+            {filteredCompanies.map((company) => (
+              <CompanyCard
+                key={company.ticker}
+                ticker={company.ticker}
+                companyName={company.name}
+                logoUrl={company.logoUrl ?? getCompanyLogo(company.ticker)}
+                price={company.financials.price}
+                status={company.status}
+                sector={company.sector}
+                metrics={financialsToMetrics(company.financials)}
+                updatedAt={company.updatedAt}
+                isComparing={compareTickers.includes(company.ticker)}
+                isFavorite={favoriteTickers.has(company.ticker)}
+                onToggleCompare={() => toggleCompare(company.ticker)}
+                onToggleFavorite={() => onToggleFavorite(company.ticker)}
+                onAlert={() => {}}
+              />
+            ))}
+          </div>
 
-            return (
-            <article
-              key={company.ticker}
-              className={`group relative flex min-h-[212px] flex-col justify-between overflow-hidden rounded-[22px] border border-[#E7EEF5] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,40,0.08)] ${getCardShellColor(company.status)}`}
-            >
-              <div className={`pointer-events-none absolute inset-x-0 top-0 ${accentVariant.band} ${getCardAccentColor(company.status)} opacity-90`} />
-              <div className={`pointer-events-none absolute ${accentVariant.shape} ${getCardAccentColor(company.status)} opacity-45`} />
-              <div className={`pointer-events-none absolute inset-x-6 top-[86px] h-px ${accentVariant.divider}`} />
-              <div className="relative">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 items-start gap-4">
-                    {(company.logoUrl ?? getCompanyLogo(company.ticker)) && (
-                      <img
-                        src={company.logoUrl ?? getCompanyLogo(company.ticker)}
-                        alt={`Logo ${company.ticker}`}
-                        className="h-12 w-12 rounded-[18px] border border-[#EEF3F7] bg-[#F8FBFD] object-cover p-1"
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <h3 className="truncate text-[20px] font-semibold leading-7 text-[#0F1728]">
-                        {company.name} <span className="text-[#98A2B3]">{company.ticker}</span>
-                      </h3>
-                      <p className="mt-1 text-[13px] font-medium text-[#98A2B3]">{company.sector}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 flex-col items-end gap-2 pt-1">
-                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] ${statusColors[company.status]}`}>
-                      {company.status}
-                    </span>
-                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] ${freshnessColors[company.freshnessStatus]}`}>
-                      {freshnessLabelMap[company.freshnessStatus]}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-[13px] font-semibold text-[#344054]">{company.headline}</p>
-                <p className="mt-1 text-[13px] leading-6 text-[#475467]">{company.shortDiagnosis}</p>
-                {company.whyOpen && (
-                  <p className="mt-2 text-[12px] leading-5 text-[#667085] italic">{company.whyOpen}</p>
-                )}
-
-                <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-full border border-[#D9E8FF] bg-[#EEF6FF] px-3 py-1 text-[11px] font-medium text-[#3965B8]">
-                    Pilar em foco: {company.highlightPillar}
-                  </span>
-                  <span className="inline-flex rounded-full border border-[#EEF3F7] bg-[#F8FBFD] px-3 py-1 text-[11px] font-medium text-[#667085]">
-                    Porte: {company.size}
-                  </span>
-                </div>
-              </div>
-
-              <div className="relative mt-7 flex flex-col gap-4 border-t border-[#EEF3F7] pt-5">
-                <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#98A2B3]">
-                  <span>
-                    Fonte: {company.source} . Atualizado em {company.updatedAt}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href={`/empresa/${company.ticker}`}
-                    className="inline-flex h-11 items-center rounded-[16px] bg-[#0E9384] px-4 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition group-hover:-translate-y-0.5 group-hover:px-5 group-hover:shadow-[0_18px_36px_rgba(14,147,132,0.22)] hover:opacity-90"
-                  >
-                    Abrir análise
-                  </Link>
-                  <Link
-                    href={`/empresa/${company.ticker}`}
-                    className="text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]"
-                  >
-                    Ver pilares
-                  </Link>
-                  <button
-                    onClick={() => toggleCompare(company.ticker)}
-                    className={`text-[13px] font-medium transition ${
-                      compareTickers.includes(company.ticker) ? "text-[#0E9384]" : "text-[#667085] hover:text-[#0F1728]"
-                    }`}
-                  >
-                    Comparar
-                  </button>
-                  <button className="inline-flex items-center gap-1 text-[13px] font-medium text-[#667085] transition hover:text-[#0F1728]">
-                    <Star className="h-3.5 w-3.5" />
-                    Favoritar
-                  </button>
-                </div>
-              </div>
-            </article>
-          )})}
-        </div>
+          {totalPages > 1 && (
+            <PaginationBar page={page} totalPages={totalPages} onGoToPage={goToPage} />
+          )}
+        </>
       )}
     </section>
   );

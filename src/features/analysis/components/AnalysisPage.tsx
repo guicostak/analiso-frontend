@@ -91,6 +91,9 @@ function ScoreBar({ score, max = 6, color }: { score: number; max?: number; colo
 
 function SectionCard({ id, title, subtitle, children, className = '' }: { id?: string; title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
+    <div className={`bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 ${className}`}>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
     <div id={id} className={`bg-white rounded-2xl shadow-sm p-6 scroll-mt-24 ${className}`}>
       <div className="mb-5">
         <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
@@ -2650,6 +2653,10 @@ function OverviewTab({ data, onSelectTab }: { data: AnalysisData; onSelectTab: (
 
   return (
     <div className="space-y-6">
+      {/* Company Header */}
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -2871,6 +2878,22 @@ function ValueTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
+      {/* Dimension Header */}
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.value}15` }}>
+              <DollarSign className="w-5 h-5" style={{ color: COLORS.value }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Valor (Valuation)</h2>
+              <p className="text-sm text-neutral-500">{dim.summary}</p>
+            </div>
+          </div>
+          <ScoreBar score={dim.score} color={COLORS.value} />
+        </div>
+        <CheckList checks={dim.checks} />
+      </div>
       <DimensionIntroCard dimension="value" title="Valuation" icon={<DollarSign className="w-5 h-5" />} color={COLORS.value} />
       <DimensionScoreCard
         label="Valuation"
@@ -2935,6 +2958,21 @@ function FutureTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.future}15` }}>
+              <TrendingUp className="w-5 h-5" style={{ color: COLORS.future }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Crescimento Futuro</h2>
+              <p className="text-sm text-neutral-500">{dim.summary}</p>
+            </div>
+          </div>
+          <ScoreBar score={dim.score} color={COLORS.future} />
+        </div>
+        <CheckList checks={dim.checks} />
+      </div>
       <DimensionIntroCard dimension="future" title="Crescimento Futuro" icon={<TrendingUp className="w-5 h-5" />} color={COLORS.future} />
       <DimensionScoreCard
         label="Crescimento Futuro"
@@ -3034,6 +3072,21 @@ function PastTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.past}15` }}>
+              <BarChart3 className="w-5 h-5" style={{ color: COLORS.past }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Performance Passada</h2>
+              <p className="text-sm text-neutral-500">{dim.summary}</p>
+            </div>
+          </div>
+          <ScoreBar score={dim.score} color={COLORS.past} />
+        </div>
+        <CheckList checks={dim.checks} />
+      </div>
       <DimensionIntroCard dimension="past" title="Performance Passada" icon={<BarChart3 className="w-5 h-5" />} color={COLORS.past} />
       <DimensionScoreCard
         label="Performance Passada"
@@ -3077,6 +3130,35 @@ function PastTab({ data }: { data: AnalysisData }) {
         </SectionCard>
       </div>
 
+      {/* ROCE — Line Chart with confidence band */}
+      <SectionCard title="ROCE — Retorno sobre Capital Empregado" subtitle="data-to-viz: Line Chart com benchmark — connected dots para tendência">
+        <div className="h-64">
+          <TremorLine
+            data={p.roceSeries}
+            index="year"
+            categories={["value"]}
+            colors={["emerald"]}
+            valueFormatter={(v: number) => `${v}%`}
+            showLegend={false}
+            curveType="monotone"
+          />
+        </div>
+      </SectionCard>
+
+      {/* Key Metrics — KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'ROE Atual', value: `${p.currentROE}%`, color: p.currentROE >= 20 ? COLORS.positive : COLORS.negative },
+          { label: 'ROCE Atual', value: `${p.currentROCE}%`, color: p.currentROCE >= 20 ? COLORS.positive : COLORS.health },
+          { label: 'ROA Atual', value: `${p.currentROA}%`, color: p.currentROA >= p.industryROA ? COLORS.positive : COLORS.negative },
+          { label: 'Cresc. LPA 5a', value: `${p.epsGrowth5y}% a.a.`, color: COLORS.past },
+        ].map((m) => (
+          <div key={m.label} className="bg-card rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-center">
+            <div className="text-2xl font-bold" style={{ color: m.color }}>{m.value}</div>
+            <div className="text-xs text-neutral-500 mt-1">{m.label}</div>
+          </div>
+        ))}
+      </div>
       {/* ROCE + KPIs — dentro do mesmo card */}
       <SectionCard id="past-roce" title="ROCE e Indicadores de Retorno" subtitle="Eficiência no uso do capital empregado">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
@@ -3147,6 +3229,21 @@ function HealthTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.health}15` }}>
+              <Shield className="w-5 h-5" style={{ color: COLORS.health }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Saúde Financeira</h2>
+              <p className="text-sm text-neutral-500">{dim.summary}</p>
+            </div>
+          </div>
+          <ScoreBar score={dim.score} color={COLORS.health} />
+        </div>
+        <CheckList checks={dim.checks} />
+      </div>
       <DimensionIntroCard dimension="health" title="Saúde Financeira" icon={<Shield className="w-5 h-5" />} color={COLORS.health} />
       <DimensionScoreCard
         label="Saúde Financeira"
@@ -3265,6 +3362,21 @@ function DividendTab({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${COLORS.dividend}15` }}>
+              <DollarSign className="w-5 h-5" style={{ color: COLORS.dividend }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Dividendos</h2>
+              <p className="text-sm text-neutral-500">{dim.summary}</p>
+            </div>
+          </div>
+          <ScoreBar score={dim.score} color={COLORS.dividend} />
+        </div>
+        <CheckList checks={dim.checks} />
+      </div>
       <DimensionIntroCard dimension="dividend" title="Dividendos" icon={<DollarSign className="w-5 h-5" />} color={COLORS.dividend} />
       <DimensionScoreCard
         label="Dividendos"
@@ -3501,10 +3613,12 @@ export function AnalysisPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top Bar */}
+      <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-700">
+        <div className="max-w-6xl mx-auto px-4 py-3">
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-neutral-400 hover:text-neutral-700 transition-colors">
+            <Link href="/painel" className="text-neutral-400 hover:text-neutral-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
@@ -3528,6 +3642,10 @@ export function AnalysisPage() {
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="sticky top-[57px] z-20 bg-card border-b border-neutral-200 dark:border-neutral-700">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex gap-1 overflow-x-auto py-1 -mb-px">
       {/* Body */}
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6 items-start">
         {/* Left Sidebar — Tab Navigation */}

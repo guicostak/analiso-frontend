@@ -1,10 +1,10 @@
 import { ProtectedRoute } from "@/src/components/layout";
-import { SecurityPage } from "@/src/features/perfil/components";
+import { ProfilePage } from "@/src/features/perfil/components";
 
 export default function PerfilSegurancaPage() {
   return (
     <ProtectedRoute>
-      <SecurityPage />
+      <ProfilePage />
     </ProtectedRoute>
   );
 }

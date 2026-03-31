@@ -167,6 +167,19 @@ export interface AddWatchlistItemsBatchResponse {
 
 // ─── Chamadas HTTP ────────────────────────────────────────────────────────────
 
+/** Resposta vazia quando o pipeline ainda não gerou dados. */
+const EMPTY_WATCHLIST_RESPONSE: WatchlistResponse = {
+  header: null as unknown as WatchlistResponse["header"],
+  stateBlock: null as unknown as WatchlistResponse["stateBlock"],
+  prioritySection: null as unknown as WatchlistResponse["prioritySection"],
+  priorityItems: [],
+  updatesSection: null as unknown as WatchlistResponse["updatesSection"],
+  alertsPanel: null as unknown as WatchlistResponse["alertsPanel"],
+  listSection: null as unknown as WatchlistResponse["listSection"],
+  quickOverview: null as unknown as WatchlistResponse["quickOverview"],
+  sessionClosing: null as unknown as WatchlistResponse["sessionClosing"],
+};
+
 export async function getWatchlist(
   mode: "UPDATES" | "LIST",
   token?: string | null,
@@ -174,7 +187,15 @@ export async function getWatchlist(
 ): Promise<WatchlistResponse> {
   const params = new URLSearchParams({ mode });
   if (date) params.set("date", date);
-  return apiFetch<WatchlistResponse>(`/api/watchlist?${params.toString()}`, {}, token);
+  try {
+    return await apiFetch<WatchlistResponse>(`/api/watchlist?${params.toString()}`, {}, token);
+  } catch (err: unknown) {
+    // Pipeline ainda não rodou — retorna vazio em vez de estourar erro
+    if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "watchlist_not_ready") {
+      return EMPTY_WATCHLIST_RESPONSE;
+    }
+    throw err;
+  }
 }
 
 export async function getUserWatchlist(token?: string | null): Promise<WatchlistItemResponse[]> {

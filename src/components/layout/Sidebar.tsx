@@ -2,112 +2,151 @@
 
 import {
   Bookmark,
-  Building2,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   GitCompare,
   Home,
   LayoutGrid,
-  NotebookPen,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
+import logoImage from "@/src/assets/logos/logo.png";
 import type { ComponentType } from "react";
 import { SidebarPlanCard } from "./SidebarPlanCard";
+import { useSidebar } from "./SidebarContext";
+
+// ─── Tipos e config ────────────────────────────────────────────────────────────
 
 interface SidebarProps {
   currentPage?: string;
-  contextLabel?: string;
 }
 
-type SidebarGroup = {
-  title: string;
-  items: Array<{
-    id: string;
-    label: string;
-    href: string;
-    icon: ComponentType<{ className?: string }>;
-  }>;
-};
+interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: ComponentType<{ className?: string }>;
+}
 
-const sidebarGroups: SidebarGroup[] = [
+type NavGroup = { items: NavItem[] };
+
+const GROUPS: NavGroup[] = [
   {
-    title: "Geral",
     items: [
-      { id: "dashboard", label: "Painel de hoje", href: "/dashboard", icon: Home },
-      { id: "explorar", label: "Explorar mercado", href: "/explorar", icon: Compass },
-      { id: "watchlist", label: "Watchlist", href: "/watchlist", icon: LayoutGrid },
-      { id: "comparar", label: "Comparar empresas", href: "/comparar", icon: GitCompare },
+      { id: "dashboard",  label: "Meu Painel",         href: "/painel",     icon: LayoutGrid },
+      { id: "explorar",   label: "Explorar mercado",  href: "/explorar",   icon: Compass },
+      { id: "favoritas",  label: "Favoritas",          href: "/favoritas",  icon: Bookmark },
+      { id: "comparar",   label: "Comparar empresas", href: "/comparar",   icon: GitCompare },
     ],
   },
   {
-    title: "Apoios",
     items: [
       { id: "agenda", label: "Agenda", href: "#", icon: CalendarDays },
-      { id: "notas", label: "Notas", href: "#", icon: NotebookPen },
-      { id: "empresas", label: "Empresas", href: "#", icon: Building2 },
-      { id: "time", label: "Time", href: "#", icon: Users },
-      { id: "bookmarks", label: "Salvos", href: "#", icon: Bookmark },
     ],
   },
 ];
 
-export function Sidebar({
-  currentPage = "dashboard",
-  contextLabel = "Minha watchlist",
-}: SidebarProps) {
+// ─── Item de navegação ─────────────────────────────────────────────────────────
+
+function NavItemRow({
+  item,
+  isActive,
+  isCollapsed,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  isCollapsed: boolean;
+}) {
+  const Icon = item.icon;
+
+  const inner = (
+    <span
+      title={isCollapsed ? item.label : undefined}
+      className={`group relative flex items-center rounded-[10px] py-2 transition-[background-color,box-shadow] duration-150 ease-[var(--ease-out)]
+        ${isActive
+          ? "bg-brand-surface"
+          : "hover:bg-hover hover:shadow-[0_1px_3px_rgba(0,0,0,0.05)]"}
+        ${isCollapsed ? "justify-center px-2" : "gap-3 px-3"}
+      `}
+    >
+      {isActive && !isCollapsed && (
+        <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
+      )}
+      <span className={`transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"}`}>
+        <Icon className="h-[15px] w-[15px] shrink-0" />
+      </span>
+      {!isCollapsed && (
+        <span className={`text-[12px] transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
+          {item.label}
+        </span>
+      )}
+    </span>
+  );
+
+  if (item.href.startsWith("/")) {
+    return <Link href={item.href}>{inner}</Link>;
+  }
+  return <button className="w-full text-left">{inner}</button>;
+}
+
+// ─── Sidebar ───────────────────────────────────────────────────────────────────
+
+export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
+  const { isCollapsed, toggle } = useSidebar();
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[240px] border-r border-[#EEF2F6] bg-white xl:block">
-      <div className="flex h-full flex-col px-5 py-7">
-        <div className="pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">Contexto</p>
-          <p className="mt-2 text-[15px] font-semibold text-[#171717]">{contextLabel}</p>
+    <aside
+      className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-[var(--ease-out)] xl:block
+        ${isCollapsed ? "w-[64px]" : "w-[240px]"}`}
+    >
+      <div className="flex min-h-full flex-col">
+
+        {/* ── Topo: logo + botão de colapso ── */}
+        <div
+          className={`sticky top-0 z-10 flex h-14 shrink-0 items-center border-b border-sidebar-border bg-sidebar
+            ${isCollapsed ? "justify-center px-0" : "justify-between px-4"}`}
+        >
+          {!isCollapsed && (
+            <img
+              src={logoImage.src}
+              alt="Analiso"
+              className="h-[26px] w-auto"
+              draggable="false"
+            />
+          )}
+          <button
+            onClick={toggle}
+            title={isCollapsed ? "Expandir menu" : "Recolher menu"}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-[background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-hover hover:text-foreground"
+          >
+            {isCollapsed
+              ? <ChevronRight className="h-4 w-4" />
+              : <ChevronLeft className="h-4 w-4" />}
+          </button>
         </div>
 
-        <div className="space-y-8">
-          {sidebarGroups.map((group) => (
-            <div key={group.title}>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B0B0B0]">
-                {group.title}
-              </p>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = item.id === currentPage;
-                  const content = (
-                    <span className="relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14px] transition hover:bg-[#FAFAFA]">
-                      {isActive ? (
-                        <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#12A594]" />
-                      ) : null}
-                      <span className={`${isActive ? "text-[#171717]" : "text-[#8A8A8A]"}`}>
-                        <Icon className="h-[18px] w-[18px]" />
-                      </span>
-                      <span className={isActive ? "font-semibold text-[#171717]" : "font-medium text-[#7A7A7A]"}>
-                        {item.label}
-                      </span>
-                    </span>
-                  );
+        {/* ── Nav ── */}
+        <nav className={`flex-1 py-4 ${isCollapsed ? "px-2" : "px-3"}`}>
+          <div className="flex flex-col gap-0.5">
+            {GROUPS.flatMap((group) => group.items).map((item) => (
+              <NavItemRow
+                key={item.id}
+                item={item}
+                isActive={item.id === currentPage}
+                isCollapsed={isCollapsed}
+              />
+            ))}
+          </div>
+        </nav>
 
-                  if (item.href.startsWith("/")) {
-                    return (
-                      <Link key={item.id} href={item.href}>
-                        {content}
-                      </Link>
-                    );
-                  }
+        {/* ── Plano — sticky no rodapé ── */}
+        {!isCollapsed && (
+          <div className="sticky bottom-0 shrink-0 border-t border-sidebar-border bg-sidebar px-3 py-3">
+            <SidebarPlanCard />
+          </div>
+        )}
 
-                  return (
-                    <button key={item.id} className="w-full text-left">
-                      {content}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <SidebarPlanCard />
       </div>
     </aside>
   );

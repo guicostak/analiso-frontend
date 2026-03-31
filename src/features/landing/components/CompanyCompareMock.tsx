@@ -65,13 +65,13 @@ function trendLabel(trend: CompareTrend) {
 
 export function CompanyCompareMock() {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-[#E2EDF5] bg-[#F7FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
-      <div className="border-b border-[#E2EDF5] bg-white px-6 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#0E9384]">Comparação</p>
+    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-[#F7FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
+      <div className="border-b border-border bg-card px-6 py-4">
+        <p className="text-[10px] font-semibold uppercase text-brand">Comparação</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
-            <h3 className="text-[20px] font-semibold text-[#0F1728]">Compare empresas com veredito antes do detalhe</h3>
-            <p className="mt-1 text-[13px] text-[#667085]">
+            <h3 className="text-[20px] font-semibold text-foreground">Compare empresas com veredito antes do detalhe</h3>
+            <p className="mt-1 text-[13px] text-muted-foreground">
               Veja quem está melhor hoje, onde está a maior diferença e qual ponto merece leitura mais cuidadosa.
             </p>
           </div>
@@ -86,31 +86,31 @@ export function CompanyCompareMock() {
 
       <div className="flex-1 overflow-y-auto p-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="space-y-5">
-          <section className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+          <section className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3 rounded-[18px] border border-[#DDF6F0] bg-[#F6FEFB] px-4 py-3">
                   <img src={pair.a.logo} alt={pair.a.ticker} className="h-10 w-10 rounded-full object-cover" />
                   <div>
-                    <p className="text-[12px] font-medium text-[#667085]">{pair.a.ticker}</p>
-                    <p className="text-[14px] font-semibold text-[#0F1728]">{pair.a.name}</p>
+                    <p className="text-[12px] font-medium text-muted-foreground">{pair.a.ticker}</p>
+                    <p className="text-[14px] font-semibold text-foreground">{pair.a.name}</p>
                   </div>
                 </div>
-                <div className="text-[13px] font-medium text-[#98A2B3]">vs</div>
+                <div className="text-[13px] font-medium text-muted-foreground">vs</div>
                 <div className="flex items-center gap-3 rounded-[18px] border border-[#D9E8FF] bg-[#F8FBFF] px-4 py-3">
                   <img src={pair.b.logo} alt={pair.b.ticker} className="h-10 w-10 rounded-full object-cover" />
                   <div>
-                    <p className="text-[12px] font-medium text-[#667085]">{pair.b.ticker}</p>
-                    <p className="text-[14px] font-semibold text-[#0F1728]">{pair.b.name}</p>
+                    <p className="text-[12px] font-medium text-muted-foreground">{pair.b.ticker}</p>
+                    <p className="text-[14px] font-semibold text-foreground">{pair.b.name}</p>
                   </div>
                 </div>
               </div>
-              <span className="text-[12px] font-medium text-[#98A2B3]">Atualizado em {pair.a.updatedAt}</span>
+              <span className="text-[12px] font-medium text-muted-foreground">Atualizado em {pair.a.updatedAt}</span>
             </div>
 
-            <div className="mt-4 rounded-[20px] border border-[#E7EEF5] bg-[linear-gradient(135deg,#F3FAF8_0%,#FFFFFF_100%)] p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0E9384]">Veredito</p>
-              <h4 className="mt-1 text-[22px] font-semibold leading-[1.18] text-[#0F1728]">
+            <div className="mt-4 rounded-[20px] border border-border bg-[linear-gradient(135deg,#F3FAF8_0%,#FFFFFF_100%)] p-5">
+              <p className="text-[11px] font-semibold uppercase text-brand">Veredito</p>
+              <h4 className="mt-1 text-[22px] font-semibold leading-[1.18] text-foreground">
                 WEGE3 aparece melhor hoje, com vantagem mais clara em margens, retorno e dívida.
               </h4>
               <p className="mt-2 max-w-[72ch] text-[13px] leading-6 text-[#526070]">
@@ -119,22 +119,22 @@ export function CompanyCompareMock() {
             </div>
           </section>
 
-          <section className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+          <section className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Placar dos pilares</p>
-                <h4 className="mt-1 text-[16px] font-semibold text-[#0F1728]">Onde está a maior diferença</h4>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Placar dos pilares</p>
+                <h4 className="mt-1 text-[16px] font-semibold text-foreground">Onde está a maior diferença</h4>
               </div>
-              <span className="rounded-full border border-[#E7EEF5] bg-white px-3 py-1.5 text-[11px] font-medium text-[#667085]">
+              <span className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
                 4 pilares comparados
               </span>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-4">
               {pillarDiffs.map((item) => (
-                <article key={item.pillar} className="rounded-[20px] border border-[#E7EEF5] bg-[#FCFDFE] p-4">
+                <article key={item.pillar} className="rounded-[20px] border border-border bg-card p-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-[14px] font-semibold text-[#0F1728]">{item.pillar}</p>
+                    <p className="text-[14px] font-semibold text-foreground">{item.pillar}</p>
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
                       item.winner === pair.a.ticker
                         ? "border-[#DDF6F0] bg-[#EFFAF6] text-[#0F8C7D]"
@@ -144,12 +144,12 @@ export function CompanyCompareMock() {
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="flex-1 rounded-[16px] border border-[#E7EEF5] bg-white px-3 py-2">
-                      <p className="text-[11px] text-[#667085]">{pair.a.ticker}</p>
+                    <div className="flex-1 rounded-[16px] border border-border bg-card px-3 py-2">
+                      <p className="text-[11px] text-muted-foreground">{pair.a.ticker}</p>
                       <p className="mt-1 text-[17px] font-semibold text-[#12A594]">{item.a.toFixed(1)}</p>
                     </div>
-                    <div className="flex-1 rounded-[16px] border border-[#E7EEF5] bg-white px-3 py-2">
-                      <p className="text-[11px] text-[#667085]">{pair.b.ticker}</p>
+                    <div className="flex-1 rounded-[16px] border border-border bg-card px-3 py-2">
+                      <p className="text-[11px] text-muted-foreground">{pair.b.ticker}</p>
                       <p className="mt-1 text-[17px] font-semibold text-[#5B8DEF]">{item.b.toFixed(1)}</p>
                     </div>
                   </div>
@@ -158,23 +158,23 @@ export function CompanyCompareMock() {
             </div>
           </section>
 
-          <section className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+          <section className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Métricas comparadas</p>
-              <h4 className="mt-1 text-[16px] font-semibold text-[#0F1728]">Leitura guiada das diferenças</h4>
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Métricas comparadas</p>
+              <h4 className="mt-1 text-[16px] font-semibold text-foreground">Leitura guiada das diferenças</h4>
             </div>
 
             <div className="mt-4 space-y-4">
               {metricRows.map((row) => (
-                <article key={row.name} className="rounded-[20px] border border-[#E7EEF5] bg-[#FCFDFE] p-4">
+                <article key={row.name} className="rounded-[20px] border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[15px] font-semibold text-[#0F1728]">{row.name}</p>
-                      <p className="mt-1 max-w-[70ch] text-[13px] leading-6 text-[#667085]">{row.definition}</p>
+                      <p className="text-[15px] font-semibold text-foreground">{row.name}</p>
+                      <p className="mt-1 max-w-[70ch] text-[13px] leading-6 text-muted-foreground">{row.definition}</p>
                     </div>
                     <button
                       type="button"
-                      className="rounded-full border border-[#E7EEF5] bg-white px-3 py-1.5 text-[11px] font-medium text-[#667085]"
+                      className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground"
                     >
                       Fonte
                     </button>
@@ -182,27 +182,27 @@ export function CompanyCompareMock() {
 
                   <div className="mt-4 grid grid-cols-[1fr_1fr_auto] gap-3">
                     <div className={`rounded-[18px] border p-4 ${
-                      row.winner === "a" ? "border-[#DDF6F0] bg-[#F6FEFB]" : "border-[#E7EEF5] bg-white"
+                      row.winner === "a" ? "border-[#DDF6F0] bg-[#F6FEFB]" : "border-border bg-card"
                     }`}>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">{pair.a.ticker}</p>
-                      <p className="mt-2 text-[20px] font-semibold text-[#0F1728]">{row.aValue}</p>
-                      <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-[#667085]">
+                      <p className="text-[11px] font-semibold uppercase text-muted-foreground">{pair.a.ticker}</p>
+                      <p className="mt-2 text-[20px] font-semibold text-foreground">{row.aValue}</p>
+                      <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                         {trendIcon(row.aTrend)}
                         {trendLabel(row.aTrend)}
                       </p>
                     </div>
                     <div className={`rounded-[18px] border p-4 ${
-                      row.winner === "b" ? "border-[#D9E8FF] bg-[#F8FBFF]" : "border-[#E7EEF5] bg-white"
+                      row.winner === "b" ? "border-[#D9E8FF] bg-[#F8FBFF]" : "border-border bg-card"
                     }`}>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">{pair.b.ticker}</p>
-                      <p className="mt-2 text-[20px] font-semibold text-[#0F1728]">{row.bValue}</p>
-                      <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-[#667085]">
+                      <p className="text-[11px] font-semibold uppercase text-muted-foreground">{pair.b.ticker}</p>
+                      <p className="mt-2 text-[20px] font-semibold text-foreground">{row.bValue}</p>
+                      <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                         {trendIcon(row.bTrend)}
                         {trendLabel(row.bTrend)}
                       </p>
                     </div>
                     <div className="flex items-center">
-                      <div className="rounded-[16px] border border-[#E7EEF5] bg-white px-3 py-2 text-[11px] font-medium text-[#667085]">
+                      <div className="rounded-[16px] border border-border bg-card px-3 py-2 text-[11px] font-medium text-muted-foreground">
                         {row.insight}
                       </div>
                     </div>
@@ -213,8 +213,8 @@ export function CompanyCompareMock() {
           </section>
 
           <section className="rounded-[24px] border border-[#DDF6F0] bg-[linear-gradient(135deg,#F3FAF8_0%,#FFFFFF_100%)] p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0E9384]">Fechar a leitura</p>
-            <h4 className="mt-1 text-[16px] font-semibold text-[#0F1728]">Transforme a comparação em próximo passo útil</h4>
+            <p className="text-[11px] font-semibold uppercase text-brand">Fechar a leitura</p>
+            <h4 className="mt-1 text-[16px] font-semibold text-foreground">Transforme a comparação em próximo passo útil</h4>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 type="button"
@@ -224,7 +224,7 @@ export function CompanyCompareMock() {
               </button>
               <button
                 type="button"
-                className="rounded-[16px] border border-[#D7F3ED] bg-white px-4 py-2 text-[13px] font-medium text-[#0F1728]"
+                className="rounded-[16px] border border-[#D7F3ED] bg-card px-4 py-2 text-[13px] font-medium text-foreground"
               >
                 Criar alerta da principal diferença
               </button>

@@ -1,4 +1,9 @@
 export { CompanyRow } from "./company-row";
+export { CompanyCard } from "./CompanyCard";
+export type { CompanyCardProps } from "./CompanyCard";
+export { SearchAutocomplete } from "./SearchAutocomplete";
+export type { SuggestResult } from "./SearchAutocomplete";
+export { PaginationBar } from "./PaginationBar";
 export { PreviewPanel } from "./preview-panel";
 export { MiniSparkline } from "./MiniSparkline";
 export { MiniRadar } from "./MiniRadar";

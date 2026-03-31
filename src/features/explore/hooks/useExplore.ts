@@ -155,19 +155,11 @@ export function useExplore(): UseExploreReturn {
   const [showVolatilityDetails, setShowVolatilityDetails] = useState(false);
   const [showContextPanel,      setShowContextPanel]      = useState(false);
   const [filters,               setFilters]               = useState<Filters>(DEFAULT_FILTERS);
+  const isLoading = false; // pronto para ligar quando vier API
 
-  const { token } = useAuth();
-  const [isLoading,    setIsLoading]    = useState(false);
-  const [exploreData,  setExploreData]  = useState<ExploreResponse | null>(null);
-
-  useEffect(() => {
-    if (!token) return;
-    setIsLoading(true);
-    getExplore(token)
-      .then(setExploreData)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [token]);
+  // Dados da API (null até haver chamada HTTP real)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const exploreData = null as ExploreResponse | null;
 
   // ─── Dados derivados ───────────────────────────────────────────────────────
 

@@ -5,14 +5,16 @@ export interface SubscriptionFeature {
   included: boolean;
 }
 
+export interface PlanPricing {
+  billingCycle: string;  // "mensal" | "anual"
+  price: number;         // centavos (ex: 3900 = R$ 39)
+}
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  monthlyInstallments: string;
-  price: string;
-  period: string;
-  badge?: string;
-  highlighted?: boolean;
-  featuresTitle: string;
+  badge?: string | null;
+  highlighted: boolean;
+  pricing: PlanPricing[];
   features: SubscriptionFeature[];
 }

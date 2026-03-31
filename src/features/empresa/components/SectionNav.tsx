@@ -45,7 +45,7 @@ export function SectionNav({ sections }: SectionNavProps) {
   };
 
   return (
-    <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-lg border-b border-neutral-200">
+    <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-[1600px] mx-auto px-8">
         <nav className="flex items-center gap-1 py-3 overflow-x-auto">
           {sections.map((section) => (
@@ -55,7 +55,7 @@ export function SectionNav({ sections }: SectionNavProps) {
               className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeSection === section.id
                   ? 'text-mint-700'
-                  : 'text-neutral-600 hover:text-neutral-900'
+                  : 'text-dim hover:text-foreground'
               }`}
             >
               {section.label}

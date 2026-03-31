@@ -525,9 +525,25 @@ type CompanyData = {
  };
  sourceRows: Array<Contextual<(typeof sourceRows)[number]> & { displaySource?: string; displayDoc?: string; displayStatus?: string }>;
  sourceConfidence?: { title?: string; level?: string; summary?: string };
- changesSummaryByWindow?: Record<string, Record<string, unknown>>;
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- changesSummary?: any;
+ changesSummaryByWindow?: Record<string, ChangesSummaryEntry>;
+ changesSummary?: ChangesSummaryEntry;
+};
+
+type ChangesSummaryEntry = {
+ windowDays?: number;
+ summaryText?: string;
+ mostAffectedPillar?: string;
+ structuralCount?: number;
+ relevantCount?: number;
+ routineCount?: number;
+ isWindowFallback?: boolean;
+ principalChange?: {
+  title?: string;
+  type?: string;
+  impact?: string;
+  pillar?: string;
+  whyItMatters?: string;
+ };
 };
 
 type TabPayload =
@@ -1701,9 +1717,9 @@ async function fetchCompanyData(companyId: string, ticker: string): Promise<Comp
 }
 
 const statusTone = {
- Risco: { dot: 'bg-[#DC2626]', badge: 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' },
- Atencao: { dot: 'bg-[#D97706]', badge: 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' },
- Saudavel: { dot: 'bg-[#0E9384]', badge: 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' },
+ Risco: { dot: 'bg-danger-text', badge: 'border-danger-border bg-danger-surface text-danger-text' },
+ Atencao: { dot: 'bg-warning-text', badge: 'border-warning-border bg-warning-surface text-warning-text' },
+ Saudavel: { dot: 'bg-brand', badge: 'border-brand-border bg-brand-surface text-brand' },
 } as const;
 
 const pillarOrder: PillarName[] = ['Divida', 'Caixa', 'Margens', 'Retorno', 'Proventos'];
@@ -1731,22 +1747,22 @@ type PillarMapDatum = {
 
 const pillarMapStatusTone: Record<PillarMapStatus, { stroke: string; fill: string; label: string; chip: string }> = {
  risco: {
- stroke: '#D9735E',
- fill: '#D9735E',
+ stroke: 'var(--danger-text)',
+ fill: 'var(--danger-text)',
  label: 'Risco',
- chip: 'border-[#F7C9C0] bg-[#FFF5F3] text-[#B54935]',
+ chip: 'border-danger-border bg-danger-surface text-danger-text',
  },
  atencao: {
- stroke: '#C78D21',
- fill: '#C78D21',
+ stroke: 'var(--warning-text)',
+ fill: 'var(--warning-text)',
  label: 'Atenção',
- chip: 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]',
+ chip: 'border-warning-border bg-warning-surface text-warning-text',
  },
  saudavel: {
- stroke: '#168E7D',
- fill: '#168E7D',
+ stroke: 'var(--brand)',
+ fill: 'var(--brand)',
  label: 'Saudável',
- chip: 'border-[#AEE3D8] bg-[#F1FCF9] text-[#0E9384]',
+ chip: 'border-brand-border bg-brand-surface text-brand',
  },
 };
 
@@ -1791,6 +1807,16 @@ function hexToRgba(hex: string, alpha: number) {
  return `rgba(${r},${g},${b},${alpha})`;
 }
 
+function QueueLogo({ company }: { company: CompanyQueueItem }) {
+ if (company.logo) {
+ return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-border object-cover" />;
+ }
+ return (
+ <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand text-xs font-semibold text-white">
+ {company.initials}
+ </div>
+ );
+}
 
 function PillarMapTooltip({ datum }: { datum: PillarMapDatum }) {
  const tone = pillarMapStatusTone[datum.status];
@@ -1799,11 +1825,11 @@ function PillarMapTooltip({ datum }: { datum: PillarMapDatum }) {
  const deltaText = hasDelta ? `${deltaArrow} ${Math.abs(datum.delta!)} vs trimestre anterior` : null;
 
  return (
- <div className="max-w-[240px] rounded-xl border border-[#E2EDF5] bg-white p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
- <p className="text-[13px] font-semibold text-[#111827]">{datum.pillarLabel}</p>
- <p className="mt-1 text-[15px] font-semibold" style={{ color: '#1F2937' }}>{datum.score}/100 {tone.label}</p>
- {deltaText && <p className="mt-1 text-[12px] text-[#4B5563]">{deltaText}</p>}
- {datum.reason && <p className="mt-1 text-[12px] text-[#6B7280]">{datum.reason}</p>}
+ <div className="max-w-[240px] rounded-xl border border-border bg-card p-3.5 shadow-[0_10px_22px_-18px_rgba(2,6,23,0.7)]">
+ <p className="text-[13px] font-semibold text-foreground">{datum.pillarLabel}</p>
+ <p className="mt-1 text-[15px] font-semibold text-foreground">{datum.score}/100 {tone.label}</p>
+ {deltaText && <p className="mt-1 text-[12px] text-dim">{deltaText}</p>}
+ {datum.reason && <p className="mt-1 text-[12px] text-muted-foreground">{datum.reason}</p>}
  </div>
  );
 }
@@ -1835,13 +1861,13 @@ function PillarMap({
    onMouseLeave={() => setActivePillar(null)}
    className={cx(
    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150',
-   isActive ? 'ring-1 ring-[#C8EDE6]' : '',
+   isActive ? 'ring-1 ring-brand-border' : '',
    )}
-   style={{ background: isActive ? '#F4FBFA' : 'transparent' }}
+   style={{ background: isActive ? 'var(--brand-surface)' : 'transparent' }}
   >
    <div
    className="h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center"
-   style={{ backgroundColor: `${tone.stroke}1A` }}
+   style={{ backgroundColor: `color-mix(in srgb, ${tone.stroke} 10%, transparent)` }}
    >
    <span className="text-[13px] font-bold tabular-nums" style={{ color: tone.stroke }}>
     {entry.score}
@@ -1849,10 +1875,10 @@ function PillarMap({
    </div>
    <div className="flex-1 min-w-0">
    <div className="flex items-center justify-between gap-2 mb-1.5">
-    <span className="text-[12px] font-semibold text-[#1F2937]">{entry.pillarLabel}</span>
+    <span className="text-[12px] font-semibold text-foreground">{entry.pillarLabel}</span>
     <div className="flex items-center gap-1.5">
     {hasDelta && (
-     <span className={cx('text-[10px] font-medium tabular-nums', deltaPositive ? 'text-[#0E9384]' : deltaNegative ? 'text-[#DC2626]' : 'text-[#9CA3AF]')}>
+     <span className={cx('text-[10px] font-medium tabular-nums', deltaPositive ? 'text-brand' : deltaNegative ? 'text-danger-text' : 'text-muted-foreground')}>
      {deltaPositive ? '+' : ''}{entry.delta!.toFixed(0)}
      </span>
     )}
@@ -1861,7 +1887,7 @@ function PillarMap({
     </span>
     </div>
    </div>
-   <div className="h-1 w-full rounded-full bg-[#EEF2F6] overflow-hidden">
+   <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
     <div
     className="h-full rounded-full transition-all duration-500"
     style={{ width: `${entry.score}%`, backgroundColor: tone.stroke, opacity: isActive ? 1 : 0.6 }}
@@ -1901,9 +1927,9 @@ function MiniLineChart({
  const min = Math.min(...values);
  const max = Math.max(...values);
  const span = max - min || 1;
- const strokeColor = tone === 'teal' ? '#0E9384' : '#D97706';
- const fillColor = tone === 'teal' ? '#0E938420' : '#D9770618';
- const refLineColor = tone === 'teal' ? '#0E9384' : '#D97706';
+ const strokeColor = tone === 'teal' ? 'var(--brand)' : 'var(--warning-text)';
+ const fillColor = tone === 'teal' ? 'color-mix(in srgb, var(--brand) 12%, transparent)' : 'color-mix(in srgb, var(--warning-text) 10%, transparent)';
+ const refLineColor = tone === 'teal' ? 'var(--brand)' : 'var(--warning-text)';
 
  const toX = (index: number) => paddingX + (index * (width - paddingX * 2)) / Math.max(values.length - 1, 1);
  const toY = (value: number) => paddingTop + chartH - ((value - min) / span) * chartH;
@@ -1981,11 +2007,11 @@ function MiniLineChart({
   )}
  </svg>
  {isAboveReference !== null && (
-  <p className={cx('text-[10px] font-medium', isAboveReference ? 'text-[#0E9384]' : 'text-[#B45309]')}>
+  <p className={cx('text-[10px] font-medium', isAboveReference ? 'text-brand' : 'text-warning-text')}>
   {isAboveReference ? '↑ Acima da referência histórica' : '↓ Abaixo da referência histórica'}
   </p>
  )}
- <div className="flex items-center justify-between text-[10px] text-[#B0BAC8]">
+ <div className="flex items-center justify-between text-[10px] text-muted-foreground">
   {labels.map((label) => (
   <span key={label}>{label}</span>
   ))}
@@ -2220,7 +2246,7 @@ function median(values: number[]) {
 }
 
 function SkeletonBlock({ className }: { className: string }) {
- return <div className={cx('rounded-md bg-[#F6FAFC] skeleton-shimmer', className)} />;
+ return <div className={cx('rounded-md bg-muted skeleton-shimmer', className)} />;
 }
 
 export function CompanyAnalysis() {
@@ -2395,12 +2421,12 @@ export function CompanyAnalysis() {
  const valuationStateChipLabel = safeMeta(activeData?.priceData.valuationStateChip?.label);
  const valuationStateChipToneRaw = safeMeta(activeData?.priceData.valuationStateChip?.tone).toLowerCase();
  const valuationStateChipTone = valuationStateChipToneRaw.includes('coral')
- ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]'
+ ? 'border-danger-border bg-danger-surface text-danger-text'
  : valuationStateChipToneRaw.includes('amber')
- ? 'border-[#F6DEA9] bg-[#FFFBEB] text-[#D97706]'
+ ? 'border-warning-border bg-warning-surface text-warning-text'
  : valuationStateChipToneRaw.includes('teal')
- ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0F766E]'
- : 'border-[#E2EDF5] bg-[#F8FAFC] text-[#475569]';
+ ? 'border-brand-border bg-brand-surface text-brand-text'
+ : 'border-border bg-background text-dim';
 const valuationSummaryLine = (activeData?.priceData.valuationSummary ?? activeData?.priceData.summary ?? '').trim();
 const valuationScenarios = (activeData?.priceData.valuationScenarios ?? []).filter((scenario) => scenario.scenario || scenario.estimatedValue || scenario.differenceVsCurrent || scenario.reading);
 const sensitivityDrivers = (activeData?.priceData.sensitivityDrivers ?? []).filter((driver) => driver.driver || driver.value || driver.impact);
@@ -2465,10 +2491,10 @@ const valuationBullet = activeData?.priceData.bulletChart ?? null;
  ? (outdatedComplementarySources > 0 ? 'Alta no núcleo da leitura' : 'Alta')
  : 'Em revisão';
  const sourceConfidenceTone = sourceConfidenceLabel === 'Alta'
- ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]'
+ ? 'border-brand-border bg-brand-surface text-brand'
  : sourceConfidenceLabel === 'Moderada'
- ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]'
- : 'border-[#E2EDF5] bg-[#F6FAFC] text-[#64748B]';
+ ? 'border-warning-border bg-warning-surface text-warning-text'
+ : 'border-border bg-muted text-muted-foreground';
  const sourceConfidenceSummary = outdatedPrimarySources > 0
  ? `A leitura atual tem ${outdatedPrimarySources} fonte principal desatualizada e pede cautela em parte do diagnóstico.`
  : `A leitura atual está apoiada em fontes principais atualizadas. ${outdatedComplementarySources > 0 ? `Há ${outdatedComplementarySources} fonte complementar mais antiga, sem comprometer a leitura central neste momento.` : 'Não há alerta de desatualização relevante no conjunto principal.'}`;
@@ -2813,29 +2839,29 @@ const changesCount = changesBySelectedWindow.length;
  };
 
  const renderChangeCard = (change: (typeof enrichedChanges)[number], nested = false) => (
- <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
+ <article key={`${change.type}-${change.date}-${change.title}`} className={cx('rounded-2xl border bg-card shadow-sm', nested ? 'border-border' : 'border-border')}>
   <div className="p-4">
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{change.pillar}</span>
-    <span className="text-[#D1D5DB]">·</span>
-    <span className="text-[#94A3B8]">{change.date}</span>
-    <span className="text-[#D1D5DB]">·</span>
-    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : change.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+    <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 font-medium text-dim">{change.pillar}</span>
+    <span className="text-border-strong">·</span>
+    <span className="text-muted-foreground">{change.date}</span>
+    <span className="text-border-strong">·</span>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-danger-border bg-danger-surface text-danger-text' : change.level === 'Relevante' ? 'border border-warning-border bg-warning-surface text-warning-text' : 'border border-brand-border bg-brand-surface text-brand')}>
      {change.severityLabel}
     </span>
    </div>
-   <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{change.title}</h3>
-   <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{change.interpretation}</p>
-   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
-    <p className="mt-1 text-[13px] text-[#475569]">{change.whyItMatters}</p>
+   <h3 className="mt-2 text-[15px] font-semibold text-foreground">{change.title}</h3>
+   <p className="mt-2 text-[13px] leading-relaxed text-foreground">{change.interpretation}</p>
+   <div className="mt-3 rounded-xl border border-border bg-muted px-3 py-2.5">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Por que isso importa</p>
+    <p className="mt-1 text-[13px] text-dim">{change.whyItMatters}</p>
    </div>
-   <p className="mt-3 text-[11px] text-[#B0BAC8]">
+   <p className="mt-3 text-[11px] text-muted-foreground">
     Fonte: {safeMeta(change.source.docLabel)} · {safeMeta(change.date)} · Atualizado
    </p>
    <div className="mt-3 flex flex-wrap items-center gap-2">
     <button
-     className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     className={cx('rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
      disabled={actionsDisabled}
      onClick={(event) => {
       if (guardAction(event, change.companyId)) return;
@@ -2851,7 +2877,7 @@ const changesCount = changesBySelectedWindow.length;
      onClick={(event) => {
       if (guardAction(event, change.companyId)) return;
      }}
-     className={cx('inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     className={cx('inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
     >
      Abrir documento original
      <ExternalLink className="h-3.5 w-3.5" />
@@ -2862,29 +2888,29 @@ const changesCount = changesBySelectedWindow.length;
  );
 
  const renderAgendaEventCard = (timelineEvent: (typeof enrichedTimelineEvents)[number], nested = false) => (
- <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-2xl border bg-white shadow-sm', nested ? 'border-[#E2EDF5]' : 'border-[#E2EDF5]')}>
+ <article key={`${timelineEvent.title}-${timelineEvent.date}-${timelineEvent.mainPillar}`} className={cx('rounded-2xl border bg-card shadow-sm', nested ? 'border-border' : 'border-border')}>
   <div className="p-4">
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-    <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-0.5 font-medium text-[#4B5563]">{timelineEvent.mainPillar}</span>
-    <span className="text-[#D1D5DB]">·</span>
-    <span className="text-[#94A3B8]">{timelineEvent.date}</span>
-    <span className="text-[#D1D5DB]">·</span>
-    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : timelineEvent.level === 'Relevante' ? 'border border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+    <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 font-medium text-dim">{timelineEvent.mainPillar}</span>
+    <span className="text-border-strong">·</span>
+    <span className="text-muted-foreground">{timelineEvent.date}</span>
+    <span className="text-border-strong">·</span>
+    <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-danger-border bg-danger-surface text-danger-text' : timelineEvent.level === 'Relevante' ? 'border border-warning-border bg-warning-surface text-warning-text' : 'border border-brand-border bg-brand-surface text-brand')}>
      {timelineEvent.severityLabel}
     </span>
    </div>
-   <h3 className="mt-2 text-[15px] font-semibold text-[#111827]">{timelineEvent.title}</h3>
-   <p className="mt-2 text-[13px] leading-relaxed text-[#374151]">{timelineEvent.interpretation}</p>
-   <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5">
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Por que isso importa</p>
-    <p className="mt-1 text-[13px] text-[#475569]">{timelineEvent.whyItMatters}</p>
+   <h3 className="mt-2 text-[15px] font-semibold text-foreground">{timelineEvent.title}</h3>
+   <p className="mt-2 text-[13px] leading-relaxed text-foreground">{timelineEvent.interpretation}</p>
+   <div className="mt-3 rounded-xl border border-border bg-muted px-3 py-2.5">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Por que isso importa</p>
+    <p className="mt-1 text-[13px] text-dim">{timelineEvent.whyItMatters}</p>
    </div>
-   <p className="mt-3 text-[11px] text-[#B0BAC8]">
+   <p className="mt-3 text-[11px] text-muted-foreground">
     Fonte: {safeMeta(timelineEvent.source)} · {safeMeta(timelineEvent.date)} · Monitorado
    </p>
    <div className="mt-3 flex flex-wrap items-center gap-2">
     <button
-     className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     className={cx('rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
      disabled={actionsDisabled}
      onClick={(event) => {
       if (guardAction(event, timelineEvent.companyId)) return;
@@ -2894,7 +2920,7 @@ const changesCount = changesBySelectedWindow.length;
      Ver impacto no pilar
     </button>
     <button
-     className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3 py-1.5 text-[12px] font-medium text-[#374151] hover:bg-[#F6FAFC]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+     className={cx('rounded-xl border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
      disabled={actionsDisabled}
      onClick={(event) => guardAction(event, timelineEvent.companyId)}
     >
@@ -2908,7 +2934,7 @@ const changesCount = changesBySelectedWindow.length;
     onClick={(event) => {
      if (guardAction(event, timelineEvent.companyId)) return;
     }}
-    className={cx('mt-3 inline-flex items-center gap-1 text-[12px] text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+    className={cx('mt-3 inline-flex items-center gap-1 text-[12px] text-brand hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
    >
     Abrir documento original
     <ExternalLink className="h-3.5 w-3.5" />
@@ -2985,10 +3011,10 @@ const changesCount = changesBySelectedWindow.length;
  }, [activeTab, changesWindow, companyContext.companyId, eventsWindow, expandedPillars]);
 
  return (
- <div className="h-screen overflow-hidden bg-[#F6FAFC] font-['Plus_Jakarta_Sans','DM_Sans',system-ui,sans-serif] text-[#111827]">
+ <div className="h-screen overflow-hidden bg-muted font-['Plus_Jakarta_Sans','DM_Sans',system-ui,sans-serif] text-foreground">
  <style>{`
  .skeleton-shimmer {
- background-image: linear-gradient(90deg, #EEF2F6 0%, #E4EBF2 40%, #EEF2F6 80%);
+ background-image: linear-gradient(90deg, var(--muted) 0%, var(--border) 40%, var(--muted) 80%);
  background-size: 200% 100%;
  animation: shimmer 1.5s linear infinite;
  }
@@ -2999,13 +3025,91 @@ const changesCount = changesBySelectedWindow.length;
  `}</style>
  <div className="relative flex h-full">
  <div className="hidden w-[240px] flex-shrink-0 xl:block">
- <Sidebar currentPage="explorar" contextLabel="Explorar mercado" />
+ <Sidebar currentPage="explorar" />
  </div>
 
- <main className="h-full flex-1 overflow-y-auto bg-[#F6FAFC]">
- <header className="sticky top-0 z-10 border-b border-[#EAF0F6] bg-white shadow-[0_1px_6px_-2px_rgba(2,6,23,0.05)]">
+ <aside
+ className={cx(
+ 'relative h-full flex-shrink-0 overflow-hidden bg-card transition-all duration-200',
+ watchlistCollapsed ? 'w-0 border-r-0 p-0' : 'w-[228px] border-r border-border p-3.5'
+ )}
+ >
+ {!watchlistCollapsed && (
+ <button
+ className="absolute -right-3 top-1/2 z-20 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:bg-muted"
+ onClick={() => setWatchlistCollapsed(true)}
+ aria-label="Retrair watchlist"
+ title="Retrair watchlist"
+ >
+ <ChevronLeft className="h-4 w-4 transition-transform" />
+ </button>
+ )}
+ {!watchlistCollapsed && (
+ <div className="flex items-center justify-between">
+ <h2 className="text-[14px] font-semibold text-foreground">Watchlist</h2>
+ <div className="flex items-center gap-2">
+ <Search className="h-4 w-4 text-muted-foreground" />
+ </div>
+ </div>
+ )}
+ {!watchlistCollapsed && (
+ <div className="mt-3 flex items-center gap-1.5">
+ {(['Todas', 'Atencao', 'Risco'] as QueueFilter[]).map((filter) => (
+ <button
+ key={filter}
+ onClick={() => setQueueFilter(filter)}
+ className={cx(
+ 'h-7 rounded-full px-3.5 text-[13px]',
+ queueFilter === filter ? 'border border-border bg-card font-semibold text-foreground' : 'text-muted-foreground'
+ )}
+ >
+ {filter === 'Atencao' ? 'Atenção' : filter}
+ </button>
+ ))}
+ </div>
+ )}
+ {!watchlistCollapsed && (
+ <div className="mt-4 divide-y divide-border">
+ {filteredQueue.map((company) => {
+ const selected = company.companyId === companyContext.companyId;
+ return (
+ <button
+ key={company.ticker}
+ onClick={() => switchCompany(company.ticker)}
+ className={cx(
+ 'group flex w-full items-center gap-2.5 text-left',
+ selected ? 'rounded-[10px] border border-brand-border bg-brand-surface p-2.5' : 'px-2 py-2.5'
+ )}
+ >
+ <QueueLogo company={company} />
+ <div className="min-w-0 flex-1">
+ <p className="truncate text-[13px] font-bold text-foreground">{company.ticker}</p>
+ <p className="truncate text-[11px] text-muted-foreground">{company.name}</p>
+ </div>
+ <span className={cx('h-[7px] w-[7px] rounded-full', statusTone[company.status].dot)} />
+ <MoreHorizontal className={cx('h-3.5 w-3.5 text-muted-foreground transition-opacity', selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')} />
+ </button>
+ );
+ })}
+ </div>
+ )}
+ </aside>
+
+ {watchlistCollapsed && (
+ <button
+ className="absolute left-0 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-border-strong bg-card text-muted-foreground shadow-sm hover:bg-muted xl:grid xl:left-[240px]"
+ onClick={() => setWatchlistCollapsed(false)}
+ aria-label="Expandir watchlist"
+ title="Expandir watchlist"
+ >
+ <ChevronLeft className="h-4 w-4 rotate-180 transition-transform" />
+ </button>
+ )}
+
+ <main className="h-full flex-1 overflow-y-auto bg-muted">
+ <header className="sticky top-0 z-10 border-b border-border bg-card shadow-[0_1px_6px_-2px_rgba(2,6,23,0.05)]">
  {/* Hero strip */}
- <div className="px-6 pt-4 pb-3" style={{ background: 'linear-gradient(160deg, #F8FBFF 0%, #FFFFFF 60%)' }}>
+ <div className="px-6 pt-4 pb-3" style={{ background: 'linear-gradient(160deg, var(--muted) 0%, var(--card) 60%)' }}>
  <div className="flex min-w-0 items-start justify-between gap-4">
  <div className="flex min-w-0 items-start gap-3.5">
  {activeData?.logoUrl
@@ -3016,28 +3120,32 @@ const changesCount = changesBySelectedWindow.length;
  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{companyContext.ticker}</p>
  <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[#0B1220]">
  {activeData?.companyName ?? companyContext.ticker}
+ <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{activeCompany.ticker}</p>
+ <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-foreground">
+ {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
  </h1>
+ <p className="mt-0.5 max-w-[480px] truncate text-[12px] text-muted-foreground">{activeCompany.description}</p>
  <div className="mt-2.5 flex flex-wrap items-center gap-2">
  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', statusTone[companyStatus].badge)}>
  {statusLabel(companyStatus)} · {scoreAverage}/100
  </span>
  {safeMeta(activeData?.priceData.current) && (
- <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[11px] font-medium text-[#374151]">
+ <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground">
  {safeMeta(activeData?.priceData.current)}
  </span>
  )}
- <span className="text-[11px] text-[#A0AEC0]">Indústria · Bens de capital</span>
+ <span className="text-[11px] text-muted-foreground">Indústria · Bens de capital</span>
  <div className="relative">
- <button className="text-[11px] text-[#A0AEC0] hover:text-[#374151] transition-colors" onClick={() => setShowHeaderUpdateDetails((prev) => !prev)}>
+ <button className="text-[11px] text-muted-foreground hover:text-foreground transition-colors" onClick={() => setShowHeaderUpdateDetails((prev) => !prev)}>
  Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}
  </button>
  {showHeaderUpdateDetails && (
- <div className="absolute left-0 top-6 z-30 min-w-[220px] rounded-xl border border-[#E5EEF6] bg-white p-3.5 text-[12px] text-[#4B5563] shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
- <p className="font-semibold text-[#111827] mb-1.5">Detalhes da atualização</p>
- <p className="text-[#6B7280]">Financeiro: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p className="text-[#6B7280]">Eventos: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
- <p className="text-[#6B7280]">Preço: {safeMeta(activeData?.priceData.updatedAt)}</p>
- <p className="text-[#6B7280]">Fontes: CVM, B3 e RI</p>
+ <div className="absolute left-0 top-6 z-30 min-w-[220px] rounded-xl border border-border bg-card p-3.5 text-[12px] text-dim shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
+ <p className="font-semibold text-foreground mb-1.5">Detalhes da atualização</p>
+ <p className="text-muted-foreground">Financeiro: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <p className="text-muted-foreground">Eventos: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+ <p className="text-muted-foreground">Preço: {safeMeta(activeData?.priceData.updatedAt)}</p>
+ <p className="text-muted-foreground">Fontes: CVM, B3 e RI</p>
  </div>
  )}
  </div>
@@ -3047,30 +3155,30 @@ const changesCount = changesBySelectedWindow.length;
 
  <div className="relative flex flex-wrap items-center gap-2">
  <button
- className={cx('inline-flex items-center gap-1.5 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3.5 py-2 text-[12px] font-semibold text-white transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:opacity-90')}
+ className={cx('inline-flex items-center gap-1.5 rounded-xl border border-brand bg-brand px-3.5 py-2 text-[12px] font-semibold text-white transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:opacity-90')}
  disabled={actionsDisabled}
  onClick={(event) => guardAction(event)}
  >
  <Check className="h-3.5 w-3.5" />
  Na Watchlist
  </button>
- <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] font-medium text-[#374151] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
- <button className={cx('rounded-xl border border-[#E2EDF5] bg-white px-3.5 py-2 text-[12px] text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
+ <button className={cx('rounded-xl border border-border bg-card px-3.5 py-2 text-[12px] font-medium text-foreground transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Criar alerta</button>
+ <button className={cx('rounded-xl border border-border bg-card px-3.5 py-2 text-[12px] text-muted-foreground transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Comparar</button>
  <button
- className={cx('grid h-9 w-9 place-items-center rounded-full border border-[#E2EDF5] bg-white text-[#6B7280] transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#F6FAFC]')}
+ className={cx('grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-all', actionsDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted')}
  disabled={actionsDisabled}
  onClick={() => setShowHeaderMenu((prev) => !prev)}
  >
  <MoreHorizontal className="h-4 w-4" />
  </button>
  {showHeaderMenu && (
- <div className="absolute right-0 top-11 z-30 w-44 rounded-xl border border-[#E5EEF6] bg-white p-1.5 shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
- <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-[#374151] hover:bg-[#F6FAFC]" onClick={(event) => guardAction(event)}>
- <Bell className="h-3.5 w-3.5 text-[#8494A9]" />
+ <div className="absolute right-0 top-11 z-30 w-44 rounded-xl border border-border bg-card p-1.5 shadow-[0_8px_24px_-8px_rgba(2,6,23,0.14)]">
+ <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-foreground hover:bg-muted" onClick={(event) => guardAction(event)}>
+ <Bell className="h-3.5 w-3.5 text-muted-foreground" />
  Notificações
  </button>
- <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-[#374151] hover:bg-[#F6FAFC]" onClick={(event) => guardAction(event)}>
- <Share2 className="h-3.5 w-3.5 text-[#8494A9]" />
+ <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] text-foreground hover:bg-muted" onClick={(event) => guardAction(event)}>
+ <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
  Compartilhar
  </button>
  </div>
@@ -3088,8 +3196,8 @@ const changesCount = changesBySelectedWindow.length;
  className={cx(
  'flex-shrink-0 py-3.5 px-4 text-[13px] font-medium border-b-2 transition-all duration-150',
  activeTab === tab
- ? 'border-[#0E9384] text-[#0B1220]'
- : 'border-transparent text-[#8494A9] hover:text-[#374151] hover:border-[#D0DDE8]'
+ ? 'border-brand text-foreground'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
  )}
  >
  {tab === 'Mudancas'
@@ -3106,20 +3214,20 @@ const changesCount = changesBySelectedWindow.length;
 
  <section className={cx('px-6 py-5 transition-opacity duration-150', contentVisible ? 'opacity-100' : 'opacity-0')}>
  {actionError && (
- <div className="mb-4 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-[13px] text-[#B45309]">
+ <div className="mb-4 rounded-xl border border-warning-border bg-warning-surface px-4 py-3 text-[13px] text-warning-text">
  {actionError}
  </div>
  )}
  {showScoreInfo && (
- <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+ <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
- <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Metodologia</p>
- <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Como calculamos o placar</h3>
+ <p className="text-[10px] font-semibold uppercase text-muted-foreground">Metodologia</p>
+ <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Como calculamos o placar</h3>
  </div>
- <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setShowScoreInfo(false)}>Fechar</button>
+ <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => setShowScoreInfo(false)}>Fechar</button>
  </div>
- <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
+ <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
  <p>Pesos: Dívida 25%, Caixa 20%, Margens 20%, Retorno 20%, Proventos 15%.</p>
  <p>Status exibido conforme informado no endpoint de cada pilar.</p>
  <p>Fontes: CVM, B3 e RI da empresa.</p>
@@ -3127,42 +3235,42 @@ const changesCount = changesBySelectedWindow.length;
  </div>
  )}
  {evidenceModal && (
- <div className="mb-4 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+ <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
- <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Evidência</p>
- <h3 className="mt-0.5 text-[15px] font-semibold text-[#111827]">Painel de fonte · {evidenceModal.pillarName}</h3>
+ <p className="text-[10px] font-semibold uppercase text-muted-foreground">Evidência</p>
+ <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Painel de fonte · {evidenceModal.pillarName}</h3>
  </div>
- <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => setEvidenceModal(null)}>Fechar</button>
+ <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => setEvidenceModal(null)}>Fechar</button>
  </div>
- <div className="mt-3 inline-flex rounded-xl bg-[#F6FAFC] p-1">
+ <div className="mt-3 inline-flex rounded-xl bg-muted p-1">
  {(['Fonte', 'Trecho', 'Como calculamos'] as EvidenceTab[]).map((tab) => (
  <button
  key={tab}
  onClick={() => setEvidenceTab(tab)}
- className={cx('rounded-lg px-3 py-1.5 text-[12px] transition-all', evidenceTab === tab ? 'bg-white border border-[#DDE8F2] font-semibold text-[#0E9384] shadow-sm' : 'text-[#6B7280] hover:text-[#374151]')}
+ className={cx('rounded-lg px-3 py-1.5 text-[12px] transition-all', evidenceTab === tab ? 'bg-card border border-border font-semibold text-brand shadow-sm' : 'text-muted-foreground hover:text-foreground')}
  >
  {tab}
  </button>
  ))}
  </div>
  {evidenceTab === 'Fonte' && (
- <div className="mt-3 space-y-1.5 text-[13px] text-[#6B7280]">
- <p><span className="font-medium text-[#374151]">Documento:</span> {safeMeta(evidenceModal.evidence.source.docLabel)}</p>
- <p><span className="font-medium text-[#374151]">Atualizado em:</span> {safeMeta(evidenceModal.evidence.source.date)}</p>
- <a href={evidenceModal.evidence.source.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#0E9384] hover:underline">
+ <div className="mt-3 space-y-1.5 text-[13px] text-muted-foreground">
+ <p><span className="font-medium text-foreground">Documento:</span> {safeMeta(evidenceModal.evidence.source.docLabel)}</p>
+ <p><span className="font-medium text-foreground">Atualizado em:</span> {safeMeta(evidenceModal.evidence.source.date)}</p>
+ <a href={evidenceModal.evidence.source.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-brand hover:underline">
  Abrir fonte externa
  <ExternalLink className="h-3.5 w-3.5" />
  </a>
  </div>
  )}
  {evidenceTab === 'Trecho' && (
- <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3.5 text-[13px] text-[#6B7280] italic">
+ <div className="mt-3 rounded-xl border border-border bg-muted p-3.5 text-[13px] text-muted-foreground italic">
  "{evidenceModal.evidence.why}"
  </div>
  )}
  {evidenceTab === 'Como calculamos' && (
- <div className="mt-3 space-y-1 text-[13px] text-[#6B7280]">
+ <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
  <p>Fórmula base: valor atual vs histórico de 5 anos.</p>
  <p>Notas: sinalizamos ponto forte/atenção conforme direção do pilar.</p>
  <p>Limitações: sujeito a revisão após novo release da companhia.</p>
@@ -3172,41 +3280,41 @@ const changesCount = changesBySelectedWindow.length;
  )}
  {showSkeleton ? (
  <div className="space-y-4">
- <div className="rounded-2xl border border-[#E2EDF5] bg-white p-6"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-3 h-8 w-full" /><SkeletonBlock className="mt-2 h-5 w-4/5" /><SkeletonBlock className="mt-5 h-10 w-48" /></div>
+ <div className="rounded-2xl border border-border bg-card p-6"><SkeletonBlock className="h-5 w-48" /><SkeletonBlock className="mt-3 h-8 w-full" /><SkeletonBlock className="mt-2 h-5 w-4/5" /><SkeletonBlock className="mt-5 h-10 w-48" /></div>
  <div className="grid grid-cols-12 gap-4">
- <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
- <div className="col-span-6 rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-border bg-card p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
+ <div className="col-span-6 rounded-2xl border border-border bg-card p-5"><SkeletonBlock className="h-4 w-28" /><SkeletonBlock className="mt-4 h-7 w-20" /><SkeletonBlock className="mt-3 h-14 w-full" /></div>
  </div>
- <div className="rounded-2xl border border-[#E2EDF5] bg-white p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /></div>
+ <div className="rounded-2xl border border-border bg-card p-5"><SkeletonBlock className="h-5 w-40" /><SkeletonBlock className="mt-4 h-4 w-full" /><SkeletonBlock className="mt-2 h-4 w-10/12" /></div>
  </div>
  ) : activePayload?.status === 'empty' ? (
- <article className="rounded-2xl border border-[#E2EDF5] bg-white p-8 text-center">
- <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F6FAFC]">
- <Database className="h-5 w-5 text-[#A0AEC0]" />
+ <article className="rounded-2xl border border-border bg-card p-8 text-center">
+ <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
+ <Database className="h-5 w-5 text-muted-foreground" />
  </div>
- <h2 className="text-[16px] font-semibold text-[#111827]">Empresa em processamento</h2>
- <p className="mt-1.5 text-[13px] text-[#6B7280]">Os dados desta empresa estão sendo ingeridos. Em breve a leitura estará disponível.</p>
+ <h2 className="text-[16px] font-semibold text-foreground">Empresa em processamento</h2>
+ <p className="mt-1.5 text-[13px] text-muted-foreground">Os dados desta empresa estão sendo ingeridos. Em breve a leitura estará disponível.</p>
  </article>
  ) : (
  <>
 {activeTab === 'Resumo' && (
 <div className="space-y-5">
 
-<article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
- <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Diagnóstico rápido</p>
- <h2 className="mt-2 text-[22px] font-bold leading-snug text-[#0B1220]">
+<article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+ <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Diagnóstico rápido</p>
+ <h2 className="mt-2 text-[22px] font-bold leading-snug text-foreground">
   {activeData?.diagnosisHeadline ?? 'A empresa permanece estruturalmente saudável, com um ponto de atenção concentrado em dívida.'}
  </h2>
- <p className="mt-2 text-[13px] leading-relaxed text-[#64748B]">Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.</p>
+ <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">Entenda o que sustenta a empresa hoje, o que mudou e o que vale monitorar daqui para frente.</p>
  <div className="mt-5 flex flex-wrap items-center gap-2">
   <button
-   className="rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+   className="rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
    onClick={() => goToPillar(activeData?.strongest.title ?? 'Divida')}
   >
    Ver principal força
   </button>
   <button
-   className="rounded-xl border border-[#F6DEA9] bg-[#FFFBEB] px-4 py-2 text-[13px] font-semibold text-[#D97706] transition-opacity hover:opacity-80"
+   className="rounded-xl border border-warning-border bg-warning-surface px-4 py-2 text-[13px] font-semibold text-warning-text transition-opacity hover:opacity-80"
    onClick={() => goToPillar(activeData?.watchout.title ?? 'Margens')}
   >
    Ver principal atenção
@@ -3217,52 +3325,52 @@ const changesCount = changesBySelectedWindow.length;
 <div className="grid grid-cols-12 gap-4">
  <div className="col-span-12 space-y-4 xl:col-span-8">
 
-  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: '#0E9384' }}>
+  <article className="rounded-2xl border border-border bg-card p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: 'var(--brand)' }}>
    <div className="flex items-center gap-2">
-    <BarChart3 className="h-4 w-4 text-[#0E9384]" />
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Principal Força</p>
+    <BarChart3 className="h-4 w-4 text-brand" />
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand">Principal Força</p>
    </div>
    <div className="mt-3">
-    <p className="text-[26px] font-bold leading-none text-[#0E9384]">{activeData?.strongest.title ?? 'Divida'}</p>
-    <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+    <p className="text-[26px] font-bold leading-none text-brand">{activeData?.strongest.title ?? 'Divida'}</p>
+    <p className="mt-2.5 text-[14px] leading-relaxed text-dim">
      {strongestHumanLine}
     </p>
     <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-     <span className="rounded-full border border-[#C7F5EE] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.score ?? '95/100'}</span>
-     <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 font-semibold text-[#0E9384]">{activeData?.strongest.badge ?? ''}</span>
-     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
+     <span className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-1 font-semibold text-brand">{activeData?.strongest.score ?? '95/100'}</span>
+     <span className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-1 font-semibold text-brand">{activeData?.strongest.badge ?? ''}</span>
+     <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">Variação: {activeData?.strongest.trend ?? 'estável'}</span>
     </div>
     <div className="mt-3 flex items-center gap-2">
-     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
+     <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa')}>
       Ver pilar
      </button>
-     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
+     <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => goToPillar(activeData?.strongest.title ?? 'Caixa', true)}>
       Ver fonte
      </button>
     </div>
    </div>
   </article>
 
-  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: '#F59E0B' }}>
+  <article className="rounded-2xl border border-border bg-card p-5 shadow-sm" style={{ borderTopWidth: '3px', borderTopColor: 'var(--warning-text)' }}>
    <div className="flex items-center gap-2">
-    <TriangleAlert className="h-4 w-4 text-[#D97706]" />
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Principal Atenção</p>
+    <TriangleAlert className="h-4 w-4 text-warning-text" />
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-warning-text">Principal Atenção</p>
    </div>
    <div className="mt-3">
-    <p className="text-[26px] font-bold leading-none text-[#D97706]">{activeData?.watchout.title ?? 'Margens'}</p>
-    <p className="mt-2.5 text-[14px] leading-relaxed text-[#4B5563]">
+    <p className="text-[26px] font-bold leading-none text-warning-text">{activeData?.watchout.title ?? 'Margens'}</p>
+    <p className="mt-2.5 text-[14px] leading-relaxed text-dim">
      {watchoutHumanLine}
     </p>
     <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-     <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{activeData?.watchout.score ?? '61/100'}</span>
-     <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-semibold text-[#D97706]">{watchoutBadgeLabel}</span>
-     <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
+     <span className="rounded-full border border-warning-border bg-warning-surface px-2.5 py-1 font-semibold text-warning-text">{activeData?.watchout.score ?? '61/100'}</span>
+     <span className="rounded-full border border-warning-border bg-warning-surface px-2.5 py-1 font-semibold text-warning-text">{watchoutBadgeLabel}</span>
+     <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">Variação: {activeData?.watchout.trend ?? 'piora'}</span>
     </div>
     <div className="mt-3 flex items-center gap-2">
-     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
+     <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida')}>
       Ver pilar
      </button>
-     <button className="rounded-lg border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#6B7280] hover:bg-[#F6FAFC]" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
+     <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => goToPillar(activeData?.watchout.title ?? 'Divida', true)}>
       Ver fonte
      </button>
     </div>
@@ -3271,14 +3379,14 @@ const changesCount = changesBySelectedWindow.length;
 
  </div>
 
- <article className="col-span-12 rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm xl:col-span-4">
+ <article className="col-span-12 rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-4">
   <div className="flex items-center justify-between">
-   <h2 className="text-[15px] font-semibold text-[#111827]">Mapa dos 5 pilares</h2>
-   <button className="text-[11px] text-[#667085] hover:text-[#475467] hover:underline" onClick={() => setShowScoreInfo(true)}>
+   <h2 className="text-[15px] font-semibold text-foreground">Mapa dos 5 pilares</h2>
+   <button className="text-[11px] text-muted-foreground hover:text-dim hover:underline" onClick={() => setShowScoreInfo(true)}>
     Como calculamos
    </button>
   </div>
-  <p className="mt-1 text-[12px] text-[#94A3B8]">Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.</p>
+  <p className="mt-1 text-[12px] text-muted-foreground">Visão geral para apoiar a leitura inicial, sem substituir o diagnóstico.</p>
   <div className="mt-3">
    <PillarMap
     data={mapPillarData}
@@ -3286,60 +3394,60 @@ const changesCount = changesBySelectedWindow.length;
     onSelectPillar={(pillar) => goToPillar(pillar)}
    />
   </div>
-  <p className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] px-3 py-2.5 text-[12px] text-[#475467]">
+  <p className="mt-3 rounded-xl border border-border bg-muted px-3 py-2.5 text-[12px] text-dim">
    Atenção principal em {activeData?.watchout.title ?? 'Margens'}; força relativa em {activeData?.strongest.title ?? 'Dívida'}.
   </p>
  </article>
 </div>
 
-<article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+<article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
  <div className="flex items-center justify-between">
   <div>
-   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Resumo em 60s</p>
-   <h2 className="mt-1 text-[16px] font-semibold text-[#111827]">Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.</h2>
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Resumo em 60s</p>
+   <h2 className="mt-1 text-[16px] font-semibold text-foreground">Uma visão simples do que sustenta a empresa hoje e do que merece acompanhamento.</h2>
   </div>
-  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
+  <button className="text-[12px] text-brand hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
- <p className="mt-4 text-[14px] leading-relaxed text-[#1F2937]">
+ <p className="mt-4 text-[14px] leading-relaxed text-foreground">
   {summaryNarrative}
  </p>
  <div className="mt-4 grid grid-cols-3 gap-3">
-  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Força principal</p>
-   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
+  <div className="rounded-xl border border-border bg-muted p-3">
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">Força principal</p>
+   <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
   </div>
-  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Atenção principal</p>
-   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
+  <div className="rounded-xl border border-border bg-muted p-3">
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção principal</p>
+   <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
   </div>
-  <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">O que monitorar</p>
-   <p className="mt-1 text-[13px] font-semibold text-[#111827]">{activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
+  <div className="rounded-xl border border-border bg-muted p-3">
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">O que monitorar</p>
+   <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
   </div>
  </div>
  <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
-  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
-  <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1 text-[#6B7280]">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
-  <span className="rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-2.5 py-1 text-[#0E9384]">Confiança: Alta</span>
+  <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">Atualizado em {safeMeta(activeData?.summaryMeta.updatedAt)}</span>
+  <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">Fonte: {safeMeta(activeData?.summaryMeta.source)}</span>
+  <span className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-1 text-brand">Confiança: Alta</span>
  </div>
 </article>
 
-<article className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-6">
+<article className="rounded-2xl border border-brand-border bg-gradient-to-br from-brand-surface to-muted p-6">
  <div className="flex items-center justify-between gap-3">
   <div>
-   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0E9384]">Próximas ações</p>
-   <h2 className="mt-1 text-[15px] font-semibold text-[#111827]">Feche a leitura com um próximo passo útil e verificável.</h2>
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-brand">Próximas ações</p>
+   <h2 className="mt-1 text-[15px] font-semibold text-foreground">Feche a leitura com um próximo passo útil e verificável.</h2>
   </div>
-  <button className="text-[12px] text-[#0E9384] hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
+  <button className="text-[12px] text-brand hover:underline" onClick={openSummaryEvidence}>Ver fonte</button>
  </div>
  <div className="mt-4 flex flex-wrap items-center gap-2">
-  <button className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
+  <button className={cx('rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
    Criar alerta da principal atenção
   </button>
-  <button className="rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]" onClick={() => setActiveTab('Pilares')}>
+  <button className="rounded-xl border border-brand-border bg-card px-4 py-2 text-[13px] font-medium text-foreground hover:bg-brand-surface" onClick={() => setActiveTab('Pilares')}>
    Ver pilares completos
   </button>
-  <button className={cx('rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
+  <button className={cx('rounded-xl border border-brand-border bg-card px-4 py-2 text-[13px] font-medium text-foreground hover:bg-brand-surface', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>
    Comparar com outra empresa
   </button>
  </div>
@@ -3351,32 +3459,32 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Pilares' && (
  <div className="space-y-4">
 
- <article className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+ <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
   <div className="flex flex-wrap items-start justify-between gap-3">
    <div>
-    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Síntese dos pilares</p>
-    <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Diagnóstico por pilares</h2>
+    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Síntese dos pilares</p>
+    <h2 className="mt-1 text-[18px] font-bold text-foreground">Diagnóstico por pilares</h2>
    </div>
    <div className="flex flex-wrap items-center gap-2 text-[12px]">
-    {healthyPillars.length > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-[#99F6E4] bg-[#F0FDFA] px-3 py-1 text-[12px] font-semibold text-[#0E9384]">{healthyPillars.length} saudável{healthyPillars.length !== 1 ? 's' : ''}</span>}
-    {attentionPillars.length > 0 && <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-3 py-1 font-semibold text-[#D97706]">{attentionPillars.length} atenção</span>}
-    {riskPillars.length > 0 && <span className="rounded-full border border-[#FECACA] bg-[#FEF2F2] px-3 py-1 font-semibold text-[#DC2626]">{riskPillars.length} risco</span>}
+    {healthyPillars.length > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[12px] font-semibold text-brand">{healthyPillars.length} saudável{healthyPillars.length !== 1 ? 's' : ''}</span>}
+    {attentionPillars.length > 0 && <span className="rounded-full border border-warning-border bg-warning-surface px-3 py-1 font-semibold text-warning-text">{attentionPillars.length} atenção</span>}
+    {riskPillars.length > 0 && <span className="rounded-full border border-danger-border bg-danger-surface px-3 py-1 font-semibold text-danger-text">{riskPillars.length} risco</span>}
    </div>
   </div>
-  <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#374151]">
-   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : '—'}</span>
-   <span className="rounded-full border border-[#E2EDF5] bg-[#F6FAFC] px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : '—'}</span>
+  <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-foreground">
+   <span className="rounded-full border border-border bg-muted px-2.5 py-1">Principal risco: {mostCriticalPillar ? pillarLabel(mostCriticalPillar.pillar) : '—'}</span>
+   <span className="rounded-full border border-border bg-muted px-2.5 py-1">Principal sustentação: {strongestPillar ? pillarLabel(strongestPillar.pillar) : '—'}</span>
   </div>
  </article>
 
  {(activeData?.pillars ?? []).filter((p) => p.companyId === companyContext.companyId).length === 0 && (
- <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+ <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
   <div className="flex flex-col items-center gap-3 py-4 text-center">
-   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F6FAFC]">
-    <BarChart3 className="h-5 w-5 text-[#A0AEC0]" />
+   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted">
+    <BarChart3 className="h-5 w-5 text-muted-foreground" />
    </div>
-   <p className="text-[14px] font-medium text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
-   <p className="text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
+   <p className="text-[14px] font-medium text-muted-foreground">Ainda não temos dados suficientes para este indicador.</p>
+   <p className="text-[12px] text-muted-foreground">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
   </div>
  </article>
  )}
@@ -3387,7 +3495,7 @@ const changesCount = changesBySelectedWindow.length;
  const values = windowSize === '5a' ? pillar.chart.series5 : pillar.chart.series10;
  const labels = windowSize === '5a' ? pillar.chart.years5 : pillar.chart.years10;
  const chartTone = pillar.status === 'Saudavel' ? 'teal' : 'amber';
- const accent = pillar.status === 'Saudavel' ? '#0E9384' : pillar.status === 'Atencao' ? '#F59E0B' : '#DC2626';
+ const accent = pillar.status === 'Saudavel' ? 'var(--brand)' : pillar.status === 'Atencao' ? 'var(--warning-text)' : 'var(--danger-text)';
  const pillarName = pillarLabel(pillar.name);
  const deltaLabel = formatDeltaForPillar(pillar.trend);
  const normalizedChartTitle = _normalizeSemanticText(pillar.chart.title);
@@ -3424,7 +3532,7 @@ const changesCount = changesBySelectedWindow.length;
  const chartVariant: 'line' | 'bar' = 'line';
 
  return (
- <article id={`pillar-${pillar.name}`} key={pillar.name} className="rounded-2xl border border-[#E2EDF5] bg-white shadow-sm overflow-hidden" style={{ borderTopWidth: '3px', borderTopColor: accent }}>
+ <article id={`pillar-${pillar.name}`} key={pillar.name} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden" style={{ borderTopWidth: '3px', borderTopColor: accent }}>
   <button
    onClick={() => {
     const isCurrentlyOpen = expandedPillars[pillar.name];
@@ -3437,69 +3545,69 @@ const changesCount = changesBySelectedWindow.length;
    className="flex w-full items-center justify-between gap-3 p-5 text-left"
   >
    <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1">
-    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${accent}18` }}>
+    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `color-mix(in srgb, ${accent} 10%, transparent)` }}>
      <span className="text-[13px] font-bold tabular-nums" style={{ color: accent }}>{pillar.score}</span>
     </div>
     <div className="min-w-0">
      <div className="flex flex-wrap items-center gap-2">
-      <h2 className="text-[16px] font-bold text-[#111827]">{pillarName}</h2>
+      <h2 className="text-[16px] font-bold text-foreground">{pillarName}</h2>
       <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', statusTone[pillar.status].badge)}>{statusLabel(pillar.status)}</span>
-      {deltaLabel && <span className="text-[12px] text-[#6B7280]">{deltaLabel}</span>}
+      {deltaLabel && <span className="text-[12px] text-muted-foreground">{deltaLabel}</span>}
      </div>
-     <p className="mt-0.5 text-[13px] text-[#64748B]">{verdictLine}</p>
+     <p className="mt-0.5 text-[13px] text-muted-foreground">{verdictLine}</p>
     </div>
    </div>
    <div className="ml-2 flex-shrink-0">
-    {expanded ? <ChevronUp className="h-4 w-4 text-[#94A3B8]" /> : <ChevronDown className="h-4 w-4 text-[#94A3B8]" />}
+    {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
    </div>
   </button>
 
   <div className={cx('overflow-hidden transition-all duration-300', expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0')}>
-   <div className="border-t border-[#E2EDF5]" />
+   <div className="border-t border-border" />
    <div className="grid gap-0 lg:grid-cols-12">
 
     {/* Left: meaning + monitor */}
-    <div className="space-y-0 border-b border-[#E2EDF5] p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
+    <div className="space-y-0 border-b border-border p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que isso significa</p>
-      <p className="mt-2 text-[14px] leading-relaxed text-[#1F2937]">{whatItMeans}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">O que isso significa</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-foreground">{whatItMeans}</p>
      </div>
-     <div className="mt-4 pt-4 border-t border-[#E2EDF5]">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">O que monitorar</p>
+     <div className="mt-4 pt-4 border-t border-border">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">O que monitorar</p>
       <ul className="mt-2 space-y-2">
        {monitorItems.map((item) => (
-        <li key={item} className="flex items-start gap-2 text-[13px] text-[#4B5563]">
-         <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" />
+        <li key={item} className="flex items-start gap-2 text-[13px] text-dim">
+         <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground" />
          <span>{item}</span>
         </li>
        ))}
       </ul>
      </div>
-     <p className="mt-4 text-[11px] text-[#B0BAC8]">Fonte: {pillar.trust.source} · {pillar.trust.updatedAt} · {pillar.trust.status}</p>
+     <p className="mt-4 text-[11px] text-muted-foreground">Fonte: {pillar.trust.source} · {pillar.trust.updatedAt} · {pillar.trust.status}</p>
     </div>
 
     {/* Right: evidence + chart + signal */}
     <div className="p-5 lg:col-span-8">
-     <section className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
+     <section className="rounded-xl border border-border bg-muted p-4">
       <div className="grid gap-4 lg:grid-cols-2">
        <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Evidência principal</p>
-        <p className="mt-1 text-[12px] text-[#94A3B8]">Indicador: {indicatorLabel}</p>
-        <p className="mt-2 text-[32px] font-bold leading-none text-[#111827]">{evidenceHeadline}</p>
-        <p className="mt-1 text-[12px] text-[#94A3B8]">Data: {baseMetric?.source.date ?? pillar.trust.updatedAt}</p>
-        <p className="mt-2 text-[13px] text-[#1F2937]"><span className="font-semibold">Ref. 5 anos:</span> <span className="font-medium text-[#64748B]">{referenceText}</span></p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Evidência principal</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">Indicador: {indicatorLabel}</p>
+        <p className="mt-2 text-[32px] font-bold leading-none text-foreground">{evidenceHeadline}</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">Data: {baseMetric?.source.date ?? pillar.trust.updatedAt}</p>
+        <p className="mt-2 text-[13px] text-foreground"><span className="font-semibold">Ref. 5 anos:</span> <span className="font-medium text-muted-foreground">{referenceText}</span></p>
         {baseMetricReadingHint(pillar, baseMetric) && (
-         <p className="mt-1 text-[12px] text-[#94A3B8]">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
+         <p className="mt-1 text-[12px] text-muted-foreground">Como ler: {baseMetricReadingHint(pillar, baseMetric)}</p>
         )}
        </div>
        <div>
         <div className="mb-2 flex justify-end">
-         <div className="inline-flex rounded-full bg-[#F6FAFC] p-0.5">
+         <div className="inline-flex rounded-full bg-muted p-0.5">
           {(['5a', '10a'] as WindowSize[]).map((windowOption) => (
            <button
             key={windowOption}
             onClick={() => setWindowByPillar((prev) => ({ ...prev, [pillar.name]: windowOption }))}
-            className={cx('rounded-full px-3 py-1 text-[11px]', windowSize === windowOption ? 'border border-[#99F6E4] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'text-[#6B7280]')}
+            className={cx('rounded-full px-3 py-1 text-[11px]', windowSize === windowOption ? 'border border-brand-border bg-brand-surface font-semibold text-brand' : 'text-muted-foreground')}
            >
             {windowOption}
            </button>
@@ -3520,17 +3628,17 @@ const changesCount = changesBySelectedWindow.length;
      </section>
 
      {mainEvidence && (
-      <section className={cx('mt-3 rounded-xl border p-4', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB]' : 'border-[#99F6E4] bg-[#F0FDFA]')}>
+      <section className={cx('mt-3 rounded-xl border p-4', signalCopy.badgeTone === 'risk' ? 'border-danger-border bg-danger-surface' : signalCopy.badgeTone === 'attention' ? 'border-warning-border bg-warning-surface' : 'border-brand-border bg-brand-surface')}>
        <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
          {signalCopy.badgeLabel && (
-          <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', signalCopy.badgeTone === 'risk' ? 'border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]' : signalCopy.badgeTone === 'attention' ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]' : 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]')}>
+          <span className={cx('rounded-full border px-2.5 py-0.5 text-[11px] font-semibold', signalCopy.badgeTone === 'risk' ? 'border-danger-border bg-danger-surface text-danger-text' : signalCopy.badgeTone === 'attention' ? 'border-warning-border bg-warning-surface text-warning-text' : 'border-brand-border bg-brand-surface text-brand')}>
            {signalCopy.badgeLabel}
           </span>
          )}
-         <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signalCopy.title}</p>
-         <p className="mt-1 text-[13px] text-[#4B5563]">{signalCopy.body}</p>
-         {signalCopy.why && <p className="mt-1 text-[13px] text-[#6B7280]">Por que importa: {signalCopy.why}</p>}
+         <p className="mt-2 text-[14px] font-semibold text-foreground">{signalCopy.title}</p>
+         <p className="mt-1 text-[13px] text-dim">{signalCopy.body}</p>
+         {signalCopy.why && <p className="mt-1 text-[13px] text-muted-foreground">Por que importa: {signalCopy.why}</p>}
         </div>
         <button
          onClick={(event) => {
@@ -3538,20 +3646,20 @@ const changesCount = changesBySelectedWindow.length;
           setEvidenceModal({ pillarName: pillar.name, evidence: mainEvidence });
           setEvidenceTab('Fonte');
          }}
-         className={cx('flex-shrink-0 text-[12px] text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+         className={cx('flex-shrink-0 text-[12px] text-brand hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
          disabled={actionsDisabled || mainEvidence.companyId !== companyContext.companyId}
         >
          Ver fonte
         </button>
        </div>
-       <p className="mt-2 text-[11px] text-[#B0BAC8]">Fonte: {mainEvidenceSource}</p>
+       <p className="mt-2 text-[11px] text-muted-foreground">Fonte: {mainEvidenceSource}</p>
       </section>
      )}
 
      {(ctaCopy.title || ctaCopy.button) && (
-      <section className="mt-3 rounded-xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-4">
-       <p className="text-[13px] text-[#374151]">{ctaCopy.title}</p>
-       <button className={cx('mt-2 rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
+      <section className="mt-3 rounded-xl border border-brand-border bg-gradient-to-br from-brand-surface to-muted p-4">
+       <p className="text-[13px] text-foreground">{ctaCopy.title}</p>
+       <button className={cx('mt-2 rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event, pillar.companyId)}>
         {ctaCopy.button}
        </button>
       </section>
@@ -3563,31 +3671,31 @@ const changesCount = changesBySelectedWindow.length;
  </article>
  );
  })}
- <p className="py-2 text-center text-[13px] text-[#6B7280]">Sentiu falta de algum indicador? <button type="button" className={cx('text-[12px] font-medium text-[#0E9384] hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Sugerir indicador</button></p>
+ <p className="py-2 text-center text-[13px] text-muted-foreground">Sentiu falta de algum indicador? <button type="button" className={cx('text-[12px] font-medium text-brand hover:underline', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')} disabled={actionsDisabled} onClick={(event) => guardAction(event)}>Sugerir indicador</button></p>
  </div>
  )}
 
  {activeTab === 'Mudancas' && (
  <div className="space-y-4">
 
-  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">O que mudou ({changesWindow})</p>
-   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Mudanças do período</h2>
-   <p className="mt-1 text-[13px] text-[#64748B]">Veja o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
-   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
-    <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">{changesSummaryText}</p>
+  <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">O que mudou ({changesWindow})</p>
+   <h2 className="mt-1 text-[18px] font-bold text-foreground">Mudanças do período</h2>
+   <p className="mt-1 text-[13px] text-muted-foreground">Veja o que teve impacto real, o que foi rotina e quais pilares foram mais afetados.</p>
+   <div className="mt-4 border-t border-border pt-4">
+    <p className="max-w-[840px] text-[13px] leading-relaxed text-foreground">{changesSummaryText}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais afetado</p>
-      <p className="mt-1 font-semibold text-[#0F766E]">{periodMostAffected}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Pilar mais afetado</p>
+      <p className="mt-1 font-semibold text-brand-text">{periodMostAffected}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Estruturais</p>
-      <p className="mt-1 font-semibold text-[#111827]">{structuralCount}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Estruturais</p>
+      <p className="mt-1 font-semibold text-foreground">{structuralCount}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
-      <p className="mt-1 font-semibold text-[#111827]">{routineCount}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Rotina</p>
+      <p className="mt-1 font-semibold text-foreground">{routineCount}</p>
      </div>
     </div>
    </div>
@@ -3596,7 +3704,7 @@ const changesCount = changesBySelectedWindow.length;
   <div className="space-y-2">
    <div className="flex flex-wrap items-center gap-2">
     {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
-     <button key={period} onClick={() => setChangesWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === changesWindow ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827] shadow-sm' : 'text-[#6B7280]')}>
+     <button key={period} onClick={() => setChangesWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === changesWindow ? 'border border-border bg-card font-semibold text-foreground shadow-sm' : 'text-muted-foreground')}>
       {period}
      </button>
     ))}
@@ -3606,19 +3714,19 @@ const changesCount = changesBySelectedWindow.length;
      <button
       key={filter}
       onClick={() => setChangesFocus(filter)}
-      className={cx('rounded-full border px-3 py-1.5 text-[12px]', changesFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#E2EDF5] bg-white text-[#5B6472] hover:bg-[#F6FAFC]')}
+      className={cx('rounded-full border px-3 py-1.5 text-[12px]', changesFocus === filter ? 'border-brand bg-brand-surface font-semibold text-brand' : 'border-border bg-card text-muted-foreground hover:bg-muted')}
      >
       {filter}
      </button>
     ))}
    </div>
    <div className="flex items-center gap-2">
-    <label htmlFor="changes-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
+    <label htmlFor="changes-pillar-filter" className="text-[12px] font-medium text-muted-foreground">Por pilar:</label>
     <select
      id="changes-pillar-filter"
      value={changesPillarFilter}
      onChange={(event) => setChangesPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
-     className="rounded-xl border border-[#E2EDF5] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
+     className="rounded-xl border border-border bg-card px-2.5 py-1.5 text-[12px] text-foreground"
     >
      {availablePillarsForFilter.map((pillar) => (
       <option key={pillar} value={pillar}>{pillar}</option>
@@ -3628,15 +3736,15 @@ const changesCount = changesBySelectedWindow.length;
   </div>
 
   {principalChange && (
-   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
+   <section className="rounded-2xl border border-danger-border bg-danger-surface p-5">
     <div className="flex items-start justify-between gap-3">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal mudança do período</p>
-      <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalChange.title}</p>
-      <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalChange.pillar} nos próximos fechamentos.</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-danger-text">Principal mudança do período</p>
+      <p className="mt-2 text-[14px] font-semibold text-foreground">{principalChange.title}</p>
+      <p className="mt-1 text-[13px] text-dim">Com possível efeito no pilar de {principalChange.pillar} nos próximos fechamentos.</p>
      </div>
      <button
-      className={cx('flex-shrink-0 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+      className={cx('flex-shrink-0 rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
       disabled={actionsDisabled}
       onClick={(event) => {
        if (guardAction(event, principalChange.companyId)) return;
@@ -3651,42 +3759,42 @@ const changesCount = changesBySelectedWindow.length;
 
   <div className="space-y-3">
    {!hasVisibleChanges && (
-    <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+    <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
      <div className="flex flex-col items-center gap-2 py-4 text-center">
-      <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-      <p className="text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+      <p className="text-[13px] text-muted-foreground">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
+      <p className="text-[11px] text-muted-foreground">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
      </div>
     </article>
    )}
 
    {displayedStructural.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Mudanças estruturais</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-danger-text">Mudanças estruturais</p>
      {displayedStructural.map((change) => renderChangeCard(change))}
     </section>
    )}
 
    {displayedRelevant.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Mudanças relevantes</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-warning-text">Mudanças relevantes</p>
      {displayedRelevant.map((change) => renderChangeCard(change))}
     </section>
    )}
 
    {displayedRoutine.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand">Rotina</p>
      {displayedRoutine.map((item) => {
       if (item.type === 'single') return renderChangeCard(item.payload);
       const isOpen = Boolean(expandedRoutineGroups[item.payload.groupKey]);
       return (
-       <article key={item.payload.groupKey} className="rounded-2xl border border-[#E2EDF5] bg-white p-4 shadow-sm">
-        <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
-        <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
-        <p className="mt-2 text-[12px] text-[#94A3B8]">Pilar afetado: {item.payload.pillar}</p>
+       <article key={item.payload.groupKey} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p className="text-[15px] font-semibold text-foreground">{item.payload.groupTitle}</p>
+        <p className="mt-2 text-[13px] text-dim">{item.payload.summary}</p>
+        <p className="mt-2 text-[12px] text-muted-foreground">Pilar afetado: {item.payload.pillar}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
          <button
-          className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+          className={cx('rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
           disabled={actionsDisabled}
           onClick={(event) => {
            if (guardAction(event, item.payload.items[0].companyId)) return;
@@ -3696,7 +3804,7 @@ const changesCount = changesBySelectedWindow.length;
           Ver impacto no pilar
          </button>
          <button
-          className="inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]"
+          className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted"
           onClick={() => setExpandedRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
          >
           Ver eventos
@@ -3716,28 +3824,28 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Eventos' && (
  <div className="space-y-4">
 
-  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Agenda ({eventsWindow})</p>
-   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Próximos eventos</h2>
-   <p className="mt-1 text-[13px] text-[#64748B]">Veja o que pode ter impacto real, o que é rotina e quais pilares podem ser mais afetados.</p>
-   <div className="mt-4 border-t border-[#E2EDF5] pt-4">
-    <p className="max-w-[840px] text-[13px] leading-relaxed text-[#374151]">
+  <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Agenda ({eventsWindow})</p>
+   <h2 className="mt-1 text-[18px] font-bold text-foreground">Próximos eventos</h2>
+   <p className="mt-1 text-[13px] text-muted-foreground">Veja o que pode ter impacto real, o que é rotina e quais pilares podem ser mais afetados.</p>
+   <div className="mt-4 border-t border-border pt-4">
+    <p className="max-w-[840px] text-[13px] leading-relaxed text-foreground">
      {principalTimelineChange
       ? `${buildTimelineHeadlineLine({ title: principalTimelineChange.title, typeLabel: principalTimelineChange.typeLabel, mainPillar: principalTimelineChange.mainPillar }, eventsWindow)} Fora isso, o período traz eventos mais recorrentes, sem outro gatilho dominante na leitura geral.`
       : `Nos próximos ${eventsWindow.replace(' dias', '')} dias, a agenda está concentrada em eventos de acompanhamento, sem gatilho dominante previsto.`}
     </p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Pilar mais sensível</p>
-      <p className="mt-1 font-semibold text-[#0F766E]">{timelineMostAffectedPillar}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Pilar mais sensível</p>
+      <p className="mt-1 font-semibold text-brand-text">{timelineMostAffectedPillar}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Gatilhos principais</p>
-      <p className="mt-1 font-semibold text-[#111827]">{timelineStructuralCount}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Gatilhos principais</p>
+      <p className="mt-1 font-semibold text-foreground">{timelineStructuralCount}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Rotina</p>
-      <p className="mt-1 font-semibold text-[#111827]">{timelineRoutineCount}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Rotina</p>
+      <p className="mt-1 font-semibold text-foreground">{timelineRoutineCount}</p>
      </div>
     </div>
    </div>
@@ -3746,7 +3854,7 @@ const changesCount = changesBySelectedWindow.length;
   <div className="space-y-2">
    <div className="flex flex-wrap items-center gap-2">
     {(['30 dias', '60 dias', '90 dias'] as FeedWindow[]).map((period) => (
-     <button key={period} onClick={() => setEventsWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === eventsWindow ? 'border border-[#E2EDF5] bg-white font-semibold text-[#111827] shadow-sm' : 'text-[#6B7280]')}>
+     <button key={period} onClick={() => setEventsWindow(period)} className={cx('h-8 rounded-full px-4 text-[13px]', period === eventsWindow ? 'border border-border bg-card font-semibold text-foreground shadow-sm' : 'text-muted-foreground')}>
       {period}
      </button>
     ))}
@@ -3756,19 +3864,19 @@ const changesCount = changesBySelectedWindow.length;
      <button
       key={filter}
       onClick={() => setEventsFocus(filter)}
-      className={cx('rounded-full border px-3 py-1.5 text-[12px]', eventsFocus === filter ? 'border-[#0E9384] bg-[#F0FDFA] font-semibold text-[#0E9384]' : 'border-[#E2EDF5] bg-white text-[#5B6472] hover:bg-[#F6FAFC]')}
+      className={cx('rounded-full border px-3 py-1.5 text-[12px]', eventsFocus === filter ? 'border-brand bg-brand-surface font-semibold text-brand' : 'border-border bg-card text-muted-foreground hover:bg-muted')}
      >
       {filter}
      </button>
     ))}
    </div>
    <div className="flex items-center gap-2">
-    <label htmlFor="events-pillar-filter" className="text-[12px] font-medium text-[#5B6472]">Por pilar:</label>
+    <label htmlFor="events-pillar-filter" className="text-[12px] font-medium text-muted-foreground">Por pilar:</label>
     <select
      id="events-pillar-filter"
      value={eventsPillarFilter}
      onChange={(event) => setEventsPillarFilter(event.target.value as ChangePillarTag | 'Todos')}
-     className="rounded-xl border border-[#E2EDF5] bg-white px-2.5 py-1.5 text-[12px] text-[#334155]"
+     className="rounded-xl border border-border bg-card px-2.5 py-1.5 text-[12px] text-foreground"
     >
      {availablePillarsForFilter.map((pillar) => (
       <option key={pillar} value={pillar}>{pillar}</option>
@@ -3778,15 +3886,15 @@ const changesCount = changesBySelectedWindow.length;
   </div>
 
   {principalTimelineChange && (
-   <section className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] p-5">
+   <section className="rounded-2xl border border-danger-border bg-danger-surface p-5">
     <div className="flex items-start justify-between gap-3">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Principal gatilho do período</p>
-      <p className="mt-2 text-[14px] font-semibold text-[#111827]">{principalTimelineChange.title}</p>
-      <p className="mt-1 text-[13px] text-[#4B5563]">Com possível efeito no pilar de {principalTimelineChange.mainPillar} nos próximos fechamentos.</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-danger-text">Principal gatilho do período</p>
+      <p className="mt-2 text-[14px] font-semibold text-foreground">{principalTimelineChange.title}</p>
+      <p className="mt-1 text-[13px] text-dim">Com possível efeito no pilar de {principalTimelineChange.mainPillar} nos próximos fechamentos.</p>
      </div>
      <button
-      className={cx('flex-shrink-0 rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+      className={cx('flex-shrink-0 rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
       disabled={actionsDisabled}
       onClick={(event) => {
        if (guardAction(event, principalTimelineChange.companyId)) return;
@@ -3801,42 +3909,42 @@ const changesCount = changesBySelectedWindow.length;
 
   <div className="space-y-3">
    {!hasVisibleTimelineEvents && (
-    <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+    <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
      <div className="flex flex-col items-center gap-2 py-4 text-center">
-      <p className="text-[13px] text-[#5B6472]">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
-      <p className="text-[11px] text-[#9CA3AF]">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
+      <p className="text-[13px] text-muted-foreground">Sem eventos para os filtros atuais. Ajuste os filtros para ampliar o contexto.</p>
+      <p className="text-[11px] text-muted-foreground">Última atualização: {safeMeta(activeData?.summaryMeta.updatedAt)}</p>
      </div>
     </article>
    )}
 
    {displayedTimelineStructural.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DC2626]">Gatilhos principais</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-danger-text">Gatilhos principais</p>
      {displayedTimelineStructural.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
     </section>
    )}
 
    {displayedTimelineRelevant.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">Eventos relevantes</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-warning-text">Eventos relevantes</p>
      {displayedTimelineRelevant.map((timelineEvent) => renderAgendaEventCard(timelineEvent))}
     </section>
    )}
 
    {displayedTimelineRoutine.length > 0 && (
     <section className="space-y-2">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Rotina</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand">Rotina</p>
      {displayedTimelineRoutine.map((item) => {
       if (item.type === 'single') return renderAgendaEventCard(item.payload);
       const isOpen = Boolean(expandedEventRoutineGroups[item.payload.groupKey]);
       return (
-       <article key={item.payload.groupKey} className="rounded-2xl border border-[#E2EDF5] bg-white p-4 shadow-sm">
-        <p className="text-[15px] font-semibold text-[#111827]">{item.payload.groupTitle}</p>
-        <p className="mt-2 text-[13px] text-[#475569]">{item.payload.summary}</p>
-        <p className="mt-2 text-[12px] text-[#94A3B8]">Pilar afetado: {item.payload.pillar}</p>
+       <article key={item.payload.groupKey} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p className="text-[15px] font-semibold text-foreground">{item.payload.groupTitle}</p>
+        <p className="mt-2 text-[13px] text-dim">{item.payload.summary}</p>
+        <p className="mt-2 text-[12px] text-muted-foreground">Pilar afetado: {item.payload.pillar}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
          <button
-          className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+          className={cx('rounded-xl border border-brand bg-brand px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
           disabled={actionsDisabled}
           onClick={(event) => {
            if (guardAction(event, item.payload.items[0].companyId)) return;
@@ -3846,7 +3954,7 @@ const changesCount = changesBySelectedWindow.length;
           Ver impacto no pilar
          </button>
          <button
-          className="inline-flex items-center gap-1 rounded-xl border border-[#E2EDF5] px-3 py-1.5 text-[12px] text-[#5B6472] hover:bg-[#F6FAFC]"
+          className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted"
           onClick={() => setExpandedEventRoutineGroups((prev) => ({ ...prev, [item.payload.groupKey]: !isOpen }))}
          >
           Ver eventos
@@ -3861,12 +3969,12 @@ const changesCount = changesBySelectedWindow.length;
    )}
 
    {hasVisibleTimelineEvents && (
-    <section className="rounded-2xl border border-[#99F6E4] bg-gradient-to-br from-[#F0FDFA] to-[#F6FAFC] p-5">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0E9384]">Fechar a leitura</p>
-     <p className="mt-1 text-[14px] text-[#1F2937]">Acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
+    <section className="rounded-2xl border border-brand-border bg-gradient-to-br from-brand-surface to-muted p-5">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand">Fechar a leitura</p>
+     <p className="mt-1 text-[14px] text-foreground">Acompanhe o impacto esperado ou garanta lembrete dos principais gatilhos.</p>
      <div className="mt-3 flex flex-wrap items-center gap-2">
       <button
-       className={cx('rounded-xl border border-[#0E9384] bg-[#0E9384] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+       className={cx('rounded-xl border border-brand bg-brand px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
        disabled={actionsDisabled}
        onClick={(event) => {
         if (guardAction(event, companyContext.companyId)) return;
@@ -3876,7 +3984,7 @@ const changesCount = changesBySelectedWindow.length;
        Ver todos os impactos esperados nos pilares
       </button>
       <button
-       className={cx('rounded-xl border border-[#D1FAE5] bg-white px-4 py-2 text-[13px] font-medium text-[#1F2937] hover:bg-[#F0FDF4]', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
+       className={cx('rounded-xl border border-brand-border bg-card px-4 py-2 text-[13px] font-medium text-foreground hover:bg-brand-surface', actionsDisabled ? 'cursor-not-allowed opacity-50' : '')}
        disabled={actionsDisabled}
        onClick={(event) => guardAction(event, companyContext.companyId)}
       >
@@ -3892,12 +4000,12 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Preço' && (
  <div className="space-y-4">
 
-  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+  <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
    <div className="flex flex-wrap items-start justify-between gap-3">
     <div>
-     <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Preço vs valor estimado</p>
-     <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Leitura por DCF</h2>
-     <p className="mt-1 text-[13px] text-[#64748B]">Não é recomendação de compra ou venda.</p>
+     <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Preço vs valor estimado</p>
+     <h2 className="mt-1 text-[18px] font-bold text-foreground">Leitura por DCF</h2>
+     <p className="mt-1 text-[13px] text-muted-foreground">Não é recomendação de compra ou venda.</p>
     </div>
     <div className="flex items-center gap-2">
      {valuationStateChipLabel && (
@@ -3906,7 +4014,7 @@ const changesCount = changesBySelectedWindow.length;
      <button
       type="button"
       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowValuationMethodologyDrawer(true); }}
-      className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-[#E2EDF5] px-2.5 py-1.5 text-[12px] text-[#64748B] hover:bg-[#F6FAFC]"
+      className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-border px-2.5 py-1.5 text-[12px] text-muted-foreground hover:bg-muted"
       aria-label="Aprender como calculamos o valuation"
      >
       <CircleHelp className="h-3.5 w-3.5" />
@@ -3914,40 +4022,40 @@ const changesCount = changesBySelectedWindow.length;
      </button>
     </div>
    </div>
-   <p className="mt-3 text-[11px] text-[#B0BAC8]">Fonte: {safeMeta(activeData?.priceData.source)} · Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
+   <p className="mt-3 text-[11px] text-muted-foreground">Fonte: {safeMeta(activeData?.priceData.source)} · Atualizado em: {safeMeta(activeData?.priceData.updatedAt)}</p>
 
    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Preço atual</p>
-     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.current) || '—'}</p>
+    <div className="rounded-2xl border border-border bg-muted p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Preço atual</p>
+     <p className="mt-1 text-[22px] font-bold text-foreground">{safeMeta(activeData?.priceData.current) || '—'}</p>
     </div>
-    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Preço justo estimado</p>
-     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.estimatedFairValue) || '—'}</p>
+    <div className="rounded-2xl border border-border bg-muted p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Preço justo estimado</p>
+     <p className="mt-1 text-[22px] font-bold text-foreground">{safeMeta(activeData?.priceData.estimatedFairValue) || '—'}</p>
     </div>
-    <div className="rounded-2xl border border-[#E2EDF5] bg-[#F6FAFC] p-4">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Diferença vs atual</p>
-     <p className="mt-1 text-[22px] font-bold text-[#0B1220]">{safeMeta(activeData?.priceData.differenceVsCurrent) || '—'}</p>
+    <div className="rounded-2xl border border-border bg-muted p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Diferença vs atual</p>
+     <p className="mt-1 text-[22px] font-bold text-foreground">{safeMeta(activeData?.priceData.differenceVsCurrent) || '—'}</p>
     </div>
    </div>
 
    {valuationSummaryLine && (
-    <div className="mt-4 rounded-xl border border-[#99F6E4] bg-[#F0FDFA] p-4">
-     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F766E]">Por que isso importa</p>
-     <p className="mt-1 text-[14px] text-[#334155]">{valuationSummaryLine}</p>
+    <div className="mt-4 rounded-xl border border-brand-border bg-brand-surface p-4">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-brand-text">Por que isso importa</p>
+     <p className="mt-1 text-[14px] text-foreground">{valuationSummaryLine}</p>
     </div>
    )}
   </article>
 
-  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Régua de valuation</p>
+  <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Régua de valuation</p>
    {!hasSemanticDomain && (
-    <div className="py-6 text-center text-[14px] text-[#9CA3AF]">Sem base suficiente para exibir a régua de valuation neste momento.</div>
+    <div className="py-6 text-center text-[14px] text-muted-foreground">Sem base suficiente para exibir a régua de valuation neste momento.</div>
    )}
    {hasSemanticDomain && (
    <>
-    <div className="mt-3 rounded-xl border border-[#E2EDF5] bg-[#F8FAFD] p-4">
-     <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-[#94A3B8]">
+    <div className="mt-3 rounded-xl border border-border bg-muted p-4">
+     <div className="mb-2 flex items-center justify-between text-[12px] font-medium text-muted-foreground">
       <span>{formatCurrencyBRL(rulerMin)}</span>
       <span>Posição do preço atual vs. preço justo estimado</span>
       <span>{formatCurrencyBRL(rulerMax)}</span>
@@ -3955,43 +4063,43 @@ const changesCount = changesBySelectedWindow.length;
      <div className="relative pt-9">
       {fairValue != null && fairMarker != null && (
        <div className="pointer-events-none absolute left-0 right-0 top-0">
-        <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl border border-[#CFE9E1] bg-white px-2 py-1 text-[13px] font-semibold text-[#0F766E] shadow-sm">
+        <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl border border-brand-border bg-card px-2 py-1 text-[13px] font-semibold text-brand-text shadow-sm">
          Preço justo estimado {formatCurrencyBRL(fairValue)}
         </div>
        </div>
       )}
       {currentMarker != null && (
        <div className="pointer-events-none absolute bottom-0 top-0 z-[1]" style={{ left: `${currentMarker}%` }}>
-        <div className="-ml-[1.5px] h-full w-[3px] rounded-full bg-[#0B1220]/95 shadow-[0_0_0_2px_#ffffff]" />
-        <div className={`absolute -top-5 whitespace-nowrap rounded-xl border border-[#CBD5E1] bg-white px-2 py-1 text-[13px] font-semibold text-[#0B1220] shadow-sm ${currentMarkerLabelClass}`}>
+        <div className="-ml-[1.5px] h-full w-[3px] rounded-full bg-foreground/95 shadow-[0_0_0_2px_var(--card)]" />
+        <div className={`absolute -top-5 whitespace-nowrap rounded-xl border border-border-strong bg-card px-2 py-1 text-[13px] font-semibold text-foreground shadow-sm ${currentMarkerLabelClass}`}>
          <span>{safeMeta(valuationBullet?.currentLabel) || 'Preço atual'}</span>
-         <span className="ml-1 text-[#475569]">{formatCurrencyBRL(currentPriceForRuler)}</span>
+         <span className="ml-1 text-dim">{formatCurrencyBRL(currentPriceForRuler)}</span>
         </div>
        </div>
       )}
-      <div className="h-9 overflow-hidden rounded-full border border-[#DCE4EE] bg-[#F8FAFD]">
+      <div className="h-9 overflow-hidden rounded-full border border-border bg-muted">
        {hasNearZone ? (
         <div className="flex h-full w-full">
-         <div className="h-full bg-[#E9F8F4]" style={{ width: `${belowZoneWidthPct}%` }} />
-         <div className="h-full border-x border-[#F2D28A] bg-[#FFF4DB]" style={{ width: `${nearZoneWidthPct}%` }} />
-         <div className="h-full bg-[#FDEBE7]" style={{ width: `${aboveZoneWidthPct}%` }} />
+         <div className="h-full bg-brand-surface" style={{ width: `${belowZoneWidthPct}%` }} />
+         <div className="h-full border-x border-warning-border bg-warning-surface" style={{ width: `${nearZoneWidthPct}%` }} />
+         <div className="h-full bg-danger-surface" style={{ width: `${aboveZoneWidthPct}%` }} />
         </div>
        ) : (
-        <div className="h-full w-full bg-[#EEF2F6]" />
+        <div className="h-full w-full bg-muted" />
        )}
       </div>
      </div>
-     <div className="mt-3 grid gap-2 text-[12px] text-[#5B6472] sm:grid-cols-3">
-      <p><span className="inline-block h-2 w-2 rounded-full bg-[#A6E7D6]" /> <span className="ml-1 font-medium text-[#334155]">Abaixo do preço justo estimado</span></p>
-      <p><span className="inline-block h-2 w-2 rounded-full bg-[#F2C86B]" /> <span className="ml-1 font-medium text-[#334155]">Próximo do preço justo estimado</span></p>
-      <p><span className="inline-block h-2 w-2 rounded-full bg-[#F1B4A8]" /> <span className="ml-1 font-medium text-[#334155]">Acima do preço justo estimado</span></p>
+     <div className="mt-3 grid gap-2 text-[12px] text-muted-foreground sm:grid-cols-3">
+      <p><span className="inline-block h-2 w-2 rounded-full bg-brand-border" /> <span className="ml-1 font-medium text-foreground">Abaixo do preço justo estimado</span></p>
+      <p><span className="inline-block h-2 w-2 rounded-full bg-warning-border" /> <span className="ml-1 font-medium text-foreground">Próximo do preço justo estimado</span></p>
+      <p><span className="inline-block h-2 w-2 rounded-full bg-danger-border" /> <span className="ml-1 font-medium text-foreground">Acima do preço justo estimado</span></p>
      </div>
      <div className="mt-2">
-      <p className="text-[13px] font-medium text-[#334155]">A régua mostra em qual zona o preço atual cai em relação ao preço justo estimado.</p>
+      <p className="text-[13px] font-medium text-foreground">A régua mostra em qual zona o preço atual cai em relação ao preço justo estimado.</p>
       <button
        type="button"
        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowValuationMethodologyDrawer(true); }}
-       className="mt-1 inline-flex items-center gap-1 rounded-xl px-1 py-0.5 text-[12px] text-[#64748B] hover:bg-[#F5F7FA]"
+       className="mt-1 inline-flex items-center gap-1 rounded-xl px-1 py-0.5 text-[12px] text-muted-foreground hover:bg-hover"
       >
        <CircleHelp className="h-3.5 w-3.5" />
        Entender cálculo do valuation
@@ -4002,45 +4110,45 @@ const changesCount = changesBySelectedWindow.length;
    )}
   </section>
 
-  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Cenários do valuation</p>
-   <div className="mt-3 grid grid-cols-4 border-b border-[#E2EDF5] pb-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+  <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Cenários do valuation</p>
+   <div className="mt-3 grid grid-cols-4 border-b border-border pb-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
     <span>Cenário</span>
     <span>Valor estimado</span>
     <span>Diferença vs atual</span>
     <span>Leitura</span>
    </div>
    {valuationScenarios.map((scenario, index) => (
-    <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-[#E2EDF5] py-3.5 text-[13px] text-[#334155]">
+    <div key={`${scenario.scenario}-${index}`} className="grid grid-cols-4 border-b border-border py-3.5 text-[13px] text-foreground">
      <span className="font-medium">{scenario.scenario || '—'}</span>
      <span>{scenario.estimatedValue || '—'}</span>
      <span>{scenario.differenceVsCurrent || '—'}</span>
-     <span className="text-[#64748B]">{scenario.reading || '—'}</span>
+     <span className="text-muted-foreground">{scenario.reading || '—'}</span>
     </div>
    ))}
-   {valuationScenarios.length === 0 && <div className="py-4 text-center text-[13px] text-[#9CA3AF]">Sem cenários de valuation disponíveis.</div>}
+   {valuationScenarios.length === 0 && <div className="py-4 text-center text-[13px] text-muted-foreground">Sem cenários de valuation disponíveis.</div>}
   </section>
 
-  <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Sensibilidade do valuation</p>
-   <p className="mt-1 text-[13px] text-[#64748B]">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
+  <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Sensibilidade do valuation</p>
+   <p className="mt-1 text-[13px] text-muted-foreground">Drivers principais: crescimento terminal, WACC, margem operacional e capex/reinvestimento.</p>
    <div className="mt-3 grid gap-3 sm:grid-cols-2">
     {sensitivityDrivers.map((driver, index) => (
-     <div key={`${driver.driver}-${index}`} className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[13px] font-semibold text-[#0F172A]">{driver.driver || '—'}</p>
-      <p className="mt-1 text-[13px] text-[#475569]">{driver.value || '—'}</p>
-      <p className="mt-1 text-[12px] text-[#6B7280]">{driver.impact || '—'}</p>
+     <div key={`${driver.driver}-${index}`} className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[13px] font-semibold text-foreground">{driver.driver || '—'}</p>
+      <p className="mt-1 text-[13px] text-dim">{driver.value || '—'}</p>
+      <p className="mt-1 text-[12px] text-muted-foreground">{driver.impact || '—'}</p>
      </div>
     ))}
-    {sensitivityDrivers.length === 0 && <p className="text-[13px] text-[#9CA3AF]">Sem drivers de sensibilidade disponíveis.</p>}
+    {sensitivityDrivers.length === 0 && <p className="text-[13px] text-muted-foreground">Sem drivers de sensibilidade disponíveis.</p>}
    </div>
   </section>
 
-  <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-   <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Múltiplos de apoio</p>
+  <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+   <div className="border-b border-border bg-muted px-5 py-3">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Múltiplos de apoio</p>
    </div>
-   <div className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+   <div className="grid grid-cols-5 border-b border-border px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
     <span>Métrica</span>
     <span>Atual</span>
     <span>Setor</span>
@@ -4048,17 +4156,17 @@ const changesCount = changesBySelectedWindow.length;
     <span>Leitura</span>
    </div>
    {companyPriceRows.map((row) => (
-    <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-[#E2EDF5] px-5 py-3 text-[13px] text-[#334155] hover:bg-[#F6FAFC]">
+    <div key={`${row.metric}-${row.companyId}`} className="grid grid-cols-5 border-b border-border px-5 py-3 text-[13px] text-foreground hover:bg-muted">
      <span className="font-medium">{row.metric}</span>
      <span>{row.current}</span>
      <span>{row.sector}</span>
      <span>{row.histórical}</span>
-     <span className="text-[#64748B]">{row.insight}</span>
+     <span className="text-muted-foreground">{row.insight}</span>
     </div>
    ))}
-   {companyPriceRows.length === 0 && <div className="px-5 py-4 text-center text-[13px] text-[#9CA3AF]">Sem múltiplos de apoio disponíveis.</div>}
-   <div className="border-t border-[#E2EDF5] px-5 py-3">
-    <p className="text-[12px] italic text-[#6B7280]">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
+   {companyPriceRows.length === 0 && <div className="px-5 py-4 text-center text-[13px] text-muted-foreground">Sem múltiplos de apoio disponíveis.</div>}
+   <div className="border-t border-border px-5 py-3">
+    <p className="text-[12px] italic text-muted-foreground">{safeMeta(activeData?.priceData.multiplesSummary) || 'Múltiplos ajudam a contextualizar a leitura de valuation, sem substituir o cenário-base de DCF.'}</p>
    </div>
   </section>
 
@@ -4068,56 +4176,56 @@ const changesCount = changesBySelectedWindow.length;
  {activeTab === 'Fontes' && (
  <div className="space-y-4">
 
-  <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Fontes & Metodologia</p>
-   <h2 className="mt-1 text-[18px] font-bold text-[#111827]">Transparência da leitura</h2>
-   <p className="mt-1 text-[13px] text-[#64748B]">Veja de onde vem os dados e quão atualizadas estão as fontes que sustentam esta análise.</p>
+  <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Fontes & Metodologia</p>
+   <h2 className="mt-1 text-[18px] font-bold text-foreground">Transparência da leitura</h2>
+   <p className="mt-1 text-[13px] text-muted-foreground">Veja de onde vem os dados e quão atualizadas estão as fontes que sustentam esta análise.</p>
   </article>
 
   {sourceRowsWithRelevance.length === 0 && (
-   <article className="rounded-2xl border border-[#E2EDF5] bg-white p-6 shadow-sm">
+   <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
     <div className="flex flex-col items-center gap-3 py-4 text-center">
-     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F6FAFC]">
-      <Database className="h-5 w-5 text-[#A0AEC0]" />
+     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted">
+      <Database className="h-5 w-5 text-muted-foreground" />
      </div>
-     <p className="text-[14px] font-medium text-[#6B7280]">Ainda não temos dados suficientes para este indicador.</p>
-     <p className="text-[12px] text-[#9CA3AF]">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
+     <p className="text-[14px] font-medium text-muted-foreground">Ainda não temos dados suficientes para este indicador.</p>
+     <p className="text-[12px] text-muted-foreground">Última tentativa: {safeMeta(activeData?.summaryMeta.updatedAt)} · Fonte esperada: CVM/RI</p>
     </div>
    </article>
   )}
 
   {sourceRowsWithRelevance.length > 0 && (
   <>
-   <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
+   <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
     <div className="flex flex-wrap items-center justify-between gap-3">
      <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">Confiabilidade das fontes</p>
-      <h3 className="mt-1 text-[16px] font-bold text-[#111827]">{resolvedSourceConfidenceLabel}</h3>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Confiabilidade das fontes</p>
+      <h3 className="mt-1 text-[16px] font-bold text-foreground">{resolvedSourceConfidenceLabel}</h3>
      </div>
      <span className={cx('rounded-full border px-3 py-1 text-[12px] font-semibold', sourceConfidenceTone)}>{resolvedSourceConfidenceLabel}</span>
     </div>
-    <p className="mt-2 text-[13px] text-[#475569]">{resolvedSourceConfidenceSummary}</p>
+    <p className="mt-2 text-[13px] text-dim">{resolvedSourceConfidenceSummary}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes atualizadas</p>
-      <p className="mt-1 font-semibold text-[#111827]">{updatedPrimarySources}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Fontes atualizadas</p>
+      <p className="mt-1 font-semibold text-foreground">{updatedPrimarySources}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Fontes complementares antigas</p>
-      <p className="mt-1 font-semibold text-[#111827]">{outdatedComplementarySources}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Fontes complementares antigas</p>
+      <p className="mt-1 font-semibold text-foreground">{outdatedComplementarySources}</p>
      </div>
-     <div className="rounded-xl border border-[#E2EDF5] bg-[#F6FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Última atualização</p>
-      <p className="mt-1 font-semibold text-[#111827]">{safeMeta(latestSourceDate)}</p>
+     <div className="rounded-xl border border-border bg-muted p-3">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Última atualização</p>
+      <p className="mt-1 font-semibold text-foreground">{safeMeta(latestSourceDate)}</p>
      </div>
     </div>
    </section>
 
-   <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
-     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes principais da leitura</p>
+   <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <div className="border-b border-border bg-muted px-5 py-3">
+     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Fontes principais da leitura</p>
     </div>
-    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <div className="grid grid-cols-9 border-b border-border px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
      <span>Categoria</span>
      <span>Fonte</span>
      <span>Documento</span>
@@ -4127,17 +4235,17 @@ const changesCount = changesBySelectedWindow.length;
      <span className="col-span-2">Link</span>
     </div>
     {primarySourceRows.map((row) => (
-    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-border px-5 py-3.5 text-[12px] text-foreground hover:bg-muted">
      <span className="font-medium">{row.category}</span>
-     <span className="text-[#64748B]">{safeMeta(row.source)}</span>
+     <span className="text-muted-foreground">{safeMeta(row.source)}</span>
      <span>{row.doc}</span>
-     <span className="text-[#64748B]">{safeMeta(row.date)}</span>
+     <span className="text-muted-foreground">{safeMeta(row.date)}</span>
      <span>
-      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
+      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-brand-border bg-brand-surface text-brand' : 'border-warning-border bg-warning-surface text-warning-text')}>
        {row.statusLabel}
       </span>
      </span>
-     <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
+     <span className="col-span-2 text-[11px] text-muted-foreground">{row.consequence}</span>
      <a
       href={row.link}
       target="_blank"
@@ -4145,7 +4253,7 @@ const changesCount = changesBySelectedWindow.length;
       onClick={(event) => {
        if (guardAction(event, row.companyId)) return;
       }}
-      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
+      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-brand hover:underline', actionsDisabled ? 'opacity-50' : '')}
      >
       Abrir documento
       <ExternalLink className="h-3 w-3" />
@@ -4154,11 +4262,11 @@ const changesCount = changesBySelectedWindow.length;
     ))}
    </section>
 
-   <section className="overflow-hidden rounded-2xl border border-[#E2EDF5] bg-white shadow-sm">
-    <div className="border-b border-[#E2EDF5] bg-[#F6FAFC] px-5 py-3">
-     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Fontes complementares</p>
+   <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <div className="border-b border-border bg-muted px-5 py-3">
+     <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Fontes complementares</p>
     </div>
-    <div className="grid grid-cols-9 border-b border-[#E2EDF5] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8]">
+    <div className="grid grid-cols-9 border-b border-border px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
      <span>Categoria</span>
      <span>Fonte</span>
      <span>Documento</span>
@@ -4168,17 +4276,17 @@ const changesCount = changesBySelectedWindow.length;
      <span className="col-span-2">Link</span>
     </div>
     {complementarySourceRows.map((row) => (
-    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-[#E2EDF5] px-5 py-3.5 text-[12px] text-[#334155] hover:bg-[#F6FAFC]">
+    <div key={`${row.category}-${row.doc}`} className="grid grid-cols-9 items-center border-b border-border px-5 py-3.5 text-[12px] text-foreground hover:bg-muted">
      <span className="font-medium">{row.category}</span>
-     <span className="text-[#64748B]">{safeMeta(row.source)}</span>
+     <span className="text-muted-foreground">{safeMeta(row.source)}</span>
      <span>{row.doc}</span>
-     <span className="text-[#64748B]">{safeMeta(row.date)}</span>
+     <span className="text-muted-foreground">{safeMeta(row.date)}</span>
      <span>
-      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-[#99F6E4] bg-[#F0FDFA] text-[#0E9384]' : 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]')}>
+      <span className={cx('rounded-full border px-2 py-0.5 text-[10px] font-semibold', row.status === 'Atualizado' ? 'border-brand-border bg-brand-surface text-brand' : 'border-warning-border bg-warning-surface text-warning-text')}>
        {row.statusLabel}
       </span>
      </span>
-     <span className="col-span-2 text-[11px] text-[#64748B]">{row.consequence}</span>
+     <span className="col-span-2 text-[11px] text-muted-foreground">{row.consequence}</span>
      <a
       href={row.link}
       target="_blank"
@@ -4186,7 +4294,7 @@ const changesCount = changesBySelectedWindow.length;
       onClick={(event) => {
        if (guardAction(event, row.companyId)) return;
       }}
-      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-[#0E9384] hover:underline', actionsDisabled ? 'opacity-50' : '')}
+      className={cx('col-span-2 inline-flex items-center gap-1 text-[11px] text-brand hover:underline', actionsDisabled ? 'opacity-50' : '')}
      >
       Abrir documento
       <ExternalLink className="h-3 w-3" />
@@ -4195,12 +4303,12 @@ const changesCount = changesBySelectedWindow.length;
     ))}
    </section>
 
-   <section className="rounded-2xl border border-[#E2EDF5] bg-white p-5 shadow-sm">
-    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#94A3B8]">Como usamos essas fontes</p>
+   <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Como usamos essas fontes</p>
     <ul className="mt-3 space-y-2">
-     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Dados financeiros sustentam os pilares estruturais da leitura.</span></li>
-     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Eventos e comunicados complementam o contexto recente da empresa.</span></li>
-     <li className="flex items-start gap-2 text-[13px] text-[#475569]"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#94A3B8]" /><span>Fontes complementares não substituem as fontes principais da análise.</span></li>
+     <li className="flex items-start gap-2 text-[13px] text-dim"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground" /><span>Dados financeiros sustentam os pilares estruturais da leitura.</span></li>
+     <li className="flex items-start gap-2 text-[13px] text-dim"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground" /><span>Eventos e comunicados complementam o contexto recente da empresa.</span></li>
+     <li className="flex items-start gap-2 text-[13px] text-dim"><span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground" /><span>Fontes complementares não substituem as fontes principais da análise.</span></li>
     </ul>
    </section>
   </>
@@ -4216,39 +4324,39 @@ const changesCount = changesBySelectedWindow.length;
  <button
  type="button"
  aria-label="Fechar painel de metodologia"
- className="absolute inset-0 bg-[#0B1220]/20"
+ className="absolute inset-0 bg-foreground/20"
  onClick={() => setShowValuationMethodologyDrawer(false)}
  />
- <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-[#E7EAEE] bg-white p-6 shadow-2xl">
+ <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-border bg-card p-6 shadow-2xl">
  <div className="flex items-start justify-between gap-3">
  <div>
- <p className="text-[11px] uppercase tracking-wide text-[#94A3B8]">Metodologia</p>
- <h3 className="mt-1 text-[16px] font-semibold text-[#111827]">Como calculamos o valuation</h3>
+ <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Metodologia</p>
+ <h3 className="mt-1 text-[16px] font-semibold text-foreground">Como calculamos o valuation</h3>
  </div>
  <button
  type="button"
- className="rounded-md border border-[#E2EDF5] px-2.5 py-1 text-[12px] text-[#475569] hover:bg-[#F8FAFC]"
+ className="rounded-md border border-border px-2.5 py-1 text-[12px] text-dim hover:bg-background"
  onClick={() => setShowValuationMethodologyDrawer(false)}
  >
  Fechar
  </button>
  </div>
- <div className="mt-4 space-y-4 text-[13px] text-[#475569]">
+ <div className="mt-4 space-y-4 text-[13px] text-dim">
  <p>Nosso valuation busca responder uma pergunta simples: quanto uma empresa vale hoje com base no caixa que ela pode gerar no futuro?</p>
  <p>Para isso, usamos um modelo de Fluxo de Caixa Descontado (DCF).</p>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">Em termos simples</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">Em termos simples</p>
  <p className="mt-1">Projetamos a geração de caixa futura da empresa, trazemos esses valores para o presente com uma taxa de desconto e chegamos a uma estimativa de valor por ação.</p>
  </section>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">A lógica central</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">A lógica central</p>
  <p className="mt-1">Uma empresa vale o quanto consegue gerar de caixa ao longo do tempo. Como o dinheiro no futuro vale menos do que hoje, descontamos esses fluxos usando uma taxa que reflete risco, custo de capital e estrutura financeira.</p>
  </section>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">Como fazemos isso</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">Como fazemos isso</p>
  <ul className="mt-2 list-disc space-y-1 pl-5">
  <li>Partimos dos dados atuais da empresa, como receita, EBIT, imposto, dívida, caixa e número de ações.</li>
  <li>Projetamos crescimento, margem operacional e reinvestimento para os próximos anos.</li>
@@ -4259,24 +4367,24 @@ const changesCount = changesBySelectedWindow.length;
  </ul>
  </section>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">O que mais influencia o resultado</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">O que mais influencia o resultado</p>
  <p className="mt-1">O valuation depende principalmente de crescimento da receita, margem operacional, reinvestimento, WACC, crescimento terminal e número de ações.</p>
  <p className="mt-1">Pequenas mudanças nessas premissas podem alterar de forma relevante o preço justo estimado.</p>
  </section>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">O que esse cálculo faz bem</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">O que esse cálculo faz bem</p>
  <p className="mt-1">Ele ajuda a enxergar o valor econômico do negócio, comparar preço de mercado com valor estimado e entender quais premissas sustentam a tese.</p>
  </section>
 
- <section className="rounded-lg border border-[#E2EDF5] bg-[#F6FAFC] p-3">
- <p className="font-semibold text-[#0F172A]">O que esse cálculo não faz</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">O que esse cálculo não faz</p>
  <p className="mt-1">Ele não prevê o preço da ação no curto prazo, não garante retorno e não substitui a análise qualitativa do negócio.</p>
  </section>
 
- <section className="rounded-lg border border-[#E6EEF9] bg-[#F7FBFF] p-3">
- <p className="font-semibold text-[#0F172A]">Em resumo</p>
+ <section className="rounded-lg border border-border bg-muted p-3">
+ <p className="font-semibold text-foreground">Em resumo</p>
  <p className="mt-1">Projetamos a operação da empresa, estimamos o caixa que ela pode gerar, trazemos esse caixa para o valor de hoje e chegamos a um preço justo por ação.</p>
  </section>
  </div>

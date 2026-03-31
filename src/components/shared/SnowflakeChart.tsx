@@ -370,7 +370,7 @@ export function SnowflakeChart({
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className={`absolute top-full left-1/2 -translate-x-1/2 mt-4 ${isLarge ? 'w-80' : 'w-64'} bg-white border border-neutral-200 rounded-2xl p-4 shadow-lg z-20`}
+            className={`absolute top-full left-1/2 -translate-x-1/2 mt-4 ${isLarge ? 'w-80' : 'w-64'} bg-card border border-neutral-200 dark:border-neutral-700 rounded-2xl p-4 shadow-lg z-20`}
           >
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-mint-100 flex items-center justify-center flex-shrink-0">

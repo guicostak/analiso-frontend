@@ -73,24 +73,24 @@ const alerts = [
 function chip(status: string) {
   if (status === "Atenção") return "border-[#F8E1B1] bg-[#FFF4DE] text-[#B27300]";
   if (status === "Saudável") return "border-[#CDECDD] bg-[#EAF9F0] text-[#17825B]";
-  return "border-[#E2EDF5] bg-[#F6FAFC] text-[#667085]";
+  return "border-border bg-muted text-muted-foreground";
 }
 
 function toneChip(tone: string) {
   if (tone === "attention") return "border-[#F8E1B1] bg-[#FFF4DE] text-[#B27300]";
   if (tone === "positive") return "border-[#CDECDD] bg-[#EAF9F0] text-[#17825B]";
-  return "border-[#E2EDF5] bg-[#F6FAFC] text-[#667085]";
+  return "border-border bg-muted text-muted-foreground";
 }
 
 export function CompanyWatchlistMock() {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-[#E2EDF5] bg-[#F6FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
-      <div className="border-b border-[#E2EDF5] bg-white px-6 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#0E9384]">Watchlist</p>
+    <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-muted shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
+      <div className="border-b border-border bg-card px-6 py-4">
+        <p className="text-[10px] font-semibold uppercase text-brand">Watchlist</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
-            <h3 className="text-[20px] font-semibold text-[#0F1728]">Veja o que mudou sem perder contexto</h3>
-            <p className="mt-1 text-[13px] text-[#667085]">
+            <h3 className="text-[20px] font-semibold text-foreground">Veja o que mudou sem perder contexto</h3>
+            <p className="mt-1 text-[13px] text-muted-foreground">
               Triagem primeiro. Organização depois. Acompanhe mudanças, prioridades e a lista monitorada com menos ruído.
             </p>
           </div>
@@ -103,7 +103,7 @@ export function CompanyWatchlistMock() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 border-b border-[#E2EDF5] bg-white px-6 py-3">
+      <div className="flex items-center gap-3 border-b border-border bg-card px-6 py-3">
         {["Atualizações", "Lista"].map((tab, index) => (
           <button
             key={tab}
@@ -111,7 +111,7 @@ export function CompanyWatchlistMock() {
             className={`rounded-full border px-4 py-2 text-[12px] font-semibold ${
               index === 0
                 ? "border-[#D9E8FF] bg-[#EEF6FF] text-[#3965B8]"
-                : "border-[#E7EEF5] bg-white text-[#667085]"
+                : "border-border bg-card text-muted-foreground"
             }`}
           >
             {tab}
@@ -122,35 +122,35 @@ export function CompanyWatchlistMock() {
       <div className="flex-1 overflow-y-auto p-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="grid grid-cols-12 gap-5">
           <section className="col-span-8 space-y-5">
-            <article className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Estado da watchlist</p>
-              <h4 className="mt-1 text-[18px] font-semibold text-[#0F1728]">
+            <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Estado da watchlist</p>
+              <h4 className="mt-1 text-[18px] font-semibold text-foreground">
                 Hoje a prioridade está concentrada em WEGE3 e em mudanças de margem.
               </h4>
-              <p className="mt-2 text-[13px] leading-6 text-[#667085]">
+              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
                 A leitura do dia pede uma revisão primeiro nos casos com mudança relevante e depois nos itens estáveis.
               </p>
               <div className="mt-4 grid grid-cols-3 gap-3">
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Atenção</p>
-                  <p className="mt-1 text-[18px] font-semibold text-[#0F1728]">2</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção</p>
+                  <p className="mt-1 text-[18px] font-semibold text-foreground">2</p>
                 </div>
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Mudanças 30d</p>
-                  <p className="mt-1 text-[18px] font-semibold text-[#0F1728]">4</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Mudanças 30d</p>
+                  <p className="mt-1 text-[18px] font-semibold text-foreground">4</p>
                 </div>
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Monitoradas</p>
-                  <p className="mt-1 text-[18px] font-semibold text-[#0F1728]">12</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Ações Favoritas</p>
+                  <p className="mt-1 text-[18px] font-semibold text-foreground">12</p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+            <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Atualizações</p>
-                  <h4 className="mt-1 text-[16px] font-semibold text-[#0F1728]">O que mudou e merece atenção</h4>
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">Atualizações</p>
+                  <h4 className="mt-1 text-[16px] font-semibold text-foreground">O que mudou e merece atenção</h4>
                 </div>
                 <div className="flex items-center gap-2">
                   {["7d", "30d", "90d"].map((range, index) => (
@@ -158,7 +158,7 @@ export function CompanyWatchlistMock() {
                       key={range}
                       type="button"
                       className={`rounded-full px-3 py-1 text-[11px] font-medium ${
-                        index === 1 ? "bg-[#EEF6FF] text-[#3965B8]" : "text-[#667085]"
+                        index === 1 ? "bg-[#EEF6FF] text-[#3965B8]" : "text-muted-foreground"
                       }`}
                     >
                       {range}
@@ -172,7 +172,7 @@ export function CompanyWatchlistMock() {
                   <button
                     key={item.ticker}
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-[18px] border border-[#E8EEF5] bg-[#FCFDFE] px-4 py-3 text-left"
+                    className="flex w-full items-center gap-3 rounded-[18px] border border-border bg-card px-4 py-3 text-left"
                   >
                     <img src={item.logo} alt={item.ticker} className="h-10 w-10 rounded-xl object-cover" />
                     <div className="min-w-0 flex-1">
@@ -180,29 +180,29 @@ export function CompanyWatchlistMock() {
                         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${toneChip(item.tone)}`}>
                           {item.tag}
                         </span>
-                        <span className="text-[12px] font-semibold text-[#334155]">{item.ticker}</span>
+                        <span className="text-[12px] font-semibold text-dim">{item.ticker}</span>
                       </div>
-                      <p className="mt-1 text-[13px] font-semibold text-[#0F1728]">{item.title}</p>
-                      <p className="mt-1 text-[12px] text-[#667085]">{item.summary}</p>
+                      <p className="mt-1 text-[13px] font-semibold text-foreground">{item.title}</p>
+                      <p className="mt-1 text-[12px] text-muted-foreground">{item.summary}</p>
                     </div>
                   </button>
                 ))}
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+            <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Lista monitorada</p>
-                  <h4 className="mt-1 text-[16px] font-semibold text-[#0F1728]">Watchlist com contexto</h4>
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">Lista monitorada</p>
+                  <h4 className="mt-1 text-[16px] font-semibold text-foreground">Watchlist com contexto</h4>
                 </div>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     readOnly
                     value=""
                     placeholder="Buscar empresa ou ticker..."
-                    className="h-10 w-[240px] rounded-[16px] border border-[#E7EEF5] bg-[#F8FBFD] pl-10 pr-3 text-[12px] text-[#0F1728] outline-none"
+                    className="h-10 w-[240px] rounded-[16px] border border-border bg-muted pl-10 pr-3 text-[12px] text-foreground outline-none"
                   />
                 </div>
               </div>
@@ -211,22 +211,22 @@ export function CompanyWatchlistMock() {
                 {companies.map((company) => (
                   <div
                     key={company.ticker}
-                    className="flex items-center gap-3 rounded-[18px] border border-[#E8EEF5] bg-[#FCFDFE] px-4 py-3"
+                    className="flex items-center gap-3 rounded-[18px] border border-border bg-card px-4 py-3"
                   >
                     <img src={company.logo} alt={company.ticker} className="h-10 w-10 rounded-xl object-cover" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-[13px] font-semibold text-[#0F1728]">{company.name}</p>
-                        <span className="text-[12px] text-[#667085]">{company.ticker}</span>
+                        <p className="text-[13px] font-semibold text-foreground">{company.name}</p>
+                        <span className="text-[12px] text-muted-foreground">{company.ticker}</span>
                         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${chip(company.status)}`}>
                           {company.status}
                         </span>
                       </div>
-                      <p className="mt-1 text-[12px] text-[#667085]">{company.why}</p>
+                      <p className="mt-1 text-[12px] text-muted-foreground">{company.why}</p>
                     </div>
                     <button
                       type="button"
-                      className="rounded-[14px] border border-[#E7EEF5] bg-white px-3 py-1.5 text-[12px] font-medium text-[#334155]"
+                      className="rounded-[14px] border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-dim"
                     >
                       Abrir
                     </button>
@@ -237,42 +237,42 @@ export function CompanyWatchlistMock() {
           </section>
 
           <aside className="col-span-4 space-y-5">
-            <article className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Visão rápida</p>
+            <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Visão rápida</p>
               <div className="mt-4 space-y-3">
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[12px] font-medium text-[#667085]">Principal atenção</p>
-                  <p className="mt-1 text-[14px] font-semibold text-[#0F1728]">WEGE3 em Margens</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[12px] font-medium text-muted-foreground">Principal atenção</p>
+                  <p className="mt-1 text-[14px] font-semibold text-foreground">WEGE3 em Margens</p>
                 </div>
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[12px] font-medium text-[#667085]">Maior melhora</p>
-                  <p className="mt-1 text-[14px] font-semibold text-[#0F1728]">VALE3 com recuperação operacional</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[12px] font-medium text-muted-foreground">Maior melhora</p>
+                  <p className="mt-1 text-[14px] font-semibold text-foreground">VALE3 com recuperação operacional</p>
                 </div>
-                <div className="rounded-[18px] border border-[#E7EEF5] bg-[#F8FBFD] p-3">
-                  <p className="text-[12px] font-medium text-[#667085]">Próximo passo</p>
-                  <p className="mt-1 text-[14px] font-semibold text-[#0F1728]">Abrir WEGE3 e confirmar impacto</p>
+                <div className="rounded-[18px] border border-border bg-muted p-3">
+                  <p className="text-[12px] font-medium text-muted-foreground">Próximo passo</p>
+                  <p className="mt-1 text-[14px] font-semibold text-foreground">Abrir WEGE3 e confirmar impacto</p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#E7EEF5] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
+            <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#98A2B3]">Alertas</p>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Alertas</p>
                 <button type="button" className="text-[12px] font-medium text-[#3965B8]">
                   Ver regras
                 </button>
               </div>
               <div className="mt-4 space-y-3">
                 {alerts.map((alert) => (
-                  <div key={alert.ticker} className="rounded-[18px] border border-[#E8EEF5] bg-[#FCFDFE] p-3">
+                  <div key={alert.ticker} className="rounded-[18px] border border-border bg-card p-3">
                     <div className="flex items-center gap-2">
                       <span className="rounded-full border border-[#F8E1B1] bg-[#FFF4DE] px-2 py-0.5 text-[10px] font-semibold text-[#B27300]">
                         Atenção
                       </span>
-                      <span className="text-[12px] font-semibold text-[#334155]">{alert.ticker}</span>
+                      <span className="text-[12px] font-semibold text-dim">{alert.ticker}</span>
                     </div>
-                    <p className="mt-2 text-[13px] font-semibold text-[#0F1728]">{alert.title}</p>
-                    <p className="mt-1 text-[12px] text-[#667085]">{alert.note}</p>
+                    <p className="mt-2 text-[13px] font-semibold text-foreground">{alert.title}</p>
+                    <p className="mt-1 text-[12px] text-muted-foreground">{alert.note}</p>
                   </div>
                 ))}
               </div>

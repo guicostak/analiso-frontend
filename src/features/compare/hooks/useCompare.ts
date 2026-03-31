@@ -74,6 +74,13 @@ export interface UseCompareReturn {
   toast: string;
   compactSticky: boolean;
   actionsOpen: boolean;
+  customFrom: string;
+  setCustomFrom: (v: string) => void;
+  customTo: string;
+  setCustomTo: (v: string) => void;
+  comparisonHistory: Array<{ tickers: string[]; label: string; savedAt: string }>;
+  historyOpen: boolean;
+  setHistoryOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
 
   // Dados derivados de empresas
   selected: CompareCompany[];
@@ -148,7 +155,7 @@ export function useCompare(): UseCompareReturn {
 
   // — Estado do painel —
   const [activePillar, setActivePillar] = useState<ComparePillar>("Divida");
-  const [range, setRange] = useState<CompareRangeKey>("5a");
+  const [range, setRange] = useState<CompareRangeKey>("1a");
   const [eventsOpen, setEventsOpen] = useState(false);
   const [qualityOpen, setQualityOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -156,6 +163,14 @@ export function useCompare(): UseCompareReturn {
   const [toast, setToast] = useState("");
   const [compactSticky, setCompactSticky] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [comparisonHistory, setComparisonHistory] = useState<Array<{
+    tickers: string[];
+    label: string;
+    savedAt: string;
+  }>>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // — Dados derivados básicos —
   const selected = useMemo(
@@ -193,7 +208,7 @@ export function useCompare(): UseCompareReturn {
     setRefreshing(true);
     const t = window.setTimeout(() => setRefreshing(false), 350);
     return () => window.clearTimeout(t);
-  }, [selectedTickers, activePillar, range]);
+  }, [selectedTickers, activePillar, range, customFrom, customTo]);
 
   // Auto-dismiss do toast
   useEffect(() => {
@@ -220,18 +235,21 @@ export function useCompare(): UseCompareReturn {
 
   // — Dados derivados de cálculo —
 
-  const years = RANGES.find((r) => r.key === range)?.years ?? null;
+  const rangeOpt = RANGES.find((r) => r.key === range);
+  const years = rangeOpt?.years ?? null;
+  const months = rangeOpt?.months ?? null;
 
   const chartData = useMemo(() => {
     if (!a || !b) return [];
-    const as = years
-      ? a.pillars[activePillar].series.slice(-years)
+    const sliceCount = years ? years : months ? Math.ceil(months / 12) : null;
+    const as = sliceCount
+      ? a.pillars[activePillar].series.slice(-sliceCount)
       : a.pillars[activePillar].series;
-    const bs = years
-      ? b.pillars[activePillar].series.slice(-years)
+    const bs = sliceCount
+      ? b.pillars[activePillar].series.slice(-sliceCount)
       : b.pillars[activePillar].series;
     return as.map((p, i) => ({ year: p.year, a: p.value, b: bs[i]?.value ?? null }));
-  }, [a, b, activePillar, years]);
+  }, [a, b, activePillar, years, months]);
 
   const scoreboard = useMemo<CompareScoreboard | null>(() => {
     if (!a || !b) return null;
@@ -437,9 +455,15 @@ export function useCompare(): UseCompareReturn {
   }, [selectedTickers, range, activePillar]);
 
   const saveComparison = useCallback(() => {
-    setToast("Comparacao salva.");
-    setActionsOpen(false);
-  }, []);
+    if (!canCompare) return;
+    const label = selectedTickers.join(" vs ");
+    const savedAt = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    setComparisonHistory((prev) => [
+      { tickers: [...selectedTickers], label, savedAt },
+      ...prev.slice(0, 9),
+    ]);
+    setToast("Comparação salva no histórico!");
+  }, [canCompare, selectedTickers]);
 
   const createAlert = useCallback(() => {
     setToast(`Alerta criado para ${PILLAR_LABEL[activePillar]}.`);
@@ -466,6 +490,13 @@ export function useCompare(): UseCompareReturn {
     toast,
     compactSticky,
     actionsOpen,
+    customFrom,
+    setCustomFrom,
+    customTo,
+    setCustomTo,
+    comparisonHistory,
+    historyOpen,
+    setHistoryOpen,
 
     // Dados derivados de empresas
     selected,
