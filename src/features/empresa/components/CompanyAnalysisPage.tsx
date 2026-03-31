@@ -3222,7 +3222,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
- <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Metodologia</p>
+ <p className="text-[10px] font-semibold uppercase text-muted-foreground">Metodologia</p>
  <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Como calculamos o placar</h3>
  </div>
  <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => setShowScoreInfo(false)}>Fechar</button>
@@ -3238,7 +3238,7 @@ const changesCount = changesBySelectedWindow.length;
  <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
  <div className="flex items-center justify-between">
  <div>
- <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Evidência</p>
+ <p className="text-[10px] font-semibold uppercase text-muted-foreground">Evidência</p>
  <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Painel de fonte · {evidenceModal.pillarName}</h3>
  </div>
  <button className="rounded-lg border border-border px-3 py-1.5 text-[12px] text-muted-foreground hover:bg-muted" onClick={() => setEvidenceModal(null)}>Fechar</button>
@@ -3413,15 +3413,15 @@ const changesCount = changesBySelectedWindow.length;
  </p>
  <div className="mt-4 grid grid-cols-3 gap-3">
   <div className="rounded-xl border border-border bg-muted p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Força principal</p>
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">Força principal</p>
    <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.strength.pillar ?? activeData?.strongest.title ?? 'Dívida'}</p>
   </div>
   <div className="rounded-xl border border-border bg-muted p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Atenção principal</p>
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção principal</p>
    <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.attention.pillar ?? activeData?.watchout.title ?? 'Margens'}</p>
   </div>
   <div className="rounded-xl border border-border bg-muted p-3">
-   <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">O que monitorar</p>
+   <p className="text-[10px] font-semibold uppercase text-muted-foreground">O que monitorar</p>
    <p className="mt-1 text-[13px] font-semibold text-foreground">{activeData?.summaryScan.monitor.text ?? 'Evolução das margens no próximo fechamento.'}</p>
   </div>
  </div>
@@ -3686,15 +3686,15 @@ const changesCount = changesBySelectedWindow.length;
     <p className="max-w-[840px] text-[13px] leading-relaxed text-foreground">{changesSummaryText}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Pilar mais afetado</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Pilar mais afetado</p>
       <p className="mt-1 font-semibold text-brand-text">{periodMostAffected}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Estruturais</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Estruturais</p>
       <p className="mt-1 font-semibold text-foreground">{structuralCount}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Rotina</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Rotina</p>
       <p className="mt-1 font-semibold text-foreground">{routineCount}</p>
      </div>
     </div>
@@ -3836,15 +3836,15 @@ const changesCount = changesBySelectedWindow.length;
     </p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Pilar mais sensível</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Pilar mais sensível</p>
       <p className="mt-1 font-semibold text-brand-text">{timelineMostAffectedPillar}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gatilhos principais</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Gatilhos principais</p>
       <p className="mt-1 font-semibold text-foreground">{timelineStructuralCount}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Rotina</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Rotina</p>
       <p className="mt-1 font-semibold text-foreground">{timelineRoutineCount}</p>
      </div>
     </div>
@@ -4207,15 +4207,15 @@ const changesCount = changesBySelectedWindow.length;
     <p className="mt-2 text-[13px] text-dim">{resolvedSourceConfidenceSummary}</p>
     <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Fontes atualizadas</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Fontes atualizadas</p>
       <p className="mt-1 font-semibold text-foreground">{updatedPrimarySources}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Fontes complementares antigas</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Fontes complementares antigas</p>
       <p className="mt-1 font-semibold text-foreground">{outdatedComplementarySources}</p>
      </div>
      <div className="rounded-xl border border-border bg-muted p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Última atualização</p>
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">Última atualização</p>
       <p className="mt-1 font-semibold text-foreground">{safeMeta(latestSourceDate)}</p>
      </div>
     </div>

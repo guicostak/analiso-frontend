@@ -45,7 +45,7 @@ export interface CompanySearchResponse {
 
 // ─── API Base URL ────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+import { API_BASE_URL as API_BASE } from "@/src/lib/api-base";
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 
@@ -57,8 +57,22 @@ export const searchService = {
   async search(filters: CompanySearchFilters): Promise<CompanySearchResponse> {
     const params = new URLSearchParams();
 
+    // Campos numéricos que o backend aceita
+    const NUMERIC_KEYS = new Set([
+      "plMin", "plMax", "pvpMin", "pvpMax", "evEbitdaMax",
+      "dyMin", "dyMax", "roeMin", "roeMax", "roicMin",
+      "margemMin", "dividaEbitdaMax", "page", "size",
+    ]);
+
     for (const [key, value] of Object.entries(filters)) {
-      if (value != null && value !== "") {
+      if (value == null || value === "") continue;
+
+      // Para campos numéricos, garante que é um número válido
+      if (NUMERIC_KEYS.has(key)) {
+        const num = Number(value);
+        if (Number.isNaN(num)) continue;
+        params.set(key, String(num));
+      } else {
         params.set(key, String(value));
       }
     }
@@ -70,6 +84,11 @@ export const searchService = {
     });
 
     if (!res.ok) {
+      // Erro de validação — retorna vazio em vez de estourar
+      if (res.status === 400) {
+        console.warn("[search] Validation error, returning empty results");
+        return { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 };
+      }
       const err = await res.json().catch(() => ({}));
       throw new Error(err?.message ?? `HTTP ${res.status}`);
     }

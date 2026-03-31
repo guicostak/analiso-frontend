@@ -382,7 +382,7 @@ export function ReadableCompanySection() {
                       key={metric.label}
                       className="rounded-[14px] border border-[#eef1f4] bg-card/82 px-2 py-2 md:rounded-[18px] md:px-3 md:py-3"
                     >
-                      <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[#9aa1a8] md:text-[11px] md:tracking-[0.08em]">
+                      <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[#9aa1a8] md:text-[11px]">
                         {metric.label}
                       </div>
                       <div

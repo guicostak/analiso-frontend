@@ -19,7 +19,7 @@ export function LuizNavbarButton() {
       onClick={toggle}
       aria-label="Falar com Luiz"
       aria-expanded={isOpen}
-      className="hidden md:flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-all duration-150 hover:scale-[1.03] active:scale-[0.97]"
+      className="hidden md:flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-[transform,box-shadow,background-color,border-color] duration-150 hover:scale-[1.03] active:scale-[0.97]"
       style={
         isOpen
           ? {
@@ -37,8 +37,7 @@ export function LuizNavbarButton() {
     >
       {/* Ícone neon pequeno */}
       <span
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-        style={{ background: NEON }}
+        className="luiz-neon-icon flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
       >
         <Sparkles className="h-3 w-3 text-white" />
       </span>

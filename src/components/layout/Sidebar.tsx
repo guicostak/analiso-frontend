@@ -2,7 +2,6 @@
 
 import {
   Bookmark,
-  Building2,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -10,11 +9,9 @@ import {
   GitCompare,
   Home,
   LayoutGrid,
-  NotebookPen,
-  SearchCheck,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
+import logoImage from "@/src/assets/logos/logo.png";
 import type { ComponentType } from "react";
 import { SidebarPlanCard } from "./SidebarPlanCard";
 import { useSidebar } from "./SidebarContext";
@@ -37,20 +34,15 @@ type NavGroup = { items: NavItem[] };
 const GROUPS: NavGroup[] = [
   {
     items: [
-      { id: "dashboard", label: "Painel de hoje",    href: "/dashboard", icon: Home },
-      { id: "explorar",  label: "Explorar mercado",  href: "/explorar",  icon: Compass },
-      { id: "watchlist", label: "Watchlist",          href: "/watchlist", icon: LayoutGrid },
-      { id: "comparar",  label: "Comparar empresas", href: "/comparar",  icon: GitCompare },
-      { id: "busca",     label: "Busca avançada",    href: "/busca",     icon: SearchCheck },
+      { id: "dashboard",  label: "Meu Painel",         href: "/painel",     icon: LayoutGrid },
+      { id: "explorar",   label: "Explorar mercado",  href: "/explorar",   icon: Compass },
+      { id: "favoritas",  label: "Favoritas",          href: "/favoritas",  icon: Bookmark },
+      { id: "comparar",   label: "Comparar empresas", href: "/comparar",   icon: GitCompare },
     ],
   },
   {
     items: [
-      { id: "agenda",    label: "Agenda",   href: "#", icon: CalendarDays },
-      { id: "notas",     label: "Notas",    href: "#", icon: NotebookPen },
-      { id: "empresas",  label: "Empresas", href: "#", icon: Building2 },
-      { id: "time",      label: "Time",     href: "#", icon: Users },
-      { id: "bookmarks", label: "Salvos",   href: "#", icon: Bookmark },
+      { id: "agenda", label: "Agenda", href: "#", icon: CalendarDays },
     ],
   },
 ];
@@ -71,7 +63,7 @@ function NavItemRow({
   const inner = (
     <span
       title={isCollapsed ? item.label : undefined}
-      className={`group relative flex items-center rounded-[10px] py-2 transition-all duration-150
+      className={`group relative flex items-center rounded-[10px] py-2 transition-[background-color,box-shadow] duration-150 ease-[var(--ease-out)]
         ${isActive
           ? "bg-brand-surface"
           : "hover:bg-hover hover:shadow-[0_1px_3px_rgba(0,0,0,0.05)]"}
@@ -81,11 +73,11 @@ function NavItemRow({
       {isActive && !isCollapsed && (
         <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
       )}
-      <span className={`transition-colors ${isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"}`}>
-        <Icon className="h-[17px] w-[17px] shrink-0" />
+      <span className={`transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"}`}>
+        <Icon className="h-[15px] w-[15px] shrink-0" />
       </span>
       {!isCollapsed && (
-        <span className={`text-[13px] transition-colors ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
+        <span className={`text-[12px] transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
           {item.label}
         </span>
       )}
@@ -105,20 +97,28 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-sidebar-border bg-sidebar transition-[width] duration-200 xl:block
+      className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-[var(--ease-out)] xl:block
         ${isCollapsed ? "w-[64px]" : "w-[240px]"}`}
     >
       <div className="flex min-h-full flex-col">
 
-        {/* ── Topo minimalista com botão de colapso ── */}
+        {/* ── Topo: logo + botão de colapso ── */}
         <div
           className={`sticky top-0 z-10 flex h-14 shrink-0 items-center border-b border-sidebar-border bg-sidebar
-            ${isCollapsed ? "justify-center px-0" : "justify-end px-3"}`}
+            ${isCollapsed ? "justify-center px-0" : "justify-between px-4"}`}
         >
+          {!isCollapsed && (
+            <img
+              src={logoImage.src}
+              alt="Analiso"
+              className="h-[26px] w-auto"
+              draggable="false"
+            />
+          )}
           <button
             onClick={toggle}
             title={isCollapsed ? "Expandir menu" : "Recolher menu"}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-[background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-hover hover:text-foreground"
           >
             {isCollapsed
               ? <ChevronRight className="h-4 w-4" />

@@ -80,7 +80,7 @@ export function ExploreHeader({
           placeholder="Search companies, tickers, or sectors..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
+          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-[border-color,box-shadow,opacity]"
         />
       </div>
 
@@ -97,7 +97,7 @@ export function ExploreHeader({
             )}
             <ChevronDown className="w-4 h-4" />
           </button>
-          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[200px]">
+          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[border-color,box-shadow,opacity] z-10 min-w-[200px]">
             {sectors.map((sector) => (
               <button
                 key={sector}
@@ -123,7 +123,7 @@ export function ExploreHeader({
             )}
             <ChevronDown className="w-4 h-4" />
           </button>
-          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[180px]">
+          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[border-color,box-shadow,opacity] z-10 min-w-[180px]">
             {statuses.map((status) => (
               <button
                 key={status}
@@ -149,7 +149,7 @@ export function ExploreHeader({
             )}
             <ChevronDown className="w-4 h-4" />
           </button>
-          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[160px]">
+          <div className="absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[border-color,box-shadow,opacity] z-10 min-w-[160px]">
             {sizes.map((size) => (
               <button
                 key={size}
@@ -192,7 +192,7 @@ export function ExploreHeader({
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-border hover:border-border/70 bg-card text-sm font-medium text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-[border-color,box-shadow,opacity] cursor-pointer"
           >
             <option value="urgency">Sort by: Urgency</option>
             <option value="updated">Sort by: Most Updated</option>

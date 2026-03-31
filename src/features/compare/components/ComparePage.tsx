@@ -4,11 +4,14 @@ import {
   ArrowUp,
   Bell,
   Bookmark,
+  Calendar,
   Check,
   ChevronDown,
   ChevronUp,
   Crown,
   FileText,
+  History,
+  Link2,
   Minus,
   Plus,
   Search,
@@ -32,10 +35,12 @@ import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import wegLogo from "@/src/assets/logos/weg.jpeg";
 import valeLogo from "@/src/assets/logos/vale.png";
+import { useState } from "react";
 import { useCompare } from "../hooks/useCompare";
-import { pillarCopy } from "../services";
+import { pillarCopy, PILLARS } from "../services";
 import type { CompareTableRow, CompareTrend } from "../interfaces";
 import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
+import { AddCompanyModal } from "@/src/features/watchlist/components/AddCompanyModal";
 
 const TOKENS = {
   companyA: "var(--brand)",
@@ -258,7 +263,7 @@ function MetricComparisonRow({
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
           <div className={`rounded-[20px] border p-4 ${aWinner ? "border-brand-border bg-brand-surface" : "border-border bg-card"}`}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{aTicker}</p>
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">{aTicker}</p>
             <p className={`mt-2 text-[20px] font-semibold ${winner === "a" ? "text-brand" : "text-foreground"}`}>
               {formatMetric(row.a?.value ?? null, row.unit)}
             </p>
@@ -272,7 +277,7 @@ function MetricComparisonRow({
             )}
           </div>
           <div className={`rounded-[20px] border p-4 ${bWinner ? "border-border bg-muted" : "border-border bg-card"}`}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{bTicker}</p>
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">{bTicker}</p>
             <p className={`mt-2 text-[20px] font-semibold ${winner === "b" ? "text-[var(--compare-b)]" : "text-foreground"}`}>
               {formatMetric(row.b?.value ?? null, row.unit)}
             </p>
@@ -295,8 +300,6 @@ export function ComparePage() {
   const {
     detailRef,
     verdictRef,
-    search,
-    openPicker,
     activePillar,
     range,
     eventsOpen,
@@ -306,6 +309,8 @@ export function ComparePage() {
     toast,
     compactSticky,
     actionsOpen,
+    customFrom, setCustomFrom, customTo, setCustomTo,
+    comparisonHistory, historyOpen, setHistoryOpen,
     selected,
     pair,
     a,
@@ -326,8 +331,7 @@ export function ComparePage() {
     latestChartLeader,
     scoreVsChartContext,
     qualityTone,
-    setSearch,
-    setOpenPicker,
+    selectedTickers,
     setSelectedTickers,
     addTicker,
     selectPillar,
@@ -340,6 +344,7 @@ export function ComparePage() {
     copyShareLink,
     saveComparison,
     createAlert,
+    setToast,
     PILLAR_LABEL,
     RANGES,
     formatMetric,
@@ -351,6 +356,10 @@ export function ComparePage() {
     trendContext,
     formatNumber,
   } = useCompare();
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [pillarAll, setPillarAll] = useState(false);
 
   const activeIsLowerBetter = a?.pillars[activePillar].thresholdLabel.toLowerCase().includes("menor");
   const latestUpdate = [...pair]
@@ -365,6 +374,14 @@ export function ComparePage() {
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "Inter, sans-serif" }}>
       <Sidebar currentPage="comparar" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
+      <AddCompanyModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSelect={(ticker) => addTicker(ticker)}
+        excludeTickers={new Set(selectedTickers)}
+        searchPlaceholder="Buscar empresa para comparar..."
+        footerText={`${selectedTickers.length} de 4 empresas selecionadas`}
+      />
       <MainContent className="relative overflow-hidden pt-20">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[8%] top-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.10)_0%,rgba(91,141,239,0)_72%)]" />
@@ -372,149 +389,211 @@ export function ComparePage() {
         </div>
         <div className="relative px-8 pb-12 pt-6">
           <div className="mx-auto max-w-[1560px]">
-            <div className="mb-6">
-              <h1 className="text-[32px] font-semibold tracking-[-0.03em] text-foreground">Comparar</h1>
-              <p className="mt-2 text-[15px] text-muted-foreground">Compare empresas lado a lado por pilar.</p>
+            <div className="mb-6 space-y-3">
+              <p className="text-[12px] font-medium uppercase text-muted-foreground">Análise comparativa</p>
+              <h1 className="text-[32px] font-semibold tracking-[-0.03em] text-foreground">Comparar empresas</h1>
+              <p className="text-[15px] text-muted-foreground">Compare empresas lado a lado por pilar.</p>
             </div>
             <section
-              className={`sticky top-12 z-30 mb-8 border border-border bg-[rgba(255,255,255,0.94)] dark:bg-[rgba(15,23,40,0.94)] shadow-[0_16px_36px_rgba(15,23,40,0.07)] dark:shadow-none backdrop-blur transition-all ${compactSticky ? "rounded-[24px] p-3" : "rounded-[28px] p-4"}`}
+              className={`sticky top-14 z-10 mb-2 border border-border bg-[rgba(255,255,255,0.94)] dark:bg-[rgba(15,23,40,0.94)] shadow-[0_16px_36px_rgba(15,23,40,0.07)] dark:shadow-none backdrop-blur transition-[padding,border-radius,box-shadow] ${compactSticky ? "rounded-[24px] p-4" : "rounded-[28px] p-6"}`}
             >
-              <div className="grid gap-3 xl:grid-cols-12">
-                <article className="rounded-[24px] border border-border bg-muted p-4 xl:col-span-8">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Setup da comparacao</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="space-y-4">
+                {/* ── Linha 1: Empresas | Período ── */}
+                <div className="flex items-center justify-between gap-3">
+                  {/* Empresas à esquerda */}
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     {selected.map((company, index) => (
                       <span
                         key={company.ticker}
-                        className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-[12px] font-medium text-foreground"
+                        className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground"
                       >
-                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: index === 0 ? TOKENS.companyA : TOKENS.companyB }} />
-                        <TickerLogo ticker={company.ticker} size={18} />
-                        {index === 0 ? "Empresa A" : index === 1 ? "Empresa B" : `Empresa ${index + 1}`}: {company.ticker}
+                        <TickerLogo ticker={company.ticker} size={22} />
+                        {company.ticker}
                         <button
                           onClick={() => setSelectedTickers((current) => current.filter((ticker) => ticker !== company.ticker))}
                           className="rounded-full p-0.5 text-muted-foreground transition hover:bg-hover hover:text-foreground"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-4 w-4" />
                         </button>
                       </span>
                     ))}
-                    {selected.length < 4 ? (
+                    {selected.length < 4 && (
                       <button
-                        onClick={() => setOpenPicker((value) => !value)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-card px-3 py-2 text-[12px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+                        onClick={() => setShowAddModal(true)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
                       >
-                        <Plus className="h-3.5 w-3.5" />
-                        Adicionar empresa
+                        <Plus className="h-4 w-4" />
+                        Adicionar
                       </button>
-                    ) : null}
-                    {selected.length >= 2 ? (
-                      <button
-                        onClick={() => setSelectedTickers((current) => (current.length < 2 ? current : [current[1], current[0], ...current.slice(2)]))}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-[12px] font-medium text-muted-foreground"
-                      >
-                        <ArrowRightLeft className="h-3.5 w-3.5" />
-                        Trocar A/B
-                      </button>
-                    ) : null}
+                    )}
                   </div>
-                  <div className="relative mt-3 max-w-[440px]">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      value={search}
-                      onFocus={() => setOpenPicker(true)}
-                      onChange={(event) => {
-                        setSearch(event.target.value);
-                        setOpenPicker(true);
-                      }}
-                      className="h-11 w-full rounded-[18px] border border-border bg-card pl-9 pr-3 text-[13px] text-foreground outline-none transition focus:ring-2 focus:ring-brand-border"
-                      placeholder="Buscar ticker ou nome (opcional)"
-                    />
-                    {openPicker && selected.length < 4 ? (
-                      <div className="absolute z-40 mt-2 w-full rounded-[20px] border border-border bg-card p-2 shadow-[0_24px_50px_rgba(15,23,40,0.12)]">
-                        {available.length ? (
-                          available.map((company) => (
-                            <button
-                              key={company.ticker}
-                              onClick={() => addTicker(company.ticker)}
-                              className="flex w-full items-center justify-between rounded-[16px] px-3 py-3 text-left transition hover:bg-muted"
-                            >
-                              <div>
-                                <p className="text-[13px] font-semibold text-foreground">{company.ticker}</p>
-                                <p className="mt-0.5 text-[12px] text-muted-foreground">{company.name}</p>
-                              </div>
-                              <span className="text-[11px] text-muted-foreground">{company.sector}</span>
-                            </button>
-                          ))
-                        ) : (
-                          <p className="px-3 py-3 text-[12px] text-muted-foreground">Nenhuma empresa encontrada.</p>
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-                </article>
 
-                <article className="rounded-[24px] border border-border bg-card p-4 xl:col-span-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Leitura da comparacao</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <div className="flex items-center rounded-full border border-border bg-muted p-1">
-                      {RANGES.map((option) => (
+                  {/* Período fixo à direita */}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="hidden text-[11px] font-semibold uppercase tracking-wider text-muted-foreground xl:block">Período:</span>
+                    <div className="flex items-center rounded-full border border-border bg-muted p-0.5">
+                      {RANGES.filter((r) => r.key !== "custom").map((option) => (
                         <button
                           key={option.key}
                           onClick={() => setRange(option.key)}
-                          className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${range === option.key ? "bg-brand text-white shadow-[0_10px_20px_rgba(18,165,148,0.2)]" : "text-muted-foreground"}`}
+                          className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${range === option.key ? "bg-brand text-white shadow-[0_6px_14px_rgba(18,165,148,0.2)]" : "text-muted-foreground hover:text-foreground"}`}
                         >
                           {option.label}
                         </button>
                       ))}
                     </div>
-                    {canCompare ? (
-                      <button
-                        onClick={() => verdictRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                        className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand px-4 text-[12px] font-semibold text-white shadow-[0_14px_28px_rgba(18,165,148,0.18)]"
-                      >
-                        Ver veredito
-                      </button>
-                    ) : null}
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {canCompare ? <span className={chipClass}>Pilar em foco: {PILLAR_LABEL[activePillar]}</span> : null}
-                    {canCompare ? (
-                      <span className={`${chipClass} border-brand-border bg-brand-surface text-brand-text`}>
-                        <span className={`h-2 w-2 rounded-full ${qualityTone.dot}`} />
-                        {qualityTone.label}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="relative mt-4">
                     <button
-                      onClick={() => setActionsOpen((value) => !value)}
-                      className="inline-flex h-11 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-[12px] font-medium text-muted-foreground"
+                      onClick={() => setRange("custom")}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition ${range === "custom" ? "border-brand bg-brand text-white" : "border-border bg-card text-muted-foreground hover:border-brand hover:text-foreground"}`}
                     >
-                      Opcoes da comparacao <ChevronDown className="h-3.5 w-3.5" />
+                      <Calendar className="h-3.5 w-3.5" />
+                      Custom
                     </button>
-                    {actionsOpen ? (
-                      <div className="absolute left-0 z-40 mt-2 w-[240px] rounded-[20px] border border-border bg-card p-2 shadow-[0_24px_50px_rgba(15,23,40,0.12)]">
-                        <button onClick={saveComparison} className="flex w-full items-center gap-2 rounded-[14px] px-3 py-3 text-left text-[12px] text-muted-foreground transition hover:bg-muted">
-                          <Bookmark className="h-3.5 w-3.5" />
-                          Salvar comparacao
-                        </button>
-                        <button onClick={copyShareLink} className="flex w-full items-center gap-2 rounded-[14px] px-3 py-3 text-left text-[12px] text-muted-foreground transition hover:bg-muted">
-                          <Share2 className="h-3.5 w-3.5" />
-                          Compartilhar
-                        </button>
-                        {canCompare ? (
-                          <button onClick={createAlert} className="flex w-full items-center gap-2 rounded-[14px] px-3 py-3 text-left text-[12px] text-brand-text transition hover:bg-success-surface">
-                            <Bell className="h-3.5 w-3.5" />
-                            Acompanhar mudancas
-                          </button>
-                        ) : null}
-                      </div>
-                    ) : null}
                   </div>
-                </article>
+                </div>
+
+                {/* Date picker (só quando custom) */}
+                {range === "custom" && (
+                  <div className="flex items-center gap-2 pl-1">
+                    <input
+                      type="date"
+                      value={customFrom}
+                      onChange={(e) => setCustomFrom(e.target.value)}
+                      className="h-8 rounded-[10px] border border-border bg-card px-2.5 text-[11px] text-foreground outline-none focus:ring-2 focus:ring-brand-border"
+                    />
+                    <span className="text-[11px] text-muted-foreground">até</span>
+                    <input
+                      type="date"
+                      value={customTo}
+                      onChange={(e) => setCustomTo(e.target.value)}
+                      className="h-8 rounded-[10px] border border-border bg-card px-2.5 text-[11px] text-foreground outline-none focus:ring-2 focus:ring-brand-border"
+                    />
+                  </div>
+                )}
+
+                {/* ── Linha 2: Pilares + Comparar + Histórico ── */}
+                {canCompare && (
+                  <div className="flex flex-wrap items-center gap-2.5 border-t border-border pt-3">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Pilar:</span>
+
+                    {/* Todos */}
+                    <button
+                      onClick={() => setPillarAll(true)}
+                      className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition ${pillarAll ? "border-brand bg-brand/10 text-brand" : "border-border bg-card text-muted-foreground hover:border-brand/50 hover:text-foreground"}`}
+                    >
+                      Todos
+                    </button>
+
+                    {PILLARS.map((pillar) => (
+                      <button
+                        key={pillar}
+                        onClick={() => { selectPillar(pillar); setPillarAll(false); }}
+                        className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition ${!pillarAll && activePillar === pillar ? "border-brand bg-brand/10 text-brand" : "border-border bg-card text-muted-foreground hover:border-brand/50 hover:text-foreground"}`}
+                      >
+                        {PILLAR_LABEL[pillar]}
+                      </button>
+                    ))}
+
+                    {/* Botão Comparar — sempre à direita via ml-auto */}
+                    <button
+                      onClick={() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                      className="ml-auto inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-brand px-6 text-[14px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.22)] transition hover:bg-brand/90 active:scale-[0.97]"
+                    >
+                      <ArrowRightLeft className="h-4.5 w-4.5" />
+                      Comparar
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
+
+            {/* ── Ações secundárias fora da ilha ── */}
+            {canCompare && (
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+                {/* Histórico à esquerda */}
+                <div>
+                  <button
+                    onClick={() => setHistoryOpen((v) => !v)}
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition ${historyOpen ? "border-brand bg-brand/10 text-brand" : "border-border bg-card text-muted-foreground hover:border-brand hover:text-foreground"}`}
+                  >
+                    <History className="h-3.5 w-3.5" />
+                    Histórico
+                    {comparisonHistory.length > 0 && (
+                      <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
+                        {comparisonHistory.length}
+                      </span>
+                    )}
+                  </button>
+                  {historyOpen && (
+                    <div className="mt-2 rounded-[18px] border border-border bg-card p-4 shadow-[0_8px_24px_rgba(15,23,40,0.06)] dark:shadow-none">
+                      <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Comparações recentes</p>
+                      {comparisonHistory.length === 0 ? (
+                        <p className="py-2 text-[12px] text-muted-foreground">Nenhuma comparação salva ainda</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {comparisonHistory.slice(0, 4).map((item, i) => (
+                            <button
+                              key={i}
+                              onClick={() => { setSelectedTickers(item.tickers); setHistoryOpen(false); }}
+                              className="flex flex-col rounded-[12px] border border-border bg-muted px-3.5 py-2.5 text-left transition hover:border-brand hover:bg-brand/5"
+                            >
+                              <span className="text-[13px] font-medium text-foreground">{item.label}</span>
+                              <span className="text-[11px] text-muted-foreground">{item.savedAt}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Salvar + Compartilhar à direita */}
+                <div className="flex items-center gap-2">
+                <button
+                  onClick={saveComparison}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[12px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+                >
+                  <Bookmark className="h-3.5 w-3.5" />
+                  Salvar comparação
+                </button>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setShareOpen((v) => !v)}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[12px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    Compartilhar
+                  </button>
+                  {shareOpen && (
+                        <div className="absolute right-0 z-40 mt-2 w-[200px] rounded-[18px] border border-border bg-card p-2 shadow-[0_20px_40px_rgba(15,23,40,0.12)]">
+                          <button
+                            onClick={() => { const text = `Comparei ${selectedTickers.join(" vs ")} no Analiso! `; window.open(`https://wa.me/?text=${encodeURIComponent(text + window.location.href)}`, "_blank"); setShareOpen(false); }}
+                            className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted"
+                          >
+                            <svg className="h-3.5 w-3.5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            WhatsApp
+                          </button>
+                          <button
+                            onClick={() => { const text = `Comparei ${selectedTickers.join(" vs ")} no Analiso!`; window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, "_blank"); setShareOpen(false); }}
+                            className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted"
+                          >
+                            <svg className="h-3.5 w-3.5 text-foreground" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.733-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            X (Twitter)
+                          </button>
+                          <button
+                            onClick={() => { const text = `Comparei ${selectedTickers.join(" vs ")} no Analiso!\n${window.location.href}`; navigator.clipboard.writeText(text).then(() => { setShareOpen(false); setToast("Link copiado!"); }); }}
+                            className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground transition hover:bg-muted"
+                          >
+                            <Link2 className="h-3.5 w-3.5" />
+                            Copiar link
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                </div>
+              </div>
+            )}
 
             {!canCompare ? (
               <section className={`${surfaceClass} p-10 text-center`}>
@@ -579,7 +658,7 @@ export function ComparePage() {
 
                           <div className="grid gap-4">
                             <div className="rounded-[28px] border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,251,255,0.96))] dark:bg-none dark:bg-card p-4 shadow-[0_20px_38px_rgba(15,23,40,0.08)] dark:shadow-none backdrop-blur-sm">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Score de apoio da leitura</p>
+                              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Score de apoio da leitura</p>
                               <div className="mt-4 rounded-[24px] border border-border bg-card p-3">
                                 <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
                                   <div className="grid grid-cols-[1fr_auto] items-end gap-3 rounded-[20px] border border-brand-border bg-brand-surface px-4 py-4">
@@ -602,7 +681,7 @@ export function ComparePage() {
                                 </div>
                               </div>
                               <div className="mt-4 rounded-[22px] border border-danger-border bg-danger-surface px-4 py-5">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-danger-text">Diferenca</p>
+                                <p className="text-[11px] font-semibold uppercase text-danger-text">Diferenca</p>
                                 <p className="mt-2 text-[34px] font-semibold tracking-[-0.05em] text-foreground">
                                   {formatNumber(Math.abs((scoreboard?.avgA ?? 0) - (scoreboard?.avgB ?? 0)), 1)} pts
                                 </p>
@@ -615,7 +694,7 @@ export function ComparePage() {
 
                     <aside className="space-y-4 xl:col-span-4">
                       <article className={`${cardClass} bg-warning-surface dark:bg-card p-5`}>
-                        <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-warning-text">
+                        <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase text-warning-text">
                           <TriangleAlert className="h-3.5 w-3.5" />
                           Onde olhar com mais cuidado
                         </p>
@@ -630,7 +709,7 @@ export function ComparePage() {
                       </article>
 
                       <article className={`${cardClass} bg-blue-50 dark:bg-card p-5`}>
-                        <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-700 dark:text-blue-400">
+                        <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase text-blue-700 dark:text-blue-400">
                           <ArrowRightLeft className="h-3.5 w-3.5" />
                           Onde a diferenca realmente aparece
                         </p>
@@ -638,7 +717,7 @@ export function ComparePage() {
                           {PILLAR_LABEL[verdict.biggestGap?.p ?? "Divida"]} e o pilar que mais separa as empresas.
                         </p>
                         <div className="mt-4 rounded-[20px] border border-blue-200 dark:border-blue-800/50 bg-card/80 px-4 py-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Delta de score</p>
+                          <p className="text-[11px] font-semibold uppercase text-muted-foreground">Delta de score</p>
                           <p className="mt-1 text-[30px] font-semibold tracking-[-0.04em] text-foreground">
                             {formatNumber(verdict.biggestGap?.delta ?? 0, 1)}/10
                           </p>
@@ -660,7 +739,7 @@ export function ComparePage() {
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{PILLAR_LABEL[item.p]}</p>
+                              <p className="text-[11px] font-semibold uppercase text-muted-foreground">{PILLAR_LABEL[item.p]}</p>
                               {item.p === activePillar ? <p className="mt-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">Pilar em foco</p> : null}
                             </div>
                             <span className={`${chipClass} ${item.winner.ticker === a?.ticker ? "border-brand-border bg-brand-surface text-brand-text" : "border-border bg-muted text-blue-700 dark:text-blue-400"}`}>
@@ -766,7 +845,7 @@ export function ComparePage() {
                       <div className={`${cardClass} bg-blue-50 dark:bg-card p-5`}>
                         {a && b ? (
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Resumo do pilar</p>
+                            <p className="text-[11px] font-semibold uppercase text-muted-foreground">Resumo do pilar</p>
                             <p className="mt-3 text-[18px] font-semibold leading-7 text-foreground">
                               {a.pillars[activePillar].score >= b.pillars[activePillar].score ? a.ticker : b.ticker} esta melhor neste pilar hoje.
                             </p>
@@ -774,15 +853,15 @@ export function ComparePage() {
                         ) : null}
                         <div className="mt-5 grid gap-3">
                           <div className="rounded-[20px] border border-border bg-card px-4 py-4">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">O que isso quer dizer</p>
+                            <p className="text-[11px] font-semibold uppercase text-muted-foreground">O que isso quer dizer</p>
                             <p className="mt-2 text-[14px] leading-6 text-foreground">{pillarCopy[activePillar].what}</p>
                           </div>
                           <div className="rounded-[20px] border border-border bg-card px-4 py-4">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Por que isso pesa na analise</p>
+                            <p className="text-[11px] font-semibold uppercase text-muted-foreground">Por que isso pesa na analise</p>
                             <p className="mt-2 text-[14px] leading-6 text-foreground">{pillarCopy[activePillar].why}</p>
                           </div>
                           <div className="rounded-[20px] border border-border bg-card px-4 py-4">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">O que observar com atencao</p>
+                            <p className="text-[11px] font-semibold uppercase text-muted-foreground">O que observar com atencao</p>
                             <p className="mt-2 text-[14px] leading-6 text-foreground">{pillarCopy[activePillar].how}</p>
                             <div className="mt-4 flex flex-wrap gap-2">
                               {pillarCopy[activePillar].ranges.map((rangeItem) => (
@@ -800,7 +879,7 @@ export function ComparePage() {
                           <div className="rounded-[24px] border border-border bg-card p-4">
                             <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
                               <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Leitura do periodo</p>
+                                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Leitura do periodo</p>
                                 <p className="mt-3 text-[16px] font-medium leading-7 text-foreground">
                                   {a.pillars[activePillar].score >= b.pillars[activePillar].score ? a.ticker : b.ticker} mostra trajetoria mais favoravel, enquanto {a.pillars[activePillar].score >= b.pillars[activePillar].score ? b.ticker : a.ticker} perdeu tracao relativa.
                                 </p>
@@ -810,18 +889,18 @@ export function ComparePage() {
                               </div>
                               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                                 <div className="rounded-[20px] border border-brand-border bg-brand-surface px-4 py-4">
-                                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand-text">Direcao desejavel</p>
+                                  <p className="text-[11px] font-semibold uppercase text-brand-text">Direcao desejavel</p>
                                   <p className="mt-2 text-[16px] font-semibold text-foreground">{activeIsLowerBetter ? "linha descendente" : "linha ascendente"}</p>
                                 </div>
                                 {latestChartLeader ? (
                                   <div className="rounded-[20px] border border-border bg-muted px-4 py-4">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-700 dark:text-blue-400">Vantagem atual</p>
+                                    <p className="text-[11px] font-semibold uppercase text-blue-700 dark:text-blue-400">Vantagem atual</p>
                                     <p className="mt-2 text-[16px] font-semibold text-foreground">{latestChartLeader}</p>
                                   </div>
                                 ) : null}
                                 {latestChartDelta !== null ? (
                                   <div className="rounded-[20px] border border-danger-border bg-danger-surface px-4 py-4">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-danger-text">Delta final</p>
+                                    <p className="text-[11px] font-semibold uppercase text-danger-text">Delta final</p>
                                     <p className="mt-2 text-[16px] font-semibold text-foreground">{formatNumber(latestChartDelta, 1)}</p>
                                   </div>
                                 ) : null}
@@ -974,7 +1053,7 @@ export function ComparePage() {
                   <div className="mt-6 grid gap-5 xl:grid-cols-12">
                     <article className="space-y-4 xl:col-span-8">
                       <div className="rounded-[28px] border border-brand-border bg-success-surface dark:bg-card p-5 shadow-[0_16px_30px_rgba(18,165,148,0.07)]">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand-text">Sintese principal (90 dias)</p>
+                        <p className="text-[11px] font-semibold uppercase text-brand-text">Sintese principal (90 dias)</p>
                         <p className="mt-3 text-[16px] leading-7 text-foreground">{mainExplainer}</p>
                       </div>
 
@@ -1017,7 +1096,7 @@ export function ComparePage() {
 
                     <aside className="space-y-4 xl:col-span-4">
                       <article className={`${cardClass} bg-[radial-gradient(circle_at_top_left,rgba(91,141,239,0.14),transparent_42%)] dark:bg-card p-5`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-700 dark:text-blue-400">Contexto recente + como verificamos os dados</p>
+                        <p className="text-[11px] font-semibold uppercase text-blue-700 dark:text-blue-400">Contexto recente + como verificamos os dados</p>
                         <div className="mt-4 rounded-[22px] border border-border bg-card/90 p-3">
                           <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
                             <span className={`${chipClass} border-border bg-muted text-blue-700 dark:text-blue-400`}>Atualizado em {latestUpdate ?? "-"}</span>
@@ -1038,11 +1117,11 @@ export function ComparePage() {
                         {qualityOpen ? (
                           <div className="mt-4 space-y-3">
                             <div className="rounded-[20px] border border-border bg-card px-4 py-4">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Fonte</p>
+                              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Fonte</p>
                               <p className="mt-2 text-[14px] leading-6 text-foreground">{pair.map((company) => company.primarySource).join(" | ")}</p>
                             </div>
                             <div className="rounded-[20px] border border-border bg-card px-4 py-4">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Como calculamos</p>
+                              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Como calculamos</p>
                               <p className="mt-2 text-[14px] leading-6 text-foreground">{a?.pillars[activePillar].metrics[0]?.source.method ?? "-"}</p>
                             </div>
                           </div>

@@ -1,11 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
-  Activity,
-  Bookmark,
   ChevronRight,
+  Check,
   Database,
+  LayoutGrid,
+  GitCompare,
+  Compass,
+  RotateCcw,
 } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
@@ -173,6 +177,43 @@ export function Dashboard() {
     inboxRef,
   } = useDashboardInbox();
 
+  // ─── Animação de pipeline ────────────────────────────────────────────────────
+  const [animStep,     setAnimStep]     = useState(0);
+  const [animDone,     setAnimDone]     = useState(false);
+  const [dataResolved, setDataResolved] = useState(false);
+
+  // Marca quando a API respondeu (com ou sem dados)
+  useEffect(() => {
+    if (!dashboardLoading) setDataResolved(true);
+  }, [dashboardLoading]);
+
+  // Avança os passos: 1400ms durante loading, 350ms após dados chegarem,
+  // 150ms se não houver dados (fast-forward para o estado vazio)
+  useEffect(() => {
+    if (animDone) return;
+    const delay = !dataResolved ? 1400 : dashboardData ? 350 : 150;
+    const timer = setTimeout(() => {
+      if (animStep >= 2) {
+        setAnimDone(true);
+      } else {
+        setAnimStep((s) => s + 1);
+      }
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [animStep, animDone, dataResolved, dashboardData]);
+
+  const stepLabels   = ["Carregando Favoritas", "Fazendo Análise", "Montando Painel"];
+  const stepSubtitles = [
+    "Carregando suas ações favoritas...",
+    "Processando análises das ações...",
+    "Montando seu painel...",
+  ];
+
+  const isProcessing = !animDone;
+  const isEmpty      = animDone && !dashboardData;
+
+  const [isRetrySpin, setIsRetrySpin] = useState(false);
+
   const pillarMovements = pillarMovementsData;
   const secondPillarMovement = [...pillarMovements].sort((a, b) => b.events - a.events)[1];
 
@@ -266,28 +307,122 @@ export function Dashboard() {
                 "relative min-h-[196px] overflow-hidden bg-card",
               )}
             >
-              <div className="absolute inset-x-0 top-0 h-[68px] rounded-t-[24px] bg-[linear-gradient(180deg,#DCEBFF_0%,#EAF3FF_100%)] dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.15)_0%,transparent_100%)]" />
-              <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-blue-600 dark:text-blue-400">Resumo do dia</span>
+              <div className="absolute inset-x-0 top-0 h-[44px] rounded-t-[24px] bg-brand-surface dark:bg-brand-surface" />
+              {!isProcessing && !isEmpty && (
+                <span className="absolute left-6 top-4 text-sm font-medium leading-5 text-brand">Resumo do dia</span>
+              )}
 
-              <div className="relative grid h-full gap-6 px-6 pb-5 pt-[84px] xl:grid-cols-[minmax(0,1.6fr)_auto] xl:items-end">
+              <div className={cn(
+                "relative grid h-full gap-6 px-6 pb-5 pt-[60px] xl:items-end",
+                (isProcessing || isEmpty) ? "" : "xl:grid-cols-[minmax(0,1.6fr)_auto]",
+              )}>
                 <div>
-                  {dashboardLoading ? (
-                    <div className="space-y-3">
-                      <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
-                      <div className="h-8 w-4/5 animate-pulse rounded-full bg-muted" />
-                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-muted" />
+                  {isProcessing ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <h1 className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground">
+                          Preparando seu painel
+                        </h1>
+                        <p className="max-w-[40ch] text-[14px] leading-6 text-muted-foreground">
+                          {stepSubtitles[animStep]}
+                        </p>
+                      </div>
+
+                      {/* Pipeline de passos */}
+                      <div className="flex items-start pt-1">
+                        {stepLabels.map((label, i) => {
+                          const isCompleted   = i < animStep;
+                          const isActive      = i === animStep;
+                          const isPending     = i > animStep;
+                          const connectorDone = i > 0 && i - 1 < animStep;
+                          const connectorAnim = i > 0 && i - 1 === animStep;
+                          return (
+                            <div key={label} className="flex items-start">
+                              {i > 0 && (
+                                <div className="relative mx-2 mt-[7px] h-px w-12 overflow-hidden rounded-full bg-border">
+                                  {connectorDone && (
+                                    <div className="absolute inset-0 rounded-full bg-brand" />
+                                  )}
+                                  {connectorAnim && (
+                                    <div
+                                      key={`conn-${animStep}`}
+                                      className="absolute inset-y-0 left-0 rounded-full bg-brand"
+                                      style={{ animation: "connector-fill 1400ms linear forwards" }}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex flex-col items-center gap-1.5">
+                                <div className={cn(
+                                  "flex h-5 w-5 items-center justify-center rounded-full transition-all duration-500",
+                                  isCompleted ? "bg-brand/10"
+                                  : isActive   ? "animate-pulse bg-brand/10"
+                                             : "bg-muted",
+                                )}>
+                                  {isCompleted && (
+                                    <Check size={11} className="text-brand" strokeWidth={3} />
+                                  )}
+                                  {isActive && (
+                                    <div
+                                      className="h-3 w-3 rounded-full border-2"
+                                      style={{
+                                        borderColor: "color-mix(in srgb, var(--brand) 25%, transparent)",
+                                        borderTopColor: "var(--brand)",
+                                        animation: "step-spin 700ms linear infinite",
+                                      }}
+                                    />
+                                  )}
+                                  {isPending && (
+                                    <div className="h-2 w-2 rounded-full border border-border" />
+                                  )}
+                                </div>
+                                <span className={cn(
+                                  "whitespace-nowrap text-[11px] transition-colors duration-500",
+                                  isCompleted || isActive
+                                    ? "font-semibold text-brand"
+                                    : "font-normal text-muted-foreground",
+                                )}>
+                                  {label}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Barra de progresso */}
+                      <div className="h-0.5 w-full overflow-hidden rounded-full bg-brand/10">
+                        <div
+                          className="h-full rounded-full bg-brand transition-[width] duration-[600ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                          style={{ width: `${((animStep + 1) / 3) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                  ) : dashboardError === "not_ready" ? (
-                    <div className="space-y-2.5">
+                  ) : isEmpty ? (
+                    <div className="space-y-2">
                       <h1 className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground">
-                        Preparando seu dashboard
+                        Seu painel está esperando por você
                       </h1>
-                      <p className="max-w-[30ch] text-[15px] leading-6 text-muted-foreground">
-                        Estamos analisando sua watchlist pela primeira vez. Isso costuma levar menos de um minuto.
+                      <p className="max-w-[44ch] text-[14px] leading-6 text-muted-foreground">
+                        Adicione suas ações favoritas e comece a acompanhar o que importa para você.
                       </p>
+                      <div className="flex items-center gap-3 pt-3">
+                        <button
+                          onClick={() => { setIsRetrySpin(true); refreshInboxNow(); }}
+                          className="inline-flex h-9 items-center gap-2 rounded-[12px] border border-border bg-card px-4 text-[12px] font-medium text-foreground shadow-[0_2px_6px_rgba(15,23,40,0.04)] transition active:scale-[0.97] hover:border-brand/40 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:shadow-none"
+                        >
+                          <RotateCcw
+                            size={14}
+                            style={isRetrySpin ? { animation: 'spin-once 600ms ease-out forwards' } : undefined}
+                            onAnimationEnd={() => setIsRetrySpin(false)}
+                          />
+                          Recarregar dados
+                        </button>
+                        <span className="text-[11px] text-muted-foreground">Atualizado {renderedLabel}</span>
+                      </div>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="animate-[dashboard-fade-in_0.4s_ease-out] space-y-3">
                       <h1 className="max-w-[32ch] text-[25px] font-semibold leading-[1.08] tracking-[-0.04em] text-foreground">
                         {heroHeadline}
                       </h1>
@@ -296,25 +431,125 @@ export function Dashboard() {
                   )}
                 </div>
 
-                <div className="flex flex-col items-start gap-3 xl:items-end">
-                  <span className="text-[12px] font-medium text-muted-foreground">
-                      {"Refer\u00eancia "}{dashboardData?.referenceDate ?? "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"}
+                {!isProcessing && !isEmpty && (
+                  <div className="flex flex-col items-start gap-3 xl:items-end">
+                    <span className="text-[12px] font-medium text-muted-foreground">
+                      Referência {dashboardData?.referenceDate}
                     </span>
 
-                  <div className="flex items-center gap-3">
-                    <Button
-                      onClick={focusInboxRecentImpact}
-                      className="h-10 rounded-[18px] bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] dark:shadow-brand/20 hover:bg-brand-hover"
-                    >
-                      {dashboardData?.summary.ctaPrimary ?? "Abrir prioridade"}
-                    </Button>
-                    <span className="text-[12px] font-medium text-muted-foreground">Renderizado {renderedLabel}</span>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={focusInboxRecentImpact}
+                        className="h-10 rounded-[18px] bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] dark:shadow-brand/20 hover:bg-brand-hover"
+                      >
+                        {dashboardData?.summary.ctaPrimary}
+                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-medium text-muted-foreground">Atualizado {renderedLabel}</span>
+                        <button
+                          onClick={() => { setIsRetrySpin(true); refreshInboxNow(); }}
+                          className="cursor-pointer text-muted-foreground transition-colors hover:text-brand"
+                          aria-label="Atualizar"
+                        >
+                          <RotateCcw
+                            size={14}
+                            style={isRetrySpin ? { animation: 'spin-once 600ms ease-out forwards' } : undefined}
+                            onAnimationEnd={() => setIsRetrySpin(false)}
+                          />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </article>
           </section>
 
+          {isEmpty ? (
+            /* ── Empty state — 4 action cards ───────────────────────────── */
+            <section className="animate-[dashboard-fade-in_0.5s_ease-out]">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {([
+                  {
+                    icon: LayoutGrid,
+                    title: "Adicionar às Favoritas",
+                    desc: "Monitore as empresas que importam para você",
+                    cta: "Ir para Favoritas",
+                    href: "/favoritas",
+                  },
+                  {
+                    icon: GitCompare,
+                    title: "Criar uma comparação",
+                    desc: "Compare empresas lado a lado",
+                    cta: "Comparar",
+                    href: "/comparar",
+                  },
+                  {
+                    icon: Compass,
+                    title: "Explorar mercado",
+                    desc: "Descubra empresas e oportunidades",
+                    cta: "Explorar",
+                    href: "/explorar",
+                  },
+                ] as const).map(({ icon: Icon, title, desc, cta, href }) => (
+                  <button
+                    key={title}
+                    onClick={() => router.push(href)}
+                    className="dash-empty-card text-left"
+                  >
+                    <div className="dash-empty-scan-line" />
+                    <div className="dash-empty-icon-wrap">
+                      <Icon className="h-4 w-4 text-brand" />
+                    </div>
+                    <p className="mb-1 text-[14px] font-semibold leading-[1.3] text-foreground">{title}</p>
+                    <p className="mb-4 text-[13px] leading-5 text-muted-foreground">{desc}</p>
+                    <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-brand">
+                      {cta}
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : isProcessing ? (
+            <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+              <div className="col-span-1 grid gap-5 xl:col-span-5">
+                {/* Skeleton: Maior atenção */}
+                <div className="relative min-h-[164px] overflow-hidden rounded-[20px] border border-border bg-card px-5 py-5">
+                  <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-muted" />
+                  <div className="mt-9 space-y-3">
+                    <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+                    <div className="h-4 w-3/4 animate-pulse rounded-full bg-muted" />
+                    <div className="h-3 w-1/2 animate-pulse rounded-full bg-muted" />
+                  </div>
+                </div>
+                {/* Skeleton: Maior melhora */}
+                <div className="relative min-h-[164px] overflow-hidden rounded-[20px] border border-border bg-card px-5 py-5">
+                  <div className="absolute inset-x-0 top-0 h-[46px] rounded-t-[20px] bg-muted" />
+                  <div className="mt-9 space-y-3">
+                    <div className="h-5 w-24 animate-pulse rounded-full bg-muted" />
+                    <div className="h-4 w-2/3 animate-pulse rounded-full bg-muted" />
+                    <div className="h-3 w-1/2 animate-pulse rounded-full bg-muted" />
+                  </div>
+                </div>
+              </div>
+              {/* Skeleton: Prioridade do dia */}
+              <div className={cn(surfaceBase, "col-span-1 min-h-[224px] bg-card p-5 xl:col-span-7")}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+                    <div className="h-6 w-3/4 animate-pulse rounded-full bg-muted" />
+                    <div className="h-6 w-1/2 animate-pulse rounded-full bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+                    <div className="h-4 w-5/6 animate-pulse rounded-full bg-muted" />
+                  </div>
+                  <div className="h-20 animate-pulse rounded-[18px] bg-muted" />
+                </div>
+              </div>
+            </section>
+          ) : (
           <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
             <div className="col-span-1 grid gap-5 xl:col-span-5">
               <button
@@ -454,14 +689,25 @@ export function Dashboard() {
               </div>
             </article>
           </section>
+          )}
 
+          {isProcessing ? (
+            <div className="rounded-[20px] border border-border bg-muted dark:bg-muted/50 px-5 py-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="space-y-2">
+                  <div className="h-3 w-24 animate-pulse rounded-full bg-border" />
+                  <div className="h-5 w-64 animate-pulse rounded-full bg-border" />
+                </div>
+                <div className="h-8 w-28 animate-pulse rounded-full bg-border" />
+              </div>
+            </div>
+          ) : !isEmpty ? (
           <section className="rounded-[20px] border border-border bg-muted dark:bg-muted/50 px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-blue-500 dark:text-blue-400">{"Por onde come\u00e7ar"}</p>
+                <p className="text-[12px] font-medium uppercase text-blue-500 dark:text-blue-400">{"Por onde come\u00e7ar"}</p>
                 <p className="mt-1 text-[15px] font-semibold leading-6 text-foreground">{editorialText}</p>
               </div>
-
               <button
                 onClick={focusInboxRecentImpact}
                 className="inline-flex items-center gap-2 self-start rounded-full bg-card px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-hover lg:self-auto"
@@ -471,13 +717,14 @@ export function Dashboard() {
               </button>
             </div>
           </section>
+          ) : null}
 
-          <section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+          {!isEmpty && (<><section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
             <article className={cn(surfaceBase, "col-span-1 min-h-[540px] overflow-hidden xl:col-span-7")}>
               <div className="border-b border-border px-6 py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="max-w-[44ch]">
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{"Explora\u00e7\u00e3o principal"}</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">{"Explora\u00e7\u00e3o principal"}</p>
                     <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
                       {"Atualiza\u00e7\u00f5es da watchlist"}
                     </h2>
@@ -761,7 +1008,7 @@ export function Dashboard() {
               <article className={cn(surfaceBase, "min-h-[232px] p-6")}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Pilar em movimento</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Pilar em movimento</p>
                     <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                       {leadingPillarMovement.pillar}
                     </h3>
@@ -805,7 +1052,7 @@ export function Dashboard() {
               </article>
 
               <article className={cn(mediumSurface, "min-h-[170px] bg-muted dark:bg-muted/30 p-6")}>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-blue-500 dark:text-blue-400">{"Sa\u00fade da watchlist"}</p>
+                <p className="text-[12px] font-medium uppercase text-blue-500 dark:text-blue-400">{"Sa\u00fade da watchlist"}</p>
                 <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                   {healthyWatchlistCount} de {totalWatchlistCount} seguem estáveis
                 </h3>
@@ -827,7 +1074,7 @@ export function Dashboard() {
                     </div>
                   </div>
                   <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-blue-50 dark:bg-blue-950/50 px-3 py-2 text-right">
-                    <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Hoje</span>
+                    <span className="text-[10px] uppercase text-muted-foreground">Hoje</span>
                     <span className="text-[18px] font-semibold text-blue-700 dark:text-blue-400">{todayHealthyCount}</span>
                     <span className="text-[11px] text-muted-foreground">sinais positivos</span>
                   </div>
@@ -840,7 +1087,7 @@ export function Dashboard() {
                   "min-h-[210px] overflow-hidden bg-brand-surface/20 dark:bg-brand-surface/10 p-6",
                 )}
               >
-                <p className="relative text-[12px] font-medium uppercase tracking-[0.08em] text-brand">{"Pr\u00f3xima leitura"}</p>
+                <p className="relative text-[12px] font-medium uppercase text-brand">{"Pr\u00f3xima leitura"}</p>
                 <h3 className="relative mt-2 max-w-[18ch] text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                   {dashboardData?.sessionClosing.headline ??
                     (completedSteps === progressStates.length
@@ -890,7 +1137,7 @@ export function Dashboard() {
           <section className="rounded-[28px] border border-border bg-card px-7 py-10 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{"Fechamento da sess\u00e3o"}</p>
+                <p className="text-[12px] font-medium uppercase text-muted-foreground">{"Fechamento da sess\u00e3o"}</p>
                 <div className="mt-3 h-px w-20 bg-[linear-gradient(90deg,var(--brand),var(--brand-border))]" />
                 <p className="mt-3 max-w-[72ch] text-[18px] font-semibold leading-7 text-foreground">
                   {showSessionClosing
@@ -912,6 +1159,7 @@ export function Dashboard() {
               </div>
             </div>
           </section>
+        </>)}
         </div>
       </MainContent>
     </div>

@@ -1,13 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Bell, Search } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import { UserNavMenu } from "@/src/components/layout/UserNavMenu";
-import { subscriptionPlans } from "../services";
+import { fetchPlans } from "../services";
+import type { SubscriptionPlan, BillingCycle } from "../interfaces";
 import { SubscriptionPlanCard } from "./SubscriptionPlanCard";
 
 export function SubscriptionPage() {
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [cycle, setCycle] = useState<BillingCycle>("Anual");
+
+  useEffect(() => {
+    fetchPlans().then(setPlans).catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar />
@@ -45,15 +54,37 @@ export function SubscriptionPage() {
               </div>
 
               <div className="inline-flex items-center rounded-[18px] border border-border bg-muted p-1.5 shadow-[0_10px_22px_rgba(15,23,40,0.03)]">
-                <button className="rounded-[14px] px-5 py-2.5 text-[13px] font-medium text-muted-foreground">Mensal</button>
-                <button className="rounded-[14px] bg-card px-5 py-2.5 text-[13px] font-semibold text-foreground shadow-[0_6px_14px_rgba(15,23,40,0.05)]">Anual</button>
-                <span className="ml-2 rounded-[12px] bg-brand-surface px-3 py-2 text-[13px] font-semibold text-brand">20%OFF</span>
+                <button
+                  onClick={() => setCycle("Mensal")}
+                  className={`rounded-[14px] px-5 py-2.5 text-[13px] font-medium transition ${
+                    cycle === "Mensal"
+                      ? "bg-card font-semibold text-foreground shadow-[0_6px_14px_rgba(15,23,40,0.05)]"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Mensal
+                </button>
+                <button
+                  onClick={() => setCycle("Anual")}
+                  className={`rounded-[14px] px-5 py-2.5 text-[13px] font-medium transition ${
+                    cycle === "Anual"
+                      ? "bg-card font-semibold text-foreground shadow-[0_6px_14px_rgba(15,23,40,0.05)]"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Anual
+                </button>
+                {cycle === "Anual" && (
+                  <span className="ml-2 rounded-[12px] bg-brand-surface px-3 py-2 text-[13px] font-semibold text-brand">
+                    20%OFF
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="mt-8 grid gap-5 xl:grid-cols-3 xl:gap-4">
-              {subscriptionPlans.map((plan) => (
-                <SubscriptionPlanCard key={plan.id} plan={plan} />
+              {plans.map((plan) => (
+                <SubscriptionPlanCard key={plan.id} plan={plan} cycle={cycle} />
               ))}
             </div>
           </div>

@@ -18,7 +18,7 @@ export function CompareEvidenceDrawer({ data, onClose, formatMetric }: CompareEv
       <aside className="absolute inset-y-0 right-0 w-full max-w-[460px] overflow-y-auto border-l border-border bg-card p-6 shadow-2xl">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="text-xs uppercase text-muted-foreground">
               Evidence drawer
             </p>
             <h3 className="mt-1 text-lg font-semibold text-foreground">{data.metricName}</h3>

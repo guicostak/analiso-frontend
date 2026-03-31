@@ -3618,7 +3618,7 @@ export function AnalysisPage() {
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-neutral-400 hover:text-neutral-700 transition-colors">
+            <Link href="/painel" className="text-neutral-400 hover:text-neutral-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">

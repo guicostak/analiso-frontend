@@ -110,7 +110,7 @@ function FeedItem({ item }: { item: ChangeFeedItem }) {
   };
 
   return (
-    <div className="p-5 bg-muted border border-border rounded-2xl hover:border-border-strong hover:shadow-sm transition-all group">
+    <div className="p-5 bg-muted border border-border rounded-2xl hover:border-border-strong hover:shadow-sm transition-[border-color,box-shadow] group">
       {/* Header Row */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">

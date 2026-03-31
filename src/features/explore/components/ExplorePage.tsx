@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ExternalLink, Globe, Newspaper, Search } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
@@ -16,6 +16,8 @@ import { ExploreCompareBar } from "./ExploreCompareBar";
 import { ExploreDrawer } from "./ExploreDrawer";
 import type { CompanyCard } from "../interfaces";
 import type { CompanySearchFilters, CompanySearchItem } from "../services/search.service";
+import { useFavorites } from "@/src/features/favoritas";
+import { useSavedSearches } from "@/src/features/saved-searches";
 
 /**
  * Mapeia query params do URL (snake_case do Luiz) para CompanySearchFilters (camelCase da API).
@@ -57,6 +59,31 @@ function parseUrlFilters(params: URLSearchParams): CompanySearchFilters | null {
 }
 
 /**
+ * Serializa CompanySearchFilters + page para query string do URL /explorar.
+ */
+function buildExploreUrl(filters: CompanySearchFilters, page: number): string {
+  const params = new URLSearchParams();
+  params.set("tab", "busca");
+  if (filters.query)              params.set("query",             filters.query);
+  if (filters.sector)             params.set("setor",             filters.sector);
+  if (filters.plMin        != null) params.set("pl_min",          String(filters.plMin));
+  if (filters.plMax        != null) params.set("pl_max",          String(filters.plMax));
+  if (filters.pvpMin       != null) params.set("pvp_min",         String(filters.pvpMin));
+  if (filters.pvpMax       != null) params.set("pvp_max",         String(filters.pvpMax));
+  if (filters.evEbitdaMax  != null) params.set("ev_ebitda_max",   String(filters.evEbitdaMax));
+  if (filters.dyMin        != null) params.set("dy_min",          String(filters.dyMin));
+  if (filters.dyMax        != null) params.set("dy_max",          String(filters.dyMax));
+  if (filters.roeMin       != null) params.set("roe_min",         String(filters.roeMin));
+  if (filters.roeMax       != null) params.set("roe_max",         String(filters.roeMax));
+  if (filters.roicMin      != null) params.set("roic_min",        String(filters.roicMin));
+  if (filters.margemMin    != null) params.set("margem_min",      String(filters.margemMin));
+  if (filters.dividaEbitdaMax != null) params.set("divida_ebitda_max", String(filters.dividaEbitdaMax));
+  if (page > 0)                   params.set("page",              String(page));
+  const qs = params.toString();
+  return `/explorar?${qs}`;
+}
+
+/**
  * Converte CompanySearchItem da API em CompanyCard para o catálogo.
  */
 /** Resolve métrica tentando chave snake_case e display name. */
@@ -90,22 +117,37 @@ function mapSearchItemToCard(item: CompanySearchItem): CompanyCard {
       dividaLiquidaEbitda: pick(m, "divida_ebitda", "Dívida Líquida/EBITDA"),
       evEbitda: pick(m, "ev_ebitda", "EV/EBITDA"),
       lpa: pick(m, "lpa", "LPA"),
+      price: pick(m, "price", "Preço"),
     },
   };
 }
 
 export function ExplorePage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const companySearch = useCompanySearch();
+  const favorites = useFavorites();
+  const savedSearches = useSavedSearches();
+  const [apiTriggered, setApiTriggered] = useState(false);
+  // Tab padrão: "mercado", mas troca para "busca" se URL tem filtros/tab=busca
+  const initialTab = (() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "busca" || tabParam === "noticias") return tabParam;
+    const urlFilters = parseUrlFilters(searchParams);
+    const page = parseInt(searchParams.get("page") ?? "0", 10) || 0;
+    if (urlFilters || page > 0) return "busca" as const;
+    return "mercado" as const;
+  })();
+  const [sectionTab, setSectionTab] = useState<"busca" | "mercado" | "noticias">(initialTab);
 
-  // Lê filtros do URL e dispara busca na API quando há params
+  // Dispara busca sempre no mount — sem filtros traz todos os resultados
   useEffect(() => {
     const urlFilters = parseUrlFilters(searchParams);
-    if (urlFilters) {
-      companySearch.search(urlFilters);
-    }
+    const page = parseInt(searchParams.get("page") ?? "0", 10) || 0;
+    setApiTriggered(true);
+    companySearch.search({ ...(urlFilters ?? {}), page });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, []);
 
   const {
     selectedTab,
@@ -163,12 +205,46 @@ export function ExplorePage() {
     resetFilters,
   } = useExplore();
 
-  // Quando há resultados da API, mapeia para CompanyCard[]; senão usa mock local
-  const hasApiResults = companySearch.items.length > 0 || companySearch.isLoading;
+  // Usa resultados da API quando disponíveis; fallback para mock local
+  const isSearchActive = apiTriggered && companySearch.items.length > 0;
   const catalogCompanies = useMemo<CompanyCard[]>(() => {
-    if (hasApiResults) return companySearch.items.map(mapSearchItemToCard);
+    if (isSearchActive) return companySearch.items.map(mapSearchItemToCard);
     return filteredCompanies;
-  }, [hasApiResults, companySearch.items, filteredCompanies]);
+  }, [isSearchActive, companySearch.items, filteredCompanies]);
+
+  // Wrappers que sincronizam paginação e filtros com o URL (para compartilhamento)
+  function handleGoToPage(page: number) {
+    router.push(buildExploreUrl(companySearch.filters, page), { scroll: false });
+    companySearch.goToPage(page);
+  }
+
+  const urlDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleUpdateFilters = useCallback(
+    (partial: Partial<CompanySearchFilters>) => {
+      // Atualiza filtros imediatamente (hook faz debounce interno da API)
+      companySearch.updateFilters(partial);
+
+      // Debounce da URL — sincroniza endereço após o usuário parar de digitar
+      if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
+      urlDebounceRef.current = setTimeout(() => {
+        const merged = { ...companySearch.filters, ...partial };
+        router.push(buildExploreUrl(merged, 0), { scroll: false });
+      }, 800);
+    },
+    [companySearch, router],
+  );
+
+  function handleClearFilters() {
+    if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
+    router.push("/explorar", { scroll: false });
+    companySearch.clearFilters();
+  }
+
+  function handleLoadSavedSearch(filters: CompanySearchFilters) {
+    router.push(buildExploreUrl(filters, 0), { scroll: false });
+    companySearch.search({ ...filters, page: 0 });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -182,10 +258,10 @@ export function ExplorePage() {
           <div className="absolute right-[10%] top-40 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.08)_0%,rgba(18,165,148,0)_72%)]" />
         </div>
 
-        <div className="relative px-6 pb-8 pt-5">
+        <div className="relative px-6 pb-20 pt-5">
           <div className="mx-auto max-w-[1380px]">
             <header className="mb-4 space-y-2">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Explorar mercado</p>
+              <p className="text-[12px] font-medium uppercase text-muted-foreground">Explorar mercado</p>
               <div className="max-w-[640px] space-y-2">
                 <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-foreground">Explorar</h1>
                 <p className="text-[13px] leading-6 text-muted-foreground">
@@ -211,54 +287,103 @@ export function ExplorePage() {
                 applyHighlightPreset={applyHighlightPreset}
               />
 
-              <div className="grid grid-cols-1 gap-5">
-                <ExploreCompanyCatalog
-                  isLoading={isLoading || companySearch.isLoading}
-                  filteredCompanies={catalogCompanies}
-                  filters={filters}
-                  searchQuery={searchQuery}
-                  showAdvancedFilters={showAdvancedFilters}
-                  activePreset={activePreset}
-                  appliedChips={appliedChips}
-                  showStaleBanner={showStaleBanner}
-                  staleCount={staleCount}
-                  selectedEntryPoints={selectedEntryPoints}
-                  thesisCollections={thesisCollections}
-                  compareTickers={compareTickers}
-                  getCompanyLogo={getCompanyLogo}
-                  setSearchQuery={setSearchQuery}
-                  setFilters={setFilters}
-                  setShowAdvancedFilters={setShowAdvancedFilters}
-                  toggleEntryPoint={toggleEntryPoint}
-                  clearEntryPoints={clearEntryPoints}
-                  clearPreset={clearPreset}
-                  toggleCompare={toggleCompare}
-                  resetFilters={resetFilters}
-                />
+              {/* ── Navegação entre seções ── */}
+              <div className="pt-6">
+                <div className="mb-6 flex gap-8 border-b border-border">
+                  {(
+                    [
+                      { key: "mercado",    label: "Contexto de mercado", icon: Globe },
+                      { key: "busca",      label: "Buscar ações",        icon: Search },
+                      { key: "noticias",   label: "Notícias",            icon: Newspaper },
+                    ] as const
+                  ).map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => setSectionTab(key)}
+                      className={`relative flex items-center gap-2 pb-4 text-sm font-medium transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                        sectionTab === key
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                      <span className={`absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-brand transition-opacity duration-200 ${sectionTab === key ? "opacity-100" : "opacity-0"}`} />
+                    </button>
+                  ))}
+                </div>
 
-                <ExploreMarketContext
-                  isLoading={isLoading}
-                  showContextPanel={showContextPanel}
-                  showVolatilityInfo={showVolatilityInfo}
-                  indexCards={indexCards}
-                  volatility={volatility}
-                  volatilityIsStale={volatilityIsStale}
-                  setShowContextPanel={setShowContextPanel}
-                  setShowVolatilityInfo={setShowVolatilityInfo}
-                  setShowVolatilityDetails={setShowVolatilityDetails}
-                />
+                {sectionTab === "busca" && (
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-[12px] font-medium uppercase text-muted-foreground">Catálogo de empresas</p>
+                      <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Buscar ações</h2>
+                    </div>
+                  <ExploreCompanyCatalog
+                    isLoading={isLoading || companySearch.isLoading}
+                    filteredCompanies={catalogCompanies}
+                    filters={filters}
+                    searchQuery={searchQuery}
+                    showAdvancedFilters={showAdvancedFilters}
+                    activePreset={activePreset}
+                    appliedChips={appliedChips}
+                    showStaleBanner={showStaleBanner}
+                    staleCount={staleCount}
+                    selectedEntryPoints={selectedEntryPoints}
+                    thesisCollections={thesisCollections}
+                    compareTickers={compareTickers}
+                    getCompanyLogo={getCompanyLogo}
+                    setSearchQuery={setSearchQuery}
+                    setFilters={setFilters}
+                    setShowAdvancedFilters={setShowAdvancedFilters}
+                    toggleEntryPoint={toggleEntryPoint}
+                    clearEntryPoints={clearEntryPoints}
+                    clearPreset={clearPreset}
+                    toggleCompare={toggleCompare}
+                    resetFilters={resetFilters}
+                    isSearchActive={isSearchActive}
+                    totalItems={companySearch.totalItems}
+                    totalPages={companySearch.totalPages}
+                    page={companySearch.page}
+                    companySearchFilters={companySearch.filters}
+                    goToPage={handleGoToPage}
+                    updateFilters={handleUpdateFilters}
+                    clearApiFilters={handleClearFilters}
+                    favoriteTickers={favorites.tickers}
+                    onToggleFavorite={favorites.toggle}
+                    savedSearches={savedSearches.items}
+                    onSaveSearch={savedSearches.create}
+                    onDeleteSavedSearch={savedSearches.remove}
+                    onLoadSavedSearch={handleLoadSavedSearch}
+                  />
+                  </div>
+                )}
 
-                <ExploreMovementsPanel
-                  selectedTab={selectedTab}
-                  movers={movers}
-                  movementInsights={movementInsights}
-                  showAllMovements={showAllMovements}
-                  movementSummary={movementSummary}
-                  movementDominant={movementDominant}
-                  getCompanyLogo={getCompanyLogo}
-                  setSelectedTab={setSelectedTab}
-                  setShowAllMovements={setShowAllMovements}
-                />
+                {sectionTab === "mercado" && (
+                  <ExploreMarketContext
+                    isLoading={isLoading}
+                    showVolatilityInfo={showVolatilityInfo}
+                    indexCards={indexCards}
+                    volatility={volatility}
+                    volatilityIsStale={volatilityIsStale}
+                    setShowVolatilityInfo={setShowVolatilityInfo}
+                    setShowVolatilityDetails={setShowVolatilityDetails}
+                  />
+                )}
+
+                {sectionTab === "noticias" && (
+                  <ExploreMovementsPanel
+                    selectedTab={selectedTab}
+                    movers={movers}
+                    movementInsights={movementInsights}
+                    showAllMovements={showAllMovements}
+                    movementSummary={movementSummary}
+                    movementDominant={movementDominant}
+                    getCompanyLogo={getCompanyLogo}
+                    setSelectedTab={setSelectedTab}
+                    setShowAllMovements={setShowAllMovements}
+                  />
+                )}
               </div>
             </div>
           </div>

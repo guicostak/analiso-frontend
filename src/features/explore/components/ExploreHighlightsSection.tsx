@@ -112,7 +112,7 @@ function HighlightPriorityCard({
 
       <div className="relative mt-4 flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Impacto e pilar</p>
+          <p className="text-[12px] font-medium uppercase text-muted-foreground">Impacto e pilar</p>
           <p className="mt-1 text-[13px] leading-5 text-foreground">{item.whyItMatters}</p>
           <p className="mt-2 text-[12px] font-medium text-muted-foreground">
             {item.pillar} . {item.timeframeLabel}
@@ -203,7 +203,7 @@ export function ExploreHighlightsSection({
               <div className="relative grid h-full gap-6 lg:grid-cols-[minmax(0,1.2fr)_260px]">
                 <div className="flex flex-col justify-between">
                   <div>
-                    <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-blue-700 dark:text-blue-300">
+                    <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300">
                       Curadoria principal
                     </span>
                     <h2 className="mt-4 max-w-[680px] text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
@@ -262,13 +262,13 @@ export function ExploreHighlightsSection({
                 <aside className="relative flex flex-col justify-between rounded-[22px] border border-[rgba(221,233,245,0.92)] dark:border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,251,253,0.96))] dark:bg-none dark:bg-card p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-none">
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-16 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(234,244,255,0.72),rgba(234,244,255,0))] dark:hidden" />
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Por que abrir agora</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Por que abrir agora</p>
                     <p className="mt-3 text-[15px] leading-7 text-foreground">{featuredHighlight.whyItMatters}</p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="rounded-[20px] border border-border bg-card p-4">
-                      <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Fonte e rastreabilidade</p>
+                      <p className="text-[12px] font-medium uppercase text-muted-foreground">Fonte e rastreabilidade</p>
                       <p className="mt-2 text-[14px] font-semibold text-foreground">{featuredHighlight.source.name}</p>
                       <p className="mt-1 text-[13px] leading-6 text-muted-foreground">{featuredHighlight.source.docLabel}</p>
                       <p className="mt-1 text-[12px] text-muted-foreground">Atualizado em {featuredHighlight.source.updatedAt}</p>
@@ -303,7 +303,7 @@ export function ExploreHighlightsSection({
 
               <div className="relative flex h-full flex-col justify-between">
                 <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Lente da curadoria</p>
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Lente da curadoria</p>
                   <h3 className="mt-3 text-[20px] font-semibold leading-7 text-foreground">{summaryScope}</h3>
                   <p className="mt-3 text-[15px] leading-7 text-muted-foreground">
                     {summaryScope === "Setor"
@@ -339,7 +339,7 @@ export function ExploreHighlightsSection({
                   </div>
 
                   <div className="rounded-[24px] border border-border bg-card p-5">
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Como ler este bloco</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Como ler este bloco</p>
                     <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
                       Primeiro abra a leitura principal. Depois use a lente para expandir por setor ou por empresas relacionadas.
                     </p>

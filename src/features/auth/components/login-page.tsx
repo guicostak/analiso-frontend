@@ -20,11 +20,16 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && !justLoggedIn.current) {
-      router.replace("/dashboard");
+      router.replace("/painel");
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const handleSuccess = (data: GoogleAuthUser | EmailAuthUser) => {
+  // While restoring session, show nothing to avoid login form flash
+  if (isLoading || (!isLoading && isAuthenticated && !justLoggedIn.current)) {
+    return null;
+  }
+
+  const handleSuccess = (data: GoogleAuthUser | EmailAuthUser, provider: "google" | "email") => {
     justLoggedIn.current = true;
 
     if (data.isNewUser) {
@@ -37,11 +42,13 @@ export function LoginPage() {
         email: data.email,
         name: data.name,
         picture: data.picture,
+        emailVerified: false,
+        provider,
       },
       data.token,
     );
 
-    router.replace(data.isNewUser ? "/onboarding" : "/dashboard");
+    router.replace(data.isNewUser ? "/onboarding" : "/painel");
   };
 
   const handleError = () => {
@@ -77,7 +84,7 @@ export function LoginPage() {
             </div>
 
             {/* Google */}
-            <GoogleButton onSuccess={handleSuccess} onError={handleError} />
+            <GoogleButton onSuccess={(data) => handleSuccess(data, "google")} onError={handleError} />
 
             {/* Divider */}
             <div className="flex items-center gap-4">
@@ -87,7 +94,7 @@ export function LoginPage() {
             </div>
 
             {/* Email form */}
-            <EmailAuthForm onSuccess={handleSuccess} />
+            <EmailAuthForm onSuccess={(data) => handleSuccess(data, "email")} />
 
             <p className="text-xs text-muted-foreground leading-relaxed">
               Ao entrar, você concorda com nossos{" "}

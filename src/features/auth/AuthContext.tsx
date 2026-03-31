@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 
 // -------------------------------------------------------
 // Types
@@ -11,6 +11,8 @@ export interface AuthUser {
   email: string;
   name: string;
   picture: string;
+  emailVerified: boolean;
+  provider: "google" | "email";
 }
 
 interface AuthContextType {
@@ -73,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     try {
@@ -82,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore storage errors
     }
-  };
+  }, []);
 
   return (
     <AuthContext.Provider

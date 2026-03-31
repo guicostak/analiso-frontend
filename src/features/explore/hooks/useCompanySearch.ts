@@ -5,14 +5,19 @@
  *
  * Hook para busca avançada de empresas com filtros e paginação.
  * Segue architecture_skill.md: lógica isolada em hook, service para HTTP.
+ *
+ * updateFilters usa debounce de 500ms para evitar chamadas excessivas
+ * à API enquanto o usuário digita nos filtros de métricas.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   searchService,
   type CompanySearchFilters,
   type CompanySearchItem,
 } from "../services/search.service";
+
+const FILTER_DEBOUNCE_MS = 800;
 
 interface UseCompanySearchState {
   items: CompanySearchItem[];
@@ -34,6 +39,7 @@ export function useCompanySearch() {
   });
 
   const [filters, setFilters] = useState<CompanySearchFilters>({});
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const search = useCallback(
     async (newFilters?: CompanySearchFilters) => {
@@ -63,6 +69,7 @@ export function useCompanySearch() {
     [filters],
   );
 
+  /** Paginação — sem debounce, resposta imediata. */
   const goToPage = useCallback(
     (page: number) => {
       search({ ...filters, page });
@@ -70,15 +77,30 @@ export function useCompanySearch() {
     [filters, search],
   );
 
+  /**
+   * Atualiza filtros com debounce.
+   * O estado dos filtros atualiza imediatamente (UI responsiva),
+   * mas a chamada à API espera o usuário parar de digitar.
+   */
   const updateFilters = useCallback(
     (partial: Partial<CompanySearchFilters>) => {
       const merged = { ...filters, ...partial, page: 0 };
-      search(merged);
+
+      // Atualiza state imediatamente — inputs refletem o valor digitado
+      setFilters(merged);
+
+      // Cancela timer anterior e agenda nova busca
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        search(merged);
+      }, FILTER_DEBOUNCE_MS);
     },
     [filters, search],
   );
 
+  /** Limpa todos os filtros — sem debounce, ação explícita do usuário. */
   const clearFilters = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     search({ page: 0 });
   }, [search]);
 

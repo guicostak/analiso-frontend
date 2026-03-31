@@ -196,7 +196,7 @@ export function LuizChatPanel() {
                   <button
                     key={s.text}
                     onClick={() => sendMessage(s.text)}
-                    className="group flex items-center gap-3 rounded-[14px] border border-border bg-muted px-4 py-3.5 text-left transition-all hover:border-transparent hover:shadow-[0_0_0_1.5px_rgba(168,85,247,0.35)] active:scale-[0.99]"
+                    className="group flex items-center gap-3 rounded-[14px] border border-border bg-muted px-4 py-3.5 text-left transition-[border-color,box-shadow,transform] duration-150 hover:border-transparent hover:shadow-[0_0_0_1.5px_rgba(168,85,247,0.35)] active:scale-[0.99]"
                   >
                     <span className="text-[18px] leading-none">{s.icon}</span>
                     <span className="text-[13.5px] font-medium text-foreground group-hover:text-[#6D28D9]">
@@ -224,7 +224,7 @@ export function LuizChatPanel() {
         {/* ── Input ── */}
         <div className="shrink-0 border-t border-border bg-card px-4 pb-6 pt-3">
           <div
-            className="flex items-end gap-2 rounded-[16px] border px-4 py-3 transition-all duration-150"
+            className="flex items-end gap-2 rounded-[16px] border px-4 py-3 transition-[border-color,box-shadow,background-color] duration-150"
             style={{
               borderColor: focused ? "rgba(168,85,247,0.50)" : "var(--border)",
               boxShadow:   focused
@@ -252,7 +252,7 @@ export function LuizChatPanel() {
               onClick={handleSend}
               disabled={!input.trim() || isTyping}
               aria-label="Enviar"
-              className="mb-[1px] flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150"
+              className="mb-[1px] flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-[background-color,box-shadow] duration-150"
               style={{
                 background: input.trim() && !isTyping ? NEON : "var(--muted)",
                 boxShadow:  input.trim() && !isTyping

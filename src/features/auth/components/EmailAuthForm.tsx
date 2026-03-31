@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mail, CheckCircle } from "lucide-react";
 import type { AuthMode, EmailAuthUser } from "../interfaces/auth.interfaces";
 import { useEmailAuth } from "../hooks/useEmailAuth";
 
@@ -11,16 +12,22 @@ interface EmailAuthFormProps {
 export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
   const {
     mode,
+    step,
     email,
     name,
     password,
+    verificationCode,
+    pendingUser,
     isLoading,
     error,
     setMode,
     setEmail,
     setName,
     setPassword,
+    setVerificationCode,
     submit,
+    submitVerification,
+    resendVerification,
   } = useEmailAuth({ onSuccess });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,6 +35,74 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
     void submit();
   };
 
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submitVerification();
+  };
+
+  // ── Step de verificação de e-mail ──────────────────────────────────────────
+  if (step === "verify-email" && pendingUser) {
+    return (
+      <div className="w-full flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-brand/10">
+            <Mail className="h-6 w-6 text-brand" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Verifique seu e-mail</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Enviamos um código de verificação para{" "}
+              <span className="font-medium text-foreground">{pendingUser.email}</span>
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleVerify} className="flex flex-col gap-4" noValidate>
+          <FormField
+            id="auth-code"
+            label="Código de verificação"
+            type="text"
+            value={verificationCode}
+            onChange={setVerificationCode}
+            placeholder="000000"
+            autoComplete="one-time-code"
+            required
+          />
+
+          {error && (
+            <p role="alert" className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading || verificationCode.length === 0}
+            className="w-full mt-1 py-3.5 px-4 rounded-full bg-brand text-white text-sm font-semibold tracking-wide
+              hover:bg-brand/90 active:scale-[0.98] transition-[color,background-color,transform,opacity]
+              disabled:opacity-60 disabled:cursor-not-allowed
+              focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-2 focus:ring-offset-muted"
+          >
+            {isLoading ? "Verificando..." : "Confirmar e-mail"}
+          </button>
+        </form>
+
+        <p className="text-xs text-center text-muted-foreground">
+          Não recebeu?{" "}
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={() => void resendVerification()}
+            className="text-brand font-medium hover:underline disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none"
+          >
+            Reenviar código
+          </button>
+        </p>
+      </div>
+    );
+  }
+
+  // ── Formulário principal ───────────────────────────────────────────────────
   return (
     <div className="w-full">
       {/* Mode tabs */}
@@ -69,6 +144,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
           required
         />
 
+
         <FormField
           id="auth-password"
           label="Senha"
@@ -90,14 +166,14 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps) {
           type="submit"
           disabled={isLoading}
           className="w-full mt-3 py-3.5 px-4 rounded-full bg-brand text-white text-sm font-semibold tracking-wide
-            hover:bg-brand/90 active:scale-[0.98] transition-all
+            hover:bg-brand/90 active:scale-[0.98] transition-[color,background-color,transform,opacity]
             disabled:opacity-60 disabled:cursor-not-allowed
             focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-2 focus:ring-offset-muted"
         >
           {isLoading
             ? mode === "register"
-              ? "Criando conta…"
-              : "Entrando…"
+              ? "Criando conta..."
+              : "Entrando..."
             : mode === "register"
               ? "Criar conta"
               : "Entrar"}

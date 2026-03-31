@@ -1,4 +1,4 @@
-﻿import { AlertTriangle, Bell, Plus, Database, ArrowRight, Eye, Compass, GitCompare } from 'lucide-react';
+﻿import { AlertTriangle, Bell, Plus, Database, ArrowRight, Eye, Compass, GitCompare, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { 
   mockAttentionCompanies, 
@@ -76,7 +76,10 @@ function AlertsCard() {
           {mockActiveAlerts.map((alert) => (
             <div key={alert.id} className="p-3 bg-danger-surface border border-danger-border rounded-lg">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-foreground text-xs">{alert.ticker}</span>
+                <div className="flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-danger-text shrink-0" />
+                  <span className="font-medium text-foreground text-xs">{alert.ticker}</span>
+                </div>
                 <span className="text-xs text-muted-foreground">{alert.triggeredAt}</span>
               </div>
               <p className="text-xs text-dim">{alert.condition}</p>
@@ -90,6 +93,15 @@ function AlertsCard() {
         <span className="text-xs text-dim">Alertas ativos</span>
         <span className="text-sm font-semibold text-foreground">7</span>
       </div>
+
+      {/* Ver todos */}
+      <Link
+        href="/alertas"
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-brand hover:bg-brand-surface transition-colors mb-2"
+      >
+        <span>Ver todos os alertas</span>
+        <ChevronRight className="w-3.5 h-3.5" />
+      </Link>
 
       {/* CTA */}
       <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-foreground hover:opacity-90 text-card rounded-lg text-xs font-medium transition-colors">

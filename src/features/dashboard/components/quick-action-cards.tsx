@@ -48,7 +48,7 @@ export function QuickActionCards() {
             key={index}
             href={action.href}
             onClick={action.href === '#' ? (e) => e.preventDefault() : undefined}
-            className="bg-card border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-all text-left group block"
+            className="bg-card border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-[border-color,box-shadow] text-left group block"
           >
             <div className={`w-9 h-9 rounded-lg ${action.iconBg} flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
               <Icon className={`w-4 h-4 ${action.iconColor}`} />

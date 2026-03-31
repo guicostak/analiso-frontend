@@ -3,6 +3,8 @@ import type {
   EmailAuthResponse,
   EmailLoginRequest,
   EmailRegisterRequest,
+  SendVerificationRequest,
+  VerifyCodeRequest,
 } from "../interfaces/auth.interfaces";
 
 // ── DTOs do Google Auth ────────────────────────────────────────────────────────
@@ -16,6 +18,7 @@ interface BackendAuthResponse {
     email: string;
     name: string;
     avatarUrl: string;
+    emailVerified: boolean;
   };
 }
 
@@ -57,6 +60,30 @@ export const authService = {
 
   loginWithEmail: (payload: EmailLoginRequest) =>
     post<EmailAuthResponse>("/api/auth/login", payload),
+
+  /**
+   * Envia o código de verificação.
+   * Passa pelo proxy Next.js (/api/auth/verification/send) que bloqueia usuários Google.
+   * O token é enviado no cabeçalho Authorization para que o proxy possa inspecionar o provider.
+   */
+  sendVerification: async (payload: SendVerificationRequest, token?: string | null): Promise<void> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch("/api/auth/verification/send", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error((data as { message?: string }).message ?? `HTTP ${response.status}`);
+    }
+  },
+
+  verifyCode: (payload: VerifyCodeRequest) =>
+    post<void>("/api/auth/verification/verify", payload),
 
   /**
    * Autentica o usuário via Google ID Token.

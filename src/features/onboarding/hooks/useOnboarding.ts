@@ -114,7 +114,7 @@ export function useOnboarding(): UseOnboardingReturn {
   // — Redireciona se o onboarding já estiver concluído —
   useEffect(() => {
     if (isOnboardingCompleted()) {
-      router.push("/dashboard");
+      router.push("/painel");
     }
   }, [router]);
 
@@ -215,7 +215,7 @@ export function useOnboarding(): UseOnboardingReturn {
       updateDraft({ onboardingCompleted: true });
       markOnboardingCompleted();
       sessionStorage.setItem("onboarding_toast", "Tudo pronto. Sua watchlist já está montada.");
-      router.push("/dashboard");
+      router.push("/painel");
     } catch (err) {
       console.error("[onboarding] erro ao salvar watchlist:", err);
       setCompleteError("Não foi possível salvar sua watchlist. Tente novamente.");

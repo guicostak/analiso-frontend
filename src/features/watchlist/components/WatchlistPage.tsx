@@ -1,109 +1,55 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import { useWatchlist } from "../hooks/useWatchlist";
-import { suggestedCompanies } from "../services";
-import type { Pillar, WatchlistCompany, WatchlistStatus } from "../interfaces";
+import { useFavorites } from "@/src/features/favoritas";
+import { useFavoriteCompanies } from "../hooks/useFavoriteCompanies";
+import { getCompanyLogo } from "@/src/features/explore/services";
 import { WatchlistHeader } from "./WatchlistHeader";
-import { WatchlistUpdatesTab } from "./WatchlistUpdatesTab";
-import { WatchlistListTab } from "./WatchlistListTab";
 import { WatchlistSidebar } from "./WatchlistSidebar";
-
-const pillars = ["Dívida", "Caixa", "Margens", "Retorno", "Proventos"] as Pillar[];
-const attentionStatus = "Atenção" as WatchlistStatus;
+import { AddCompanyModal } from "./AddCompanyModal";
+import { CompanyCard } from "@/src/components/shared/CompanyCard";
 
 export function WatchlistPage() {
   const {
-    activeTab, setActiveTab,
-    activeRange, setActiveRange,
-    activePillars, togglePillar,
-    severityFilter, setSeverityFilter,
-    sourceFilter, setSourceFilter,
-    showAdvancedFeedFilters, setShowAdvancedFeedFilters,
-    listSearch, setListSearch,
-    sortBy, setSortBy,
-    filters, setFilters,
-    showListFilters, setShowListFilters,
-    listSeverityFilter, setListSeverityFilter,
-    listSourceFilter, setListSourceFilter,
-    listDensity, setListDensity,
-    unseenOnly, setUnseenOnly,
-    seenTickers, toggleSeenTicker,
     showAlertActionOnly, setShowAlertActionOnly,
-    expandedTicker, setExpandedTicker,
-    quickActionsTicker, setQuickActionsTicker,
     uiState,
-    filteredFeedItems,
-    filteredCompanies,
-    priorityItems,
     alerts,
     pageHeader,
-    stateBlock,
-    prioritySection,
-    updatesSectionHeader,
     quickOverview,
     alertsPanelHeader,
-    sessionClosing,
-    sourceByTicker,
   } = useWatchlist();
 
-  const activeListFiltersCount =
-    (filters.sector !== "Todos" ? 1 : 0) +
-    (filters.tags !== "Todos" ? 1 : 0) +
-    (filters.pillar !== "Todos" ? 1 : 0) +
-    (listSeverityFilter !== "Todos" ? 1 : 0) +
-    (listSourceFilter !== "Todas" ? 1 : 0);
+  const favorites = useFavorites();
+  const { companies: favoriteCompanies, isLoading: favCompaniesLoading } = useFavoriteCompanies(favorites.tickers);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [compareTickers, setCompareTickers] = useState<string[]>([]);
+
+  function toggleCompare(ticker: string) {
+    setCompareTickers((prev) =>
+      prev.includes(ticker) ? prev.filter((t) => t !== ticker) : [...prev, ticker]
+    );
+  }
+
+  const favoritesAuthError = favorites.error && favorites.error.message.includes("401");
+
+  // Se o pipeline está vazio mas o usuário tem favoritos, mostra como "ready"
+  // Enquanto favoritos carrega, mantém "loading" para não flashar o CTA vazio
+  const hasFavorites = favorites.tickers.size > 0;
+  const effectiveUiState =
+    uiState === "empty" && favorites.isLoading ? "loading" :
+    uiState === "empty" && hasFavorites ? "ready" :
+    uiState;
 
   const alertsToShow = showAlertActionOnly ? alerts.filter((a) => a.severity !== "Saudável") : alerts;
 
-  const pillarToSlug = (pillar: Pillar) =>
-    pillar.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  const buildCompanyDeepLink = (ticker: string, pillar: Pillar, evidenceId?: string) => {
-    const params = new URLSearchParams({ pilar: pillarToSlug(pillar) });
-    if (evidenceId) params.set("evidencia", evidenceId);
-    return `/empresa/${ticker}?${params.toString()}`;
-  };
-
-  const getDefaultEvidenceId = (pillar: Pillar) => {
-    if (pillar === pillars[0]) return "divida-1";
-    if (pillar === "Caixa") return "caixa-1";
-    if (pillar === "Margens") return "margens-1";
-    if (pillar === "Retorno") return "retorno-1";
-    return "proventos-1";
-  };
-
-  const getWhyItMatters = (company: WatchlistCompany) => {
-    const minScore = Math.min(...company.scores);
-    const minIndex = company.scores.findIndex((score) => score === minScore);
-    const pillar = pillars[minIndex];
-    if (minScore < 50) return `${pillar} em risco pode pressionar o plano da empresa no curto prazo.`;
-    if (minScore < 70) return `${pillar} pede monitoramento para evitar piora dos próximos trimestres.`;
-    return "Sem sinais críticos no momento; mantenha o acompanhamento periódico.";
-  };
-
-  const applySummaryAttentionFilter = () => {
-    setActiveTab("list");
-    setListSeverityFilter(attentionStatus);
-  };
-
-  const applySummaryRiskFilter = () => {
-    setActiveTab("list");
-    setListSeverityFilter("Risco");
-  };
-
-  const applySummaryChangesWindow = () => {
-    setActiveTab("updates");
-    setActiveRange("30d");
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar currentPage="watchlist" />
+      <Sidebar currentPage="favoritas" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
       <MainContent className="relative overflow-hidden pt-20">
@@ -115,68 +61,49 @@ export function WatchlistPage() {
         <div className="relative px-7 pb-8 pt-5">
           <div className="mx-auto max-w-[1480px]">
             <WatchlistHeader
-              activeTab={activeTab}
-              title={pageHeader?.title ?? "Monitorados"}
-              subtitle={pageHeader?.subtitle}
+              activeTab="list"
+              title={pageHeader?.title ?? "Ações Favoritas"}
+              subtitle={pageHeader?.subtitle ?? "Acompanhe suas ações favoritas e receba notificações de mudanças."}
+            />
+
+            <AddCompanyModal
+              isOpen={showAddModal}
+              onClose={() => setShowAddModal(false)}
+              onSelect={(ticker) => favorites.toggle(ticker)}
+              excludeTickers={favorites.tickers}
+              footerText={`${favorites.tickers.size} ${favorites.tickers.size === 1 ? "ação favoritada" : "ações favoritadas"}`}
             />
 
             <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
               <section className="space-y-5 lg:col-span-8">
-                <div className="flex flex-wrap items-center gap-3">
-                  {[
-                    { key: "updates", label: "Atualizações" },
-                    { key: "list", label: "Lista" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.key}
-                      onClick={() => setActiveTab(tab.key as "updates" | "list")}
-                      className={`rounded-full border px-4.5 py-2 text-[12px] font-semibold transition ${
-                        activeTab === tab.key
-                          ? "border-border bg-muted text-blue-700 dark:text-blue-400"
-                          : "border-border bg-card text-muted-foreground hover:bg-hover hover:text-foreground"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {uiState === "empty" ? (
-                  <div className="rounded-[24px] border border-border bg-card p-7 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
-                    <h2 className="text-[24px] font-semibold leading-[30px] tracking-[-0.02em] text-foreground">
-                      Comece pela sua primeira watchlist
+                {effectiveUiState === "empty" ? (
+                  favoritesAuthError ? (
+                    <div className="flex flex-col items-center rounded-[24px] border border-border bg-card px-7 py-12 text-center shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                      <h2 className="text-[22px] font-semibold leading-[28px] tracking-[-0.02em] text-foreground">
+                        Sessão expirada
+                      </h2>
+                      <p className="mt-2 max-w-md text-[14px] leading-6 text-muted-foreground">
+                        Não foi possível carregar suas ações favoritas. Faça login novamente para continuar.
+                      </p>
+                    </div>
+                  ) : (
+                  <div className="flex flex-col items-center rounded-[24px] border border-border bg-card px-7 py-12 text-center shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
+                    <h2 className="text-[22px] font-semibold leading-[28px] tracking-[-0.02em] text-foreground">
+                      Comece adicionando suas ações favoritas
                     </h2>
-                    <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
-                      Escolha 3 empresas para acompanhar mudanças sem ruído.
+                    <p className="mt-2 max-w-md text-[14px] leading-6 text-muted-foreground">
+                      Favorite empresas para acompanhar mudanças sem ruído.
                     </p>
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <input
-                          type="text"
-                          placeholder="Buscar empresa ou ticker..."
-                          className="h-11 w-full rounded-[18px] border border-border bg-muted pl-10 pr-3 text-[13px] text-foreground outline-none transition focus:ring-2 focus:ring-brand-border"
-                        />
-                      </div>
-                      <Link
-                        href="/explorar"
-                        className="inline-flex h-11 items-center justify-center rounded-[18px] bg-brand px-4.5 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] dark:shadow-none"
-                      >
-                        Explorar mercado
-                      </Link>
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {suggestedCompanies.map((ticker) => (
-                        <button
-                          key={ticker}
-                          className="rounded-full border border-border bg-muted px-3.5 py-2 text-[11px] font-medium text-muted-foreground transition hover:bg-card"
-                        >
-                          {ticker}
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="mt-6 inline-flex h-11 items-center gap-2 rounded-[18px] bg-brand px-6 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(18,165,148,0.18)] transition hover:bg-brand/90 active:scale-[0.98] dark:shadow-none"
+                    >
+                      <Search className="h-4 w-4" />
+                      Adicionar empresa
+                    </button>
                   </div>
-                ) : uiState === "loading" ? (
+                  )
+                ) : effectiveUiState === "loading" ? (
                   <div className="space-y-4">
                     <div className="space-y-4 rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
                       <div className="h-4 w-32 rounded bg-muted" />
@@ -191,58 +118,69 @@ export function WatchlistPage() {
                       <div className="h-14 w-full rounded-[18px] bg-muted" />
                     </div>
                   </div>
-                ) : activeTab === "updates" ? (
-                  <WatchlistUpdatesTab
-                    stateBlock={stateBlock}
-                    prioritySection={prioritySection}
-                    updatesSectionHeader={updatesSectionHeader}
-                    priorityItems={priorityItems}
-                    filteredFeedItems={filteredFeedItems}
-                    sessionClosing={sessionClosing}
-                    activeRange={activeRange}
-                    severityFilter={severityFilter}
-                    sourceFilter={sourceFilter}
-                    showAdvancedFeedFilters={showAdvancedFeedFilters}
-                    activePillars={activePillars}
-                    buildCompanyDeepLink={buildCompanyDeepLink}
-                    setActiveRange={setActiveRange}
-                    setSeverityFilter={setSeverityFilter}
-                    setSourceFilter={setSourceFilter}
-                    setShowAdvancedFeedFilters={setShowAdvancedFeedFilters}
-                    togglePillar={togglePillar}
-                  />
-                ) : (
-                  <WatchlistListTab
-                    filteredCompanies={filteredCompanies}
-                    listSearch={listSearch}
-                    sortBy={sortBy}
-                    listDensity={listDensity}
-                    showListFilters={showListFilters}
-                    activeListFiltersCount={activeListFiltersCount}
-                    unseenOnly={unseenOnly}
-                    seenTickers={seenTickers}
-                    expandedTicker={expandedTicker}
-                    quickActionsTicker={quickActionsTicker}
-                    listSeverityFilter={listSeverityFilter}
-                    listSourceFilter={listSourceFilter}
-                    filters={filters}
-                    sourceByTicker={sourceByTicker}
-                    getWhyItMatters={getWhyItMatters}
-                    buildCompanyDeepLink={buildCompanyDeepLink}
-                    getDefaultEvidenceId={getDefaultEvidenceId}
-                    setListSearch={setListSearch}
-                    setSortBy={setSortBy}
-                    setListDensity={setListDensity}
-                    setShowListFilters={setShowListFilters}
-                    setUnseenOnly={setUnseenOnly}
-                    setListSeverityFilter={setListSeverityFilter}
-                    setListSourceFilter={setListSourceFilter}
-                    setFilters={setFilters}
-                    toggleSeenTicker={toggleSeenTicker}
-                    setExpandedTicker={setExpandedTicker}
-                    setQuickActionsTicker={setQuickActionsTicker}
-                  />
-                )}
+                ) : uiState === "empty" && hasFavorites ? (
+                  /* Pipeline vazio mas o user tem favoritos — cards padronizados */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        {favorites.tickers.size} {favorites.tickers.size === 1 ? "ação favoritada" : "ações favoritadas"}
+                      </p>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-[10px] border border-border bg-card px-3.5 py-2 text-[12px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,40,0.05)] transition-[color,background-color,border-color,transform,box-shadow] duration-150 hover:border-brand hover:bg-brand/5 hover:text-brand active:scale-[0.97] dark:shadow-none"
+                      >
+                        <Search className="h-3.5 w-3.5" />
+                        Adicionar
+                      </button>
+                    </div>
+
+                    {favCompaniesLoading ? (
+                      <div className="grid grid-cols-1 gap-5">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="space-y-4 rounded-[18px] border border-l-[3px] border-border bg-card p-5">
+                            <div className="flex items-start gap-3.5">
+                              <div className="h-10 w-10 animate-pulse rounded-[14px] bg-muted" />
+                              <div className="flex-1 space-y-1.5">
+                                <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+                                <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                              </div>
+                            </div>
+                            <div className="flex gap-6 border-t border-border pt-3">
+                              {[1, 2, 3, 4, 5].map((m) => (
+                                <div key={m} className="space-y-1">
+                                  <div className="h-2.5 w-10 animate-pulse rounded bg-muted" />
+                                  <div className="h-3.5 w-14 animate-pulse rounded bg-muted" />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-5">
+                        {favoriteCompanies.map((company) => {
+                          const m = company.metrics ?? {};
+                          return (
+                            <CompanyCard
+                              key={company.ticker}
+                              ticker={company.ticker}
+                              companyName={company.companyName}
+                              logoUrl={getCompanyLogo(company.ticker)}
+                              price={m.price}
+                              sector={typeof m.sector === "string" ? m.sector : undefined}
+                              metrics={m}
+                              isComparing={compareTickers.includes(company.ticker)}
+                              isFavorite={favorites.tickers.has(company.ticker)}
+                              onToggleCompare={() => toggleCompare(company.ticker)}
+                              onToggleFavorite={() => favorites.toggle(company.ticker)}
+                              onAlert={() => {}}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
               </section>
 
               <WatchlistSidebar
@@ -250,9 +188,9 @@ export function WatchlistPage() {
                 alertsPanelHeader={alertsPanelHeader}
                 alertsToShow={alertsToShow}
                 showAlertActionOnly={showAlertActionOnly}
-                applySummaryAttentionFilter={applySummaryAttentionFilter}
-                applySummaryRiskFilter={applySummaryRiskFilter}
-                applySummaryChangesWindow={applySummaryChangesWindow}
+                applySummaryAttentionFilter={() => {}}
+                applySummaryRiskFilter={() => {}}
+                applySummaryChangesWindow={() => {}}
                 setShowAlertActionOnly={setShowAlertActionOnly}
               />
             </div>

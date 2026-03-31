@@ -92,7 +92,7 @@ export function CompanyAnalysisPriceMock() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">
+              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase text-brand">
                 Análise da empresa
               </span>
               <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">

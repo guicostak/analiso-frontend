@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
+import { Bookmark, ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
 import type { Pillar, WatchlistCompany, WatchlistSortBy, WatchlistStatus, FeedSource } from "../interfaces";
 import { getStatusFromScores } from "../services";
 
@@ -76,6 +76,8 @@ interface WatchlistListTabProps {
   toggleSeenTicker: (ticker: string) => void;
   setExpandedTicker: (ticker: string | null) => void;
   setQuickActionsTicker: (ticker: string | null) => void;
+  favoriteTickers: Set<string>;
+  onToggleFavorite: (ticker: string) => void;
 }
 
 export function WatchlistListTab({
@@ -107,6 +109,8 @@ export function WatchlistListTab({
   toggleSeenTicker,
   setExpandedTicker,
   setQuickActionsTicker,
+  favoriteTickers,
+  onToggleFavorite,
 }: WatchlistListTabProps) {
   const router = useRouter();
 
@@ -409,11 +413,17 @@ export function WatchlistListTab({
                       className="absolute right-0 top-12 z-10 w-48 rounded-[18px] border border-border bg-card p-2 shadow-[0_18px_40px_rgba(15,23,40,0.08)]"
                     >
                       <button
-                        title="Favoritar"
-                        onClick={() => setQuickActionsTicker(null)}
-                        className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-muted-foreground hover:bg-muted"
+                        title={favoriteTickers.has(company.ticker) ? "Remover dos favoritos" : "Favoritar"}
+                        onClick={() => {
+                          onToggleFavorite(company.ticker);
+                          setQuickActionsTicker(null);
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-[12px] hover:bg-muted ${
+                          favoriteTickers.has(company.ticker) ? "text-brand" : "text-muted-foreground"
+                        }`}
                       >
-                        Favoritar
+                        <Bookmark className={`h-3.5 w-3.5 ${favoriteTickers.has(company.ticker) ? "fill-brand" : ""}`} />
+                        {favoriteTickers.has(company.ticker) ? "Remover dos favoritos" : "Favoritar"}
                       </button>
                       <button
                         title="Criar alerta"
@@ -443,11 +453,16 @@ export function WatchlistListTab({
                         {seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
                       </button>
                       <button
-                        title="Remover da watchlist"
-                        onClick={() => setQuickActionsTicker(null)}
+                        title="Remover dos favoritos"
+                        onClick={() => {
+                          if (favoriteTickers.has(company.ticker)) {
+                            onToggleFavorite(company.ticker);
+                          }
+                          setQuickActionsTicker(null);
+                        }}
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-danger-text hover:bg-danger-surface"
                       >
-                        Remover da watchlist
+                        Remover dos favoritos
                       </button>
                     </div>
                   )}

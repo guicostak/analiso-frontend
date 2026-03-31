@@ -11,6 +11,17 @@ export interface EmailLoginRequest {
   password: string;
 }
 
+export interface SendVerificationRequest {
+  target: string;
+  channel: "email";
+}
+
+export interface VerifyCodeRequest {
+  target: string;
+  channel: "email";
+  code: string;
+}
+
 // ── Response DTOs ─────────────────────────────────────────────────────────────
 
 export interface EmailAuthResponse {
@@ -22,6 +33,7 @@ export interface EmailAuthResponse {
     email: string;
     name: string;
     avatarUrl: string;
+    emailVerified: boolean;
   };
 }
 

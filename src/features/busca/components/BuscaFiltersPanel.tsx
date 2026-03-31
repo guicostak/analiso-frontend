@@ -62,6 +62,9 @@ interface BuscaFiltersPanelProps {
   isLoading: boolean;
   onUpdateFilters: (partial: Partial<CompanySearchFilters>) => void;
   onClearFilters: () => void;
+  /** Controle externo de abertura (opcional — se omitido, usa estado interno) */
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -71,6 +74,8 @@ export function BuscaFiltersPanel({
   isLoading,
   onUpdateFilters,
   onClearFilters,
+  isOpen: isOpenProp,
+  onToggle,
 }: BuscaFiltersPanelProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -78,8 +83,10 @@ export function BuscaFiltersPanel({
     return initial;
   });
 
-  // No mobile, painel pode ser recolhido
-  const [isOpen, setIsOpen] = useState(true);
+  // Estado interno usado apenas quando o pai não controla isOpen
+  const [isOpenInternal, setIsOpenInternal] = useState(true);
+  const isOpen   = isOpenProp  !== undefined ? isOpenProp : isOpenInternal;
+  const handleToggle = onToggle ?? (() => setIsOpenInternal((prev) => !prev));
 
   const toggleGroup = useCallback((title: string) => {
     setExpandedGroups((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -107,7 +114,7 @@ export function BuscaFiltersPanel({
       {/* Header */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
         className="flex w-full items-center justify-between px-4 py-3 lg:cursor-default"
       >
         <div className="flex items-center gap-2">
@@ -212,6 +219,11 @@ function MetricInput({
 }) {
   const hasMaxField = !!onMaxChange;
 
+  /** Permite apenas dígitos, ponto, vírgula e sinal negativo. */
+  function sanitize(raw: string): string {
+    return raw.replace(/[^0-9.,\-]/g, "");
+  }
+
   return (
     <div>
       <div className="mb-1 flex items-baseline gap-1.5">
@@ -224,20 +236,22 @@ function MetricInput({
       {hasMaxField ? (
         <div className="flex items-center gap-2">
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             placeholder="Mín"
             value={minValue}
-            onChange={(e) => onMinChange(e.target.value)}
+            onChange={(e) => onMinChange(sanitize(e.target.value))}
             disabled={disabled}
             className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-50"
             aria-label={`${metric.label} mínimo`}
           />
           <span className="text-[11px] text-muted-foreground">a</span>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             placeholder="Máx"
             value={maxValue}
-            onChange={(e) => onMaxChange(e.target.value)}
+            onChange={(e) => onMaxChange(sanitize(e.target.value))}
             disabled={disabled}
             className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-50"
             aria-label={`${metric.label} máximo`}
@@ -245,10 +259,11 @@ function MetricInput({
         </div>
       ) : (
         <input
-          type="number"
+          type="text"
+          inputMode="decimal"
           placeholder={metric.minKey.includes("Max") ? "Máx" : "Mín"}
           value={minValue}
-          onChange={(e) => onMinChange(e.target.value)}
+          onChange={(e) => onMinChange(sanitize(e.target.value))}
           disabled={disabled}
           className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-50"
           aria-label={`${metric.label} ${metric.minKey.includes("Max") ? "máximo" : "mínimo"}`}

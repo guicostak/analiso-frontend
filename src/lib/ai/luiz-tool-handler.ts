@@ -19,7 +19,7 @@ interface ToolCallInput {
 // ─── Mapa de rotas ───────────────────────────────────────────────────────────
 
 const PAGE_ROUTES: Record<string, string> = {
-  dashboard: "/dashboard",
+  dashboard: "/painel",
   explorar: "/explorar",
   watchlist: "/watchlist",
   comparar: "/comparar",
@@ -74,7 +74,7 @@ const PAGE_SUGGESTIONS: Record<string, string[]> = {
 function handleNavigate(args: Record<string, unknown>): LuizServiceResponse {
   const page = String(args.page ?? "dashboard");
   const message = String(args.message ?? "Navegando...");
-  const href = PAGE_ROUTES[page] ?? "/dashboard";
+  const href = PAGE_ROUTES[page] ?? "/painel";
 
   return {
     content: message,

@@ -5,14 +5,14 @@ export const APP_DESCRIPTION = "Análise financeira guiada";
 // Rotas
 export const ROUTES = {
   HOME: "/",
-  DASHBOARD: "/dashboard",
+  DASHBOARD: "/painel",
   EXPLORAR: "/explorar",
-  WATCHLIST: "/watchlist",
+  WATCHLIST: "/favoritas",
   COMPARAR: "/comparar",
   ASSINATURA: "/assinatura",
   PERFIL: "/perfil",
   LOGIN: "/login",
 } as const;
 
-// API
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+// API — re-export from the canonical source
+export { API_BASE_URL } from "@/src/lib/api-base";

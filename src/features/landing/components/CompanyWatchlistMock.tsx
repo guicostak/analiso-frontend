@@ -86,7 +86,7 @@ export function CompanyWatchlistMock() {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-muted shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
       <div className="border-b border-border bg-card px-6 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">Watchlist</p>
+        <p className="text-[10px] font-semibold uppercase text-brand">Watchlist</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
             <h3 className="text-[20px] font-semibold text-foreground">Veja o que mudou sem perder contexto</h3>
@@ -123,7 +123,7 @@ export function CompanyWatchlistMock() {
         <div className="grid grid-cols-12 gap-5">
           <section className="col-span-8 space-y-5">
             <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Estado da watchlist</p>
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Estado da watchlist</p>
               <h4 className="mt-1 text-[18px] font-semibold text-foreground">
                 Hoje a prioridade está concentrada em WEGE3 e em mudanças de margem.
               </h4>
@@ -132,15 +132,15 @@ export function CompanyWatchlistMock() {
               </p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <div className="rounded-[18px] border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Atenção</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção</p>
                   <p className="mt-1 text-[18px] font-semibold text-foreground">2</p>
                 </div>
                 <div className="rounded-[18px] border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Mudanças 30d</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Mudanças 30d</p>
                   <p className="mt-1 text-[18px] font-semibold text-foreground">4</p>
                 </div>
                 <div className="rounded-[18px] border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Monitoradas</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Ações Favoritas</p>
                   <p className="mt-1 text-[18px] font-semibold text-foreground">12</p>
                 </div>
               </div>
@@ -149,7 +149,7 @@ export function CompanyWatchlistMock() {
             <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Atualizações</p>
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">Atualizações</p>
                   <h4 className="mt-1 text-[16px] font-semibold text-foreground">O que mudou e merece atenção</h4>
                 </div>
                 <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export function CompanyWatchlistMock() {
             <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Lista monitorada</p>
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">Lista monitorada</p>
                   <h4 className="mt-1 text-[16px] font-semibold text-foreground">Watchlist com contexto</h4>
                 </div>
                 <div className="relative">
@@ -238,7 +238,7 @@ export function CompanyWatchlistMock() {
 
           <aside className="col-span-4 space-y-5">
             <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Visão rápida</p>
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Visão rápida</p>
               <div className="mt-4 space-y-3">
                 <div className="rounded-[18px] border border-border bg-muted p-3">
                   <p className="text-[12px] font-medium text-muted-foreground">Principal atenção</p>
@@ -257,7 +257,7 @@ export function CompanyWatchlistMock() {
 
             <article className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Alertas</p>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Alertas</p>
                 <button type="button" className="text-[12px] font-medium text-[#3965B8]">
                   Ver regras
                 </button>

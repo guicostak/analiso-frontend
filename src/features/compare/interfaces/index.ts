@@ -8,7 +8,7 @@
 export type ComparePillar = "Divida" | "CaixaFCF" | "Margens" | "Retorno" | "Proventos";
 export type CompareTrend = "melhorando" | "estavel" | "piorando";
 export type CompareStatus = "Saudavel" | "Atencao" | "Risco";
-export type CompareRangeKey = "5a" | "10a" | "max";
+export type CompareRangeKey = "6m" | "1a" | "2a" | "3a" | "5a" | "10a" | "max" | "custom";
 export type CompareConfidence = "Alta" | "Media" | "Baixa";
 export type CompareProvider = "CVM" | "B3" | "RI";
 
@@ -83,6 +83,7 @@ export type CompareRangeOption = {
   key: CompareRangeKey;
   label: string;
   years: number | null;
+  months?: number;
 };
 
 export type ComparePillarDiff = {

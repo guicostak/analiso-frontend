@@ -45,9 +45,14 @@ export const PILLAR_LABEL: Record<ComparePillar, string> = {
 };
 
 export const RANGES: CompareRangeOption[] = [
-  { key: "5a", label: "5 anos", years: 5 },
-  { key: "10a", label: "10 anos", years: 10 },
-  { key: "max", label: "Max", years: null },
+  { key: "6m",     label: "6M",   years: null, months: 6  },
+  { key: "1a",     label: "1A",   years: 1               },
+  { key: "2a",     label: "2A",   years: 2               },
+  { key: "3a",     label: "3A",   years: 3               },
+  { key: "5a",     label: "5A",   years: 5               },
+  { key: "10a",    label: "10A",  years: 10              },
+  { key: "max",    label: "Máx",  years: null            },
+  { key: "custom", label: "Período personalizado", years: null },
 ];
 
 export const pillarCopy: Record<

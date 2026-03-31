@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import logoImage from "@/src/assets/logos/logo.png";
 
 const navLinks = [
-  { label: "Início",        href: "/" },
-  { label: "Como funciona", href: "/#como-funciona" },
-  { label: "Para quem é",   href: "/#para-quem-e" },
-  { label: "FAQ",           href: "/#faq" },
+  { label: "Início",        href: "/",                 activePath: "/",               color: "bg-brand" },
+  { label: "Como funciona", href: "/como-funciona",    activePath: "/como-funciona",  color: "bg-brand" },
+  { label: "Para quem é",   href: "/para-quem",        activePath: "/para-quem",      color: "bg-brand" },
+  { label: "Blog",          href: "/blog",             activePath: "/blog",           color: "bg-brand" },
+  { label: "FAQ",           href: "/faq",              activePath: "/faq",            color: "bg-brand" },
 ] as const;
 
 interface LandingNavProps {
@@ -18,11 +20,12 @@ interface LandingNavProps {
 
 export function LandingNav({ showAuthButton = true }: LandingNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-sm">
       {/* ── Barra principal ─────────────────────────────────────────────── */}
-      <div className="mx-auto flex max-w-[1430px] flex-wrap items-center justify-between px-8 pt-8 max-md:px-4 max-md:pt-5">
+      <div className="relative mx-auto flex max-w-[1430px] flex-wrap items-center justify-between px-8 pt-8 max-md:px-4 max-md:pt-5">
 
         {/* Logo */}
         <a href="/" className="order-1 flex shrink-0 items-center">
@@ -36,15 +39,21 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
 
         {/* Nav links — desktop */}
         <nav className="absolute left-1/2 order-2 flex -translate-x-1/2 items-center gap-0.5 max-md:hidden">
-          {navLinks.map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {label}
-            </a>
-          ))}
+          {navLinks.map(({ label, href, activePath, color }) => {
+            const isActive = activePath !== null && pathname === activePath;
+            return (
+              <a
+                key={label}
+                href={href}
+                className={`relative whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 transition-colors hover:text-foreground ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                {label}
+                {isActive && color && (
+                  <span className={`absolute bottom-1 left-3 right-3 h-0.5 rounded-full ${color}`} />
+                )}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Ações — direita */}
@@ -75,16 +84,22 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
       {mobileOpen && (
         <div className="mx-auto w-full max-w-[1430px] border-t border-border px-4 py-2 md:hidden">
           <nav className="flex flex-col">
-            {navLinks.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-muted-foreground hover:bg-hover"
-              >
-                {label}
-              </a>
-            ))}
+            {navLinks.map(({ label, href, activePath, color }) => {
+              const isActive = activePath !== null && pathname === activePath;
+              return (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2 rounded-[10px] px-3 py-3 text-sm font-semibold hover:bg-hover ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                >
+                  {isActive && color && (
+                    <span className={`h-4 w-0.5 rounded-full ${color}`} />
+                  )}
+                  {label}
+                </a>
+              );
+            })}
             {!showAuthButton && (
               <a
                 href="/"

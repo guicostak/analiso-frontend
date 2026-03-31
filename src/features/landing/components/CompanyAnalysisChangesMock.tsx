@@ -158,7 +158,7 @@ export function CompanyAnalysisChangesMock() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">
+              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase text-brand">
                 Análise da empresa
               </span>
               <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
@@ -239,15 +239,15 @@ export function CompanyAnalysisChangesMock() {
               </p>
               <div className="mt-3 grid grid-cols-3 gap-3 text-[13px]">
                 <div className="rounded-xl border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Pilar mais afetado</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Pilar mais afetado</p>
                   <p className="mt-1 font-semibold text-[#0F766E]">Margens</p>
                 </div>
                 <div className="rounded-xl border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Estruturais</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Estruturais</p>
                   <p className="mt-1 font-semibold text-foreground">1</p>
                 </div>
                 <div className="rounded-xl border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Rotina</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Rotina</p>
                   <p className="mt-1 font-semibold text-foreground">2</p>
                 </div>
               </div>

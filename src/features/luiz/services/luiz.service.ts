@@ -119,7 +119,7 @@ const MOCK_PATTERNS: ResponsePattern[] = [
     response: {
       content: "Levando você para o Painel de Hoje!",
       suggestions: ["Ver watchlist", "Explorar ações", "Comparar empresas"],
-      command: { type: "navigate", href: "/dashboard" },
+      command: { type: "navigate", href: "/painel" },
       delay: 500,
     },
   },

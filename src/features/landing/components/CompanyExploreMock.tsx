@@ -99,7 +99,7 @@ export function CompanyExploreMock() {
           }
         `}</style>
         <header className="mb-4 space-y-2">
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Explorar mercado</p>
+          <p className="text-[12px] font-medium uppercase text-muted-foreground">Explorar mercado</p>
           <div className="max-w-[640px] space-y-2">
             <h1 className="text-[26px] font-semibold leading-[30px] tracking-[-0.04em] text-foreground">Explorar</h1>
             <p className="text-[13px] leading-6 text-muted-foreground">
@@ -170,6 +170,16 @@ export function CompanyExploreMock() {
                 setActivePreset(null);
                 setAppliedChips([]);
               }}
+              isSearchActive={false}
+              totalItems={0}
+              totalPages={0}
+              page={0}
+              companySearchFilters={{}}
+              goToPage={() => {}}
+              updateFilters={() => {}}
+              clearApiFilters={() => {}}
+              favoriteTickers={new Set()}
+              onToggleFavorite={() => {}}
             />
 
             <ExploreMarketContext

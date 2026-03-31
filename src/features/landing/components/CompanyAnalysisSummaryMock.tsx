@@ -185,7 +185,7 @@ export function CompanyAnalysisSummaryMock() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">
+              <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase text-brand">
                 Análise da empresa
               </span>
               <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
@@ -257,7 +257,7 @@ export function CompanyAnalysisSummaryMock() {
           <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Metodologia</p>
+                <p className="text-[10px] font-semibold uppercase text-[#A0AEC0]">Metodologia</p>
                 <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Como calculamos o placar</h3>
               </div>
               <button
@@ -280,7 +280,7 @@ export function CompanyAnalysisSummaryMock() {
           <div className="mb-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0AEC0]">Evidência</p>
+                <p className="text-[10px] font-semibold uppercase text-[#A0AEC0]">Evidência</p>
                 <h3 className="mt-0.5 text-[15px] font-semibold text-foreground">Painel de fonte · Resumo</h3>
               </div>
               <button
@@ -446,15 +446,15 @@ export function CompanyAnalysisSummaryMock() {
             <p className="mt-4 text-[14px] leading-relaxed text-foreground">{summaryMock.summaryNarrative}</p>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <div className="rounded-xl border border-border bg-muted p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Força principal</p>
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Força principal</p>
                 <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.strength.pillar}</p>
               </div>
               <div className="rounded-xl border border-border bg-muted p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Atenção principal</p>
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Atenção principal</p>
                 <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.attention.pillar}</p>
               </div>
               <div className="rounded-xl border border-border bg-muted p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">O que monitorar</p>
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">O que monitorar</p>
                 <p className="mt-1 text-[13px] font-semibold text-foreground">{summaryMock.summaryScan.monitor.text}</p>
               </div>
             </div>

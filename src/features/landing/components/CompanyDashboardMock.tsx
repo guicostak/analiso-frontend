@@ -99,7 +99,7 @@ export function CompanyDashboardMock() {
       <div className="border-b border-border bg-card px-6 py-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">
+            <span className="rounded-full border border-[#D8EEE9] bg-brand-surface px-2.5 py-1 text-[10px] font-semibold uppercase text-brand">
               Dashboard
             </span>
             <h3 className="mt-3 text-[20px] font-semibold leading-[1.12] text-foreground">
@@ -156,7 +156,7 @@ export function CompanyDashboardMock() {
           <article className="rounded-[20px] border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">
                   Feed do dia
                 </p>
                 <h4 className="mt-1 text-[16px] font-semibold text-foreground">O que merece leitura agora</h4>
@@ -198,7 +198,7 @@ export function CompanyDashboardMock() {
           <article className="rounded-[20px] border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">
                   Feed do dia
                 </p>
                 <h4 className="mt-1 text-[16px] font-semibold text-foreground">Triagem rápida do que mudou</h4>
@@ -233,7 +233,7 @@ export function CompanyDashboardMock() {
           </article>
 
           <article className="rounded-[20px] border border-border bg-card p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
               Mapa rápido do dia
             </p>
             <h4 className="mt-1 text-[16px] font-semibold text-foreground">Onde a watchlist concentrou mudanças</h4>
@@ -259,7 +259,7 @@ export function CompanyDashboardMock() {
           </article>
 
           <article className="rounded-[20px] border border-border bg-card p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
               Próximo passo
             </p>
             <h4 className="mt-1 text-[16px] font-semibold text-foreground">Feche a leitura com uma ação útil</h4>

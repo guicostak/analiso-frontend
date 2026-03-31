@@ -43,9 +43,9 @@ const navGroups: NavGroup[] = [
   {
     title: "Geral",
     items: [
-      { id: "dashboard", label: "Painel de hoje", href: "/dashboard", icon: Home },
+      { id: "dashboard", label: "Meu Painel", href: "/painel", icon: Home },
       { id: "explorar", label: "Explorar mercado", href: "/explorar", icon: Compass },
-      { id: "watchlist", label: "Watchlist", href: "/watchlist", icon: LayoutGrid },
+      { id: "favoritas", label: "Favoritas", href: "/favoritas", icon: LayoutGrid },
       { id: "comparar", label: "Comparar empresas", href: "/comparar", icon: GitCompare },
       { id: "busca",    label: "Busca avançada",    href: "/busca",     icon: SearchCheck },
     ],
@@ -71,7 +71,7 @@ export function MobileNav({
   return (
     <>
       <button
-        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-hover xl:hidden"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-[background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-hover xl:hidden"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu"
       >
@@ -81,7 +81,7 @@ export function MobileNav({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-[280px] p-0">
           <SheetHeader className="border-b border-border px-5 py-5">
-            <SheetTitle className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <SheetTitle className="text-[11px] font-semibold uppercase text-muted-foreground">
               Contexto
             </SheetTitle>
             <p className="text-[15px] font-semibold text-foreground">{contextLabel}</p>
@@ -91,7 +91,7 @@ export function MobileNav({
             <div className="space-y-8">
               {navGroups.map((group) => (
                 <div key={group.title}>
-                  <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="mb-4 text-[11px] font-semibold uppercase text-muted-foreground">
                     {group.title}
                   </p>
                   <div className="space-y-1">
@@ -99,7 +99,7 @@ export function MobileNav({
                       const Icon = item.icon;
                       const isActive = item.id === currentPage;
                       const content = (
-                        <span className="relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14px] transition hover:bg-hover">
+                        <span className="relative flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[14px] transition-[background-color] duration-150 ease-[var(--ease-out)] hover:bg-hover">
                           {isActive && (
                             <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand" />
                           )}

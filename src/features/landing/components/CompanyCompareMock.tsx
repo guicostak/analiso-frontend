@@ -67,7 +67,7 @@ export function CompanyCompareMock() {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-[#F7FAFC] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]">
       <div className="border-b border-border bg-card px-6 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-brand">Comparação</p>
+        <p className="text-[10px] font-semibold uppercase text-brand">Comparação</p>
         <div className="mt-2 flex items-end justify-between gap-4">
           <div>
             <h3 className="text-[20px] font-semibold text-foreground">Compare empresas com veredito antes do detalhe</h3>
@@ -109,7 +109,7 @@ export function CompanyCompareMock() {
             </div>
 
             <div className="mt-4 rounded-[20px] border border-border bg-[linear-gradient(135deg,#F3FAF8_0%,#FFFFFF_100%)] p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">Veredito</p>
+              <p className="text-[11px] font-semibold uppercase text-brand">Veredito</p>
               <h4 className="mt-1 text-[22px] font-semibold leading-[1.18] text-foreground">
                 WEGE3 aparece melhor hoje, com vantagem mais clara em margens, retorno e dívida.
               </h4>
@@ -122,7 +122,7 @@ export function CompanyCompareMock() {
           <section className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Placar dos pilares</p>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Placar dos pilares</p>
                 <h4 className="mt-1 text-[16px] font-semibold text-foreground">Onde está a maior diferença</h4>
               </div>
               <span className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -160,7 +160,7 @@ export function CompanyCompareMock() {
 
           <section className="rounded-[24px] border border-border bg-card p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Métricas comparadas</p>
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Métricas comparadas</p>
               <h4 className="mt-1 text-[16px] font-semibold text-foreground">Leitura guiada das diferenças</h4>
             </div>
 
@@ -184,7 +184,7 @@ export function CompanyCompareMock() {
                     <div className={`rounded-[18px] border p-4 ${
                       row.winner === "a" ? "border-[#DDF6F0] bg-[#F6FEFB]" : "border-border bg-card"
                     }`}>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{pair.a.ticker}</p>
+                      <p className="text-[11px] font-semibold uppercase text-muted-foreground">{pair.a.ticker}</p>
                       <p className="mt-2 text-[20px] font-semibold text-foreground">{row.aValue}</p>
                       <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                         {trendIcon(row.aTrend)}
@@ -194,7 +194,7 @@ export function CompanyCompareMock() {
                     <div className={`rounded-[18px] border p-4 ${
                       row.winner === "b" ? "border-[#D9E8FF] bg-[#F8FBFF]" : "border-border bg-card"
                     }`}>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{pair.b.ticker}</p>
+                      <p className="text-[11px] font-semibold uppercase text-muted-foreground">{pair.b.ticker}</p>
                       <p className="mt-2 text-[20px] font-semibold text-foreground">{row.bValue}</p>
                       <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                         {trendIcon(row.bTrend)}
@@ -213,7 +213,7 @@ export function CompanyCompareMock() {
           </section>
 
           <section className="rounded-[24px] border border-[#DDF6F0] bg-[linear-gradient(135deg,#F3FAF8_0%,#FFFFFF_100%)] p-5 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">Fechar a leitura</p>
+            <p className="text-[11px] font-semibold uppercase text-brand">Fechar a leitura</p>
             <h4 className="mt-1 text-[16px] font-semibold text-foreground">Transforme a comparação em próximo passo útil</h4>
             <div className="mt-4 flex flex-wrap gap-3">
               <button

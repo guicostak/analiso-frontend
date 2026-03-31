@@ -123,6 +123,7 @@ export interface CompanyFinancials {
   dividaLiquidaEbitda: number | null; // Dívida Líquida / EBITDA
   evEbitda: number | null;     // EV/EBITDA
   lpa: number | null;          // LPA (Lucro por Ação)
+  price: number | null;        // Preço atual da ação (R$)
 }
 
 export interface CompanyCard {

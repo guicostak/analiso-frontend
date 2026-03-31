@@ -78,7 +78,7 @@ export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivel
 
         <button onClick={() => setImportantesApenas((v) => !v)} className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-[12px] font-medium text-muted-foreground">
           <span className={cx("relative h-5 w-9 rounded-full transition-colors", importantesApenas ? "bg-brand" : "bg-muted-foreground/40")}>
-            <span className={cx("absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all", importantesApenas ? "left-[18px]" : "left-0.5")} />
+            <span className={cx("absolute top-0.5 h-4 w-4 rounded-full bg-white transition-[left]", importantesApenas ? "left-[18px]" : "left-0.5")} />
           </span>
           Importantes apenas
         </button>

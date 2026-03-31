@@ -109,7 +109,7 @@ export function WatchlistUpdatesTab({
 
           <div className="relative flex min-h-[190px] flex-col justify-between gap-6 lg:flex-row lg:items-start">
             <div className="max-w-[64rem] space-y-4 lg:pr-10">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-blue-500 dark:text-blue-400">{stateBlock.eyebrow}</p>
+              <p className="text-[12px] font-medium uppercase text-blue-500 dark:text-blue-400">{stateBlock.eyebrow}</p>
               <div className="space-y-3">
                 <h2 className="max-w-[38ch] text-[28px] font-semibold leading-[32px] tracking-[-0.03em] text-foreground">
                   {stateBlock.headline}
@@ -196,13 +196,13 @@ export function WatchlistUpdatesTab({
 
                 <div className={`mt-${index === 2 ? "4" : "5"} grid gap-3 ${index === 0 ? "lg:grid-cols-[1.15fr_0.85fr]" : "lg:grid-cols-[1fr_0.8fr]"}`}>
                   <div className={`rounded-[22px] bg-card/72 ${index === 2 ? "p-3.5" : "p-4"}`}>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{item.changeLabel}</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">{item.changeLabel}</p>
                     <p className={`mt-2 text-foreground ${index === 0 ? "text-[15px] leading-7" : index === 1 ? "text-[14px] leading-6" : "text-[13px] leading-6"}`}>
                       {item.change}
                     </p>
                   </div>
                   <div className={`rounded-[22px] bg-card/60 ${index === 2 ? "p-3.5" : "p-4"}`}>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{item.whyLabel}</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">{item.whyLabel}</p>
                     <p className={`mt-2 text-muted-foreground ${index === 0 ? "text-[15px] leading-7" : index === 1 ? "text-[14px] leading-6" : "text-[13px] leading-6"}`}>
                       {item.why}
                     </p>
@@ -308,7 +308,7 @@ export function WatchlistUpdatesTab({
             <div className="mt-5 rounded-[24px] border border-border bg-muted p-5">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Fonte</span>
+                  <span className="text-[12px] font-medium uppercase text-muted-foreground">Fonte</span>
                   {(["Todas", "CVM", "B3", "RI"] as const).map((option) => (
                     <button
                       key={option}
@@ -325,7 +325,7 @@ export function WatchlistUpdatesTab({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Pilar</span>
+                  <span className="text-[12px] font-medium uppercase text-muted-foreground">Pilar</span>
                   {pillars.map((pillar) => (
                     <button
                       key={pillar}
@@ -442,7 +442,7 @@ export function WatchlistUpdatesTab({
           <div className="h-1 bg-[linear-gradient(90deg,var(--brand),var(--brand-surface))]" />
           <div className="px-7 py-8">
             <div className="max-w-[62ch]">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Fechamento da sessão</p>
+              <p className="text-[12px] font-medium uppercase text-muted-foreground">Fechamento da sessão</p>
               <h3 className="mt-3 text-[20px] font-semibold leading-[26px] tracking-[-0.02em] text-foreground">
                 {sessionClosing.title}
               </h3>

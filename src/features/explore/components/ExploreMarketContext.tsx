@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard, Volatility } from "../interfaces";
 
@@ -30,45 +30,31 @@ const indexCardGlow: Record<IndexCard["trend"], string> = {
 
 interface ExploreMarketContextProps {
   isLoading: boolean;
-  showContextPanel: boolean;
   showVolatilityInfo: boolean;
   indexCards: IndexCard[];
   volatility: Volatility;
   volatilityIsStale: boolean;
-  setShowContextPanel: (fn: ((prev: boolean) => boolean) | boolean) => void;
   setShowVolatilityInfo: (fn: ((prev: boolean) => boolean) | boolean) => void;
   setShowVolatilityDetails: (v: boolean) => void;
 }
 
 export function ExploreMarketContext({
   isLoading,
-  showContextPanel,
   showVolatilityInfo,
   indexCards,
   volatility,
   volatilityIsStale,
-  setShowContextPanel,
   setShowVolatilityInfo,
   setShowVolatilityDetails,
 }: ExploreMarketContextProps) {
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Leitura de ambiente</p>
-          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado hoje</h2>
-        </div>
-        <button
-          onClick={() => setShowContextPanel((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-[11px] font-medium text-muted-foreground shadow-[0_10px_28px_rgba(15,23,40,0.05)] dark:shadow-none"
-        >
-          {showContextPanel ? "Recolher contexto" : "Expandir contexto"}
-          <ChevronDown className={`h-4 w-4 transition-transform ${showContextPanel ? "rotate-180" : ""}`} />
-        </button>
+      <div>
+        <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
+        <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado hoje</h2>
       </div>
 
-      {showContextPanel ? (
-        <>
+      <>
           <div className="grid gap-5 xl:grid-cols-12">
             <article className="relative overflow-hidden rounded-[26px] border border-border bg-[linear-gradient(135deg,#EEF6FF_0%,#F2F8FF_28%,#F7FBFF_62%,#FFFFFF_100%)] dark:bg-[linear-gradient(135deg,var(--color-card)_0%,var(--color-card)_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none xl:col-span-8 xl:min-h-[228px]">
               <div className="pointer-events-none absolute inset-0">
@@ -80,7 +66,7 @@ export function ExploreMarketContext({
 
               <div className="relative flex h-full flex-col justify-between gap-6">
                 <div className="max-w-[72%]">
-                  <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-blue-700 dark:text-blue-300">
+                  <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300">
                     Contexto macro
                   </span>
                   <h3 className="mt-4 text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
@@ -95,14 +81,14 @@ export function ExploreMarketContext({
                   <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[linear-gradient(90deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
                   <div className="relative rounded-[22px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.66))] p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)] dark:shadow-none">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-12 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.44),rgba(255,255,255,0))]" />
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Interpretacao principal</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Interpretacao principal</p>
                     <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-foreground">
                       O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia.
                     </p>
                   </div>
                   <div className="relative rounded-[22px] border border-white/72 bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.56))] p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]" />
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">O que observar</p>
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">O que observar</p>
                     <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
                       Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala.
                     </p>
@@ -113,7 +99,7 @@ export function ExploreMarketContext({
 
             <aside className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none xl:col-span-4">
               <div className="mb-4">
-                <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Resumo dos indices</p>
+                <p className="text-[12px] font-medium uppercase text-muted-foreground">Resumo dos indices</p>
                 <p className="mt-2 text-[14px] leading-6 text-muted-foreground">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
               </div>
 
@@ -204,11 +190,6 @@ export function ExploreMarketContext({
             </div>
           </div>
         </>
-      ) : (
-        <div className="rounded-[24px] border border-border bg-card px-5 py-4 text-[14px] leading-6 text-muted-foreground shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-          Resumo rapido: mercado em tom misto, small caps reagindo melhor e volatilidade moderada.
-        </div>
-      )}
     </section>
   );
 }

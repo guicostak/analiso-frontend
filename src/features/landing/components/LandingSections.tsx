@@ -23,7 +23,6 @@ import {
   LineChart,
   MessageCircleMore,
   Mail,
-  Menu,
   NotebookPen,
   PieChart,
   Presentation,
@@ -38,7 +37,6 @@ import {
   TriangleAlert,
   Users,
   Wallet,
-  X,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -2875,8 +2873,6 @@ export function HeroSection() {
   const reducedMotion = useReducedMotion();
   const [heroQuery, setHeroQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const normalizedQuery = heroQuery.trim().toLowerCase();
   const filteredHeroResults =
     normalizedQuery.length === 0
@@ -2895,80 +2891,6 @@ export function HeroSection() {
   return (
     <section className="mt-2 px-5 max-sm:mt-0 max-sm:px-0">
       <div className="w-full overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#ffffff_0%,#f5fcfa_42%,#d8f3ed_100%)] max-sm:rounded-none">
-        <div className="mx-auto max-w-[1430px] relative flex items-center justify-between flex-wrap px-8 pt-8 max-md:px-4 max-md:pt-5">
-          <a href="/" className="order-1 flex shrink-0 items-center">
-            <img
-              src={logoImage.src}
-              alt="Analiso"
-              className="h-[25px] w-auto max-md:h-[20px]"
-              draggable="false"
-            />
-          </a>
-          <div className="absolute left-1/2 order-2 flex -translate-x-1/2 items-center gap-0.5 max-md:hidden">
-            <a href="/" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Início</a>
-            <a href="#como-funciona" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Como funciona</a>
-            <a href="#para-quem-e" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">Para quem é</a>
-            
-            <a href="#faq" className="whitespace-nowrap rounded-[10px] px-3 py-3.5 text-sm font-semibold leading-5 text-[#999] transition-colors hover:text-primary-gray-700">FAQ</a>
-          </div>
-          <div className="order-3 flex shrink-0 items-center gap-2">
-            <a
-              href="/login"
-              className="flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-primary-gray-100 bg-card px-4 py-3.5 text-sm font-semibold leading-5 text-foreground shadow-small transition-all duration-300 ease-out hover:border-primary-gray-200 hover:ring-2 hover:ring-ring-blue-light hover:ring-offset-2 hover:ring-offset-card focus:outline-none focus:ring-2 focus:ring-ring-blue-light focus:ring-offset-2 focus:ring-offset-card active:scale-[0.98]"
-            >
-              Entrar
-            </a>
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen((v) => !v)}
-              className="hidden h-10 w-10 items-center justify-center rounded-[10px] border border-primary-gray-100 bg-card text-[#555] shadow-small max-md:flex"
-              aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mx-auto w-full max-w-[1430px] border-t border-[#f0f0f0] px-4 py-2">
-            <nav className="flex flex-col">
-              <a
-                href="/"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
-              >
-                Início
-              </a>
-              <a
-                href="#como-funciona"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
-              >
-                Como funciona
-              </a>
-              <a
-                href="#para-quem-e"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
-              >
-                Para quem é
-              </a>
-              <a
-                href="#faq"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-sm font-semibold text-[#555] hover:bg-[#f7f7f7]"
-              >
-                FAQ
-              </a>
-            </nav>
-          </div>
-        )}
-
         <div className="flex flex-col items-center px-8 pt-16 max-md:pt-12">
           <motion.h1
             className="w-[700px] text-center text-[56px] leading-[62px] tracking-[-1.12px] max-lg:w-full max-lg:max-w-[700px] max-lg:px-4 max-md:text-[40px] max-md:leading-[46px] max-md:tracking-[-0.8px] max-sm:px-2 max-sm:text-[32px] max-sm:leading-[38px] max-sm:tracking-[-0.64px]"

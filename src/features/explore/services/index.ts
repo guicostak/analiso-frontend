@@ -691,6 +691,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: 0.3,
       evEbitda: 24.1,
       lpa: 1.42,
+      price: 44.80,
     },
   },
   {
@@ -718,6 +719,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: null,
       evEbitda: null,
       lpa: 4.05,
+      price: 33.15,
     },
   },
   {
@@ -745,6 +747,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: 3.8,
       evEbitda: 8.6,
       lpa: 4.72,
+      price: 35.60,
     },
   },
   {
@@ -772,6 +775,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: 4.5,
       evEbitda: 7.2,
       lpa: 0.89,
+      price: 18.42,
     },
   },
   {
@@ -799,6 +803,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: 1.8,
       evEbitda: 11.5,
       lpa: 1.15,
+      price: 15.80,
     },
   },
   {
@@ -826,6 +831,7 @@ export const companies: CompanyCard[] = [
       dividaLiquidaEbitda: 6.2,
       evEbitda: 14.8,
       lpa: -1.32,
+      price: 7.24,
     },
   },
 ];

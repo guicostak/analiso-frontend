@@ -174,7 +174,7 @@ function MockSidebar() {
     <aside className="w-[240px] shrink-0 border-r border-border bg-card">
       <div className="flex h-full flex-col px-5 py-7">
         <div className="pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase text-muted-foreground">
             Contexto
           </p>
           <p className="mt-2 text-[15px] font-semibold text-foreground">Minha watchlist</p>
@@ -183,7 +183,7 @@ function MockSidebar() {
         <div className="space-y-8">
           {sidebarGroups.map((group) => (
             <div key={group.title}>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="mb-4 text-[11px] font-semibold uppercase text-muted-foreground">
                 {group.title}
               </p>
               <div className="space-y-1">
@@ -368,7 +368,7 @@ function MockDashboardMain() {
               <div className="space-y-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">
                       Prioridade do dia
                     </p>
                     <h2 className="mt-2 max-w-[20ch] text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
@@ -437,7 +437,7 @@ function MockDashboardMain() {
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex-1">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">
+              <p className="text-[12px] font-medium uppercase text-[#5B8DEF]">
                 Por onde começar
               </p>
               <p className="mt-1 text-[15px] font-semibold leading-6 text-foreground">
@@ -458,7 +458,7 @@ function MockDashboardMain() {
             <div className="border-b border-border px-6 py-5">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="max-w-[44ch]">
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">
                     Exploração principal
                   </p>
                   <h2 className="mt-2 text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-foreground">
@@ -604,7 +604,7 @@ function MockDashboardMain() {
             <article className="min-h-[232px] rounded-[24px] border border-border bg-card p-6 shadow-[0_14px_30px_rgba(15,23,40,0.04)]">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">
                     Pilar em movimento
                   </p>
                   <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
@@ -650,7 +650,7 @@ function MockDashboardMain() {
 
             {/* Watchlist health card */}
             <article className="rounded-[20px] border border-border bg-[linear-gradient(180deg,#EEF7FF_0%,#F7FBFF_100%)] p-6">
-              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#5B8DEF]">
+              <p className="text-[12px] font-medium uppercase text-[#5B8DEF]">
                 Saúde da watchlist
               </p>
               <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-foreground">
@@ -686,7 +686,7 @@ function MockDashboardMain() {
                   </div>
                 </div>
                 <div className="flex w-[68px] flex-col justify-between rounded-[14px] bg-[linear-gradient(180deg,#F4F8FF_0%,#E8F1FF_100%)] px-3 py-2 text-right">
-                  <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <span className="text-[10px] uppercase text-muted-foreground">
                     Hoje
                   </span>
                   <span className="text-[18px] font-semibold text-[#3965B8]">

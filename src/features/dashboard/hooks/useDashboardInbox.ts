@@ -230,44 +230,38 @@ export function useDashboardInbox(): UseDashboardInboxReturn {
   const [dashboardData,    setDashboardData]    = useState<DashboardResponse | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError,   setDashboardError]   = useState<string | null>(null);
-  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
+    if (!token) {
+      setDashboardLoading(false);
+      setDashboardError("no_token");
+      return;
+    }
+
     let cancelled = false;
 
-    const fetchDashboard = () => {
-      setDashboardLoading(true);
-      setDashboardError(null);
+    setDashboardLoading(true);
+    setDashboardError(null);
 
-      getDashboard(token)
-        .then((data) => {
-          if (!cancelled) {
-            setDashboardData(data);
-            setDashboardLoading(false);
-          }
-        })
-        .catch((err: unknown) => {
-          if (cancelled) return;
+    getDashboard(token)
+      .then((data) => {
+        if (!cancelled) {
+          setDashboardData(data);
           setDashboardLoading(false);
-          if (err instanceof ApiError && err.code === "dashboard_not_ready") {
-            setDashboardError("not_ready");
-            retryTimeoutRef.current = setTimeout(() => {
-              if (!cancelled) fetchDashboard();
-            }, 5000);
-          } else if (err instanceof ApiError && err.status === 401) {
-            logout();
-          } else {
-            setDashboardError("error");
-          }
-        });
-    };
+        }
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setDashboardLoading(false);
+        if (err instanceof ApiError && err.code === "dashboard_not_ready") {
+          setDashboardError("not_ready");
+        } else if (err instanceof ApiError && err.status === 401) {
+          logout();
+        } else {
+          setDashboardError("error");
+        }
+      });
 
-    fetchDashboard();
-
-    return () => {
-      cancelled = true;
-      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
-    };
+    return () => { cancelled = true; };
   }, [token, logout]);
 
   // Converte resposta da API para o formato de seed do inbox

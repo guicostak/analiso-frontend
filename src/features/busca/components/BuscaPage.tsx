@@ -11,16 +11,18 @@
  * Segue responsive_skill.md: mobile-first, breakpoints Tailwind.
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import { useCompanySearch } from "@/src/features/explore/hooks/useCompanySearch";
 import type { CompanySearchFilters } from "@/src/features/explore/services/search.service";
+import { useAnimatedPlaceholder } from "@/src/hooks/useAnimatedPlaceholder";
 import { BuscaFiltersPanel } from "./BuscaFiltersPanel";
 import { BuscaResultsGrid } from "./BuscaResultsGrid";
+import { SearchAutocomplete, type SuggestResult } from "@/src/components/shared/SearchAutocomplete";
 
 /**
  * Mapeia query params do URL (snake_case do Luiz) para CompanySearchFilters.
@@ -75,12 +77,50 @@ export function BuscaPage() {
     clearFilters,
   } = useCompanySearch();
 
+  // ── Estado da busca por texto ──────────────────────────────────────────────
+  const [query, setQuery]       = useState(searchParams.get("query") ?? "");
+  const [isFocused, setIsFocused] = useState(false);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // ── Painel de filtros avançados ────────────────────────────────────────────
+  const [filtersOpen, setFiltersOpen] = useState(true);
+
+  const hasActiveMetricFilters = Object.entries(filters).some(
+    ([key, val]) =>
+      val != null &&
+      val !== "" &&
+      !["page", "size", "sortBy", "sortOrder", "query", "sector"].includes(key),
+  );
+
+  // ── Placeholder animado ────────────────────────────────────────────────────
+  const isPlaceholderActive = !query && !isFocused;
+  const animatedPlaceholder  = useAnimatedPlaceholder(isPlaceholderActive);
+
   // Lê filtros do URL na montagem e dispara busca inicial
   useEffect(() => {
     const urlFilters = parseUrlFilters(searchParams);
     search({ ...urlFilters, page: 0, size: 20 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sincroniza query interna com o filtro do hook
+  function handleQueryChange(val: string) {
+    setQuery(val);
+    setShowAutocomplete(val.length > 0);
+    updateFilters({ query: val.trim() || undefined });
+  }
+
+  function handleSelect(item: SuggestResult) {
+    setQuery(item.ticker);
+    setShowAutocomplete(false);
+    updateFilters({ query: item.ticker });
+    inputRef.current?.blur();
+  }
+
+  function handleCloseAutocomplete() {
+    setShowAutocomplete(false);
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -99,7 +139,7 @@ export function BuscaPage() {
           <div className="mx-auto max-w-[1380px]">
             {/* Header */}
             <header className="mb-6 space-y-2">
-              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:text-[12px]">
+              <p className="text-[11px] font-medium uppercase text-muted-foreground sm:text-[12px]">
                 Busca avançada
               </p>
               <div className="max-w-[640px] space-y-2">
@@ -112,20 +152,52 @@ export function BuscaPage() {
               </div>
             </header>
 
-            {/* Barra de busca por texto */}
+            {/* Barra de busca com ícone de filtro embutido */}
             <div className="mb-6">
               <div className="relative max-w-md">
+                {/* Ícone de lupa */}
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+                {/* Input */}
                 <input
+                  ref={inputRef}
                   type="text"
-                  placeholder="Buscar por nome ou ticker..."
-                  defaultValue={filters.query ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value.trim();
-                    updateFilters({ query: val || undefined });
+                  value={query}
+                  onChange={(e) => handleQueryChange(e.target.value)}
+                  onFocus={() => {
+                    setIsFocused(true);
+                    if (query.length > 0) setShowAutocomplete(true);
                   }}
-                  className="h-10 w-full rounded-lg border border-border bg-card pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                  onBlur={() => setIsFocused(false)}
+                  placeholder={animatedPlaceholder || "Buscar por nome ou ticker..."}
+                  autoComplete="off"
+                  className="h-10 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
+
+                {/* Ícone de filtros avançados */}
+                <button
+                  type="button"
+                  title="Filtros avançados"
+                  onClick={() => setFiltersOpen((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  <SlidersHorizontal
+                    className={`h-4 w-4 transition-colors ${
+                      filtersOpen || hasActiveMetricFilters
+                        ? "text-brand"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown de autocomplete */}
+                {showAutocomplete && (
+                  <SearchAutocomplete
+                    query={query}
+                    onSelect={handleSelect}
+                    onClose={handleCloseAutocomplete}
+                  />
+                )}
               </div>
             </div>
 
@@ -138,6 +210,8 @@ export function BuscaPage() {
                   isLoading={isLoading}
                   onUpdateFilters={updateFilters}
                   onClearFilters={clearFilters}
+                  isOpen={filtersOpen}
+                  onToggle={() => setFiltersOpen((prev) => !prev)}
                 />
               </aside>
 
