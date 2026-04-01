@@ -9,74 +9,17 @@ import {
   DonutChart,
   type CustomTooltipProps,
 } from '@tremor/react';
-import { SnowflakeChart, type SnowflakeDimension } from '@/src/components/shared/SnowflakeChart';
 import type {
-  AnalysisData, AnalysisTab, DimensionScore, MetricDistribution, TimelineEvent,
+  AnalysisData, AnalysisTab, MetricDistribution, TimelineEvent,
   DCFSensitivityCell, RatioTrend, MarginSeries, ReturnComparison, DividendVsEarnings,
   RewardRisk, Competitor, AnalystTarget, EarningsRevenueSeries, CommunityFairValue,
 } from '../interfaces';
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo } from '../utils/formatters';
-import { FavoriteButton, SectionCard, pillarStatus } from './AnalysisShared';
+import { FavoriteButton, SectionCard, SWSDonut } from './AnalysisShared';
+import { LuizAvatar } from '@/src/features/luiz/components';
 
-const DIMENSION_PRIORITY: Record<string, number> = {
-  dividend: 1,
-  health: 2,
-  past: 3,
-  future: 4,
-  value: 5,
-};
 
-const DIMENSION_CONTEXT: Record<string, string> = {
-  value: 'preco e margem de seguranca',
-  future: 'crescimento e previsibilidade',
-  past: 'historico operacional',
-  health: 'balanco e cobertura financeira',
-  dividend: 'proventos e consistencia',
-};
-
-function getTopDimension(dimensions: DimensionScore[]) {
-  return [...dimensions].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return DIMENSION_PRIORITY[a.dimension] - DIMENSION_PRIORITY[b.dimension];
-  })[0];
-}
-
-function getBottomDimension(dimensions: DimensionScore[]) {
-  return [...dimensions].sort((a, b) => {
-    if (a.score !== b.score) return a.score - b.score;
-    return DIMENSION_PRIORITY[a.dimension] - DIMENSION_PRIORITY[b.dimension];
-  })[0];
-}
-
-function buildOverviewNarrative(data: AnalysisData) {
-  const bestDimension = getTopDimension(data.snowflake);
-  const weakestDimension = getBottomDimension(data.snowflake);
-  const topReward = data.rewardsAndRisks.find((item) => item.type === 'reward');
-  const topRisk = data.rewardsAndRisks.find((item) => item.type === 'risk');
-  const hasDiscount = data.valuation.discountPercent > 0;
-  const betterThanMarketLongTerm = data.returnComparison[data.returnComparison.length - 1]?.stock > data.returnComparison[data.returnComparison.length - 1]?.market;
-
-  const headline = [
-    `${data.company.name} combina força em ${DIMENSION_CONTEXT[bestDimension.dimension]}`,
-    hasDiscount ? ' — com espaço para reprecificação' : ' — leitura mais dependente de execução',
-    topRisk ? `, mas carrega pressão em ${DIMENSION_CONTEXT[weakestDimension.dimension]}` : '',
-  ].join('');
-
-  const subheadline = [
-    topReward?.text ?? `A melhor leitura hoje esta em ${bestDimension.displayName.toLowerCase()}.`,
-    topRisk?.text ? `O principal ponto de atencao esta em ${topRisk.text.toLowerCase()}.` : '',
-    betterThanMarketLongTerm ? 'No horizonte longo, a tese ainda preserva sustentacao relativa.' : 'No curto prazo, o mercado ainda pede confirmacao da tese.',
-  ].filter(Boolean).join(' ');
-
-  const quickRead = [
-    `Tese ${bestDimension.score - weakestDimension.score >= 2 ? 'desequilibrada para os pontos fortes' : 'equilibrada'},`,
-    `com destaque para ${bestDimension.displayName.toLowerCase()}`,
-    `e maior vigilancia em ${weakestDimension.displayName.toLowerCase()}.`,
-  ].join(' ');
-
-  return { bestDimension, weakestDimension, topReward, topRisk, headline, subheadline, quickRead };
-}
 
 function buildPriceInsight(data: AnalysisData) {
   const oneYearVsMarket = data.priceHistory.return1y - data.priceHistory.marketReturn1y;
@@ -133,7 +76,7 @@ function getCompetitorSummary(comp: Competitor) {
 
   return {
     synthesis,
-    differential: `Destaque em ${DIMENSION_CONTEXT[best[0]]}; pede cuidado em ${DIMENSION_CONTEXT[worst[0]]}.`,
+    differential: `Destaque em ; pede cuidado em .`,
   };
 }
 // ─── Reusable Chart Components (data-to-viz optimized) ──────────────────────
@@ -917,22 +860,12 @@ function CompetitorGrid({ competitors }: { competitors: Competitor[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {competitors.map((comp) => {
-        const dims: SnowflakeDimension[] = [
-          { label: 'Valor', value: comp.scores.value, color: COLORS.value, why: '', metric: '' },
-          { label: 'Futuro', value: comp.scores.future, color: COLORS.future, why: '', metric: '' },
-          { label: 'Passado', value: comp.scores.past, color: COLORS.past, why: '', metric: '' },
-          { label: 'Saúde', value: comp.scores.health, color: COLORS.health, why: '', metric: '' },
-          { label: 'Dividendo', value: comp.scores.dividend, color: COLORS.dividend, why: '', metric: '' },
-        ];
         const avg = Object.values(comp.scores).reduce((a, b) => a + b, 0) / 5;
         const status = avg >= 60 ? 'healthy' : avg >= 40 ? 'attention' : 'risk';
         const summary = getCompetitorSummary(comp);
 
         return (
           <div key={comp.ticker} className="bg-neutral-50 rounded-xl p-4 hover:bg-neutral-100 transition-colors cursor-pointer border border-transparent hover:border-neutral-200">
-            <div className="flex justify-center mb-2">
-              <SnowflakeChart dimensions={dims} size="small" status={status as any} />
-            </div>
             <div className="text-sm font-bold text-neutral-900">{comp.name}</div>
             <div className="text-xs text-neutral-500 font-mono">{comp.exchange}:{comp.ticker}</div>
             <div className="mt-3 rounded-xl bg-white/80 p-3 text-left">
@@ -945,82 +878,6 @@ function CompetitorGrid({ competitors }: { competitors: Competitor[] }) {
         );
       })}
     </div>
-  );
-}
-
-/**
- * SWS-style donut: dark ring (#3E4855) + colored data slice.
- * Uses stroke-dasharray on circle — same visual as SWS SVG path approach.
- */
-function SWSDonut({
-  value, total, sliceColor, centerLabel, centerValue,
-  sliceLabel, sliceDisplayValue, size = 180,
-}: {
-  value: number; total: number; sliceColor: string;
-  centerLabel: string; centerValue: string;
-  sliceLabel?: string; sliceDisplayValue?: string; size?: number;
-}) {
-  const cx = size / 2;
-  const cy = size / 2;
-  const scale = size / 200;
-  const r  = 74 * scale;
-  const sw = 36 * scale;
-  const outerR = 92 * scale; // outer edge of ring
-
-  const circumference = 2 * Math.PI * r;
-  const pct  = Math.min(Math.max(value / total, 0), 1);
-  const dash = pct * circumference;
-
-  // Annotation: line from midpoint of slice outward
-  const midAngleDeg = -90 + (pct * 360) / 2;
-  const midAngleRad = (midAngleDeg * Math.PI) / 180;
-  const lineLen = 28 * scale;
-  const lx1 = cx + outerR * Math.cos(midAngleRad);
-  const ly1 = cy + outerR * Math.sin(midAngleRad);
-  const lx2 = cx + (outerR + lineLen) * Math.cos(midAngleRad);
-  const ly2 = cy + (outerR + lineLen) * Math.sin(midAngleRad);
-  const isRight = lx2 >= cx;
-  const textX = lx2 + (isRight ? 6 : -6);
-  const anchor = isRight ? 'start' : 'end';
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} overflow="visible">
-      {/* Background ring */}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#3E4855" strokeWidth={sw} />
-      {/* Data slice — starts at top */}
-      {pct > 0 && (
-        <circle
-          cx={cx} cy={cy} r={r}
-          fill="none" stroke={sliceColor}
-          strokeWidth={sw}
-          strokeDasharray={`${dash} ${circumference}`}
-          strokeLinecap="butt"
-          transform={`rotate(-90 ${cx} ${cy})`}
-        />
-      )}
-      {/* Annotation line + dot + labels */}
-      {pct > 0 && sliceLabel && (
-        <>
-          <line x1={lx1} y1={ly1} x2={lx2} y2={ly2} stroke={sliceColor} strokeWidth={1} />
-          <circle cx={lx2} cy={ly2} r={2.5 * scale} fill={sliceColor} />
-          <text x={textX} y={ly2 - 8 * scale} textAnchor={anchor}
-            fontSize={16 * scale} fontWeight="600" fill="#94a3b8" fontFamily="Inter,sans-serif">
-            {sliceLabel}
-          </text>
-          <text x={textX} y={ly2 + 10 * scale} textAnchor={anchor}
-            fontSize={13 * scale} fill="#475569" fontFamily="Inter,sans-serif">
-            {sliceDisplayValue}
-          </text>
-        </>
-      )}
-      {/* Center labels */}
-      <text x={cx} y={cy - 5} textAnchor="middle" fontSize={10 * scale + 2} fill="#94a3b8" fontFamily="Inter,sans-serif">
-        {centerLabel}
-      </text>
-      <text x={cx} y={cy + 13 * scale} textAnchor="middle" fontSize={12 * scale + 1} fontWeight="600" fill="#1e293b" fontFamily="Inter,sans-serif">
-        {centerValue}
-      </text>
-    </svg>
   );
 }
 
@@ -2567,17 +2424,11 @@ const EVENT_LABELS: Record<string, string> = {
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
-function pillarStatus(score: number): { label: string; color: string; bg: string; dot: string } {
-  if (score >= 5) return { label: 'Forte',       color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-400' };
-  if (score >= 3) return { label: 'Equilibrado', color: 'text-slate-600',   bg: 'bg-slate-100',  dot: 'bg-slate-400'   };
-  if (score >= 2) return { label: 'Atenção',     color: 'text-amber-700',   bg: 'bg-amber-50',   dot: 'bg-amber-400'   };
-  return             { label: 'Pressionado', color: 'text-rose-700',    bg: 'bg-rose-50',    dot: 'bg-rose-400'    };
-}
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
-export function OverviewTab({ data, onSelectTab, companyCardRef }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null> }) {
-  const { bestDimension, weakestDimension, headline } = buildOverviewNarrative(data);
+export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null>; navAlignRef?: React.RefObject<HTMLDivElement | null> }) {
+  const headline = data.company.name + " — análise fundamentalista";
 
   const rewards = data.rewardsAndRisks.filter((r) => r.type === 'reward').slice(0, 3);
   const risks   = data.rewardsAndRisks.filter((r) => r.type === 'risk').slice(0, 3);
@@ -2585,13 +2436,13 @@ export function OverviewTab({ data, onSelectTab, companyCardRef }: { data: Analy
   // ─── Starting point ────────────────────────────────────────────────────────
   const startingTab: AnalysisTab = (() => {
     if (data.valuation.discountPercent > 20) return 'value';
-    return weakestDimension.dimension;
+    return 'value';
   })();
 
   const startingMeta: Record<AnalysisTab, { tab: string; reason: string }> = {
     overview:  { tab: 'Resumo',           reason: '' },
     value:     { tab: 'Preço justo',      reason: 'O preço atual pode estar abaixo do que a empresa vale. Comece entendendo essa diferença.' },
-    future:    { tab: 'Crescimento Futuro', reason: 'O crescimento esperado é um dos fatores que mais influenciam o preço. Veja as projeções.' },
+    future:    { tab: 'Crescimento Futuro', reason: 'O crescimento esperado é um dos fatores que mais influenciam o preço.' },
     past:      { tab: 'Histórico',        reason: 'O histórico de resultados mostra se a empresa entrega o que promete. Veja os números.' },
     health:    { tab: 'Saúde financeira', reason: 'Antes de tudo, é importante saber se a empresa está em boa situação financeira.' },
     dividend:  { tab: 'Dividendos',       reason: 'Os dividendos são uma parte importante do retorno. Veja se são sustentáveis.' },
@@ -2662,7 +2513,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef }: { data: Analy
       </div>
 
       {/* ── 2. Leitura atual ────────────────────────────────────────────── */}
-      <div className="bg-[#F8FAFC] border border-neutral-200/80 rounded-2xl px-6 py-5">
+      <div ref={navAlignRef} className="bg-[#F8FAFC] border border-neutral-200/80 rounded-2xl px-6 py-5">
         <div className="text-[12px] font-semibold text-neutral-500 mb-2.5">Resumo da análise</div>
         <p className="text-[17px] font-semibold leading-relaxed text-neutral-800 max-w-3xl">{headline}</p>
       </div>
@@ -2719,30 +2570,53 @@ export function OverviewTab({ data, onSelectTab, companyCardRef }: { data: Analy
         </div>
       </div>
 
-      {/* ── 5. Por onde começar ─────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-sm p-5">
-        <div className="flex items-center justify-between gap-6 flex-wrap">
-          <div className="min-w-0">
-            <div className="text-[12px] font-semibold text-neutral-500 mb-2">Por onde começar</div>
-            <div className="text-[19px] font-semibold text-neutral-900 mb-1.5">
-              Comece por{' '}
-              <span className="text-[#355CDE]">{startingMeta[startingTab].tab}</span>
-            </div>
-            <p className="text-[13px] text-neutral-500 leading-6 max-w-xl">
-              {startingMeta[startingTab].reason}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onSelectTab(startingTab)}
-            className="flex-shrink-0 flex items-center gap-1.5 text-[12px] font-semibold text-[#355CDE] bg-blue-50 hover:bg-blue-100 px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-          >
-            Ir para {startingMeta[startingTab].tab}
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+      {/* ── 5. Luiz — insight da análise ────────────────────────────────── */}
+      <div className="rounded-2xl p-4 flex items-center gap-4 border border-border" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.06) 0%, rgba(168,85,247,0.06) 35%, rgba(99,102,241,0.06) 68%, rgba(6,182,212,0.06) 100%)' }}>
+        {/* Avatar */}
+        <div className="flex-shrink-0">
+          <LuizAvatar size="md" shape="circle" />
         </div>
+
+        {/* Texto */}
+        <div className="flex-1 min-w-0">
+          {/* Nome + badge IA */}
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-[12px] font-bold text-foreground">Luiz</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none tracking-wide text-white" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)' }}>
+              IA
+            </span>
+          </div>
+          <p className="text-[13px] font-semibold text-foreground leading-snug">
+            {startingMeta[startingTab].tab === 'Preço justo'
+              ? `O preço de ${data.company.ticker} pode estar abaixo do valor estimado.`
+              : startingMeta[startingTab].tab === 'Dividendos'
+              ? `${data.company.ticker} distribui dividendos consistentemente. Veja a sustentabilidade.`
+              : `O ponto mais relevante desta análise está em ${startingMeta[startingTab].tab}.`}
+          </p>
+          <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
+            {startingMeta[startingTab].reason}
+          </p>
+        </div>
+
+        {/* CTA */}
+        <button
+          type="button"
+          onClick={() => onSelectTab(startingTab)}
+          className="flex-shrink-0 flex items-center gap-2 text-[13px] font-medium text-foreground bg-white/90 hover:bg-white px-4 py-2 rounded-full transition-colors whitespace-nowrap shadow-sm"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L15.5 8.5L22 12L15.5 15.5L12 22L8.5 15.5L2 12L8.5 8.5L12 2Z" fill="url(#luiz-btn-grad)" />
+            <defs>
+              <linearGradient id="luiz-btn-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#EC4899" />
+                <stop offset="40%" stopColor="#A855F7" />
+                <stop offset="75%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#06B6D4" />
+              </linearGradient>
+            </defs>
+          </svg>
+          Análise completa
+        </button>
       </div>
 
       {/* ── 6. O que mudou desde a última atualização ───────────────────── */}
@@ -2822,50 +2696,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef }: { data: Analy
         );
       })()}
 
-      {/* ── 7. Status resumido dos 5 pilares ────────────────────────────── */}
-      <div>
-        <div className="text-[13px] font-semibold text-neutral-600 mb-3 px-0.5">
-          Status dos pilares
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-          {data.snowflake.map((dim) => {
-            const s = pillarStatus(dim.score);
-            return (
-              <button
-                key={dim.dimension}
-                type="button"
-                onClick={() => onSelectTab(dim.dimension)}
-                className="bg-white rounded-2xl shadow-sm p-4 text-left hover:shadow-md transition-all group cursor-pointer"
-              >
-                {/* Header row */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-semibold text-neutral-500 leading-tight">
-                    {dim.displayName}
-                  </span>
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
-                </div>
-                {/* Status badge */}
-                <div className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${s.bg} ${s.color}`}>
-                  {s.label}
-                </div>
-                {/* Summary */}
-                <p className="text-[11px] text-neutral-500 mt-2.5 leading-[1.6] line-clamp-3">
-                  {dim.summary}
-                </p>
-                {/* Hover cue */}
-                <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-neutral-400 group-hover:text-[#355CDE] transition-colors">
-                  <span>Ver análise</span>
-                  <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── 8. Preço em contexto + Eventos ──────────────────────────────── */}
+      {/* ── 7. Preço em contexto + Eventos ──────────────────────────────── */}
       <PriceContextSection data={data} onSelectTab={onSelectTab} />
       <AboutSection data={data} />
       <BaseSection data={data} onSelectTab={onSelectTab} />
@@ -3289,7 +3120,8 @@ function BaseSection({
   const p  = data.pastPerformance;
   const h  = data.health;
   const dv = data.dividend;
-  const cov = (h.interestExpense ?? 0) !== 0 ? safeN((h.ebit ?? 0) / (h.interestExpense ?? 1)) : '—';
+  const cov = (h.ebit != null && h.interestExpense != null && h.interestExpense !== 0) ? safeN(h.ebit / h.interestExpense) : '—';
+  const fmt$ = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
   type Module = {
     pillar: string;
@@ -3333,44 +3165,44 @@ function BaseSection({
       name: 'Crescimento futuro',
       state: growthAbove ? 'Forte' : 'Atenção',
       stateColor: growthAbove ? 'text-blue-600' : 'text-amber-600',
-      primary: `+${g.earningsGrowthRate}%`,
+      primary: g.earningsGrowthRate != null ? `+${g.earningsGrowthRate.toFixed(1)}%` : '—',
       primaryLabel: 'crescimento do lucro / ano',
-      secondary: `vs. setor +${g.industryEarningsGrowth}%  ·  receita +${g.revenueGrowthRate}%`,
-      micro: `Lucro projetado ${growthGap}pp ${growthAbove ? 'acima' : 'abaixo'} da média do setor (${g.industryEarningsGrowth}%/ano).`,
+      secondary: `vs. setor ${g.industryEarningsGrowth != null ? `+${g.industryEarningsGrowth.toFixed(1)}%` : '—'}  ·  receita ${g.revenueGrowthRate != null ? `+${g.revenueGrowthRate.toFixed(1)}%` : '—'}`,
+      micro: `Lucro projetado ${growthGap}pp ${growthAbove ? 'acima' : 'abaixo'} da média do setor (${g.industryEarningsGrowth != null ? `${g.industryEarningsGrowth.toFixed(1)}%` : '—'}/ano).`,
     },
     {
       pillar: 'past', tab: 'past',
       name: 'Performance passada',
       state: p.currentROE > 18 ? 'Forte' : p.currentROE > 10 ? 'Moderado' : 'Pressionado',
       stateColor: p.currentROE > 18 ? 'text-emerald-600' : p.currentROE > 10 ? 'text-slate-400' : 'text-rose-600',
-      primary: `${p.currentROE}%`,
+      primary: fmt$(p.currentROE),
       primaryLabel: 'retorno sobre patrimônio',
-      secondary: `Margem líq. ${p.netMargin}%  ·  ROCE ${p.currentROCE}%`,
-      micro: `ROE de ${p.currentROE}% com margem líquida de ${p.netMargin}% no último exercício.`,
+      secondary: `Margem líq. ${fmt$(p.netMargin)}  ·  ROCE ${fmt$(p.currentROCE)}`,
+      micro: `ROE de ${fmt$(p.currentROE)} com margem líquida de ${fmt$(p.netMargin)} no último exercício.`,
     },
     {
       pillar: 'health', tab: 'health',
       name: 'Saúde financeira',
       state: h.debtToEquity < 0.5 ? 'Forte' : h.debtToEquity < 1 ? 'Moderado' : 'Pressionado',
       stateColor: h.debtToEquity < 0.5 ? 'text-emerald-600' : h.debtToEquity < 1 ? 'text-slate-400' : 'text-rose-600',
-      primary: `${h.debtToEquity}x`,
+      primary: h.debtToEquity != null ? `${h.debtToEquity.toFixed(1)}x` : '—',
       primaryLabel: 'dívida / patrimônio',
-      secondary: `Juros cobertos ${cov}x  ·  Caixa ${fmtBRL(h.cash)}`,
-      micro: `Dívida ${h.debtToEquity}x o patrimônio, com cobertura de ${cov}x pelo EBIT.`,
+      secondary: `Juros cobertos ${cov !== '—' ? `${cov}x` : '—'}  ·  Caixa ${fmtBRL(h.cash)}`,
+      micro: `Dívida ${h.debtToEquity != null ? `${h.debtToEquity.toFixed(1)}x` : '—'} o patrimônio, com cobertura de ${cov !== '—' ? `${cov}x` : '—'} pelo EBIT.`,
     },
     {
       pillar: 'dividend', tab: 'dividend',
       name: 'Dividendos',
       state: divState,
       stateColor: divColor,
-      primary: `${dv.currentYield}%`,
+      primary: fmt$(dv.currentYield),
       primaryLabel: 'dividend yield atual',
-      secondary: `Payout ${dv.payoutRatio}%  ·  ${dv.yearsWithoutInterruption} anos sem corte`,
+      secondary: `Payout ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'}  ·  ${dv.yearsWithoutInterruption ?? '—'} anos sem corte`,
       micro: divState === 'Pressionado'
-        ? `Yield de ${dv.currentYield}% com payout de ${dv.payoutRatio}% — pouca margem de segurança.`
+        ? `Yield de ${fmt$(dv.currentYield)} com payout de ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'} — pouca margem de segurança.`
         : divState === 'Atrativo'
-          ? `Yield de ${dv.currentYield}% sustentável com payout de ${dv.payoutRatio}% nos últimos ${dv.yearsWithoutInterruption} anos.`
-          : `Distribuição consistente há ${dv.yearsWithoutInterruption} anos com yield de ${dv.currentYield}%.`,
+          ? `Yield de ${fmt$(dv.currentYield)} sustentável com payout de ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'} nos últimos ${dv.yearsWithoutInterruption ?? '—'} anos.`
+          : `Distribuição consistente há ${dv.yearsWithoutInterruption ?? '—'} anos com yield de ${fmt$(dv.currentYield)}.`,
     },
   ];
 

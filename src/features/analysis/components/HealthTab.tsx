@@ -9,7 +9,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL } from '../utils/formatters';
-import { SectionCard, DimensionIntroCard, DimensionScoreCard, CheckList } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, AGFC_H, AGFC_MAX_BAR, AGFC_TOP_PAD } from './AnalysisShared';
 
 function BalanceBarChart({ title, bars }: {
   title: string;
@@ -443,20 +443,22 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
   const hocf   = h.operatingCashFlow ?? 0;
   const hltl   = h.longTermLiabilities ?? 0;
   const heq    = h.equity ?? 0;
-  const interestCoverage = (h.ebit ?? 0) / ((h.interestExpense ?? 1) || 1);
+  const interestCoverage = (h.ebit != null && h.interestExpense != null && h.interestExpense !== 0)
+    ? h.ebit / h.interestExpense
+    : null;
 
   type Strength = 'saudavel' | 'moderado' | 'alavancado';
   const strength: Strength =
-    hdte < 40 && interestCoverage > 5 && hsta > hstl
+    hdte < 40 && (interestCoverage ?? 0) > 5 && hsta > hstl
       ? 'saudavel'
-      : hdte < 100 && interestCoverage > 2
+      : hdte < 100 && (interestCoverage ?? 0) > 2
         ? 'moderado'
         : 'alavancado';
 
   const thesis = {
     saudavel: {
       headline:  'Balanço sólido, com baixa dívida e boa capacidade de pagamento',
-      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${safeN(interestCoverage)}x indicam estrutura financeira conservadora.`,
+      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${interestCoverage != null ? safeN(interestCoverage) + 'x' : '—'} indicam estrutura financeira conservadora.`,
       badge:     'Saúde forte',
       badgeBg:   '#EFF6FF',
       badgeColor:'#1D4ED8',
@@ -465,7 +467,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
     },
     moderado: {
       headline:  'Estrutura financeira adequada, com pontos de atenção',
-      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${safeN(interestCoverage)}x, dentro de limites aceitáveis.`,
+      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${interestCoverage != null ? safeN(interestCoverage) + 'x' : '—'}, dentro de limites aceitáveis.`,
       badge:     'Saúde moderada',
       badgeBg:   '#F0FDF4',
       badgeColor:'#0F766E',
@@ -474,7 +476,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
     },
     alavancado: {
       headline:  'Endividamento elevado, estrutura financeira sob pressão',
-      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${safeN(interestCoverage)}x sinalizam pressão financeira.`,
+      sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${interestCoverage != null ? safeN(interestCoverage) + 'x' : '—'} sinalizam pressão financeira.`,
       badge:     'Atenção',
       badgeBg:   '#FFF7ED',
       badgeColor:'#C2410C',
@@ -495,7 +497,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
       micro:     'Liquidez de curto prazo adequada para honrar obrigações imediatas.',
     });
   }
-  if (interestCoverage > 3) {
+  if (interestCoverage != null && interestCoverage > 3) {
     evidences.push({
       criterion: 'Cobertura de juros confortável',
       observed:  `${safeN(interestCoverage)}x`,
@@ -529,7 +531,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
       micro:     'Nível de dívida em relação ao PL limita flexibilidade financeira.',
     });
   }
-  if (interestCoverage < 3) {
+  if (interestCoverage != null && interestCoverage < 3) {
     limitations.push({
       criterion: 'Cobertura de juros limitada',
       observed:  `${safeN(interestCoverage)}x`,
@@ -646,9 +648,13 @@ export function HealthTab({ data }: { data: AnalysisData }) {
   const h = data.health;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const nf = (n: number | null | undefined, d = 1) => (n ?? 0).toFixed(d);
+  const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
+  const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
-  const interestCoverage = safeN((h.ebit ?? 0) / ((h.interestExpense ?? 1) || 1));
+  const interestCoverageRaw = (h.ebit != null && h.interestExpense != null && h.interestExpense !== 0)
+    ? h.ebit / h.interestExpense
+    : null;
+  const interestCoverage = interestCoverageRaw != null ? `${safeN(interestCoverageRaw)}x` : '—';
   const avl = h.assetsVsLiabilities ?? { shortTermAssets: 0, longTermAssets: 0, shortTermLiabilities: 0, longTermLiabilities: 0 };
   const totalAssets = (avl.shortTermAssets ?? 0) + (avl.longTermAssets ?? 0);
   const totalLiabilities = (avl.shortTermLiabilities ?? 0) + (avl.longTermLiabilities ?? 0);
@@ -669,7 +675,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(h.debtToEquity, 2)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(h.debtToEquity, 2)}</p>
                 <p className="text-xs text-neutral-400">Dívida em relação ao patrimônio</p>
               </div>
             </div>
@@ -684,7 +690,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
           <table className="w-full text-xs">
             <tbody>
               {[
-                { label: 'Capacidade de pagar juros', value: `${interestCoverage}x` },
+                { label: 'Capacidade de pagar juros', value: interestCoverage },
                 { label: 'Caixa disponível', value: fmtBRL(h.cash) },
                 { label: 'Patrimônio líquido', value: fmtBRL(h.equity) },
                 { label: 'Total de dívidas e obrigações', value: fmtBRL(totalLiabilities) },

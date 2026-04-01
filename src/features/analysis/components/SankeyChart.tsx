@@ -138,7 +138,7 @@ const CARD_COLORS: Record<string, [string, string]> = {
   net:  ['#d1fae5', '#065f46'],
 }
 
-function Label({ n, val }: { n: LNode; val: number }) {
+function Label({ n, val, isBottom }: { n: LNode; val: number; isBottom?: boolean }) {
   const cy = n.y + n.h / 2
   const valStr = fmt(val)
 
@@ -179,7 +179,15 @@ function Label({ n, val }: { n: LNode; val: number }) {
     )
   }
 
-  // Default label above node
+  // Default label: above for top nodes, below for bottom nodes (avoids overlapping flows)
+  if (isBottom) {
+    return (
+      <g style={{ pointerEvents: 'none' }}>
+        <text x={cx} y={n.y + n.h + 11} textAnchor="middle" fontSize={9} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
+        <text x={cx} y={n.y + n.h + 21} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+      </g>
+    )
+  }
   return (
     <g style={{ pointerEvents: 'none' }}>
       <text x={cx} y={n.y - 20} textAnchor="middle" fontSize={9} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
@@ -224,11 +232,14 @@ export function SankeyChart({ data }: { data: IncomeBreakdownYear }) {
           onMouseEnter={() => onNode(n.id)} />
       ))}
 
-      {nodes.map(n => (
-        <g key={`lbl-${n.id}`} opacity={nOp(n.id)} style={{ transition: 'opacity 0.18s' }}>
-          <Label n={n} val={vals[n.id]} />
-        </g>
-      ))}
+      {nodes.map(n => {
+        const isBottom = LAYERS[n.layer].indexOf(n.id) > 0
+        return (
+          <g key={`lbl-${n.id}`} opacity={nOp(n.id)} style={{ transition: 'opacity 0.18s' }}>
+            <Label n={n} val={vals[n.id]} isBottom={isBottom} />
+          </g>
+        )
+      })}
     </svg>
   )
 }
