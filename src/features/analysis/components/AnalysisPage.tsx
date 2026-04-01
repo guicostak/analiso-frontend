@@ -9,12 +9,12 @@ import {
   Calendar, ArrowUpRight, ArrowDownRight, Minus, Star, AlertTriangle, ChevronRight,
 } from 'lucide-react';
 import {
-  AreaChart as TremorArea,
-  BarChart as TremorBar,
-  LineChart as TremorLine,
-  DonutChart,
+  TremorAreaChart as TremorArea,
+  TremorBarChart as TremorBar,
+  TremorLineChart as TremorLine,
+  TremorDonutChart as DonutChart,
   type CustomTooltipProps,
-} from '@tremor/react';
+} from '@/src/components/charts/TremorCompat';
 
 import Link from 'next/link';
 import { SnowflakeChart, type SnowflakeDimension } from '@/src/components/shared/SnowflakeChart';
@@ -91,10 +91,7 @@ function ScoreBar({ score, max = 6, color }: { score: number; max?: number; colo
 
 function SectionCard({ id, title, subtitle, children, className = '' }: { id?: string; title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 ${className}`}>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
-    <div id={id} className={`bg-white rounded-2xl shadow-sm p-6 scroll-mt-24 ${className}`}>
+    <div id={id} className={`bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 scroll-mt-24 ${className}`}>
       <div className="mb-5">
         <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
         {subtitle && <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>}
@@ -2654,10 +2651,7 @@ function OverviewTab({ data, onSelectTab }: { data: AnalysisData; onSelectTab: (
   return (
     <div className="space-y-6">
       {/* Company Header */}
-      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+      <div className="bg-card rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
             {data.company.ticker.slice(0, 2)}
@@ -3614,8 +3608,6 @@ export function AnalysisPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Top Bar */}
       <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
             <Link href="/painel" className="text-neutral-400 hover:text-neutral-700 transition-colors">
@@ -3642,10 +3634,6 @@ export function AnalysisPage() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="sticky top-[57px] z-20 bg-card border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto py-1 -mb-px">
       {/* Body */}
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6 items-start">
         {/* Left Sidebar — Tab Navigation */}

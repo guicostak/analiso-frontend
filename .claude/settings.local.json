@@ -214,7 +214,8 @@
       "Bash(./mvnw flyway:migrate -Dflyway.schemas=analiso -Dflyway.url=\"jdbc:postgresql://db.uylzwlpkqggeajbdujyo.supabase.co:5432/postgres?sslmode=require\" -Dflyway.user=postgres -Dflyway.password='bEbkr%E/Et#9jC_' -Dflyway.baselineVersion=16 -Dflyway.baselineOnMigrate=true -Dflyway.target=17 -Dflyway.outOfOrder=true -Dflyway.skipExecutingMigrations=false)",
       "Bash(./mvnw flyway:repair -q -Dflyway.schemas=analiso -Dflyway.url=\"jdbc:postgresql://db.uylzwlpkqggeajbdujyo.supabase.co:5432/postgres?sslmode=require\" -Dflyway.user=postgres -Dflyway.password='bEbkr%E/Et#9jC_')",
       "Bash(./mvnw flyway:migrate -q -Dflyway.schemas=analiso -Dflyway.url=\"jdbc:postgresql://db.uylzwlpkqggeajbdujyo.supabase.co:5432/postgres?sslmode=require\" -Dflyway.user=postgres -Dflyway.password='bEbkr%E/Et#9jC_')",
-      "Bash(curl -s -X PATCH \"http://localhost:8080/api/billing/subscription\" -H \"Content-Type: application/json\" -d '{\"\"plan\"\":\"\"free\"\",\"\"status\"\":\"\"active\"\"}')"
+      "Bash(curl -s -X PATCH \"http://localhost:8080/api/billing/subscription\" -H \"Content-Type: application/json\" -d '{\"\"plan\"\":\"\"free\"\",\"\"status\"\":\"\"active\"\"}')",
+      "Bash(npm uninstall:*)"
     ]
   }
 }
