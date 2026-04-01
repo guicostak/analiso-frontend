@@ -52,28 +52,80 @@ export type RelativeValuation = {
 
 export type GrowthForecast = {
   earningsGrowthRate: number;
+  epsGrowthRate: number;
+  industryEarningsGrowth: number;
   revenueGrowthRate: number;
   marketEarningsGrowth: number;
   marketRevenueGrowth: number;
   futureROE: number;
+  futureROEIndustry: number;
+  analystCoverage: 'Good' | 'Fair' | 'Poor';
+  lastUpdated: string;
   earningsSeries: { year: string; value: number; type: 'historical' | 'forecast' }[];
   revenueSeries: { year: string; value: number; type: 'historical' | 'forecast' }[];
+  freeCashFlowSeries: { year: string; value: number; type: 'historical' | 'forecast' }[];
+  cashFromOpSeries: { year: string; value: number; type: 'historical' | 'forecast' }[];
+  operatingExpensesSeries: { year: string; value: number; type: 'historical' | 'forecast' }[];
+  industryRevenueGrowth: number;
+  savingsRate: number;
+  epsCombinedSeries: {
+    year: string;
+    value: number;
+    low: number;
+    high: number;
+    analysts: number;
+    confirmedDate: string;
+    type: 'historical' | 'forecast';
+  }[];
+  forecastEndDate: string;
+  revenueAtForecast: number;
+  earningsAtForecast: number;
+  revenueAnalysts: number;
+  earningsAnalysts: number;
+  revenueLastUpdated: string;
+  earningsLastUpdated: string;
+};
+
+export type FutureUpdate = {
+  id: string;
+  sentiment: 'good' | 'bad' | 'neutral';
+  type: 'price' | 'earnings' | 'article' | 'event' | 'risk' | 'dividend';
+  title: string;
+  date: string;
+  url?: string;
+  imageUrl?: string;
 };
 
 // ─── Past Performance ────────────────────────────────────────────────────────
 
 export type PastPerformance = {
+  earningsGrowthRate: number;
+  epsGrowthRate: number;
+  industryGrowth: number;
+  revenueGrowthRate: number;
+  currentROE: number;
+  netMargin: number;
+  nextEarningsDate: string;
   epsGrowth5y: number;
   epsCurrentVs5yAgo: boolean;
   epsAccelerating: boolean;
-  currentROE: number;
   currentROCE: number;
   roce3yAgo: number;
   currentROA: number;
   industryROA: number;
+  industryROE: number;
+  lastUpdated: string;
   epsSeries: { year: string; value: number }[];
   roeSeries: { year: string; value: number }[];
   roceSeries: { year: string; value: number }[];
+  cashFlowWaterfall: {
+    earnings: number;
+    depreciation: number;
+    stockBasedComp: number;
+    netWorkingCapital: number;
+    others: number;
+    freeCashFlow: number;
+  };
 };
 
 // ─── Financial Health ────────────────────────────────────────────────────────
@@ -88,12 +140,30 @@ export type FinancialHealth = {
   totalDebt: number;
   interestExpense: number;
   ebit: number;
+  cash: number;
+  equity: number;
   debtToEquitySeries: { year: string; value: number }[];
+  debtHistorySeries: { year: string; debt: number; equity: number; cash: number }[];
   assetsVsLiabilities: {
     shortTermAssets: number;
     longTermAssets: number;
     shortTermLiabilities: number;
     longTermLiabilities: number;
+  };
+  balanceSheet: {
+    assets: {
+      cash: number;
+      receivables: number;
+      inventory: number;
+      physicalAssets: number;
+      longTermAssets: number;
+    };
+    liabilities: {
+      accountsPayable: number;
+      debt: number;
+      otherLiabilities: number;
+      equity: number;
+    };
   };
 };
 
@@ -109,18 +179,21 @@ export type DividendData = {
   years10Growth: boolean;
   dividendSeries: { year: string; value: number }[];
   payoutSeries: { year: string; value: number }[];
-};
-
-// ─── Ownership / Insider ─────────────────────────────────────────────────────
-
-export type OwnershipData = {
-  insiderBuys: number;
-  insiderSells: number;
-  institutionalOwnership: number;
-  publicOwnership: number;
-  insiderOwnership: number;
-  topShareholders: { name: string; percentage: number; type: 'insider' | 'institution' | 'public' }[];
-  insiderTransactions: { date: string; name: string; type: 'buy' | 'sell'; shares: number; value: number }[];
+  buybackYield: number | null;
+  totalShareholderReturn: number | null;
+  futureDividendYield: number | null;
+  dividendGrowth: number | null;
+  nextPaymentDate: string;
+  exDividendDate: string;
+  dividendPerShare: number;
+  yearsWithoutInterruption: number;
+  cagr5y: number;
+  avgPayout5y: number;
+  dividendQualitySeries: { year: string; dpa: number; payout: number | null; type: 'historical' | 'forecast' }[];
+  marketMedianYield: number;
+  sectorMedianYield: number;
+  marketPercentile: number;
+  cashPayoutRatio: number;
 };
 
 // ─── Price History ───────────────────────────────────────────────────────────
@@ -145,15 +218,23 @@ export type CompanyInfo = {
   exchange: string;
   currency: string;
   logo?: string;
+  founded?: string;
+  employees?: string;
+  ceo?: string;
+  website?: string;
+  longDescription?: string;
 };
 
 // ─── Price Scenarios (Backend: price_scenarios + price_ranges) ───────────────
 
 export type PriceScenario = {
-  key: string; // 'pessimista' | 'base' | 'otimista'
+  key: string; // 'conservador' | 'base' | 'otimista'
   label: string;
   estimatedValue: number;
-  gapVsCurrent: number; // percentage
+  gapVsCurrent: number; // percentage vs current price (positive = upside)
+  wacc?: number;        // WACC assumption used
+  growthRate?: number;  // terminal/FCF growth assumption
+  note?: string;        // one-liner on the hypothesis
 };
 
 // ─── Distribution Histogram (Backend: price_distribution) ────────────────────
@@ -228,15 +309,6 @@ export type ReturnComparison = {
   market: number;
 };
 
-// ─── Insider Sentiment Trend (quarterly buy/sell) ────────────────────────────
-
-export type InsiderSentimentPoint = {
-  quarter: string;
-  buys: number;
-  sells: number;
-  netValue: number;
-};
-
 // ─── Dividend vs Earnings Comparison ─────────────────────────────────────────
 
 export type DividendVsEarnings = {
@@ -251,6 +323,35 @@ export type RewardRisk = {
   type: 'reward' | 'risk';
   text: string;
   detail?: string;
+};
+
+// ─── Recent Changes (Overview delta section) ──────────────────────────────────
+
+export type RecentChange = {
+  pillar: SnowflakeDimension;
+  direction: 'better' | 'worse' | 'neutral';
+  summary: string;   // "Valuation ficou mais atrativo"
+  detail: string;    // "Desconto ao valor justo subiu de 10% para 16%"
+  before: string;    // "10% de desconto"
+  after: string;     // "16% de desconto"
+  date: string;      // "Mar 2026"
+};
+
+// ─── Price Context (indexed chart + events) ───────────────────────────────────
+
+export type PriceContextPoint = {
+  date: string;   // 'YYYY-MM'
+  stock: number;  // raw indexed value (100 = first month)
+  ibov: number;   // raw indexed value (100 = first month)
+};
+
+export type ContextEvent = {
+  id: string;
+  date: string;
+  title: string;
+  impact: 'positive' | 'neutral' | 'attention';
+  pillar: SnowflakeDimension | null;
+  explanation: string;
 };
 
 // ─── Competitor Snowflakes (SimplyWall.St competitors section) ───────────────
@@ -309,6 +410,19 @@ export type CommunityFairValue = {
   count: number;
 };
 
+// ─── Income Breakdown (Sankey DRE) ───────────────────────────────────────────
+
+export type IncomeBreakdownYear = {
+  year: string;
+  receita: number;
+  cpv: number;
+  lucroBruto: number;
+  despesasOp: number;
+  ebit: number;
+  financeiroIR: number;
+  lucroLiquido: number;
+};
+
 // ─── Full Analysis Data ──────────────────────────────────────────────────────
 
 export type AnalysisData = {
@@ -317,10 +431,16 @@ export type AnalysisData = {
   valuation: DCFValuation;
   relativeValuation: RelativeValuation;
   growth: GrowthForecast;
+  recentChanges: RecentChange[];
+  priceContextSeries: PriceContextPoint[];
+  contextEvents: ContextEvent[];
+  futureUpdates: FutureUpdate[];
+  pastUpdates: FutureUpdate[];
+  healthUpdates: FutureUpdate[];
+  dividendUpdates: FutureUpdate[];
   pastPerformance: PastPerformance;
   health: FinancialHealth;
   dividend: DividendData;
-  ownership: OwnershipData;
   priceHistory: PriceHistory;
   // Data-to-viz optimized fields
   priceScenarios: PriceScenario[];
@@ -332,7 +452,6 @@ export type AnalysisData = {
   ratioTrends: RatioTrend[];
   marginSeries: MarginSeries[];
   returnComparison: ReturnComparison[];
-  insiderSentiment: InsiderSentimentPoint[];
   dividendVsEarnings: DividendVsEarnings[];
   // SimplyWall.St specific charts
   rewardsAndRisks: RewardRisk[];
@@ -342,8 +461,10 @@ export type AnalysisData = {
   earningsRevenueSeries: EarningsRevenueSeries[];
   priceEvents: PriceEvent[];
   communityFairValues: CommunityFairValue[];
+  incomeBreakdown: IncomeBreakdownYear[];
+  generatedAt?: string;
 };
 
 // ─── Active tab ──────────────────────────────────────────────────────────────
 
-export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend' | 'ownership';
+export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend';

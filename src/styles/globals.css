@@ -189,6 +189,17 @@ button:active:not(:disabled),
   --mint-500: #14b8a6;
   --mint-600: #0d9488;
   --mint-700: #0f766e;
+
+  /* ── Analysis Dimensions ─────────────────────────────────────────────── */
+  --analysis-value:    #5B6AC0;
+  --analysis-future:   #3E8ED0;
+  --analysis-past:     #2EAA8A;
+  --analysis-health:   #D4913B;
+  --analysis-dividend: #8B6CDB;
+  --analysis-positive: #2D9F6F;
+  --analysis-negative: #C74B4B;
+  --analysis-neutral:  #8A8F9C;
+  --analysis-forecast: #8CBAE0;
 }
 
 .dark {
@@ -427,6 +438,19 @@ button:active:not(:disabled),
   .bg-violet-600 { background-color: #7c3aed; } .bg-violet-800 { background-color: #5b21b6; }
   .text-violet-400 { color: #a78bfa; } .text-violet-500 { color: #8b5cf6; } .text-violet-600 { color: #7c3aed; }
   .text-violet-700 { color: #6d28d9; } .text-violet-900 { color: #4c1d95; }
+
+  /* ── orange ── */
+  .fill-orange-50 { fill: #fff7ed; } .fill-orange-100 { fill: #ffedd5; } .fill-orange-200 { fill: #fed7aa; }
+  .fill-orange-300 { fill: #fdba74; } .fill-orange-400 { fill: #fb923c; } .fill-orange-500 { fill: #f97316; }
+  .fill-orange-600 { fill: #ea580c; } .fill-orange-700 { fill: #c2410c; } .fill-orange-800 { fill: #9a3412; }
+  .fill-orange-900 { fill: #7c2d12; }
+  .stroke-orange-200 { stroke: #fed7aa; } .stroke-orange-300 { stroke: #fdba74; } .stroke-orange-500 { stroke: #f97316; }
+  .stroke-orange-700 { stroke: #c2410c; }
+  .bg-orange-50 { background-color: #fff7ed; } .bg-orange-100 { background-color: #ffedd5; }
+  .bg-orange-200 { background-color: #fed7aa; } .bg-orange-500 { background-color: #f97316; }
+  .bg-orange-600 { background-color: #ea580c; } .bg-orange-800 { background-color: #9a3412; }
+  .text-orange-400 { color: #fb923c; } .text-orange-500 { color: #f97316; } .text-orange-600 { color: #ea580c; }
+  .text-orange-700 { color: #c2410c; } .text-orange-900 { color: #7c2d12; }
 
   /* ── amber ── */
   .fill-amber-50 { fill: #fffbeb; } .fill-amber-100 { fill: #fef3c7; } .fill-amber-200 { fill: #fde68a; }
