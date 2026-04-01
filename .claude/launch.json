@@ -7,6 +7,13 @@
       "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "html-preview",
+      "runtimeExecutable": "C:/Program Files/nodejs/npx.cmd",
+      "runtimeArgs": ["serve", "C:/Users/Pablo Benevenuto/Downloads", "-p", "4444", "--no-clipboard"],
+      "port": 4444
     }
-  ]
+  ],
+  "autoVerify": false
 }
