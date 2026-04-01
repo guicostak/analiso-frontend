@@ -225,7 +225,7 @@ export function SubscriptionTab() {
         })()}
 
         {/* Plan cards */}
-        <div className="mt-7 grid gap-4 xl:grid-cols-3 xl:gap-3">
+        <div className="mt-7 flex flex-col gap-4 lg:flex-row lg:gap-3">
           {plans.map((plan) => (
             <SubscriptionPlanCard
               key={plan.id}

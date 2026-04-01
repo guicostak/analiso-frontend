@@ -589,7 +589,7 @@ export function ProfilePage() {
               );
             })()}
 
-            <div className="mt-8 grid gap-5 xl:grid-cols-3 xl:gap-4">
+            <div className="mt-8 flex flex-col gap-5 lg:flex-row lg:gap-4">
               {plans.map((plan) => (
                 <SubscriptionPlanCard
                   key={plan.id}

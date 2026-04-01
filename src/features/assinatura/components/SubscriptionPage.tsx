@@ -41,7 +41,7 @@ export function SubscriptionPage() {
     }
   }, [token, refresh]);
 
-  const activePlanId = isActive ? subscription!.plan : null;
+  const activePlanId = isActive ? subscription!.plan : "free";
   const activeBillingCycle = isActive ? subscription!.billingCycle : null;
 
   return (
@@ -106,7 +106,7 @@ export function SubscriptionPage() {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-5 xl:grid-cols-4 xl:gap-4">
+            <div className="mt-8 flex flex-col gap-5 lg:flex-row lg:gap-4">
               {plans.map((plan) => (
                 <SubscriptionPlanCard
                   key={plan.id}

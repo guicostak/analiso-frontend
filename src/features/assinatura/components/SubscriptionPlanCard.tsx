@@ -30,15 +30,15 @@ export function SubscriptionPlanCard({
   loading = false,
 }: SubscriptionPlanCardProps) {
   const cycleKey = cycle === "Anual" ? "anual" : "mensal";
+  const isFree = plan.id === "free";
 
   // "Seu Plano" aparece quando é o plano ativo E o ciclo selecionado bate com o ciclo da assinatura
+  // Para plano free, não depende de ciclo
   const isCurrentPlanOnCycle =
-    currentPlanId === plan.id && currentBillingCycle === cycleKey;
+    currentPlanId === plan.id && (isFree || currentBillingCycle === cycleKey);
 
   // Identifica o plano ativo independente do ciclo selecionado
   const isCurrentPlan = currentPlanId === plan.id;
-
-  const isFree = plan.id === "free";
   const pricingEntry = plan.pricing.find(p => p.billingCycle === cycleKey);
   const price = pricingEntry?.price ?? 0;
 
@@ -48,13 +48,13 @@ export function SubscriptionPlanCard({
 
   return (
     <article
-      className={`relative flex h-full flex-col rounded-[22px] border bg-card p-5 shadow-[0_12px_28px_rgba(15,23,40,0.04)] ${
+      className={`relative flex min-w-0 flex-1 flex-col rounded-[22px] border bg-card p-5 shadow-[0_12px_28px_rgba(15,23,40,0.04)] ${
         isCurrentPlanOnCycle
           ? "border-brand shadow-[0_18px_38px_rgba(18,165,148,0.14)]"
           : plan.highlighted
             ? "border-brand/40 shadow-[0_18px_38px_rgba(18,165,148,0.08)]"
             : "border-border"
-      } min-h-[620px]`}
+      }`}
     >
       {/* Badge superior */}
       {isCurrentPlanOnCycle ? (
@@ -170,7 +170,7 @@ export function SubscriptionPlanCard({
       <div className="my-5 h-px bg-border" />
 
       {/* Features */}
-      <div className="space-y-3">
+      <div className="flex-1 space-y-3">
         <div className="space-y-3">
           {plan.features.map((feature) => (
             <div key={feature.label} className="flex items-start gap-2">
