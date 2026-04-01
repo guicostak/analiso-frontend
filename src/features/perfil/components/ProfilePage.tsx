@@ -19,11 +19,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/src/features/auth/AuthContext";
 import { AccountShell } from "./AccountShell";
-import { fetchPlans, fetchSubscription, subscribePlan, cancelSubscription } from "@/src/features/assinatura/services";
+import { fetchPlans, fetchSubscription, cancelSubscription, updateAutoRenew } from "@/src/features/assinatura/services";
 import type { SubscriptionData } from "@/src/features/assinatura/services";
 import { SubscriptionPlanCard } from "@/src/features/assinatura/components/SubscriptionPlanCard";
 import type { BillingCycle, SubscriptionPlan } from "@/src/features/assinatura/interfaces";
-import { Check, Calendar, RefreshCw } from "lucide-react";
+import { Check, Calendar, RefreshCw, Loader2 } from "lucide-react";
 
 /* ─── Tipos auxiliares ─── */
 type AccountField = {
@@ -210,16 +210,17 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (!token) return;
-    fetchSubscription(token).then(setSubscription).catch(() => {});
+    fetchSubscription(token).then((data) => {
+      setSubscription(data);
+      if (data?.status === "active") {
+        setCycle(data.billingCycle === "anual" ? "Anual" : "Mensal");
+      }
+    }).catch(() => {});
   }, [token]);
 
-  const handleSubscribe = async (planId: string) => {
-    if (!token) return;
-    setLoadingAction(planId);
-    try {
-      const data = await subscribePlan(token, planId, cycle.toLowerCase());
-      setSubscription(data);
-    } catch { /* ignore */ } finally { setLoadingAction(null); }
+  const handleSubscribe = (planId: string) => {
+    const billingCycle = cycle === "Anual" ? "anual" : "mensal";
+    window.location.href = `/assinatura/checkout?plan=${planId}&cycle=${billingCycle}`;
   };
 
   const handleCancel = async () => {
@@ -231,7 +232,17 @@ export function ProfilePage() {
     } catch { /* ignore */ } finally { setLoadingAction(null); }
   };
 
+  const handleToggleAutoRenew = async () => {
+    if (!token || !subscription) return;
+    setLoadingAction("auto-renew");
+    try {
+      const data = await updateAutoRenew(token, !subscription.autoRenew);
+      setSubscription(data);
+    } catch { /* ignore */ } finally { setLoadingAction(null); }
+  };
+
   const activePlanId = subscription?.status === "active" ? subscription.plan : null;
+  const activeBillingCycle = subscription?.status === "active" ? subscription.billingCycle : null;
   const activePlan = activePlanId ? plans.find(p => p.id === activePlanId) : null;
 
   return (
@@ -471,49 +482,108 @@ export function ProfilePage() {
             {activePlan && subscription?.status === "active" && (() => {
               const pricingEntry = activePlan.pricing.find(p => p.billingCycle === subscription.billingCycle);
               const price = pricingEntry?.price ?? 0;
-              const period = subscription.billingCycle === "anual" ? "/ano" : "/mês";
+              const displayPrice = subscription.billingCycle === "anual" ? Math.round(price / 12) : price;
               const renewDate = subscription.renewsAt
                 ? new Date(subscription.renewsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
                 : null;
               const startDate = new Date(subscription.startedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
               return (
-                <div className="mt-7 rounded-[18px] border border-brand/30 bg-brand-surface/40 p-5 shadow-[0_12px_28px_rgba(18,165,148,0.08)]">
+                <div className="mt-7 rounded-[20px] border border-brand/25 bg-brand-surface/30 p-6 shadow-[0_12px_28px_rgba(18,165,148,0.06)]">
+                  {/* Header */}
                   <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-brand text-white shadow-[0_8px_18px_rgba(18,165,148,0.22)]">
+                    <div className="flex items-center gap-3.5">
+                      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-brand text-white shadow-[0_8px_18px_rgba(18,165,148,0.22)]">
                         <Check className="h-5 w-5" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-[15px] font-semibold text-foreground">Plano {activePlan.name}</h3>
-                          <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">Ativo</span>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand">
+                          Meu Plano
+                        </p>
+                        <div className="mt-0.5 flex items-center gap-2">
+                          <h3 className="text-[16px] font-semibold text-foreground">{activePlan.name}</h3>
+                          <span className="rounded-full bg-brand/15 px-2.5 py-0.5 text-[10px] font-semibold text-brand">Ativo</span>
                         </div>
-                        <p className="mt-0.5 text-[12px] text-muted-foreground">{formatPriceCents(price)} {period}</p>
+                        <p className="mt-0.5 text-[13px] text-muted-foreground">
+                          {formatPriceCents(displayPrice)} /mês
+                          {subscription.billingCycle === "anual" && (
+                            <span className="ml-1 text-muted-foreground/60">
+                              (total anual: {formatPriceCents(price)})
+                            </span>
+                          )}
+                        </p>
                       </div>
                     </div>
                     <button
                       onClick={handleCancel}
                       disabled={loadingAction === "cancel"}
-                      className="rounded-[10px] border border-red-200 bg-red-50 px-3.5 py-2 text-[11px] font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                      className="rounded-[11px] border border-red-200 bg-red-50 px-4 py-2 text-[11px] font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-60 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
                     >
                       {loadingAction === "cancel" ? "Cancelando…" : "Cancelar assinatura"}
                     </button>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-5 border-t border-brand/15 pt-4">
-                    <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                      <CreditCard className="h-3.5 w-3.5 text-brand" />
-                      <span>Ciclo: <span className="font-medium text-foreground">{subscription.billingCycle === "anual" ? "Anual" : "Mensal"}</span></span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5 text-brand" />
-                      <span>Início: <span className="font-medium text-foreground">{startDate}</span></span>
-                    </div>
-                    {renewDate && (
-                      <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                        <RefreshCw className="h-3.5 w-3.5 text-brand" />
-                        <span>Renovação: <span className="font-medium text-foreground">{renewDate}</span></span>
+
+                  {/* Separador */}
+                  <div className="my-5 h-px bg-brand/15" />
+
+                  {/* Grid 2x2 de detalhes */}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {/* Ciclo */}
+                    <div className="rounded-[14px] border border-border/60 bg-card p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CreditCard className="h-3.5 w-3.5 text-brand" />
+                        <span className="text-[11px] font-medium">Ciclo</span>
                       </div>
-                    )}
+                      <p className="mt-1.5 text-[14px] font-semibold text-foreground">
+                        {subscription.billingCycle === "anual" ? "Anual" : "Mensal"}
+                      </p>
+                    </div>
+
+                    {/* Início */}
+                    <div className="rounded-[14px] border border-border/60 bg-card p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5 text-brand" />
+                        <span className="text-[11px] font-medium">Começou a assinar em</span>
+                      </div>
+                      <p className="mt-1.5 text-[14px] font-semibold text-foreground">{startDate}</p>
+                    </div>
+
+                    {/* Renovação */}
+                    <div className="rounded-[14px] border border-border/60 bg-card p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <RefreshCw className="h-3.5 w-3.5 text-brand" />
+                        <span className="text-[11px] font-medium">Renova em</span>
+                      </div>
+                      <p className="mt-1.5 text-[14px] font-semibold text-foreground">
+                        {renewDate ?? "—"}
+                      </p>
+                    </div>
+
+                    {/* Auto-renew */}
+                    <div className="rounded-[14px] border border-border/60 bg-card p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <RefreshCw className="h-3.5 w-3.5 text-brand" />
+                        <span className="text-[11px] font-medium">Renovação automática</span>
+                      </div>
+                      <div className="mt-2.5">
+                        <button
+                          onClick={handleToggleAutoRenew}
+                          disabled={loadingAction === "auto-renew"}
+                          className={`relative flex h-6 w-10 items-center rounded-full p-1 transition ${
+                            subscription.autoRenew ? "bg-brand" : "bg-muted-foreground/30"
+                          }`}
+                        >
+                          {loadingAction === "auto-renew" ? (
+                            <Loader2 className="mx-auto h-3.5 w-3.5 animate-spin text-white" />
+                          ) : (
+                            <div
+                              className={`h-4 w-4 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.12)] transition-transform ${
+                                subscription.autoRenew ? "translate-x-4" : "translate-x-0"
+                              }`}
+                            />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
@@ -526,6 +596,7 @@ export function ProfilePage() {
                   plan={plan}
                   cycle={cycle}
                   currentPlanId={activePlanId}
+                  currentBillingCycle={activeBillingCycle}
                   onSubscribe={handleSubscribe}
                   onCancel={handleCancel}
                   loading={

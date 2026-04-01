@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, HelpCircle, Loader2, Sparkles, X } from "lucide-react";
+import { Check, Loader2, Sparkles, X } from "lucide-react";
 import type { BillingCycle, SubscriptionPlan } from "../interfaces";
 
 interface SubscriptionPlanCardProps {
@@ -8,6 +8,8 @@ interface SubscriptionPlanCardProps {
   cycle: BillingCycle;
   /** ID do plano atualmente ativo do usuário (ex: "premium") */
   currentPlanId?: string | null;
+  /** Ciclo de cobrança da assinatura ativa do usuário ("mensal" | "anual") */
+  currentBillingCycle?: string | null;
   onSubscribe?: (planId: string) => void;
   onCancel?: () => void;
   loading?: boolean;
@@ -22,20 +24,32 @@ export function SubscriptionPlanCard({
   plan,
   cycle,
   currentPlanId,
+  currentBillingCycle,
   onSubscribe,
   onCancel,
   loading = false,
 }: SubscriptionPlanCardProps) {
-  const isCurrentPlan = currentPlanId === plan.id;
   const cycleKey = cycle === "Anual" ? "anual" : "mensal";
+
+  // "Seu Plano" aparece quando é o plano ativo E o ciclo selecionado bate com o ciclo da assinatura
+  const isCurrentPlanOnCycle =
+    currentPlanId === plan.id && currentBillingCycle === cycleKey;
+
+  // Identifica o plano ativo independente do ciclo selecionado
+  const isCurrentPlan = currentPlanId === plan.id;
+
+  const isFree = plan.id === "free";
   const pricingEntry = plan.pricing.find(p => p.billingCycle === cycleKey);
   const price = pricingEntry?.price ?? 0;
-  const period = cycle === "Anual" ? "/ por ano" : "/ por mês";
+
+  // Para anual: mostra o valor mensal equivalente (preço/12) como destaque
+  const displayPrice = cycle === "Anual" ? Math.round(price / 12) : price;
+  const period = cycle === "Anual" ? "/ por mês" : "/ por mês";
 
   return (
     <article
       className={`relative flex h-full flex-col rounded-[22px] border bg-card p-5 shadow-[0_12px_28px_rgba(15,23,40,0.04)] ${
-        isCurrentPlan
+        isCurrentPlanOnCycle
           ? "border-brand shadow-[0_18px_38px_rgba(18,165,148,0.14)]"
           : plan.highlighted
             ? "border-brand/40 shadow-[0_18px_38px_rgba(18,165,148,0.08)]"
@@ -43,7 +57,7 @@ export function SubscriptionPlanCard({
       } min-h-[620px]`}
     >
       {/* Badge superior */}
-      {isCurrentPlan ? (
+      {isCurrentPlanOnCycle ? (
         <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-[10px] font-semibold text-white shadow-[0_10px_24px_rgba(18,165,148,0.26)]">
             Seu Plano
@@ -62,15 +76,23 @@ export function SubscriptionPlanCard({
       {/* Preço */}
       <div>
         <p className="text-[13px] font-medium text-muted-foreground">{plan.name}</p>
-        {cycle === "Anual" && (
-          <p className="mt-2.5 text-[14px] font-semibold text-foreground">
-            12x de {formatPrice(Math.round(price / 12))}
-          </p>
+        {isFree ? (
+          <div className="mt-1 flex items-end gap-1.5">
+            <p className="text-[26px] font-semibold tracking-[-0.04em] text-foreground">Grátis</p>
+          </div>
+        ) : (
+          <>
+            {cycle === "Anual" && (
+              <p className="mt-2.5 text-[12px] font-medium text-muted-foreground">
+                Total anual: {formatPrice(price)}
+              </p>
+            )}
+            <div className="mt-1 flex items-end gap-1.5">
+              <p className="text-[26px] font-semibold tracking-[-0.04em] text-foreground">{formatPrice(displayPrice)}</p>
+              <p className="pb-0.5 text-[13px] font-medium text-muted-foreground">{period}</p>
+            </div>
+          </>
         )}
-        <div className="mt-1 flex items-end gap-1.5">
-          <p className="text-[26px] font-semibold tracking-[-0.04em] text-foreground">{formatPrice(price)}</p>
-          <p className="pb-0.5 text-[13px] font-medium text-muted-foreground">{period}</p>
-        </div>
       </div>
 
       {/* Workers IA */}
@@ -87,12 +109,25 @@ export function SubscriptionPlanCard({
           <div className="flex h-6 w-10 items-center rounded-full bg-muted p-1">
             <div className="h-4 w-4 rounded-full bg-card shadow-[0_2px_6px_rgba(0,0,0,0.08)]" />
           </div>
-          <HelpCircle className="h-3.5 w-3.5" />
         </div>
       </div>
 
       {/* Botão principal */}
-      {isCurrentPlan ? (
+      {isFree && isCurrentPlan ? (
+        <button
+          disabled
+          className="mt-6 h-10 rounded-[13px] border border-brand bg-brand-surface text-[13px] font-semibold text-brand"
+        >
+          Plano atual
+        </button>
+      ) : isFree ? (
+        <button
+          disabled
+          className="mt-6 h-10 rounded-[13px] border border-border bg-muted text-[13px] font-semibold text-muted-foreground"
+        >
+          Plano gratuito
+        </button>
+      ) : isCurrentPlanOnCycle ? (
         <button
           onClick={onCancel}
           disabled={loading}
@@ -128,7 +163,9 @@ export function SubscriptionPlanCard({
         </button>
       )}
 
-      <p className="mt-4 text-center text-[11px] text-muted-foreground">Cancele quando quiser</p>
+      <p className="mt-4 text-center text-[11px] text-muted-foreground">
+        {isFree ? "Sem compromisso" : "Cancele quando quiser"}
+      </p>
 
       <div className="my-5 h-px bg-border" />
 
@@ -136,18 +173,15 @@ export function SubscriptionPlanCard({
       <div className="space-y-3">
         <div className="space-y-3">
           {plan.features.map((feature) => (
-            <div key={feature.label} className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <span className="mt-0.5 shrink-0">
-                  {feature.included ? (
-                    <Check className="h-4 w-4 text-brand" />
-                  ) : (
-                    <X className="h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </span>
-                <span className="text-[12px] leading-5 text-foreground">{feature.label}</span>
-              </div>
-              <HelpCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
+            <div key={feature.label} className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0">
+                {feature.included ? (
+                  <Check className="h-4 w-4 text-brand" />
+                ) : (
+                  <X className="h-4 w-4 text-muted-foreground/50" />
+                )}
+              </span>
+              <span className="text-[12px] leading-5 text-foreground">{feature.label}</span>
             </div>
           ))}
         </div>
