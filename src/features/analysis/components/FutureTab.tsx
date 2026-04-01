@@ -9,7 +9,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber } from '../utils/formatters';
-import { SectionCard, DimensionIntroCard, DimensionScoreCard, CheckList, GrowthBarChart, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
 
 const EARNINGS_CHART_SERIES: { key: string; color: string; hex: string }[] = [
   { key: 'Receita',                                              color: 'blue',   hex: '#3b82f6' },
@@ -653,7 +653,7 @@ function FutureROESection({ data }: { data: AnalysisData }) {
 }
 
 function FutureReadingCard({ data }: { data: AnalysisData }) {
-  const dim = data.snowflake.find(d => d.dimension === 'future')!;
+  const dim = data.snowflake?.find(d => d.dimension === 'future') ?? { checks: [], score: 0, summary: '', displayName: 'Crescimento Futuro', dimension: 'future', max: 6 };
   const g   = data.growth;
   const eg  = g.earningsGrowthRate ?? 0;
   const meg = g.marketEarningsGrowth ?? 0;
@@ -876,8 +876,10 @@ export function FutureTab({ data }: { data: AnalysisData }) {
   const g = data.growth;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  // Null-safe number formatter for API fields that may be null/undefined
-  const nf = (n: number | null | undefined, d = 1) => (n ?? 0).toFixed(d);
+  // Null-safe number formatter: returns "—" for null/undefined, else formatted number
+  const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
+  // Null-safe percentage: returns "—" for null, else "X.X%"
+  const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
   return (
     <div className="space-y-6">
@@ -895,14 +897,14 @@ export function FutureTab({ data }: { data: AnalysisData }) {
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-blue-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(g.earningsGrowthRate)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(g.earningsGrowthRate)}</p>
                 <p className="text-xs text-neutral-400">Lucro projetado (% ao ano)</p>
               </div>
             </div>
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-blue-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(g.revenueGrowthRate)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(g.revenueGrowthRate)}</p>
                 <p className="text-xs text-neutral-400">Receita projetada (% ao ano)</p>
               </div>
             </div>
@@ -910,13 +912,13 @@ export function FutureTab({ data }: { data: AnalysisData }) {
           <table className="w-full text-xs">
             <tbody>
               {[
-                { label: 'Média do mercado (lucro)',              value: `${nf(g.marketEarningsGrowth)}%` },
-                { label: 'Média do mercado (receita)',           value: `${nf(g.marketRevenueGrowth)}%` },
-                { label: 'Retorno sobre patrimônio esperado',    value: `${nf(g.futureROE)}%` },
-                { label: 'Retorno do setor (comparação)',        value: `${nf(g.futureROEIndustry)}%` },
-                { label: 'Lucro por ação projetado (% ao ano)',  value: `${nf(g.epsGrowthRate)}%` },
-                { label: 'Cobertura de analistas',               value: g.analystCoverage },
-                { label: 'Última atualização',                   value: g.lastUpdated },
+                { label: 'Média do mercado (lucro)',              value: nfp(g.marketEarningsGrowth) },
+                { label: 'Média do mercado (receita)',           value: nfp(g.marketRevenueGrowth) },
+                { label: 'Retorno sobre patrimônio esperado',    value: nfp(g.futureROE) },
+                { label: 'Retorno do setor (comparação)',        value: nfp(g.futureROEIndustry) },
+                { label: 'Lucro por ação projetado (% ao ano)',  value: nfp(g.epsGrowthRate) },
+                { label: 'Cobertura de analistas',               value: g.analystCoverage ?? '—' },
+                { label: 'Última atualização',                   value: g.lastUpdated ?? '—' },
               ].map((row) => (
                 <tr key={row.label} className="border-t border-neutral-100">
                   <td className="py-2 text-neutral-500 pr-4">{row.label}</td>

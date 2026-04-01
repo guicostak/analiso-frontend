@@ -2,19 +2,22 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, AlertTriangle, MoreHorizontal } from 'lucide-react';
-import Link from 'next/link';
+import { AlertTriangle, MoreHorizontal } from 'lucide-react';
 import { fetchAnalysisData } from '../services';
 import { TABS } from '../constants/colors';
 import { useAnalysis } from '../hooks/useAnalysis';
 import { useAnalysisNav } from '../hooks/useAnalysisNav';
-import { FavoriteButton, pillarStatus } from './AnalysisShared';
+import { FavoriteButton } from './AnalysisShared';
+import { Sidebar } from '@/src/components/layout/Sidebar';
+import { AppTopBar } from '@/src/components/layout/AppTopBar';
+import { MainContent } from '@/src/components/layout/MainContent';
 import { OverviewTab } from './OverviewTab';
 import { ValueTab } from './ValueTab';
 import { FutureTab } from './FutureTab';
 import { PastTab } from './PastTab';
 import { HealthTab } from './HealthTab';
 import { DividendTab } from './DividendTab';
+import { SourcesTab } from './SourcesTab';
 
 // ─── Section Divider ─────────────────────────────────────────────────────────
 
@@ -39,7 +42,7 @@ export function AnalysisPage() {
   const { data, loading, error, setData, setLoading, setError } = useAnalysis(ticker);
 
   // ── Active section tracking + scroll navigation ───────────────────────
-  const { activeSection, companyCardPassed, sidebarMarginTop, companyCardRef, sectionRefs, scrollToSection } = useAnalysisNav(!!data);
+  const { activeSection, companyCardPassed, sidebarMarginTop, companyCardRef, navAlignRef, sectionRefs, scrollToSection } = useAnalysisNav(!!data);
 
   // ── Guard: loading or error before data arrives ───────────────────────
   if (loading || !data) {
@@ -72,28 +75,13 @@ export function AnalysisPage() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* ── Top Bar ─────────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-[1400px] mx-auto px-4 py-3">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-neutral-700 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs">
-                {ticker.slice(0, 2)}
-              </div>
-              <div>
-                <div className="font-semibold text-foreground text-sm">{data.company.name}</div>
-                <div className="text-xs text-muted-foreground">{data.company.exchange}:{ticker}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Sidebar currentPage="analysis" />
+      <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
+
+      <MainContent className="px-4 pb-8 pt-20 xl:px-6">
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
-      <div className="max-w-[1400px] mx-auto px-4 py-6 flex gap-6 items-start">
+      <div className="max-w-[1400px] mx-auto py-6 flex gap-6 items-start">
 
         {/* Left Sidebar — sticky nav */}
         <aside
@@ -139,27 +127,17 @@ export function AnalysisPage() {
           <nav className="flex flex-col">
             {TABS.map(tab => {
               const isActive = activeSection === tab.id;
-              const dim = tab.id !== 'overview'
-                ? data.snowflake.find(d => d.dimension === tab.id)
-                : null;
-              const status = dim ? pillarStatus(dim.score) : null;
               return (
                 <button
                   key={tab.id}
                   onClick={() => scrollToSection(tab.id)}
-                  className={`flex items-center justify-between pl-4 pr-3 py-2.5 text-sm font-medium transition-all text-left border-l-2 ${
+                  className={`flex items-center pl-4 pr-3 py-2.5 text-sm font-medium transition-all text-left border-l-2 ${
                     isActive
                       ? 'border-brand text-foreground bg-brand-surface/60'
                       : 'border-transparent text-muted-foreground hover:text-neutral-800 hover:bg-hover'
                   }`}
                 >
                   <span className="truncate">{tab.label}</span>
-                  {status && (
-                    <span
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${status.dot}`}
-                      title={status.label}
-                    />
-                  )}
                 </button>
               );
             })}
@@ -173,7 +151,7 @@ export function AnalysisPage() {
             ref={el => { sectionRefs.current['overview'] = el; }}
             id="section-overview"
           >
-            <OverviewTab data={data} onSelectTab={scrollToSection} companyCardRef={companyCardRef} />
+            <OverviewTab data={data} onSelectTab={scrollToSection} companyCardRef={companyCardRef} navAlignRef={navAlignRef} />
           </section>
 
           <section
@@ -216,8 +194,18 @@ export function AnalysisPage() {
             <DividendTab data={data} />
           </section>
 
+          <section
+            ref={el => { sectionRefs.current['sources'] = el; }}
+            id="section-sources"
+          >
+            <SectionDivider label="Fontes de dados" />
+            <SourcesTab data={data} />
+          </section>
+
         </div>
       </div>
+
+      </MainContent>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber } from '../utils/formatters';
-import { SectionCard, DimensionIntroCard, DimensionScoreCard, CheckList, GrowthBarChart, GaugeCard, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GaugeCard, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
 import { SankeySection } from './SankeySection';
 
 const HISTORICO_CHART_SERIES: { key: string; color: string; hex: string }[] = [
@@ -806,7 +806,8 @@ export function PastTab({ data }: { data: AnalysisData }) {
   const p = data.pastPerformance;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const nf = (n: number | null | undefined, d = 1) => (n ?? 0).toFixed(d);
+  const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
+  const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
   return (
     <div className="space-y-6">
@@ -824,14 +825,14 @@ export function PastTab({ data }: { data: AnalysisData }) {
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(p.earningsGrowthRate, 2)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(p.earningsGrowthRate, 2)}</p>
                 <p className="text-xs text-neutral-400">Crescimento do lucro (% ao ano)</p>
               </div>
             </div>
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(p.epsGrowthRate, 2)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(p.epsGrowthRate, 2)}</p>
                 <p className="text-xs text-neutral-400">Lucro por ação (% ao ano)</p>
               </div>
             </div>
@@ -839,11 +840,11 @@ export function PastTab({ data }: { data: AnalysisData }) {
           <table className="w-full text-xs">
             <tbody>
               {[
-                { label: 'Média do setor', value: `${nf(p.industryGrowth)}%` },
-                { label: 'Crescimento da receita (% ao ano)', value: `${nf(p.revenueGrowthRate)}%` },
-                { label: 'Retorno sobre patrimônio (ROE)', value: `${nf(p.currentROE)}%` },
-                { label: 'Margem líquida', value: `${nf(p.netMargin)}%` },
-                { label: 'Próximo balanço', value: p.nextEarningsDate },
+                { label: 'Média do setor', value: nfp(p.industryGrowth) },
+                { label: 'Crescimento da receita (% ao ano)', value: nfp(p.revenueGrowthRate) },
+                { label: 'Retorno sobre patrimônio (ROE)', value: nfp(p.currentROE) },
+                { label: 'Margem líquida', value: nfp(p.netMargin) },
+                { label: 'Próximo balanço', value: p.nextEarningsDate ?? '—' },
               ].map((row) => (
                 <tr key={row.label} className="border-t border-neutral-100">
                   <td className="py-2 text-neutral-500 pr-4">{row.label}</td>

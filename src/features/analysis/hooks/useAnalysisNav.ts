@@ -8,6 +8,7 @@ export function useAnalysisNav(hasData: boolean) {
   const [companyCardPassed, setCompanyCardPassed] = useState(false);
   const [sidebarMarginTop, setSidebarMarginTop] = useState(0);
   const companyCardRef = useRef<HTMLDivElement | null>(null);
+  const navAlignRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>(
     Object.fromEntries(SECTION_IDS.map(id => [id, null]))
   );
@@ -24,14 +25,15 @@ export function useAnalysisNav(hasData: boolean) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasData]);
 
-  // Sidebar margin scroll effect
+  // Sidebar margin scroll effect — alinha com navAlignRef (Resumo da análise)
   useEffect(() => {
     const updateMargin = () => {
-      const cardEl = companyCardRef.current;
-      if (!cardEl) { setSidebarMarginTop(0); return; }
-      const cardH = cardEl.offsetHeight;
+      const alignEl = navAlignRef.current;
+      if (!alignEl) { setSidebarMarginTop(0); return; }
+      // offsetTop relativo ao pai do aside (o flex container)
       const scrollY = window.scrollY;
-      const offset = Math.max(0, cardH - scrollY);
+      const alignTop = alignEl.getBoundingClientRect().top + scrollY - 80; // 80 = AppTopBar height
+      const offset = Math.max(0, alignTop - scrollY);
       setSidebarMarginTop(offset);
     };
     updateMargin();
@@ -68,5 +70,5 @@ export function useAnalysisNav(hasData: boolean) {
     window.scrollTo({ top, behavior: 'smooth' });
   }, []);
 
-  return { activeSection, companyCardPassed, sidebarMarginTop, companyCardRef, sectionRefs, scrollToSection };
+  return { activeSection, companyCardPassed, sidebarMarginTop, companyCardRef, navAlignRef, sectionRefs, scrollToSection };
 }

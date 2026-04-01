@@ -539,3 +539,72 @@ export function GrowthBarChart({ title, bars }: {
     </div>
   );
 }
+
+// ─── SWSDonut ─────────────────────────────────────────────────────────────────
+
+export function SWSDonut({
+  value, total, sliceColor, centerLabel, centerValue,
+  sliceLabel, sliceDisplayValue, size = 180,
+}: {
+  value: number; total: number; sliceColor: string;
+  centerLabel: string; centerValue: string;
+  sliceLabel?: string; sliceDisplayValue?: string; size?: number;
+}) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const scale = size / 200;
+  const r  = 74 * scale;
+  const sw = 36 * scale;
+  const outerR = 92 * scale;
+
+  const circumference = 2 * Math.PI * r;
+  const pct  = Math.min(Math.max(value / total, 0), 1);
+  const dash = pct * circumference;
+
+  const midAngleDeg = -90 + (pct * 360) / 2;
+  const midAngleRad = (midAngleDeg * Math.PI) / 180;
+  const lineLen = 28 * scale;
+  const lx1 = cx + outerR * Math.cos(midAngleRad);
+  const ly1 = cy + outerR * Math.sin(midAngleRad);
+  const lx2 = cx + (outerR + lineLen) * Math.cos(midAngleRad);
+  const ly2 = cy + (outerR + lineLen) * Math.sin(midAngleRad);
+  const isRight = lx2 >= cx;
+  const textX = lx2 + (isRight ? 6 : -6);
+  const anchor = isRight ? 'start' : 'end';
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} overflow="visible">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#3E4855" strokeWidth={sw} />
+      {pct > 0 && (
+        <circle
+          cx={cx} cy={cy} r={r}
+          fill="none" stroke={sliceColor}
+          strokeWidth={sw}
+          strokeDasharray={`${dash} ${circumference}`}
+          strokeLinecap="butt"
+          transform={`rotate(-90 ${cx} ${cy})`}
+        />
+      )}
+      {pct > 0 && sliceLabel && (
+        <>
+          <line x1={lx1} y1={ly1} x2={lx2} y2={ly2} stroke={sliceColor} strokeWidth={1} />
+          <circle cx={lx2} cy={ly2} r={2.5 * scale} fill={sliceColor} />
+          <text x={textX} y={ly2 - 8 * scale} textAnchor={anchor}
+            fontSize={16 * scale} fontWeight="600" fill="#94a3b8" fontFamily="Inter,sans-serif">
+            {sliceLabel}
+          </text>
+          <text x={textX} y={ly2 + 10 * scale} textAnchor={anchor}
+            fontSize={13 * scale} fill="#475569" fontFamily="Inter,sans-serif">
+            {sliceDisplayValue}
+          </text>
+        </>
+      )}
+      <text x={cx} y={cy - 5} textAnchor="middle" fontSize={10 * scale + 2} fill="#94a3b8" fontFamily="Inter,sans-serif">
+        {centerLabel}
+      </text>
+      <text x={cx} y={cy + 13 * scale} textAnchor="middle" fontSize={12 * scale + 1} fontWeight="600" fill="#1e293b" fontFamily="Inter,sans-serif">
+        {centerValue}
+      </text>
+    </svg>
+  );
+}

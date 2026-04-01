@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber } from '../utils/formatters';
-import { SectionCard, DimensionIntroCard, DimensionScoreCard, CheckList } from './AnalysisShared';
+import { SectionCard, CheckList } from './AnalysisShared';
 
 function DividendHistorySection({ data }: { data: AnalysisData }) {
   const d = data.dividend;
@@ -839,7 +839,8 @@ export function DividendTab({ data }: { data: AnalysisData }) {
   const d = data.dividend;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const nf = (n: number | null | undefined, dec = 1) => (n ?? 0).toFixed(dec);
+  const nf  = (n: number | null | undefined, dec = 1) => n == null ? '—' : n.toFixed(dec);
+  const nfp = (n: number | null | undefined, dec = 1) => n == null ? '—' : `${n.toFixed(dec)}%`;
 
   return (
     <div className="space-y-6">
@@ -857,7 +858,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-violet-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nf(d.currentYield)}%</p>
+                <p className="text-lg font-bold text-neutral-900">{nfp(d.currentYield)}</p>
                 <p className="text-xs text-neutral-400">Rendimento de dividendos</p>
               </div>
             </div>

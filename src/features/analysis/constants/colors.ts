@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, DollarSign, TrendingUp, BarChart3, Shield } from 'lucide-react';
+import { Activity, DollarSign, TrendingUp, BarChart3, Shield, Database } from 'lucide-react';
 import type { AnalysisTab } from '../interfaces';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
@@ -39,6 +39,7 @@ export const TABS: { id: AnalysisTab; label: string; icon: React.ReactNode }[] =
   { id: 'past', label: 'Performance Passada', icon: React.createElement(BarChart3, { className: 'w-4 h-4' }) },
   { id: 'health', label: 'Saúde Financeira', icon: React.createElement(Shield, { className: 'w-4 h-4' }) },
   { id: 'dividend', label: 'Dividendos', icon: React.createElement(DollarSign, { className: 'w-4 h-4' }) },
+  { id: 'sources', label: 'Fontes de dados', icon: React.createElement(Database, { className: 'w-4 h-4' }) },
 ];
 
 // ─── Dimension intro texts ────────────────────────────────────────────────────
@@ -53,4 +54,4 @@ export const DIMENSION_INTRO: Record<string, string> = {
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 
-export const SECTION_IDS = ['overview', 'value', 'future', 'past', 'health', 'dividend'] as const;
+export const SECTION_IDS = ['overview', 'value', 'future', 'past', 'health', 'dividend', 'sources'] as const;

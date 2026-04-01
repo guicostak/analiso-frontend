@@ -467,4 +467,4 @@ export type AnalysisData = {
 
 // ─── Active tab ──────────────────────────────────────────────────────────────
 
-export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend';
+export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend' | 'sources';

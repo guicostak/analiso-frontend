@@ -12,7 +12,7 @@ import type {
 } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL } from '../utils/formatters';
-import { SectionCard, DimensionIntroCard, DimensionScoreCard, CheckList } from './AnalysisShared';
+import { SectionCard, CheckList, SWSDonut } from './AnalysisShared';
 
 function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   const myTicker = data.company.ticker;
@@ -1003,7 +1003,15 @@ function FairPEGauge({ data }: { data: AnalysisData }) {
 
 function ValuationScenariosChart({ data }: { data: AnalysisData }) {
   const cp  = data.valuation.currentPrice ?? 0;
-  const scn = [...data.priceScenarios].sort((a, b) => a.estimatedValue - b.estimatedValue);
+  const scn = [...(data.priceScenarios ?? [])].sort((a, b) => a.estimatedValue - b.estimatedValue);
+
+  if (scn.length < 3) {
+    return (
+      <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
+        Cenários de preço não disponíveis para esta empresa.
+      </div>
+    );
+  }
 
   const fmt    = (n: number | null | undefined, dec = 2) =>
     n == null ? '—' : n.toFixed(dec).replace('.', ',');
@@ -1405,7 +1413,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
 }
 
 function ValuationReadingCard({ data }: { data: AnalysisData }) {
-  const dim   = data.snowflake.find(d => d.dimension === 'value')!;
+  const dim   = data.snowflake?.find(d => d.dimension === 'value') ?? { checks: [], score: 0, summary: '', displayName: 'Valuation', dimension: 'value', max: 6 };
   const v     = data.valuation;
   const rv    = data.relativeValuation;
   const disc  = v.discountPercent ?? 0;
