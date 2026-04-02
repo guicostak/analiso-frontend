@@ -27,6 +27,21 @@ export function fmtBRL(n: number | null | undefined): string {
   return `${sign}R$ ${abs.toFixed(0)}`;
 }
 
+/**
+ * Formata uma string de data ISO (YYYY-MM-DD) para o padrão brasileiro DD/MM/YYYY.
+ * Strings que já estão em outro formato (ex: "Mar 2026") são retornadas sem alteração.
+ * Seguro contra problemas de timezone — não usa `new Date()` para dates without time.
+ */
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, year, month, day] = match;
+    return `${day}/${month}/${year}`;
+  }
+  return dateStr; // já formatado (ex: "Mar 2026") — retorna sem alterar
+}
+
 export function timeAgo(isoStr?: string): string {
   if (!isoStr) return '';
   const diff = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);

@@ -40,6 +40,7 @@ import { useCompare } from "../hooks/useCompare";
 import { pillarCopy, PILLARS } from "../services";
 import type { CompareTableRow, CompareTrend } from "../interfaces";
 import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
+import { formatDate } from '@/src/features/analysis/utils/formatters';
 import { AddCompanyModal } from "@/src/features/watchlist/components/AddCompanyModal";
 
 const TOKENS = {
@@ -1079,7 +1080,7 @@ export function ComparePage() {
                                   </div>
                                   <div className="rounded-[20px] border border-border bg-card p-4">
                                     <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                      <span className={chipClass}>{event.date}</span>
+                                      <span className={chipClass}>{formatDate(event.date)}</span>
                                       <span className={event.type === "Fato relevante" ? "rounded-full border border-warning-border bg-warning-surface px-3 py-1.5 text-[11px] font-medium text-warning-text" : chipClass}>{event.type}</span>
                                       <span className={chipClass}>{PILLAR_LABEL[event.impact]}</span>
                                       <span className={chipClass}>{event.ticker}</span>

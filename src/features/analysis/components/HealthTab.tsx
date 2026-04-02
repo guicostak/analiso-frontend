@@ -8,7 +8,7 @@ import {
 } from '@tremor/react';
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
-import { safeN, safeNbr, formatNumber, fmtBRL } from '../utils/formatters';
+import { safeN, safeNbr, formatNumber, fmtBRL, formatDate } from '../utils/formatters';
 import { SectionCard, CheckList, CriteriaIcon, AGFC_H, AGFC_MAX_BAR, AGFC_TOP_PAD } from './AnalysisShared';
 
 function BalanceBarChart({ title, bars }: {
@@ -372,13 +372,13 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
         {/* Headers */}
         <div className="flex mb-1 items-end">
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-700">Ativos</div>
-            <div className="text-[10px] text-neutral-400 mt-0.5">menos líquido → mais líquido</div>
+            <div className="text-[11px] font-semibold uppercase tracking-normal text-neutral-700">Ativos</div>
+            <div className="text-xs text-neutral-400 mt-0.5">menos líquido → mais líquido</div>
           </div>
           <div style={{ width: AXIS_W }} />
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-700">Passivo + Patrimônio Líquido</div>
-            <div className="text-[10px] text-neutral-400 mt-0.5">mais exigível → menos exigível</div>
+            <div className="text-[11px] font-semibold uppercase tracking-normal text-neutral-700">Passivo + Patrimônio Líquido</div>
+            <div className="text-xs text-neutral-400 mt-0.5">mais exigível → menos exigível</div>
           </div>
         </div>
 
@@ -417,13 +417,13 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
         {/* Legend */}
         <div className="mt-5 grid grid-cols-2 gap-x-10">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
+            <div className="text-[10px] font-semibold uppercase tracking-normal text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
               Ativos — por liquidez
             </div>
             {assetSegments.map(seg => <LegendRow key={seg.label} seg={seg} />)}
           </div>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
+            <div className="text-[10px] font-semibold uppercase tracking-normal text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
               Passivo + PL — por exigibilidade
             </div>
             {liabilitySegments.map(seg => <LegendRow key={seg.label} seg={seg} />)}
@@ -710,55 +710,29 @@ export function HealthTab({ data }: { data: AnalysisData }) {
           <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes de saúde financeira</h3>
           <div className="flex-1">
             <ul className="space-y-0">
-              {/* 2 itens completos */}
-              {data.healthUpdates.slice(0, 2).map((item) => {
+              {data.healthUpdates.slice(0, 5).map((item) => {
                 const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                 const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                 return (
                   <li key={item.id} className="flex items-start gap-3 py-2.5 border-b border-neutral-50">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                       {item.sentiment === 'good' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
+                        <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
                       )}
                       {item.sentiment === 'bad' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M10 3.5a.5.5 0 011 0v1.519A6.501 6.501 0 0116.981 11H18.5a.5.5 0 010 1h-1.519a6.468 6.468 0 01-1.308 3.436L20 19.37V17a.5.5 0 011 0v4h-4a.5.5 0 010-1h2.207l-4.2-3.817A6.478 6.478 0 0111 17.98V19.5a.5.5 0 01-1 0v-1.519A6.501 6.501 0 014.019 12H2.5a.5.5 0 010-1h1.519A6.501 6.501 0 0110 5.019V3.5z" /></svg>
+                        <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M10 3.5a.5.5 0 011 0v1.519A6.501 6.501 0 0116.981 11H18.5a.5.5 0 010 1h-1.519a6.468 6.468 0 01-1.308 3.436L20 19.37V17a.5.5 0 011 0v4h-4a.5.5 0 010-1h2.207l-4.2-3.817A6.478 6.478 0 0111 17.98V19.5a.5.5 0 01-1 0v-1.519A6.501 6.501 0 014.019 12H2.5a.5.5 0 010-1h1.519A6.501 6.501 0 0110 5.019V3.5z" /></svg>
                       )}
                       {item.sentiment === 'neutral' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7h2V7h-2v8zm0 4h2v-2h-2v2z" /></svg>
+                        <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7h2V7h-2v8zm0 4h2v-2h-2v2z" /></svg>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-neutral-800 leading-4 line-clamp-2">{item.title}</p>
-                      <p className="text-[10px] text-neutral-400 mt-0.5">{item.date}</p>
+                      <p className="text-sm text-neutral-800 leading-5 line-clamp-2">{item.title}</p>
+                      <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
                     </div>
                   </li>
                 );
               })}
-              {/* 3º item cortado */}
-              {data.healthUpdates[2] && (() => {
-                const item = data.healthUpdates[2];
-                const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
-                const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
-                return (
-                  <li className="relative flex items-start gap-3 py-2.5 overflow-hidden" style={{ maxHeight: '2rem' }}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
-                      {item.sentiment === 'bad' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M10 3.5a.5.5 0 011 0v1.519A6.501 6.501 0 0116.981 11H18.5a.5.5 0 010 1h-1.519a6.468 6.468 0 01-1.308 3.436L20 19.37V17a.5.5 0 011 0v4h-4a.5.5 0 010-1h2.207l-4.2-3.817A6.478 6.478 0 0111 17.98V19.5a.5.5 0 01-1 0v-1.519A6.501 6.501 0 014.019 12H2.5a.5.5 0 010-1h1.519A6.501 6.501 0 0110 5.019V3.5z" /></svg>
-                      )}
-                      {item.sentiment === 'good' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
-                      )}
-                      {item.sentiment === 'neutral' && (
-                        <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7h2V7h-2v8zm0 4h2v-2h-2v2z" /></svg>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-neutral-800 leading-5 line-clamp-1">{item.title}</p>
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-                  </li>
-                );
-              })()}
             </ul>
           </div>
           <button
@@ -797,20 +771,20 @@ export function HealthTab({ data }: { data: AnalysisData }) {
                   const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                   return (
                     <li key={item.id} className="flex items-start gap-3 py-3 border-b border-neutral-50 last:border-0">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                         {item.sentiment === 'good' && (
-                          <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
+                          <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
                         )}
                         {item.sentiment === 'bad' && (
-                          <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M10 3.5a.5.5 0 011 0v1.519A6.501 6.501 0 0116.981 11H18.5a.5.5 0 010 1h-1.519a6.468 6.468 0 01-1.308 3.436L20 19.37V17a.5.5 0 011 0v4h-4a.5.5 0 010-1h2.207l-4.2-3.817A6.478 6.478 0 0111 17.98V19.5a.5.5 0 01-1 0v-1.519A6.501 6.501 0 014.019 12H2.5a.5.5 0 010-1h1.519A6.501 6.501 0 0110 5.019V3.5z" /></svg>
+                          <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M10 3.5a.5.5 0 011 0v1.519A6.501 6.501 0 0116.981 11H18.5a.5.5 0 010 1h-1.519a6.468 6.468 0 01-1.308 3.436L20 19.37V17a.5.5 0 011 0v4h-4a.5.5 0 010-1h2.207l-4.2-3.817A6.478 6.478 0 0111 17.98V19.5a.5.5 0 01-1 0v-1.519A6.501 6.501 0 014.019 12H2.5a.5.5 0 010-1h1.519A6.501 6.501 0 0110 5.019V3.5z" /></svg>
                         )}
                         {item.sentiment === 'neutral' && (
-                          <svg className={`w-3.5 h-3.5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7h2V7h-2v8zm0 4h2v-2h-2v2z" /></svg>
+                          <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7h2V7h-2v8zm0 4h2v-2h-2v2z" /></svg>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-neutral-800 leading-5">{item.title}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{item.date}</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
                       </div>
                     </li>
                   );

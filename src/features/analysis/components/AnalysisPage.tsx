@@ -24,7 +24,7 @@ import { SourcesTab } from './SourcesTab';
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-4 mb-6">
-      <h2 className="text-[13px] font-semibold text-neutral-400 uppercase tracking-widest whitespace-nowrap">
+      <h2 className="text-[13px] font-semibold text-neutral-400 uppercase tracking-normal whitespace-nowrap">
         {label}
       </h2>
       <div className="flex-1 h-px bg-neutral-200" />
@@ -88,15 +88,9 @@ export function AnalysisPage() {
           className="w-48 flex-shrink-0 sticky top-[64px] self-start"
           style={{ marginTop: sidebarMarginTop }}
         >
-          {/* Mini company header — aparece ao scrollar */}
+          {/* Mini company header — aparece ao scrollar além do overview card */}
           <div
-            className="transition-all duration-300"
-            style={{
-              opacity: companyCardPassed ? 1 : 0,
-              transform: companyCardPassed ? 'translateY(0)' : 'translateY(-8px)',
-              pointerEvents: companyCardPassed ? 'auto' : 'none',
-              visibility: companyCardPassed ? 'visible' : 'hidden',
-            }}
+            className={`transition-all duration-300 overflow-hidden ${companyCardPassed ? 'opacity-100 max-h-40' : 'opacity-0 max-h-0 pointer-events-none'}`}
           >
             <div className="px-4 pt-4 pb-3 border-b border-border mb-1">
               {/* Logo + nome */}
@@ -133,7 +127,7 @@ export function AnalysisPage() {
                   onClick={() => scrollToSection(tab.id)}
                   className={`flex items-center pl-4 pr-3 py-2.5 text-sm font-medium transition-all text-left border-l-2 ${
                     isActive
-                      ? 'border-brand text-foreground bg-brand-surface/60'
+                      ? 'border-brand text-brand-text font-semibold bg-brand-surface'
                       : 'border-transparent text-muted-foreground hover:text-neutral-800 hover:bg-hover'
                   }`}
                 >

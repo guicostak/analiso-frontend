@@ -67,6 +67,7 @@ export type GrowthForecast = {
     analysts: number;
     confirmedDate: string;
     type: 'historical' | 'forecast';
+    forecastSource?: 'analyst' | 'sgr'; // 'sgr' = projeção modelo sem cobertura de analistas
   }[];
   forecastEndDate: string;
   revenueAtForecast: number;
@@ -214,6 +215,7 @@ export type CompanyInfo = {
   ceo?: string;
   website?: string;
   longDescription?: string;
+  summaryText?: string;
 };
 
 // ─── Price Scenarios (Backend: price_scenarios + price_ranges) ───────────────

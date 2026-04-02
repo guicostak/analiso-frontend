@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+import { formatDate } from '@/src/features/analysis/utils/formatters';
 import { useHeatmapMudancas } from "../hooks/useHeatmapMudancas";
 import { toneForCell, cellCount } from "../services";
 import type { HeatmapNivel, HeatmapPeriodoSegment, HeatmapSelection } from "../interfaces";
@@ -177,7 +178,7 @@ export function HeatmapMudancasCard({ stale = false, onCellSelect, externalNivel
           Pilar mais ativo na semana: <span className="font-semibold text-foreground">Caixa</span>
         </p>
         <p className="text-[12px] font-medium text-muted-foreground">
-          Dia com mais risco: <span className="font-semibold text-foreground">{maxRiskDate.date}</span>
+          Dia com mais risco: <span className="font-semibold text-foreground">{formatDate(maxRiskDate.date)}</span>
         </p>
       </footer>
     </section>

@@ -15,7 +15,7 @@ import type {
   RewardRisk, Competitor, AnalystTarget, EarningsRevenueSeries, CommunityFairValue,
 } from '../interfaces';
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
-import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo } from '../utils/formatters';
+import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo, formatDate } from '../utils/formatters';
 import { FavoriteButton, SectionCard, SWSDonut } from './AnalysisShared';
 import { LuizAvatar } from '@/src/features/luiz/components';
 
@@ -575,7 +575,7 @@ function EventTimeline({ events }: { events: TimelineEvent[] }) {
                   <span className="text-sm font-semibold text-neutral-900">{event.title}</span>
                   <span className="text-xs text-neutral-400 flex items-center gap-1 flex-shrink-0">
                     <Calendar className="w-3 h-3" />
-                    {event.date}
+                    {formatDate(event.date)}
                   </span>
                 </div>
                 {event.description && (
@@ -2429,6 +2429,7 @@ const EVENT_LABELS: Record<string, string> = {
 
 export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null>; navAlignRef?: React.RefObject<HTMLDivElement | null> }) {
   const headline = data.company.name + " — análise fundamentalista";
+  const [descExpanded, setDescExpanded] = React.useState(false);
 
   const rewards = data.rewardsAndRisks.filter((r) => r.type === 'reward').slice(0, 3);
   const risks   = data.rewardsAndRisks.filter((r) => r.type === 'risk').slice(0, 3);
@@ -2507,15 +2508,28 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
             </div>
           </div>
         </div>
-        <div className="mt-5 pt-5 border-t border-neutral-100">
-          <p className="text-[13.5px] leading-7 text-neutral-600 max-w-3xl">{data.company.description}</p>
-        </div>
+        {data.company.longDescription && (
+          <div className="mt-5 pt-5 border-t border-neutral-100">
+            <p className={`text-[13.5px] leading-7 text-neutral-600 max-w-3xl ${descExpanded ? '' : 'line-clamp-3'}`}>
+              {data.company.longDescription}
+            </p>
+            <button
+              onClick={() => setDescExpanded(v => !v)}
+              className="mt-1.5 text-[12px] font-medium text-teal-600 hover:text-teal-700 transition-colors"
+            >
+              {descExpanded ? 'Ver menos ↑' : 'Ver mais ↓'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── 2. Leitura atual ────────────────────────────────────────────── */}
       <div ref={navAlignRef} className="bg-[#F8FAFC] border border-neutral-200/80 rounded-2xl px-6 py-5">
         <div className="text-[12px] font-semibold text-neutral-500 mb-2.5">Resumo da análise</div>
-        <p className="text-[17px] font-semibold leading-relaxed text-neutral-800 max-w-3xl">{headline}</p>
+        {data.company.summaryText
+          ? <p className="text-[15px] leading-7 text-neutral-700 max-w-3xl">{data.company.summaryText}</p>
+          : <p className="text-[17px] font-semibold leading-relaxed text-neutral-800 max-w-3xl">{headline}</p>
+        }
       </div>
 
       {/* ── 3 + 4. Sustenta a tese / Merece atenção ─────────────────────── */}
@@ -2671,7 +2685,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
                         </div>
                         {/* Date */}
                         <span className="flex-shrink-0 text-[11px] text-neutral-400 mt-0.5 whitespace-nowrap">
-                          {change.date}
+                          {formatDate(change.date)}
                         </span>
                       </div>
 
@@ -2698,7 +2712,6 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
 
       {/* ── 7. Preço em contexto + Eventos ──────────────────────────────── */}
       <PriceContextSection data={data} onSelectTab={onSelectTab} />
-      <AboutSection data={data} />
       <BaseSection data={data} onSelectTab={onSelectTab} />
 
     </div>

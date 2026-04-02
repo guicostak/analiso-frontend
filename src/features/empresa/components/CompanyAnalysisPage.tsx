@@ -34,6 +34,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/src/components/layout/Sidebar';
 import { API_BASE_URL } from '@/src/lib/api-base';
 import type { CompanyQueueItem } from '../interfaces';
+import { formatDate } from '@/src/features/analysis/utils/formatters';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
@@ -1809,6 +1810,17 @@ function hexToRgba(hex: string, alpha: number) {
  return `rgba(${r},${g},${b},${alpha})`;
 }
 
+type QueueFilter = 'Todas' | 'Atencao' | 'Risco';
+
+interface CompanyQueueItem {
+  ticker: string;
+  name: string;
+  companyId: string | number;
+  logo?: string | null;
+  initials: string;
+  status: keyof typeof statusTone;
+}
+
 function QueueLogo({ company }: { company: CompanyQueueItem }) {
  if (company.logo) {
  return <img src={company.logo} alt={company.ticker} className="h-9 w-9 rounded-lg border border-border object-cover" />;
@@ -2298,6 +2310,8 @@ export function CompanyAnalysis() {
  });
  const [watchlistCollapsed, setWatchlistCollapsed] = useState(false);
  const [queueFilter, setQueueFilter] = useState<QueueFilter>('Todas');
+
+ const filteredQueue = useMemo<CompanyQueueItem[]>(() => [], []);
 
  useEffect(() => {
  setContentVisible(false);
@@ -2848,7 +2862,7 @@ const changesCount = changesBySelectedWindow.length;
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
     <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 font-medium text-dim">{change.pillar}</span>
     <span className="text-border-strong">·</span>
-    <span className="text-muted-foreground">{change.date}</span>
+    <span className="text-muted-foreground">{formatDate(change.date)}</span>
     <span className="text-border-strong">·</span>
     <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', change.level === 'Estrutural' ? 'border border-danger-border bg-danger-surface text-danger-text' : change.level === 'Relevante' ? 'border border-warning-border bg-warning-surface text-warning-text' : 'border border-brand-border bg-brand-surface text-brand')}>
      {change.severityLabel}
@@ -2897,7 +2911,7 @@ const changesCount = changesBySelectedWindow.length;
    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
     <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 font-medium text-dim">{timelineEvent.mainPillar}</span>
     <span className="text-border-strong">·</span>
-    <span className="text-muted-foreground">{timelineEvent.date}</span>
+    <span className="text-muted-foreground">{formatDate(timelineEvent.date)}</span>
     <span className="text-border-strong">·</span>
     <span className={cx('rounded-full px-2.5 py-0.5 font-semibold', timelineEvent.level === 'Estrutural' ? 'border border-danger-border bg-danger-surface text-danger-text' : timelineEvent.level === 'Relevante' ? 'border border-warning-border bg-warning-surface text-warning-text' : 'border border-brand-border bg-brand-surface text-brand')}>
      {timelineEvent.severityLabel}
@@ -3121,11 +3135,10 @@ const changesCount = changesBySelectedWindow.length;
            : <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">{companyContext.ticker.slice(0, 2)}</div>
          }
  <div className="min-w-0">
- <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{activeCompany.ticker}</p>
+ <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{companyContext.ticker}</p>
  <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-foreground">
- {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
+ {activeData?.companyName ?? companyContext.ticker}
  </h1>
- <p className="mt-0.5 max-w-[480px] truncate text-[12px] text-muted-foreground">{activeCompany.description}</p>
  <div className="mt-2.5 flex flex-wrap items-center gap-2">
  <span className={cx('rounded-full border px-2.5 py-1 text-[11px] font-semibold', statusTone[companyStatus].badge)}>
  {statusLabel(companyStatus)} · {scoreAverage}/100
