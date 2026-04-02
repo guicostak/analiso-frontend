@@ -19,7 +19,7 @@ const EARNINGS_CHART_SERIES: { key: string; color: string; hex: string }[] = [
 ];
 
 function EarningsRevenueGrowthSection({ data }: { data: AnalysisData }) {
-  const g = data.growth;
+  const g = data.growth ?? {} as typeof data.growth;
   const [activeKeys, setActiveKeys] = useState<Set<string>>(
     new Set(EARNINGS_CHART_SERIES.map(s => s.key))
   );
@@ -145,7 +145,7 @@ function EarningsRevenueGrowthSection({ data }: { data: AnalysisData }) {
 }
 
 function AnalystFutureGrowthSection({ data }: { data: AnalysisData }) {
-  const g = data.growth;
+  const g = data.growth ?? {} as typeof data.growth;
   const ticker = data.company.ticker;
 
   const earningsBars = [
@@ -271,7 +271,7 @@ const EPS_SERIES = [
 ];
 
 function EPSGrowthSection({ data }: { data: AnalysisData }) {
-  const g   = data.growth;
+  const g   = data.growth ?? {} as typeof data.growth;
   const pts = g.epsCombinedSeries ?? [];
 
   const [lpaActive, setLpaActive]           = useState(true);
@@ -472,7 +472,7 @@ function EPSGrowthSection({ data }: { data: AnalysisData }) {
 }
 
 function FutureROESection({ data }: { data: AnalysisData }) {
-  const g            = data.growth;
+  const g            = data.growth ?? {} as typeof data.growth;
   const companyROE   = g.futureROE;          // 26.9
   const industryROE  = g.futureROEIndustry;  // 9.1
 
@@ -659,7 +659,7 @@ function FutureROESection({ data }: { data: AnalysisData }) {
 
 function FutureReadingCard({ data }: { data: AnalysisData }) {
   const dim = data.snowflake?.find(d => d.dimension === 'future') ?? { checks: [], score: 0, summary: '', displayName: 'Crescimento Futuro', dimension: 'future', max: 6 };
-  const g   = data.growth;
+  const g   = data.growth ?? {} as typeof data.growth;
   const eg  = g.earningsGrowthRate ?? 0;
   const meg = g.marketEarningsGrowth ?? 0;
 
@@ -879,7 +879,7 @@ function FutureReadingCard({ data }: { data: AnalysisData }) {
 }
 
 export function FutureTab({ data }: { data: AnalysisData }) {
-  const g = data.growth;
+  const g = data.growth ?? {} as typeof data.growth;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   // Null-safe number formatter: returns "—" for null/undefined, else formatted number
@@ -940,7 +940,7 @@ export function FutureTab({ data }: { data: AnalysisData }) {
           <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes</h3>
           <div className="flex-1">
             <ul className="space-y-0">
-              {data.futureUpdates.slice(0, 5).map((item) => {
+              {(data.futureUpdates ?? []).slice(0, 5).map((item) => {
                 const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                 const bgColor   = item.sentiment === 'good' ? 'bg-teal-50'   : item.sentiment === 'bad' ? 'bg-rose-50'   : 'bg-neutral-50';
                 return (
@@ -996,7 +996,7 @@ export function FutureTab({ data }: { data: AnalysisData }) {
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="space-y-0">
-                {data.futureUpdates.map((item) => {
+                {(data.futureUpdates ?? []).map((item) => {
                   const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                   const bgColor   = item.sentiment === 'good' ? 'bg-teal-50'   : item.sentiment === 'bad' ? 'bg-rose-50'   : 'bg-neutral-50';
                   return (
