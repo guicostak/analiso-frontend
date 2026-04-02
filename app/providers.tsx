@@ -7,6 +7,7 @@ import { GlossaryProvider } from "../src/features/glossary/components/glossary-c
 import { ChatbotPanelProvider } from "../src/components/layout/ChatbotContext";
 import { SidebarProvider } from "../src/components/layout/SidebarContext";
 import { LuizProvider } from "../src/components/layout/LuizContext";
+import { SubscriptionProvider } from "../src/features/assinatura/hooks";
 import { ChatbotPanel } from "../src/features/chatbot/components";
 import { LuizChatPanel } from "../src/features/luiz/components";
 
@@ -24,19 +25,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <AuthProvider>
-          <GlossaryProvider>
-            <SidebarProvider>
-              <ChatbotPanelProvider>
-                <LuizProvider>
-                  {children}
-                  {/* Painel legado — mantido para compatibilidade */}
-                  <ChatbotPanel />
-                  {/* Luiz — assistente principal, sempre montado */}
-                  <LuizChatPanel />
-                </LuizProvider>
-              </ChatbotPanelProvider>
-            </SidebarProvider>
-          </GlossaryProvider>
+          <SubscriptionProvider>
+            <GlossaryProvider>
+              <SidebarProvider>
+                <ChatbotPanelProvider>
+                  <LuizProvider>
+                    {children}
+                    {/* Painel legado — mantido para compatibilidade */}
+                    <ChatbotPanel />
+                    {/* Luiz — assistente principal, sempre montado */}
+                    <LuizChatPanel />
+                  </LuizProvider>
+                </ChatbotPanelProvider>
+              </SidebarProvider>
+            </GlossaryProvider>
+          </SubscriptionProvider>
         </AuthProvider>
       </GoogleOAuthProvider>
     </ThemeProvider>

@@ -1,36 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/src/features/auth";
-import { fetchSubscription } from "@/src/features/assinatura/services/subscription.service";
-import { fetchPlans } from "@/src/features/assinatura/services";
-import type { SubscriptionData } from "@/src/features/assinatura/services/subscription.service";
-import type { SubscriptionPlan } from "@/src/features/assinatura/interfaces";
+import { useSubscription } from "@/src/features/assinatura/hooks";
 
 interface SidebarPlanCardProps {
   href?: string;
 }
 
 export function SidebarPlanCard({ href = "/perfil?tab=assinatura" }: SidebarPlanCardProps) {
-  const { token } = useAuth();
-  const [sub, setSub] = useState<SubscriptionData | null>(null);
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const { isActive, activePlan, subscription } = useSubscription();
 
-  useEffect(() => {
-    fetchPlans().then(setPlans).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (!token) return;
-    fetchSubscription(token).then(setSub).catch(() => {});
-  }, [token]);
-
-  const isActive = sub?.status === "active";
-  const activePlan = isActive ? plans.find(p => p.id === sub.plan) : null;
   const planName = activePlan?.name ?? null;
-  const renewLabel = sub?.renewsAt
-    ? new Date(sub.renewsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+  const renewLabel = subscription?.renewsAt
+    ? new Date(subscription.renewsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
     : null;
 
   return (

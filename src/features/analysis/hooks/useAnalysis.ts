@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AnalysisData } from '../interfaces';
 import { fetchAnalysisData } from '../services';
+import { useAuth } from '@/src/features/auth';
 
 export function useAnalysis(ticker: string) {
   const router = useRouter();
+  const { token } = useAuth();
   const [data, setData] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export function useAnalysis(ticker: string) {
     setError(null);
     setData(null);
 
-    fetchAnalysisData(ticker)
+    fetchAnalysisData(ticker, token)
       .then(result => {
         if (!cancelled) {
           setData(result);
@@ -36,7 +38,7 @@ export function useAnalysis(ticker: string) {
       });
 
     return () => { cancelled = true; };
-  }, [ticker, router]);
+  }, [ticker, token, router]);
 
   return { data, loading, error, setData, setLoading, setError };
 }

@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/components/ui/utils";
 import { useDashboardInbox, allPillars, allSources, allStatuses } from "../hooks/useDashboardInbox";
+import { useSubscription } from "@/src/features/assinatura/hooks/SubscriptionContext";
+import { GoogleAdBanner } from "@/src/components/ads/GoogleAdBanner";
 import type { InboxItem, Pillar, Status, WindowRange } from "../interfaces";
 import { statusBadgeClasses, SURFACE_BASE, SURFACE_MEDIUM } from "../mappers/dashboard.mapper";
 
@@ -124,6 +126,7 @@ const summaryToneStyles: Record<
 
 export function Dashboard() {
   const router = useRouter();
+  const { planSlug } = useSubscription();
   const {
     dashboardData,
     dashboardLoading,
@@ -299,6 +302,15 @@ export function Dashboard() {
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
       <MainContent className="px-5 pb-8 pt-20 xl:px-7 xl:pt-20">
+        {planSlug === "free" && (
+          <div className="mx-auto mb-4 max-w-[1480px]">
+            <GoogleAdBanner
+              slot="5384268434"
+              format="horizontal"
+              className="min-h-[90px] w-full overflow-hidden rounded-xl border border-border bg-card"
+            />
+          </div>
+        )}
         <div className="mx-auto max-w-[1480px] space-y-5">
           <section>
             <article

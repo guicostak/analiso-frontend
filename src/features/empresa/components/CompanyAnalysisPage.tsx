@@ -33,6 +33,7 @@ import {
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/src/components/layout/Sidebar';
 import { API_BASE_URL } from '@/src/lib/api-base';
+import type { CompanyQueueItem } from '../interfaces';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
@@ -42,6 +43,7 @@ type ChangesFocusFilter = 'Mais relevantes' | 'Rotina' | 'Estruturais';
 type EventsFocusFilter = 'Mais relevantes' | 'Rotina' | 'Principais';
 type EvidenceTab = 'Fonte' | 'Trecho' | 'Como calculamos';
 type PillarName = 'Divida' | 'Caixa' | 'Margens' | 'Retorno' | 'Proventos';
+type QueueFilter = 'Todas' | 'Atencao' | 'Risco';
 type ChangePriorityLevel = 'Estrutural' | 'Relevante' | 'Rotina';
 type ChangePillarTag = PillarName | 'A classificar';
 
@@ -2294,6 +2296,8 @@ export function CompanyAnalysis() {
  Retorno: '5a',
  Proventos: '5a',
  });
+ const [watchlistCollapsed, setWatchlistCollapsed] = useState(false);
+ const [queueFilter, setQueueFilter] = useState<QueueFilter>('Todas');
 
  useEffect(() => {
  setContentVisible(false);
@@ -3117,9 +3121,6 @@ const changesCount = changesBySelectedWindow.length;
            : <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#0E9384] text-xs font-semibold text-white">{companyContext.ticker.slice(0, 2)}</div>
          }
  <div className="min-w-0">
- <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A0AEC0]">{companyContext.ticker}</p>
- <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[#0B1220]">
- {activeData?.companyName ?? companyContext.ticker}
  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{activeCompany.ticker}</p>
  <h1 className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-foreground">
  {activeCompany.name === 'WEG' ? 'WEG' : activeCompany.name}
