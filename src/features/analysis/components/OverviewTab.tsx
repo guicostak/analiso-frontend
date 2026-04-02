@@ -2293,7 +2293,7 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
           category="value"
           index="name"
           colors={["teal", "sky"]}
-          valueFormatter={(v: number) => `R$ ${formatNumber(v)}M`}
+          valueFormatter={(v: number) => `R$ ${formatNumber(v)}`}
           showLabel={false}
           showAnimation={true}
         />
@@ -2311,14 +2311,14 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
             <div className="w-3 h-3 rounded-full bg-teal-500" />
             <span className="text-neutral-600">Lucro</span>
           </div>
-          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.earnings)}M</div>
+          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.earnings)}</div>
         </div>
         <div>
           <div className="flex items-center gap-2 text-sm">
             <div className="w-3 h-3 rounded-full bg-sky-500" />
             <span className="text-neutral-600">Receita</span>
           </div>
-          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.revenue)}M</div>
+          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.revenue)}</div>
         </div>
         <div className="border-t border-neutral-200 pt-3 grid grid-cols-2 gap-4">
           <div>
@@ -2346,7 +2346,7 @@ function EarningsRevenueChart({ series }: { series: EarningsRevenueSeries[] }) {
         index="year"
         categories={["revenue", "earnings"]}
         colors={["sky", "teal"]}
-        valueFormatter={(v: number) => `R$ ${formatNumber(v)}M`}
+        valueFormatter={(v: number) => `R$ ${formatNumber(v)}`}
         showLegend={true}
         showGridLines={true}
         yAxisWidth={56}

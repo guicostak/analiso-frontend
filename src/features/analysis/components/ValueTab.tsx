@@ -335,9 +335,9 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
               total={comp.marketCap}
               sliceColor={active.sliceColor}
               centerLabel="Cap. de Mercado"
-              centerValue={`R$ ${formatNumber(comp.marketCap)}M`}
+              centerValue={`R$ ${formatNumber(comp.marketCap)}`}
               sliceLabel={active.sliceLabel}
-              sliceDisplayValue={`R$ ${formatNumber(active.sliceValue)}M`}
+              sliceDisplayValue={`R$ ${formatNumber(active.sliceValue)}`}
               size={180}
             />
           </div>
