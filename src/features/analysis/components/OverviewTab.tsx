@@ -961,9 +961,9 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
               total={comp.marketCap}
               sliceColor={active.sliceColor}
               centerLabel="Cap. de Mercado"
-              centerValue={`R$ ${formatNumber(comp.marketCap)}M`}
+              centerValue={`R$ ${formatNumber(comp.marketCap)}`}
               sliceLabel={active.sliceLabel}
-              sliceDisplayValue={`R$ ${formatNumber(active.sliceValue)}M`}
+              sliceDisplayValue={`R$ ${formatNumber(active.sliceValue)}`}
               size={180}
             />
           </div>
@@ -2301,7 +2301,7 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <div className="text-[10px] text-neutral-500">Cap. de Mercado</div>
-            <div className="text-sm font-bold text-neutral-900">R$ {formatNumber(composition.marketCap)}M</div>
+            <div className="text-sm font-bold text-neutral-900">R$ {formatNumber(composition.marketCap)}</div>
           </div>
         </div>
       </div>
