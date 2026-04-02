@@ -97,11 +97,14 @@ function mapSearchItemToCard(item: CompanySearchItem): CompanyCard {
   return {
     name: item.companyName,
     ticker: item.ticker,
-    sector: "—",
+    logoUrl: item.logoUrl ?? undefined,
+    sector: item.sectorLabel ?? "—",
     size: "Grande",
-    status: "Saudável",
-    pillarsScores: [50, 50, 50, 50, 50],
-    shortDiagnosis: "",
+    status: (item.status as CompanyCard["status"]) ?? "Atenção",
+    pillarsScores: [],
+    headline: item.headline ?? "",
+    shortDiagnosis: item.supportLine ?? "",
+    whyOpen: item.whyOpen ?? null,
     freshnessStatus: "Atualizado",
     updatedAt: new Date().toISOString(),
     source: "API",
@@ -167,6 +170,7 @@ export function ExplorePage() {
     showContextPanel,
     filters,
     isLoading,
+    allCompanies,
     filteredCompanies,
     sortedHighlights,
     staleCount,
@@ -177,6 +181,7 @@ export function ExplorePage() {
     indexCards,
     movers,
     movementInsights,
+    marketContextDto,
     movementSummary,
     movementDominant,
     volatility,
@@ -207,10 +212,38 @@ export function ExplorePage() {
 
   // Usa resultados da API quando disponíveis; fallback para mock local
   const isSearchActive = apiTriggered && companySearch.items.length > 0;
+
+  // Lookup map: ticker → CompanyCard (do /api/explore, com status/badge/contexto corretos)
+  const exploreLookup = useMemo<Map<string, CompanyCard>>(() => {
+    const map = new Map<string, CompanyCard>();
+    for (const c of allCompanies) map.set(c.ticker, c);
+    return map;
+  }, [allCompanies]);
+
   const catalogCompanies = useMemo<CompanyCard[]>(() => {
-    if (isSearchActive) return companySearch.items.map(mapSearchItemToCard);
+    if (isSearchActive) {
+      return companySearch.items.map((item) => {
+        const base = mapSearchItemToCard(item);
+        const enriched = exploreLookup.get(item.ticker);
+        if (enriched) {
+          return {
+            ...base,
+            status: enriched.status,
+            sector: enriched.sector,
+            highlightPillar: enriched.highlightPillar,
+            headline: enriched.headline,
+            shortDiagnosis: enriched.shortDiagnosis,
+            whyOpen: enriched.whyOpen,
+            freshnessStatus: enriched.freshnessStatus,
+            updatedAt: enriched.updatedAt,
+            logoUrl: base.logoUrl ?? enriched.logoUrl,
+          };
+        }
+        return base;
+      });
+    }
     return filteredCompanies;
-  }, [isSearchActive, companySearch.items, filteredCompanies]);
+  }, [isSearchActive, companySearch.items, filteredCompanies, exploreLookup]);
 
   // Wrappers que sincronizam paginação e filtros com o URL (para compartilhamento)
   function handleGoToPage(page: number) {
@@ -366,6 +399,7 @@ export function ExplorePage() {
                     indexCards={indexCards}
                     volatility={volatility}
                     volatilityIsStale={volatilityIsStale}
+                    marketContextDto={marketContextDto}
                     setShowVolatilityInfo={setShowVolatilityInfo}
                     setShowVolatilityDetails={setShowVolatilityDetails}
                   />

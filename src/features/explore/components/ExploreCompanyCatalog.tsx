@@ -616,9 +616,13 @@ export function ExploreCompanyCatalog({
                 ticker={company.ticker}
                 companyName={company.name}
                 logoUrl={company.logoUrl ?? getCompanyLogo(company.ticker)}
+                href={`/analysis/${company.ticker}`}
                 price={company.financials.price}
                 status={company.status}
                 sector={company.sector}
+                headline={company.headline}
+                shortDiagnosis={company.shortDiagnosis}
+                whyOpen={company.whyOpen}
                 metrics={financialsToMetrics(company.financials)}
                 updatedAt={company.updatedAt}
                 isComparing={compareTickers.includes(company.ticker)}

@@ -19,13 +19,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 
 import {
-  companies as mockCompanies,
-  highlights as mockHighlights,
-  movers as mockMovers,
-  indexCards as mockIndexCards,
-  volatility as mockVolatility,
-  thesisCollections as mockThesisCollections,
-  sectorCollections as mockSectorCollections,
   pillars,
   movementInsights,
   getCompanyLogo,
@@ -40,7 +33,7 @@ import {
   getExplore,
 } from "../services";
 
-import type { ExploreMovementInsightsDto, ExploreResponse } from "../services";
+import type { ExploreMovementInsightsDto, ExploreMarketContextDto, ExploreResponse } from "../services";
 
 import type {
   MoverType,
@@ -79,6 +72,7 @@ export interface UseExploreReturn {
   isLoading:             boolean;
 
   // Dados derivados
+  allCompanies:      CompanyCard[];
   filteredCompanies: CompanyCard[];
   sortedHighlights:  HighlightItem[];
   staleCount:        number;
@@ -91,6 +85,7 @@ export interface UseExploreReturn {
   indexCards:          IndexCard[];
   movers:              MoverRow[];
   movementInsights:    Record<string, MovementInsight>;
+  marketContextDto:    ExploreMarketContextDto | null;
   movementInsightsDto: ExploreMovementInsightsDto | null;
   movementSummary:     ExploreMovementInsightsDto['summary'];
   movementDominant:    ExploreMovementInsightsDto['dominantInsight'];
@@ -139,12 +134,14 @@ const DEFAULT_FILTERS: Filters = {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useExplore(): UseExploreReturn {
+  const { token, isLoading: authLoading } = useAuth();
+
   const [selectedTab,           setSelectedTab]           = useState<MoverType>("altas");
   const [selectedEntryPoints,   setSelectedEntryPoints]   = useState<string[]>([]);
   const [compareTickers,        setCompareTickers]        = useState<string[]>([]);
   const [searchQuery,           setSearchQuery]           = useState("");
   const [summaryScope,          setSummaryScope]          = useState<HighlightScopeLabel>("Mercado");
-  const [summaryState,          setSummaryState]          = useState<"loading" | "ready" | "empty" | "error">("ready");
+  const [summaryState,          setSummaryState]          = useState<"loading" | "ready" | "empty" | "error">("loading");
   const [activePreset,          setActivePreset]          = useState<HighlightPreset | null>(null);
   const [appliedChips,          setAppliedChips]          = useState<string[]>([]);
   const [selectedSource,        setSelectedSource]        = useState<HighlightItem | null>(null);
@@ -155,11 +152,28 @@ export function useExplore(): UseExploreReturn {
   const [showVolatilityDetails, setShowVolatilityDetails] = useState(false);
   const [showContextPanel,      setShowContextPanel]      = useState(false);
   const [filters,               setFilters]               = useState<Filters>(DEFAULT_FILTERS);
-  const isLoading = false; // pronto para ligar quando vier API
+  const [isLoading,             setIsLoading]             = useState(true);
+  const [exploreData,           setExploreData]           = useState<ExploreResponse | null>(null);
 
-  // Dados da API (null até haver chamada HTTP real)
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const exploreData = null as ExploreResponse | null;
+  useEffect(() => {
+    // Aguarda o AuthContext terminar de restaurar a sessão antes de chamar a API
+    if (authLoading) return;
+
+    setIsLoading(true);
+    setSummaryState("loading");
+    getExplore(token)
+      .then((data) => {
+        setExploreData(data);
+        setSummaryState("ready");
+      })
+      .catch((err) => {
+        console.error("[useExplore] Falha ao carregar /api/explore:", err);
+        setSummaryState("error");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [token, authLoading]);
 
   // ─── Dados derivados ───────────────────────────────────────────────────────
 
@@ -263,7 +277,7 @@ export function useExplore(): UseExploreReturn {
   const resolvedVolatility = useMemo<Volatility>(() => {
     const detail = exploreData?.marketContext?.detail;
     if (detail) return mapMarketContextDetailToVolatility(detail);
-    return mockVolatility;
+    return { value: 0, label: "Moderada", updatedAt: "", source: "" };
   }, [exploreData]);
 
   const staleCount        = filteredCompanies.filter((c) => c.freshnessStatus === "Antigo").length;
@@ -351,6 +365,7 @@ export function useExplore(): UseExploreReturn {
     isLoading,
 
     // Dados derivados
+    allCompanies,
     filteredCompanies,
     sortedHighlights,
     staleCount,
@@ -363,6 +378,7 @@ export function useExplore(): UseExploreReturn {
     indexCards:          resolvedIndexCards,
     movers,
     movementInsights,
+    marketContextDto:    exploreData?.marketContext ?? null,
     movementInsightsDto: exploreData?.movementInsights ?? null,
     movementSummary:     exploreData?.movementInsights?.summary ?? null,
     movementDominant:    exploreData?.movementInsights?.dominantInsight ?? null,

@@ -3,6 +3,7 @@
 import { Info } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard, Volatility } from "../interfaces";
+import type { ExploreMarketContextDto } from "../services";
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
   if (trend === "up") return "healthy";
@@ -34,6 +35,7 @@ interface ExploreMarketContextProps {
   indexCards: IndexCard[];
   volatility: Volatility;
   volatilityIsStale: boolean;
+  marketContextDto?: ExploreMarketContextDto | null;
   setShowVolatilityInfo: (fn: ((prev: boolean) => boolean) | boolean) => void;
   setShowVolatilityDetails: (v: boolean) => void;
 }
@@ -44,9 +46,12 @@ export function ExploreMarketContext({
   indexCards,
   volatility,
   volatilityIsStale,
+  marketContextDto,
   setShowVolatilityInfo,
   setShowVolatilityDetails,
 }: ExploreMarketContextProps) {
+  const summary = marketContextDto?.summary;
+  const detail = marketContextDto?.detail;
   return (
     <section className="space-y-4">
       <div>
@@ -70,10 +75,10 @@ export function ExploreMarketContext({
                     Contexto macro
                   </span>
                   <h3 className="mt-4 text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
-                    Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado.
+                    {summary?.title || "Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado."}
                   </h3>
                   <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
-                    Use este ambiente como apoio visual para decidir onde aprofundar a leitura, sem deixar o pano de fundo competir com a curadoria principal.
+                    {summary?.body || "Use este ambiente como apoio visual para decidir onde aprofundar a leitura, sem deixar o pano de fundo competir com a curadoria principal."}
                   </p>
                 </div>
 
@@ -83,14 +88,14 @@ export function ExploreMarketContext({
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-12 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.44),rgba(255,255,255,0))]" />
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">Interpretacao principal</p>
                     <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-foreground">
-                      O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia.
+                      {detail?.description || "O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia."}
                     </p>
                   </div>
                   <div className="relative rounded-[22px] border border-white/72 bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.56))] p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]" />
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">O que observar</p>
                     <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
-                      Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala.
+                      {detail?.subtitle || "Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala."}
                     </p>
                   </div>
                 </div>
@@ -162,7 +167,7 @@ export function ExploreMarketContext({
                 </div>
                 <p className="mt-4 text-[28px] font-semibold leading-8 tracking-[-0.03em] text-foreground">{volatility.value}</p>
                 <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
-                  Oscilacoes tendem a aumentar no curto prazo, entao vale combinar leitura de preco com confirmacao dos pilares antes de avancar.
+                  {detail?.description || "Oscilacoes tendem a aumentar no curto prazo, entao vale combinar leitura de preco com confirmacao dos pilares antes de avancar."}
                 </p>
                 {showVolatilityInfo && (
                   <div className="mt-4 rounded-[20px] bg-card/80 p-4 text-[14px] leading-6 text-muted-foreground">
@@ -179,7 +184,7 @@ export function ExploreMarketContext({
                   Ver detalhes
                 </button>
                 <p className="text-[12px] text-muted-foreground">
-                  Fonte: {volatility.source} . Atualizado em {volatility.updatedAt}
+                  {detail?.metaLine || `Fonte: ${volatility.source} . Atualizado em ${volatility.updatedAt}`}
                 </p>
                 {volatilityIsStale ? (
                   <span className="inline-flex rounded-full border border-warning-border bg-warning-surface px-3 py-1 text-[11px] font-medium text-warning-text">

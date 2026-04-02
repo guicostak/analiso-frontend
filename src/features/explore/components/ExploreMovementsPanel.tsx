@@ -82,7 +82,7 @@ function MovementCard({
 
       <div className={featured ? "mt-5 flex flex-wrap items-center gap-3" : "mt-4 flex flex-wrap items-center gap-3"}>
         <Link
-          href={`/empresa/${row.ticker}`}
+          href={`/analysis/${row.ticker}`}
           className="inline-flex h-10 items-center rounded-[14px] bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
         >
           Abrir analise
@@ -195,7 +195,7 @@ export function ExploreMovementsPanel({
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                       <Link
-                        href={`/empresa/${row.ticker}`}
+                        href={`/analysis/${row.ticker}`}
                         className="inline-flex h-9 items-center rounded-[13px] bg-brand px-4 text-[12px] font-semibold text-white"
                       >
                         Abrir analise

@@ -45,8 +45,9 @@ export function useAnalysisNav(hasData: boolean) {
     };
   }, []);
 
-  // Section observers
+  // Section observers — re-run when data loads so refs are populated
   useEffect(() => {
+    if (!hasData) return;
     const TOPBAR_H = 64;
     const observers: IntersectionObserver[] = [];
     SECTION_IDS.forEach(id => {
@@ -60,7 +61,7 @@ export function useAnalysisNav(hasData: boolean) {
       observers.push(obs);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, []);
+  }, [hasData]);
 
   const scrollToSection = useCallback((id: AnalysisTab) => {
     const el = sectionRefs.current[id];

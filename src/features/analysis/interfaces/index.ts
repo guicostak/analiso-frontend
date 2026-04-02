@@ -1,12 +1,3 @@
-/**
- * Tipos de domínio para a tela de análise estilo SimplyWall.St.
- *
- * Modelo: 5 dimensões × 6 checks cada = 30 checks totais.
- * Dimensões: Value, Future, Past, Health, Dividend.
- */
-
-// ─── Snowflake Dimensions ────────────────────────────────────────────────────
-
 export type SnowflakeDimension = 'value' | 'future' | 'past' | 'health' | 'dividend';
 
 export type CheckResult = {
@@ -76,6 +67,7 @@ export type GrowthForecast = {
     analysts: number;
     confirmedDate: string;
     type: 'historical' | 'forecast';
+    forecastSource?: 'analyst' | 'sgr'; // 'sgr' = projeção modelo sem cobertura de analistas
   }[];
   forecastEndDate: string;
   revenueAtForecast: number;
@@ -223,6 +215,7 @@ export type CompanyInfo = {
   ceo?: string;
   website?: string;
   longDescription?: string;
+  summaryText?: string;
 };
 
 // ─── Price Scenarios (Backend: price_scenarios + price_ranges) ───────────────
@@ -467,4 +460,4 @@ export type AnalysisData = {
 
 // ─── Active tab ──────────────────────────────────────────────────────────────
 
-export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend' | 'sources';
+export type AnalysisTab = 'overview' | 'value' | 'future' | 'past' | 'health' | 'dividend';
