@@ -506,7 +506,7 @@ function CoverageBarCard({
 }: {
   title: string;
   subtitle: string;
-  value: number;
+  value: number | null | undefined;
   contextLabel: string;
   diagTexts: { ok: string; warn: string; risk: string };
 }) {
@@ -515,6 +515,24 @@ function CoverageBarCard({
   const TH = 22;
   const TY = 24;
   const TW = VW;
+
+  // Render a "not available" state when value is null/undefined
+  if (value == null) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-4">
+        <div>
+          <h3 className="text-sm font-semibold text-neutral-800">{title}</h3>
+          <p className="text-[11px] text-neutral-400 mt-0.5">{subtitle}</p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium bg-neutral-50 text-neutral-400">
+          <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 12A5 5 0 1 1 8 3a5 5 0 0 1 0 10Zm.75-7.25a.75.75 0 0 0-1.5 0v2.5a.75.75 0 0 0 1.5 0v-2.5Zm0 4.5a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/>
+          </svg>
+          <span>Dado não disponível para esta empresa</span>
+        </div>
+      </div>
+    );
+  }
 
   const xS = (v: number) => Math.min((v / MAX) * TW, TW);
   const x75  = xS(75);
@@ -878,7 +896,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
                 { label: 'Retorno total ao acionista', value: d.totalShareholderReturn != null ? `${nf(d.totalShareholderReturn)}%` : '—' },
                 { label: 'Rendimento futuro de dividendos', value: d.futureDividendYield != null ? `${nf(d.futureDividendYield)}%` : '—' },
                 { label: 'Crescimento de dividendos (10a)', value: d.dividendGrowth != null ? `${nf(d.dividendGrowth)}%` : '—' },
-                { label: 'Próximo pagamento', value: d.nextPaymentDate ?? 'Não divulgado' },
+                { label: 'Próximo pagamento', value: d.nextPaymentDate ? formatDate(d.nextPaymentDate) : 'Não divulgado' },
                 { label: 'Data ex-dividendo', value: formatDate(d.exDividendDate) },
                 { label: 'Dividendo por ação', value: `R$ ${nf(d.dividendPerShare, 3)}` },
                 { label: 'Payout ratio atual', value: `${d.payoutRatio ?? 0}%` },

@@ -63,14 +63,13 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
   };
 
   // ── rewardsAndRisks: normalise text field ──────────────────────────────────
-  const rewardsAndRisks = ((raw.rewardsAndRisks ?? []) as AnyObj[]).map(r => ({
-    type:   r.type as 'reward' | 'risk',
-    // If text is a generic sentiment word, prefer detail as the display text
-    text:   (r.text === 'positive' || r.text === 'negative' || r.text === 'neutral')
-      ? (r.detail ?? r.text)
-      : (r.text ?? r.detail ?? ''),
-    detail: r.detail ?? '',
-  }));
+  const rewardsAndRisks = ((raw.rewardsAndRisks ?? []) as AnyObj[]).map(r => {
+    const isSentinel = r.text === 'positive' || r.text === 'negative' || r.text === 'neutral';
+    const text   = isSentinel ? (r.detail ?? r.text) : (r.text ?? r.detail ?? '');
+    // When text was promoted from detail, clear detail to avoid rendering the same string twice
+    const detail = isSentinel ? '' : (r.detail ?? '');
+    return { type: r.type as 'reward' | 'risk', text, detail };
+  });
 
   // ── safe-default arrays for every optional list field ─────────────────────
   return {
