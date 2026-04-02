@@ -426,8 +426,10 @@ export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): Highlig
 
 // ─── Chamadas HTTP ────────────────────────────────────────────────────────────
 
-export async function getExplore(token?: string | null): Promise<ExploreResponse> {
-  return apiFetch<ExploreResponse>('/api/explore', {}, token);
+export async function getExplore(_token?: string | null): Promise<ExploreResponse> {
+  // /api/explore é público (permitAll no backend) — não envia token para evitar
+  // rejeição por JWT expirado/inválido interferindo na resposta.
+  return apiFetch<ExploreResponse>('/api/explore', {});
 }
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────

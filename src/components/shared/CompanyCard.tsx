@@ -82,6 +82,14 @@ export interface CompanyCardProps {
   /** Rota de destino ao clicar no card. Padrão: /empresa/:ticker */
   href?: string;
 
+  // ─── Campos contextuais (do /api/explore) ────────────────────────────────
+  /** Título curto da situação (ex: "Retorno sob pressão") */
+  headline?: string | null;
+  /** Motivo resumido / diagnóstico (ex: "Retorno: 35/100 na leitura atual") */
+  shortDiagnosis?: string | null;
+  /** Por que vale abrir agora (ex: "Vale abrir para avaliar se a queda de retorno afeta a tese.") */
+  whyOpen?: string | null;
+
   // ─── Botões de ação (aparecem apenas quando callback é fornecido) ────────
   isComparing?: boolean;
   isFavorite?: boolean;
@@ -102,6 +110,9 @@ export function CompanyCard({
   metrics = {},
   updatedAt,
   href,
+  headline,
+  shortDiagnosis,
+  whyOpen,
   isComparing,
   isFavorite,
   onToggleCompare,
@@ -169,6 +180,27 @@ export function CompanyCard({
           </span>
         )}
       </div>
+
+      {/* ── Contexto: headline, diagnóstico e motivo para abrir ── */}
+      {(headline || shortDiagnosis || whyOpen) && (
+        <div className="space-y-1.5 border-t border-border pt-3">
+          {headline && (
+            <p className="text-[13px] font-semibold leading-5 text-foreground">
+              {headline}
+            </p>
+          )}
+          {shortDiagnosis && (
+            <p className="text-[12px] leading-[1.4] text-muted-foreground">
+              {shortDiagnosis}
+            </p>
+          )}
+          {whyOpen && (
+            <p className="text-[12px] leading-[1.4] text-brand">
+              {whyOpen}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ── Métricas financeiras + setor ── */}
       {(visibleMetrics.length > 0 || sector != null) && (

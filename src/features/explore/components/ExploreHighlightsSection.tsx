@@ -245,7 +245,7 @@ export function ExploreHighlightsSection({
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Link
-                      href={`/empresa/${featuredHighlight.ticker}`}
+                      href={`/analysis/${featuredHighlight.ticker}`}
                       className="inline-flex items-center rounded-[15px] bg-brand px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
                     >
                       Abrir analise

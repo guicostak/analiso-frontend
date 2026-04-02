@@ -32,6 +32,17 @@ export interface CompanySearchItem {
   ticker: string;
   companyName: string;
   cdCvm: number;
+  logoUrl?: string | null;
+  /** Título curto da situação (do catálogo explore) */
+  headline?: string | null;
+  /** Diagnóstico resumido */
+  supportLine?: string | null;
+  /** Por que vale abrir agora */
+  whyOpen?: string | null;
+  /** Status do catálogo explore (Saudável, Atenção, Risco) */
+  status?: string | null;
+  /** Setor da empresa */
+  sectorLabel?: string | null;
   metrics: Record<string, number>;
 }
 
