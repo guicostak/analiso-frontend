@@ -133,27 +133,36 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
     { label: 'Fluxo de Caixa Livre',           value: wf.freeCashFlow ?? 0, type: 'result'                          },
   ];
 
-  // compute running totals for waterfall positioning
-  const positives = bars.filter(b => b.type !== 'result');
-  const maxVal = positives.reduce((acc, b) => {
-    if (b.type === 'base' || b.type === 'positive') return acc + b.value;
-    return acc;
-  }, 0);
-  const scale = CHART_H / maxVal;
+  // ── Two-pass scale: find full value range (including negative excursions) ──
+  let tempRun = 0, maxRun = 0, minRun = 0;
+  for (const b of bars) {
+    if (b.type === 'result') continue;
+    if (b.type === 'base' || b.type === 'positive') tempRun += Math.abs(b.value);
+    else tempRun -= Math.abs(b.value);
+    maxRun = Math.max(maxRun, tempRun);
+    minRun = Math.min(minRun, tempRun);
+  }
+  const resultValue = bars.find(b => b.type === 'result')?.value ?? 0;
+  if (resultValue > 0) maxRun = Math.max(maxRun, resultValue);
+  if (resultValue < 0) minRun = Math.min(minRun, resultValue);
+
+  const scale = CHART_H / Math.max(maxRun - minRun, 1);
+  // ZERO_Y: where value=0 sits on screen; shifts up when bars dip below zero
+  const ZERO_Y = BASELINE - Math.abs(Math.min(minRun, 0)) * scale;
 
   let running = 0;
   const computed = bars.map(b => {
     if (b.type === 'result') {
-      const h = Math.max(b.value * scale, 2);
-      return { ...b, y: BASELINE - h, h };
+      const h = Math.max(Math.abs(b.value) * scale, 2);
+      return { ...b, y: b.value >= 0 ? ZERO_Y - h : ZERO_Y, h };
     }
     const absVal = Math.abs(b.value);
     const h = Math.max(absVal * scale, 2);
     let y: number;
     if (b.type === 'negative') {
-      y = BASELINE - running * scale;
+      y = ZERO_Y - running * scale;
     } else {
-      y = BASELINE - (running + absVal) * scale;
+      y = ZERO_Y - (running + absVal) * scale;
     }
     running += b.type === 'negative' ? -absVal : absVal;
     return { ...b, y, h };
@@ -245,7 +254,7 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
           )}
           <svg width="100%" viewBox={`0 0 700 ${TOP_PAD + CHART_H + 100}`} style={{ display: 'block', minWidth: 480, overflow: 'visible' }}>
             {/* Baseline */}
-            <line x1="0" y1={BASELINE} x2="700" y2={BASELINE} stroke="#e5e7eb" strokeWidth="1" />
+            <line x1="0" y1={ZERO_Y} x2="700" y2={ZERO_Y} stroke="#e5e7eb" strokeWidth="1" />
 
             {computed.map((b, i) => {
               const colW = 700 / bars.length;
