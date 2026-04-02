@@ -8,11 +8,12 @@ interface Props {
 }
 
 export function SankeySection({ data }: Props) {
-  const years = data.map(d => parseInt(d.year)).sort((a, b) => a - b)
+  const safeData = data ?? []
+  const years = safeData.map(d => parseInt(d.year)).sort((a, b) => a - b)
   const [year, setYear] = useState(years[years.length - 1] ?? 2024)
   const barRef = useRef<HTMLDivElement>(null)
 
-  if (!data || data.length === 0) {
+  if (safeData.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-8">
         <h3 style={{ fontSize: 18, fontWeight: 600, color: '#111827', marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>

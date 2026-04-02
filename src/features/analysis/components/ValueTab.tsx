@@ -16,13 +16,13 @@ import { SectionCard, CheckList, SWSDonut } from './AnalysisShared';
 
 function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   const myTicker = data.company.ticker;
-  const myPE     = data.relativeValuation.peRatio ?? 0;
-  const myGrowth = data.growth.earningsGrowthRate ?? 0;
+  const myPE     = data.relativeValuation?.peRatio ?? 0;
+  const myGrowth = data.growth?.earningsGrowthRate ?? 0;
 
   // Use real competitors or synthetic industry/market PE as fallback
-  let peerPEs = data.competitors.filter(c => c.pe != null).map(c => c.pe as number);
+  let peerPEs = (data.competitors ?? []).filter(c => c.pe != null).map(c => c.pe as number);
   if (peerPEs.length === 0) {
-    const rv = data.relativeValuation;
+    const rv = data.relativeValuation ?? {};
     if (rv.peIndustry && rv.peIndustry !== myPE) peerPEs.push(rv.peIndustry);
     if (rv.peMarket && rv.peMarket !== myPE) peerPEs.push(rv.peMarket);
   }
@@ -261,8 +261,8 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
 
 function KeyValuationMetric({ data }: { data: AnalysisData }) {
   const [activeTab, setActiveTab] = useState<'pe' | 'ps' | 'pb'>('pe');
-  const rv = data.relativeValuation;
-  const comp = data.marketCapComposition;
+  const rv = data.relativeValuation ?? {} as typeof data.relativeValuation;
+  const comp = data.marketCapComposition ?? {} as typeof data.marketCapComposition;
 
   const tabs = [
     { id: 'pe' as const, label: 'P/L' },
@@ -574,18 +574,18 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
  * horizontal P/E axis. VALE3 as protagonist; peers discrete; amber avg line.
  */
 function PEVsPeersChart({ data }: { data: AnalysisData }) {
-  const myPE   = data.relativeValuation.peRatio ?? 0;
+  const myPE   = data.relativeValuation?.peRatio ?? 0;
   const myName = data.company.ticker;
-  const myEG   = data.growth.earningsGrowthRate ?? 0;
+  const myEG   = data.growth?.earningsGrowthRate ?? 0;
 
   // Build peer rows: real competitors + synthetic industry/market if no competitors
-  const realPeers = data.competitors
+  const realPeers = (data.competitors ?? [])
     .filter(c => c.pe != null)
     .map(c => ({ name: c.ticker, pe: c.pe as number, eg: c.earningsGrowth ?? null, isMain: false }));
 
   const syntheticPeers: typeof realPeers = [];
   if (realPeers.length === 0) {
-    const rv = data.relativeValuation;
+    const rv = data.relativeValuation ?? {};
     if (rv.peIndustry && rv.peIndustry !== myPE) syntheticPeers.push({ name: 'Indústria', pe: rv.peIndustry, eg: null, isMain: false });
     if (rv.peMarket && rv.peMarket !== myPE) syntheticPeers.push({ name: 'Mercado', pe: rv.peMarket, eg: null, isMain: false });
   }
@@ -1002,7 +1002,7 @@ function FairPEGauge({ data }: { data: AnalysisData }) {
 }
 
 function ValuationScenariosChart({ data }: { data: AnalysisData }) {
-  const cp  = data.valuation.currentPrice ?? 0;
+  const cp  = data.valuation?.currentPrice ?? 0;
   const scn = [...(data.priceScenarios ?? [])].sort((a, b) => a.estimatedValue - b.estimatedValue);
 
   if (scn.length < 3) {
@@ -1414,8 +1414,8 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
 
 function ValuationReadingCard({ data }: { data: AnalysisData }) {
   const dim   = data.snowflake?.find(d => d.dimension === 'value') ?? { checks: [], score: 0, summary: '', displayName: 'Valuation', dimension: 'value', max: 6 };
-  const v     = data.valuation;
-  const rv    = data.relativeValuation;
+  const v     = data.valuation ?? {} as typeof data.valuation;
+  const rv    = data.relativeValuation ?? {} as typeof data.relativeValuation;
   const disc  = v.discountPercent ?? 0;
 
   const fmt   = (n: number | null | undefined, dec = 1) =>
@@ -1646,7 +1646,7 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
 // ─── Value Tab ───────────────────────────────────────────────────────────────
 
 export function ValueTab({ data }: { data: AnalysisData }) {
-  const v  = data.valuation;
+  const v  = data.valuation ?? {} as typeof data.valuation;
   const [expanded, setExpanded] = useState(false);
 
   return (

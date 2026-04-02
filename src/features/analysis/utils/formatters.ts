@@ -32,14 +32,16 @@ export function fmtBRL(n: number | null | undefined): string {
  * Strings que já estão em outro formato (ex: "Mar 2026") são retornadas sem alteração.
  * Seguro contra problemas de timezone — não usa `new Date()` para dates without time.
  */
-export function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '—';
-  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+export function formatDate(dateStr: unknown): string {
+  if (dateStr == null || dateStr === '') return '—';
+  // Coerce to string safely — runtime values can deviate from TypeScript types
+  const str = typeof dateStr === 'string' ? dateStr : String(dateStr);
+  const match = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (match) {
     const [, year, month, day] = match;
     return `${day}/${month}/${year}`;
   }
-  return dateStr; // já formatado (ex: "Mar 2026") — retorna sem alterar
+  return str; // já formatado (ex: "Mar 2026") — retorna sem alterar
 }
 
 export function timeAgo(isoStr?: string): string {

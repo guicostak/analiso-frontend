@@ -7,7 +7,7 @@ import { safeN, safeNbr, formatNumber, formatDate } from '../utils/formatters';
 import { SectionCard, CheckList } from './AnalysisShared';
 
 function DividendHistorySection({ data }: { data: AnalysisData }) {
-  const d = data.dividend;
+  const d = data.dividend ?? {} as typeof data.dividend;
   const series = d.dividendQualitySeries ?? [];
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -263,7 +263,7 @@ function DividendHistorySection({ data }: { data: AnalysisData }) {
 }
 
 function DividendYieldVsMarketSection({ data }: { data: AnalysisData }) {
-  const d = data.dividend;
+  const d = data.dividend ?? {} as typeof data.dividend;
 
   const PAD = { top: 52, right: 108, bottom: 44, left: 168 };
   const VW = 920, VH = 460;
@@ -601,7 +601,7 @@ function CoverageBarCard({
 }
 
 function DividendCoverageSection({ data }: { data: AnalysisData }) {
-  const d = data.dividend;
+  const d = data.dividend ?? {} as typeof data.dividend;
   return (
     <div className="flex flex-col gap-4">
       <CoverageBarCard
@@ -631,7 +631,7 @@ function DividendCoverageSection({ data }: { data: AnalysisData }) {
 }
 
 function DividendReadingCard({ data }: { data: AnalysisData }) {
-  const d   = data.dividend;
+  const d   = data.dividend ?? {} as typeof data.dividend;
   const dcy = d.currentYield ?? 0;
   const dmm = d.marketMedianYield ?? 0;
   const dpr = d.payoutRatio ?? 0;
@@ -836,7 +836,7 @@ function DividendReadingCard({ data }: { data: AnalysisData }) {
 }
 
 export function DividendTab({ data }: { data: AnalysisData }) {
-  const d = data.dividend;
+  const d = data.dividend ?? {} as typeof data.dividend;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const nf  = (n: number | null | undefined, dec = 1) => n == null ? '—' : n.toFixed(dec);
@@ -897,7 +897,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
           <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes de dividendos</h3>
           <div className="flex-1">
             <ul className="space-y-0">
-              {data.dividendUpdates.slice(0, 5).map((item) => {
+              {(data.dividendUpdates ?? []).slice(0, 5).map((item) => {
                 const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                 const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                 return (
@@ -953,7 +953,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="space-y-0">
-                {data.dividendUpdates.map((item) => {
+                {(data.dividendUpdates ?? []).map((item) => {
                   const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                   const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                   return (

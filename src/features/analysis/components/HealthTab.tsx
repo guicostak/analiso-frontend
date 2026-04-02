@@ -69,22 +69,24 @@ function BalanceBarChart({ title, bars }: {
 }
 
 function FinancialPositionSection({ data }: { data: AnalysisData }) {
-  const h = data.health;
+  const h = data.health ?? {} as typeof data.health;
   const ticker = data.company.ticker;
+  const avlDefault = { shortTermAssets: 0, shortTermLiabilities: 0, longTermAssets: 0, longTermLiabilities: 0 };
+  const avl = h.assetsVsLiabilities ?? avlDefault;
 
   const shortTermBars = [
-    { label: 'Ativos',   value: h.assetsVsLiabilities.shortTermAssets,      color: '#3b82f6', textColor: '#FFFFFF' },
-    { label: 'Passivos', value: h.assetsVsLiabilities.shortTermLiabilities, color: '#bae6fd', textColor: '#262E3A' },
+    { label: 'Ativos',   value: avl.shortTermAssets,      color: '#3b82f6', textColor: '#FFFFFF' },
+    { label: 'Passivos', value: avl.shortTermLiabilities, color: '#bae6fd', textColor: '#262E3A' },
   ];
 
   const longTermBars = [
-    { label: 'Ativos',   value: h.assetsVsLiabilities.longTermAssets,       color: '#3b82f6', textColor: '#FFFFFF' },
-    { label: 'Passivos', value: h.assetsVsLiabilities.longTermLiabilities,  color: '#bae6fd', textColor: '#262E3A' },
+    { label: 'Ativos',   value: avl.longTermAssets,       color: '#3b82f6', textColor: '#FFFFFF' },
+    { label: 'Passivos', value: avl.longTermLiabilities,  color: '#bae6fd', textColor: '#262E3A' },
   ];
 
-  const stA = h.assetsVsLiabilities.shortTermAssets;
-  const stL = h.assetsVsLiabilities.shortTermLiabilities;
-  const ltL = h.assetsVsLiabilities.longTermLiabilities;
+  const stA = avl.shortTermAssets;
+  const stL = avl.shortTermLiabilities;
+  const ltL = avl.longTermLiabilities;
 
   const fmt = (v: number) => {
     const abs = Math.abs(v);
@@ -435,7 +437,7 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
 }
 
 function HealthReadingCard({ data }: { data: AnalysisData }) {
-  const h = data.health;
+  const h = data.health ?? {} as typeof data.health;
   const hdte   = h.debtToEquity ?? 0;
   const hdte5y = h.debtToEquity5yAgo ?? 0;
   const hsta   = h.shortTermAssets ?? 0;
@@ -645,7 +647,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
 }
 
 export function HealthTab({ data }: { data: AnalysisData }) {
-  const h = data.health;
+  const h = data.health ?? {} as typeof data.health;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
@@ -710,7 +712,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
           <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes de saúde financeira</h3>
           <div className="flex-1">
             <ul className="space-y-0">
-              {data.healthUpdates.slice(0, 5).map((item) => {
+              {(data.healthUpdates ?? []).slice(0, 5).map((item) => {
                 const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                 const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                 return (
@@ -766,7 +768,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="space-y-0">
-                {data.healthUpdates.map((item) => {
+                {(data.healthUpdates ?? []).map((item) => {
                   const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
                   const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
                   return (

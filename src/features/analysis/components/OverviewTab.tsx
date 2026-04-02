@@ -22,10 +22,10 @@ import { LuizAvatar } from '@/src/features/luiz/components';
 
 
 function buildPriceInsight(data: AnalysisData) {
-  const oneYearVsMarket = data.priceHistory.return1y - data.priceHistory.marketReturn1y;
-  const fiveYearTrend = data.priceHistory.return5y;
+  const oneYearVsMarket = (data.priceHistory?.return1y ?? 0) - (data.priceHistory?.marketReturn1y ?? 0);
+  const fiveYearTrend = data.priceHistory?.return5y ?? 0;
 
-  if (data.priceHistory.return1y < 0 && fiveYearTrend > 0) {
+  if ((data.priceHistory?.return1y ?? 0) < 0 && fiveYearTrend > 0) {
     return 'Depois de um periodo mais pressionado no curto prazo, a acao ainda preserva ganho acumulado no horizonte mais longo, mas sem uma recuperacao convincente o suficiente para eliminar a cautela.';
   }
 
@@ -37,8 +37,8 @@ function buildPriceInsight(data: AnalysisData) {
 }
 
 function buildReturnInsight(data: AnalysisData) {
-  const shortTerm = data.returnComparison.slice(0, 4);
-  const longTerm = data.returnComparison.slice(4);
+  const shortTerm = (data.returnComparison ?? []).slice(0, 4);
+  const longTerm = (data.returnComparison ?? []).slice(4);
   const shortUnderperformance = shortTerm.filter((item) => item.stock < item.market).length;
   const longOutperformance = longTerm.filter((item) => item.stock > item.market).length;
 
@@ -133,11 +133,11 @@ function BulletChart({
 
 function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   const myTicker = data.company.ticker;
-  const myPE     = data.relativeValuation.peRatio ?? 0;
-  const myGrowth = data.growth.earningsGrowthRate ?? 0;
+  const myPE     = data.relativeValuation?.peRatio ?? 0;
+  const myGrowth = data.growth?.earningsGrowthRate ?? 0;
 
   // Use real competitors or synthetic industry/market PE as fallback
-  let peerPEs = data.competitors.filter(c => c.pe != null).map(c => c.pe as number);
+  let peerPEs = (data.competitors ?? []).filter(c => c.pe != null).map(c => c.pe as number);
   if (peerPEs.length === 0) {
     const rv = data.relativeValuation;
     if (rv.peIndustry && rv.peIndustry !== myPE) peerPEs.push(rv.peIndustry);
@@ -1204,12 +1204,12 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
  * horizontal P/E axis. VALE3 as protagonist; peers discrete; amber avg line.
  */
 function PEVsPeersChart({ data }: { data: AnalysisData }) {
-  const myPE   = data.relativeValuation.peRatio ?? 0;
+  const myPE   = data.relativeValuation?.peRatio ?? 0;
   const myName = data.company.ticker;
-  const myEG   = data.growth.earningsGrowthRate ?? 0;
+  const myEG   = data.growth?.earningsGrowthRate ?? 0;
 
   // Build peer rows: real competitors + synthetic industry/market if no competitors
-  const realPeers = data.competitors
+  const realPeers = (data.competitors ?? [])
     .filter(c => c.pe != null)
     .map(c => ({ name: c.ticker, pe: c.pe as number, eg: c.earningsGrowth ?? null, isMain: false }));
 
@@ -1474,8 +1474,8 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
  * Uses the same translate(cx, cy) coordinate system as the original SWS SVG.
  */
 function FairPEGauge({ data }: { data: AnalysisData }) {
-  const currentPE = Math.round((data.relativeValuation.peRatio ?? 0) * 10) / 10;
-  const rawFair   = currentPE * ((data.valuation.fairValue ?? 0) / (data.valuation.currentPrice || 1));
+  const currentPE = Math.round((data.relativeValuation?.peRatio ?? 0) * 10) / 10;
+  const rawFair   = currentPE * ((data.valuation?.fairValue ?? 0) / (data.valuation?.currentPrice || 1));
   const fairPE    = Math.round(rawFair * 10) / 10;
   const maxPE     = fairPE * 2;  // fair PE always at top (π/2)
   const isGood    = currentPE <= fairPE;
@@ -1639,8 +1639,8 @@ function FairPEGauge({ data }: { data: AnalysisData }) {
  * VALUATION SCENARIOS — Thin editorial ruler, Base as protagonist, compact scenario cols.
  */
 function ValuationScenariosChart({ data }: { data: AnalysisData }) {
-  const cp  = data.valuation.currentPrice ?? 0;
-  const scn = [...data.priceScenarios].sort((a, b) => a.estimatedValue - b.estimatedValue);
+  const cp  = data.valuation?.currentPrice ?? 0;
+  const scn = [...(data.priceScenarios ?? [])].sort((a, b) => a.estimatedValue - b.estimatedValue);
 
   const fmt    = (n: number | null | undefined, dec = 2) =>
     n == null ? '—' : n.toFixed(dec).replace('.', ',');
@@ -1848,7 +1848,7 @@ function DCFWidget({ data }: { data: AnalysisData }) {
   // Series: monthly snapshots → current price as final point
   const currentPrice = v.currentPrice ?? 0;
   const pts = [
-    ...data.analystTargets.map(t => ({ label: t.date, price: t.price ?? 0 })),
+    ...(data.analystTargets ?? []).map(t => ({ label: t.date, price: t.price ?? 0 })),
     { label: 'Atual', price: currentPrice },
   ];
 
@@ -2431,12 +2431,12 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
   const headline = data.company.name + " — análise fundamentalista";
   const [descExpanded, setDescExpanded] = React.useState(false);
 
-  const rewards = data.rewardsAndRisks.filter((r) => r.type === 'reward').slice(0, 3);
-  const risks   = data.rewardsAndRisks.filter((r) => r.type === 'risk').slice(0, 3);
+  const rewards = (data.rewardsAndRisks ?? []).filter((r) => r.type === 'reward').slice(0, 3);
+  const risks   = (data.rewardsAndRisks ?? []).filter((r) => r.type === 'risk').slice(0, 3);
 
   // ─── Starting point ────────────────────────────────────────────────────────
   const startingTab: AnalysisTab = (() => {
-    if (data.valuation.discountPercent > 20) return 'value';
+    if (data.valuation?.discountPercent > 20) return 'value';
     return 'value';
   })();
 
@@ -2449,7 +2449,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
     dividend:  { tab: 'Dividendos',       reason: 'Os dividendos são uma parte importante do retorno. Veja se são sustentáveis.' },
   };
 
-  const priceUp = data.priceHistory.return1y >= 0;
+  const priceUp = (data.priceHistory?.return1y ?? 0) >= 0;
 
   return (
     <div className="space-y-5">
@@ -2502,9 +2502,9 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-neutral-900 tabular-nums">R$ {safeN(data.valuation.currentPrice, 2)}</div>
+            <div className="text-2xl font-bold text-neutral-900 tabular-nums">R$ {safeN(data.valuation?.currentPrice, 2)}</div>
             <div className={`text-[12px] font-medium mt-0.5 tabular-nums ${priceUp ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {priceUp ? '+' : ''}{data.priceHistory.return1y}% em 12 meses
+              {priceUp ? '+' : ''}{data.priceHistory?.return1y}% em 12 meses
             </div>
           </div>
         </div>
@@ -2634,7 +2634,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
       </div>
 
       {/* ── 6. O que mudou desde a última atualização ───────────────────── */}
-      {data.recentChanges.length > 0 && (() => {
+      {(data.recentChanges ?? []).length > 0 && (() => {
         const PILLAR_LABEL: Record<string, string> = {
           value: 'Preço justo', future: 'Futuro',
           past: 'Histórico', health: 'Saúde financeira', dividend: 'Dividendos',
@@ -2645,7 +2645,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
               O que mudou desde a última atualização
             </div>
             <div className="flex flex-col gap-2.5">
-              {data.recentChanges.map((change, i) => {
+              {(data.recentChanges ?? []).map((change, i) => {
                 const isWorse   = change.direction === 'worse';
                 const isBetter  = change.direction === 'better';
                 const arrowColor = isBetter ? 'text-emerald-500' : isWorse ? 'text-rose-500' : 'text-slate-400';
@@ -2751,7 +2751,7 @@ function PriceContextSection({
   ];
 
   // ── Slice + re-index ─────────────────────────────────────────────────────
-  const all    = data.priceContextSeries;
+  const all    = data.priceContextSeries ?? [];
   const cutoff = period === '6m' ? 6 : period === '1y' ? 12 : period === '3y' ? 36 : 60;
   const sliced = all.slice(Math.max(0, all.length - cutoff));
 
@@ -2768,7 +2768,7 @@ function PriceContextSection({
   const stockVar = last.stock - 100;
   const ibovVar  = last.ibov  - 100;
   const vsMkt    = stockVar - ibovVar;
-  const discount = data.valuation.discountPercent;
+  const discount = data.valuation?.discountPercent;
 
   // ── Chart geometry ────────────────────────────────────────────────────────
   const VW = 880, VH = 220;
@@ -2778,8 +2778,8 @@ function PriceContextSection({
   const n   = indexed.length;
 
   const allVals = indexed.flatMap(p => [p.stock, p.ibov]);
-  const rawMin  = Math.min(...allVals);
-  const rawMax  = Math.max(...allVals);
+  const rawMin  = allVals.length > 0 ? Math.min(...allVals) : 90;
+  const rawMax  = allVals.length > 0 ? Math.max(...allVals) : 110;
   const pad     = (rawMax - rawMin) * 0.1;
   const yMin    = rawMin - pad;
   const yMax    = rawMax + pad;
@@ -2949,9 +2949,9 @@ function PriceContextSection({
       </div>
 
       {/* ── Block 2: Eventos que explicam o movimento ─────────────────── */}
-      {data.contextEvents.length > 0 && (() => {
-        const visible  = data.contextEvents.slice(0, 3);
-        const overflow = data.contextEvents.slice(3);
+      {(data.contextEvents ?? []).length > 0 && (() => {
+        const visible  = (data.contextEvents ?? []).slice(0, 3);
+        const overflow = (data.contextEvents ?? []).slice(3);
 
         // Reusable event row
         const EventRow = ({ evt, isLast }: { evt: typeof data.contextEvents[0]; isLast: boolean }) => {
@@ -3035,7 +3035,7 @@ function PriceContextSection({
                   <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
                     <div>
                       <h3 className="text-[15px] font-semibold text-neutral-900">Todas as atualizações</h3>
-                      <p className="text-[11px] text-neutral-500 mt-0.5">{data.contextEvents.length} eventos relevantes</p>
+                      <p className="text-[11px] text-neutral-500 mt-0.5">{(data.contextEvents ?? []).length} eventos relevantes</p>
                     </div>
                     <button
                       type="button"
@@ -3050,11 +3050,11 @@ function PriceContextSection({
 
                   {/* Drawer body */}
                   <div className="flex-1 overflow-y-auto px-5 py-2">
-                    {data.contextEvents.map((evt, idx) => (
+                    {(data.contextEvents ?? []).map((evt, idx) => (
                       <EventRow
                         key={evt.id}
                         evt={evt}
-                        isLast={idx === data.contextEvents.length - 1}
+                        isLast={idx === (data.contextEvents ?? []).length - 1}
                       />
                     ))}
                   </div>
@@ -3127,12 +3127,12 @@ function BaseSection({
   data: AnalysisData;
   onSelectTab: (tab: AnalysisTab) => void;
 }) {
-  const v  = data.valuation;
-  const rv = data.relativeValuation;
-  const g  = data.growth;
-  const p  = data.pastPerformance;
-  const h  = data.health;
-  const dv = data.dividend;
+  const v  = data.valuation ?? {} as typeof data.valuation;
+  const rv = data.relativeValuation ?? {} as typeof data.relativeValuation;
+  const g  = data.growth ?? {} as typeof data.growth;
+  const p  = data.pastPerformance ?? {} as typeof data.pastPerformance;
+  const h  = data.health ?? {} as typeof data.health;
+  const dv = data.dividend ?? {} as typeof data.dividend;
   const cov = (h.ebit != null && h.interestExpense != null && h.interestExpense !== 0) ? safeN(h.ebit / h.interestExpense) : '—';
   const fmt$ = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
