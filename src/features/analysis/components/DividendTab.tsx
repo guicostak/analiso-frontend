@@ -878,7 +878,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
                 { label: 'Retorno total ao acionista', value: d.totalShareholderReturn != null ? `${nf(d.totalShareholderReturn)}%` : '—' },
                 { label: 'Rendimento futuro de dividendos', value: d.futureDividendYield != null ? `${nf(d.futureDividendYield)}%` : '—' },
                 { label: 'Crescimento de dividendos (10a)', value: d.dividendGrowth != null ? `${nf(d.dividendGrowth)}%` : '—' },
-                { label: 'Próximo pagamento', value: d.nextPaymentDate ?? 'Não divulgado' },
+                { label: 'Próximo pagamento', value: d.nextPaymentDate ? formatDate(d.nextPaymentDate) : 'Não divulgado' },
                 { label: 'Data ex-dividendo', value: formatDate(d.exDividendDate) },
                 { label: 'Dividendo por ação', value: `R$ ${nf(d.dividendPerShare, 3)}` },
                 { label: 'Payout ratio atual', value: `${d.payoutRatio ?? 0}%` },

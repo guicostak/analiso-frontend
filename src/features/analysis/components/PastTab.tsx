@@ -844,7 +844,7 @@ export function PastTab({ data }: { data: AnalysisData }) {
                 { label: 'Crescimento da receita (% ao ano)', value: nfp(p.revenueGrowthRate) },
                 { label: 'Retorno sobre patrimônio (ROE)', value: nfp(p.currentROE) },
                 { label: 'Margem líquida', value: nfp(p.netMargin) },
-                { label: 'Próximo balanço', value: p.nextEarningsDate ?? '—' },
+                { label: 'Próximo balanço', value: formatDate(p.nextEarningsDate) },
               ].map((row) => (
                 <tr key={row.label} className="border-t border-neutral-100">
                   <td className="py-2 text-neutral-500 pr-4">{row.label}</td>
