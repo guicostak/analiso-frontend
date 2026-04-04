@@ -29,12 +29,23 @@ function EarningsRevenueGrowthSection({ data }: { data: AnalysisData }) {
   const freeCashFlowSeries = g.freeCashFlowSeries ?? [];
   const cashFromOpSeries = g.cashFromOpSeries ?? [];
 
-  const chartData = earningsSeries.map((e, i) => ({
-    year: e.year,
-    'Receita': revenueSeries[i]?.value ?? 0,
-    'Ganhos': e.value,
-    'Fluxo de Caixa Livre': freeCashFlowSeries[i]?.value ?? 0,
-    'Fluxo de Caixa das Atividades Operacionais (FCO)': cashFromOpSeries[i]?.value ?? 0,
+  const earningsByYear = new Map(earningsSeries.map((item) => [item.year, item.value]));
+  const revenueByYear = new Map(revenueSeries.map((item) => [item.year, item.value]));
+  const fcfByYear = new Map(freeCashFlowSeries.map((item) => [item.year, item.value]));
+  const cfoByYear = new Map(cashFromOpSeries.map((item) => [item.year, item.value]));
+  const chartYears = Array.from(new Set([
+    ...earningsSeries.map((item) => item.year),
+    ...revenueSeries.map((item) => item.year),
+    ...freeCashFlowSeries.map((item) => item.year),
+    ...cashFromOpSeries.map((item) => item.year),
+  ])).sort();
+
+  const chartData = chartYears.map((year) => ({
+    year,
+    'Receita': revenueByYear.get(year) ?? 0,
+    'Ganhos': earningsByYear.get(year) ?? 0,
+    'Fluxo de Caixa Livre': fcfByYear.get(year) ?? 0,
+    'Fluxo de Caixa das Atividades Operacionais (FCO)': cfoByYear.get(year) ?? 0,
   }));
 
   const activeSeries = EARNINGS_CHART_SERIES.filter(s => activeKeys.has(s.key));

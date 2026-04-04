@@ -15,10 +15,11 @@ function BalanceBarChart({ title, bars }: {
   title: string;
   bars: { label: string; value: number; color: string; textColor: string }[];
 }) {
-  const maxVal = Math.max(...bars.map(b => b.value), 0.01);
+  const maxVal = Math.max(...bars.map(b => b.value ?? 0), 0.01);
   const n = bars.length;
   const pct = 100 / n;
-  const fmt = (v: number) => {
+  const fmt = (v: number | null | undefined) => {
+    if (v == null) return 'R$ —';
     const abs = Math.abs(v);
     if (abs >= 1e9) return `R$${(v / 1e9).toFixed(1)}bi`;
     if (abs >= 1e6) return `R$${(v / 1e6).toFixed(1)}mi`;
@@ -84,11 +85,12 @@ function FinancialPositionSection({ data }: { data: AnalysisData }) {
     { label: 'Passivos', value: avl.longTermLiabilities,  color: '#bae6fd', textColor: '#262E3A' },
   ];
 
-  const stA = avl.shortTermAssets;
-  const stL = avl.shortTermLiabilities;
-  const ltL = avl.longTermLiabilities;
+  const stA = avl.shortTermAssets ?? 0;
+  const stL = avl.shortTermLiabilities ?? 0;
+  const ltL = avl.longTermLiabilities ?? 0;
 
-  const fmt = (v: number) => {
+  const fmt = (v: number | null | undefined) => {
+    if (v == null) return 'R$ —';
     const abs = Math.abs(v);
     if (abs >= 1e9) return `R$ ${(v / 1e9).toFixed(2).replace('.', ',')} bi`;
     if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} mi`;
@@ -272,11 +274,14 @@ const BS_MIN_PCT = 10; // % below which inline label is replaced by external ann
 
 function BalanceSheetSection({ data }: { data: AnalysisData }) {
   const bs    = data.health?.balanceSheet;
-  if (!bs) return null;
-  const total = bs.assets.cash + bs.assets.receivables + bs.assets.inventory +
-                bs.assets.physicalAssets + bs.assets.longTermAssets;
+  if (!bs?.assets || !bs?.liabilities) return null;
+  const n = (v: number | null | undefined) => v ?? 0;
+  const total = n(bs.assets.cash) + n(bs.assets.receivables) + n(bs.assets.inventory) +
+                n(bs.assets.physicalAssets) + n(bs.assets.longTermAssets);
+  if (total <= 0) return null;
 
-  const fmt = (v: number) => {
+  const fmt = (v: number | null | undefined) => {
+    if (v == null) return 'R$ —';
     const abs = Math.abs(v);
     if (abs >= 1e9) return `R$${(v / 1e9).toFixed(1)}bi`;
     if (abs >= 1e6) return `R$${(v / 1e6).toFixed(1)}mi`;
@@ -287,20 +292,20 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
   // first = rightmost (flex-row-reverse → most liquid at center).
   // Blues: wider luminosity steps for scannability — light at center, dark at edge.
   const assetSegments = [
-    { label: 'Caixa e Invest. de Curto Prazo', short: 'Caixa & CP',  value: bs.assets.cash,            color: '#93c5fd', textDark: true,  key: true  },
-    { label: 'Recebíveis',                     short: 'Recebíveis',  value: bs.assets.receivables,     color: '#3b82f6', textDark: false, key: false },
-    { label: 'Estoques',                       short: 'Estoques',    value: bs.assets.inventory,        color: '#1d4ed8', textDark: false, key: false },
-    { label: 'Ativos Físicos',                 short: 'Ativos Fís.', value: bs.assets.physicalAssets,  color: '#1e40af', textDark: false, key: false },
-    { label: 'Ativos de LP e Outros',          short: 'LP & Outros', value: bs.assets.longTermAssets,  color: '#1e3a8a', textDark: false, key: true  },
-  ];
+    { label: 'Caixa e Invest. de Curto Prazo', short: 'Caixa & CP',  value: n(bs.assets.cash),            color: '#93c5fd', textDark: true,  key: true  },
+    { label: 'Recebíveis',                     short: 'Recebíveis',  value: n(bs.assets.receivables),     color: '#3b82f6', textDark: false, key: false },
+    { label: 'Estoques',                       short: 'Estoques',    value: n(bs.assets.inventory),       color: '#1d4ed8', textDark: false, key: false },
+    { label: 'Ativos Físicos',                 short: 'Ativos Fís.', value: n(bs.assets.physicalAssets),  color: '#1e40af', textDark: false, key: false },
+    { label: 'Ativos de LP e Outros',          short: 'LP & Outros', value: n(bs.assets.longTermAssets),  color: '#1e3a8a', textDark: false, key: true  },
+  ].filter(s => s.value > 0);
 
   // first = leftmost (most urgent at center). Red for debt, orange for others, green for equity.
   const liabilitySegments = [
-    { label: 'Contas a Pagar',     short: 'A Pagar',     value: bs.liabilities.accountsPayable,  color: '#f97316', textDark: false, key: false },
-    { label: 'Dívida',             short: 'Dívida',       value: bs.liabilities.debt,             color: '#dc2626', textDark: false, key: true  },
-    { label: 'Outros Passivos',    short: 'Outros Pass.', value: bs.liabilities.otherLiabilities, color: '#fb923c', textDark: false, key: false },
-    { label: 'Patrimônio Líquido', short: 'Patrim. L.',   value: bs.liabilities.equity,           color: '#15803d', textDark: false, key: true  },
-  ];
+    { label: 'Contas a Pagar',     short: 'A Pagar',     value: n(bs.liabilities.accountsPayable),  color: '#f97316', textDark: false, key: false },
+    { label: 'Dívida',             short: 'Dívida',       value: n(bs.liabilities.debt),             color: '#dc2626', textDark: false, key: true  },
+    { label: 'Outros Passivos',    short: 'Outros Pass.', value: n(bs.liabilities.otherLiabilities), color: '#fb923c', textDark: false, key: false },
+    { label: 'Patrimônio Líquido', short: 'Patrim. L.',   value: n(bs.liabilities.equity),           color: '#15803d', textDark: false, key: true  },
+  ].filter(s => s.value > 0);
 
   type Seg = typeof assetSegments[number];
 

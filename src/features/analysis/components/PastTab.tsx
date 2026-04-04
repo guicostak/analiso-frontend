@@ -32,13 +32,26 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
   const cS = (g.cashFromOpSeries ?? []).filter(r => r.type === 'historical');
   const oS = (g.operatingExpensesSeries ?? []).filter(r => r.type === 'historical');
 
-  const chartData = eS.map((e, i) => ({
-      year: e.year,
-      'Receita':                                              rS[i]?.value ?? 0,
-      'Ganhos':                                               e.value,
-      'Fluxo de Caixa Livre':                                fS[i]?.value ?? 0,
-      'Fluxo de Caixa das Atividades Operacionais (FCO)':    cS[i]?.value ?? 0,
-      'Despesas Operacionais':                               oS[i]?.value ?? 0,
+  const earningsByYear = new Map(eS.map((item) => [item.year, item.value]));
+  const revenueByYear = new Map(rS.map((item) => [item.year, item.value]));
+  const fcfByYear = new Map(fS.map((item) => [item.year, item.value]));
+  const cfoByYear = new Map(cS.map((item) => [item.year, item.value]));
+  const opExByYear = new Map(oS.map((item) => [item.year, item.value]));
+  const chartYears = Array.from(new Set([
+    ...eS.map((item) => item.year),
+    ...rS.map((item) => item.year),
+    ...fS.map((item) => item.year),
+    ...cS.map((item) => item.year),
+    ...oS.map((item) => item.year),
+  ])).sort();
+
+  const chartData = chartYears.map((year) => ({
+      year,
+      'Receita':                                              revenueByYear.get(year) ?? 0,
+      'Ganhos':                                               earningsByYear.get(year) ?? 0,
+      'Fluxo de Caixa Livre':                                fcfByYear.get(year) ?? 0,
+      'Fluxo de Caixa das Atividades Operacionais (FCO)':    cfoByYear.get(year) ?? 0,
+      'Despesas Operacionais':                               opExByYear.get(year) ?? 0,
     }));
 
   const activeSeries = HISTORICO_CHART_SERIES.filter(s => activeKeys.has(s.key));
