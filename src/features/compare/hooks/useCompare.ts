@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import {
   PILLARS,
@@ -149,12 +150,18 @@ export interface UseCompareReturn {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useCompare(): UseCompareReturn {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const detailRef = useRef<HTMLDivElement | null>(null);
   const verdictRef = useRef<HTMLElement | null>(null);
   const mounted = useRef(false);
 
-  // — Estado de seleção —
-  const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
+  // — Estado de seleção (inicializa da URL) —
+  const [selectedTickers, setSelectedTickers] = useState<string[]>(() => {
+    const param = searchParams.get("tickers");
+    if (!param) return [];
+    return param.split(",").map((t) => t.trim().toUpperCase()).filter(Boolean).slice(0, 4);
+  });
   const [search, setSearch] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
 
@@ -176,6 +183,20 @@ export function useCompare(): UseCompareReturn {
     savedAt: string;
   }>>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  // — Sincroniza tickers → URL —
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (selectedTickers.length > 0) {
+      params.set("tickers", selectedTickers.join(","));
+    } else {
+      params.delete("tickers");
+    }
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    if (newUrl !== `${window.location.pathname}${window.location.search}`) {
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [selectedTickers, router, searchParams]);
 
   // — Dados derivados básicos —
   const selected = useMemo(
