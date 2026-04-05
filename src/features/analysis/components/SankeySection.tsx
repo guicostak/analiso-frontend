@@ -15,11 +15,11 @@ export function SankeySection({ data }: Props) {
 
   if (safeData.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-8">
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: '#111827', marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <div className="analysis-card p-8">
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--foreground)', marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>
           De onde vem o dinheiro e para onde vai?
         </h3>
-        <p style={{ fontSize: 13, color: '#6b7280', fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <p style={{ fontSize: 13, color: 'var(--muted-foreground)', fontFamily: "'Inter', system-ui, sans-serif" }}>
           Dados indisponíveis.
         </p>
       </div>
@@ -40,11 +40,11 @@ export function SankeySection({ data }: Props) {
   const selectedData = data.find(d => d.year === String(year))
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
-      <h3 style={{ fontSize: 18, fontWeight: 600, color: '#111827', marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="analysis-card p-8">
+      <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--foreground)', marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>
         De onde vem o dinheiro e para onde vai?
       </h3>
-      <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <p style={{ fontSize: 13, color: 'var(--muted-foreground)', marginBottom: 20, fontFamily: "'Inter', system-ui, sans-serif" }}>
         Este diagrama mostra como a receita se divide entre custos, despesas e lucro. Cada faixa representa um fluxo de dinheiro. Quanto mais larga, maior o valor. Selecione o ano para comparar.
       </p>
 
@@ -66,9 +66,9 @@ export function SankeySection({ data }: Props) {
                 fontSize: 11.5,
                 fontWeight: isSelected ? 600 : 400,
                 fontFamily: "'Inter', system-ui, sans-serif",
-                color: isSelected ? '#1d4ed8' : '#6b7280',
-                background: isSelected ? '#eff6ff' : 'transparent',
-                border: isSelected ? '1px solid #bfdbfe' : '1px solid transparent',
+                color: isSelected ? 'var(--brand)' : 'var(--muted-foreground)',
+                background: isSelected ? 'var(--brand-surface)' : 'transparent',
+                border: isSelected ? '1px solid var(--brand-border)' : '1px solid transparent',
                 borderRadius: 6,
                 transition: 'all 0.15s',
                 visibility: isVisible || isSelected ? 'visible' : 'hidden',

@@ -131,3 +131,90 @@ export type CompareQualityTone = {
   dot: string;
   label: string;
 };
+
+// ─── Enriched data for side-by-side islands ──────────────────────────────────
+
+export type CompareSnowflakeScore = {
+  dimension: "value" | "future" | "past" | "health" | "dividend";
+  label: string;
+  score: number;       // 0-6
+  normalized: number;  // 0-100
+};
+
+export type CompareValuation = {
+  fairValue: number;
+  currentPrice: number;
+  discountPercent: number;
+  model: string;
+  pe: number;
+  peIndustry: number;
+  evEbitda: number;
+  pvp: number;
+};
+
+export type ComparePriceScenario = {
+  key: string;
+  label: string;
+  value: number;
+  gapPercent: number;
+};
+
+export type CompareGrowth = {
+  earningsGrowth: number;
+  revenueGrowth: number;
+  industryEarningsGrowth: number;
+  marketEarningsGrowth: number;
+  epsSeries: { year: string; value: number; type: "historical" | "forecast" }[];
+  revenueSeries: { year: string; value: number; type: "historical" | "forecast" }[];
+};
+
+export type ComparePastPerformance = {
+  earningsGrowthRate: number;
+  revenueGrowthRate: number;
+  roe: number;
+  roce: number;
+  netMargin: number;
+  grossMargin: number;
+  operatingMargin: number;
+  revenueSeries: { year: string; value: number }[];
+  earningsSeries: { year: string; value: number }[];
+  marginSeries: { year: string; gross: number; operating: number; net: number }[];
+  roeSeries: { year: string; value: number }[];
+  roceSeries: { year: string; value: number }[];
+};
+
+export type CompareHealth = {
+  shortTermAssets: number;
+  shortTermLiabilities: number;
+  longTermLiabilities: number;
+  debtToEquity: number;
+  debtToEquity5yAgo: number;
+  cash: number;
+  totalDebt: number;
+  ebit: number;
+  interestExpense: number;
+  operatingCashFlow: number;
+  debtSeries: { year: string; debt: number; equity: number; cash: number }[];
+};
+
+export type CompareDividend = {
+  currentYield: number;
+  marketMedianYield: number;
+  payoutRatio: number;
+  yearsWithoutInterruption: number;
+  cagr5y: number;
+  avgPayout5y: number;
+  dpaSeries: { year: string; dpa: number; payout: number | null; type: "historical" | "forecast" }[];
+};
+
+export type CompareEnrichedCompany = CompareCompany & {
+  price: number;
+  change1d: number;
+  snowflake: CompareSnowflakeScore[];
+  valuation: CompareValuation;
+  priceScenarios: ComparePriceScenario[];
+  growthData: CompareGrowth;
+  pastData: ComparePastPerformance;
+  healthData: CompareHealth;
+  dividendData: CompareDividend;
+};

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Bookmark, ChevronRight } from 'lucide-react';
 import type { DimensionScore, AnalysisData, AnalysisTab } from '../interfaces';
 import { DIMENSION_INTRO } from '../constants/colors';
 import { safeN, safeNbr } from '../utils/formatters';
@@ -13,31 +13,22 @@ export function FavoriteButton({ ticker }: { ticker: string }) {
   const [faved, setFaved] = useState(() => {
     try { return localStorage.getItem(key) === '1'; } catch { return false; }
   });
-  const [hovered, setHovered] = useState(false);
   const toggle = () => {
     const next = !faved;
     setFaved(next);
     try { next ? localStorage.setItem(key, '1') : localStorage.removeItem(key); } catch { /* noop */ }
   };
-  const starFilled = faved || hovered;
-  const starColor  = faved ? 'currentColor' : hovered ? '#FBBF24' : 'none';
-  const starStroke = hovered && !faved ? '#FBBF24' : 'currentColor';
   return (
     <button
       onClick={toggle}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       title={faved ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-      className="flex items-center gap-2 px-3 h-9 rounded-xl text-[13px] font-semibold transition-colors cursor-pointer"
-      style={faved
-        ? { background: '#FEF3C7', color: '#92400E' }
-        : { background: '#F3F4F6', color: '#6B7280' }
-      }
+      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+        faved
+          ? 'text-brand-text bg-brand-surface'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+      }`}
     >
-      <svg viewBox="0 0 16 16" className="w-5 h-5 flex-shrink-0 transition-colors" fill={starColor} stroke={starStroke} strokeWidth="1.5">
-        <path strokeLinejoin="round" d="M8 1.5l1.74 3.52 3.88.57-2.81 2.73.66 3.86L8 10.27l-3.47 1.91.66-3.86L2.38 5.59l3.88-.57z" />
-      </svg>
-      {faved ? 'Favoritado' : 'Favoritar'}
+      <Bookmark className="w-4 h-4" fill={faved ? 'currentColor' : 'none'} />
     </button>
   );
 }
@@ -51,7 +42,7 @@ export function ScoreBar({ score, max = 6, color }: { score: number; max?: numbe
         <div
           key={i}
           className="h-2 w-4 rounded-sm"
-          style={{ backgroundColor: i < score ? color : '#e5e7eb' }}
+          style={{ backgroundColor: i < score ? color : 'var(--border)' }}
         />
       ))}
       <span className="ml-2 text-sm font-semibold" style={{ color }}>{score}/{max}</span>
@@ -61,12 +52,13 @@ export function ScoreBar({ score, max = 6, color }: { score: number; max?: numbe
 
 // ─── SectionCard ──────────────────────────────────────────────────────────────
 
+// DESIGN CHANGE — SectionCard with refined elevation, border, and subtle hover lift
 export function SectionCard({ id, title, subtitle, children, className = '' }: { id?: string; title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
-    <div id={id} className={`bg-card rounded-2xl shadow-sm p-6 scroll-mt-24 ${className}`}>
+    <div id={id} className={`analysis-card p-6 scroll-mt-24 ${className}`}>
       <div className="mb-5">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -75,24 +67,28 @@ export function SectionCard({ id, title, subtitle, children, className = '' }: {
 
 // ─── DimensionIntroCard ───────────────────────────────────────────────────────
 
+// DESIGN CHANGE — DimensionIntroCard with colored left accent, refined icon treatment
 export function DimensionIntroCard({ dimension, title, icon, color }: {
   dimension: string; title: string; icon: React.ReactNode; color: string;
 }) {
   return (
-    <div className="bg-card rounded-2xl shadow-sm px-6 py-5">
-      <div className="flex items-center gap-2.5 mb-2">
-        <div className="w-6 h-6 rounded-lg flex items-center justify-center opacity-70" style={{ backgroundColor: `${color}20` }}>
-          <span className="scale-75" style={{ color }}>{icon}</span>
+    <div className="analysis-card px-6 py-5 relative overflow-hidden">
+      {/* Subtle colored top edge */}
+      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}40)` }} />
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}12` }}>
+          <span className="scale-[0.85]" style={{ color }}>{icon}</span>
         </div>
-        <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        <h2 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h2>
       </div>
-      <p className="text-sm text-muted-foreground leading-6">{DIMENSION_INTRO[dimension]}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed">{DIMENSION_INTRO[dimension]}</p>
     </div>
   );
 }
 
 // ─── DimensionScoreCard ───────────────────────────────────────────────────────
 
+// DESIGN CHANGE — DimensionScoreCard with refined header, subtle color accent, improved check items
 export function DimensionScoreCard({ label, score, max = 6, checks, color, anchors }: {
   label: string; score: number; max?: number; checks: DimensionScore['checks']; color: string;
   anchors?: (string | null)[];
@@ -103,36 +99,40 @@ export function DimensionScoreCard({ label, score, max = 6, checks, color, ancho
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-      {/* Score header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-5">
-        <div>
-          <p className="text-[10px] font-medium uppercase text-neutral-400">
-            Pontuação de {label}
-          </p>
-          <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-4xl font-bold text-neutral-900">{score}</span>
-            <span className="text-sm text-neutral-300 font-light ml-0.5">de {max}</span>
+    <div className="analysis-card overflow-hidden">
+      {/* DESIGN CHANGE — Score header with colored top accent and larger, bolder score */}
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}30)` }} />
+        <div className="flex items-center justify-between px-6 pt-7 pb-5">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: `${color}99` }}>
+              Pontuação de {label}
+            </p>
+            <div className="flex items-baseline gap-1.5 mt-1.5">
+              <span className="text-[42px] font-bold leading-none text-foreground">{score}</span>
+              <span className="text-sm text-muted-foreground font-light">de {max}</span>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-1.5">
-          {Array.from({ length: max }).map((_, i) => (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-full transition-all"
-              style={{
-                backgroundColor: i < score ? color : '#f3f4f6',
-                boxShadow: i < score ? `0 0 0 2px ${color}25` : 'none',
-              }}
-            />
-          ))}
+          {/* DESIGN CHANGE — Score dots with smooth fill and ring treatment */}
+          <div className="flex gap-2">
+            {Array.from({ length: max }).map((_, i) => (
+              <div
+                key={i}
+                className="w-3.5 h-3.5 rounded-full transition-all duration-200"
+                style={{
+                  backgroundColor: i < score ? color : 'var(--muted)',
+                  boxShadow: i < score ? `0 0 0 2px ${color}20` : 'none',
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-neutral-50 mx-6" />
+      <div className="border-t border-border mx-6" />
 
-      {/* Checks */}
-      <div className="pb-2">
+      {/* DESIGN CHANGE — Check items with improved spacing and hover effect */}
+      <div className="py-1">
         {checks.map((check, idx) => {
           const anchor = anchors?.[idx] ?? null;
           return (
@@ -141,34 +141,33 @@ export function DimensionScoreCard({ label, score, max = 6, checks, color, ancho
               type="button"
               onClick={() => scrollTo(anchor)}
               disabled={!anchor}
-              className={`w-full flex items-center gap-4 px-6 py-3.5 text-left transition-colors ${
-                anchor ? 'hover:bg-neutral-50/80 cursor-pointer' : 'cursor-default'
+              className={`w-full flex items-center gap-4 px-6 py-3.5 text-left transition-all duration-200 ${
+                anchor ? 'hover:bg-muted/50 cursor-pointer' : 'cursor-default'
               }`}
             >
-              {/* Barra lateral colorida — neutro, sem sensação de checklist */}
               <div
                 className="w-[3px] self-stretch rounded-full flex-shrink-0"
-                style={{ backgroundColor: check.passed ? '#2EAA8A' : '#D1D5DB' }}
+                style={{ backgroundColor: check.passed ? '#2EAA8A' : 'var(--border)' }}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-neutral-800">{check.label}</span>
+                  <span className="text-sm text-foreground">{check.label}</span>
                   {check.value && (
-                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${
-                      check.passed ? 'bg-teal-50 text-teal-700' : 'bg-neutral-100 text-neutral-500'
+                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded-md ${
+                      check.passed ? 'bg-success-surface text-success-text' : 'bg-muted text-muted-foreground'
                     }`}>
                       {check.value}
                     </span>
                   )}
                   {check.threshold && (
-                    <span className="text-xs text-neutral-300">{check.threshold}</span>
+                    <span className="text-xs text-muted-foreground">{check.threshold}</span>
                   )}
                 </div>
                 {check.description && (
-                  <p className="text-[11px] text-neutral-400 mt-0.5 leading-5">{check.description}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-5">{check.description}</p>
                 )}
               </div>
-              {anchor && <ChevronRight className="w-3.5 h-3.5 text-neutral-200 flex-shrink-0" />}
+              {anchor && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />}
             </button>
           );
         })}
@@ -183,24 +182,24 @@ export function CheckList({ checks }: { checks: DimensionScore['checks'] }) {
   return (
     <div className="space-y-2">
       {checks.map((check) => (
-        <div key={check.id} className="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-neutral-50 transition-colors">
+        <div key={check.id} className="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
           <div
             className="w-[3px] self-stretch rounded-full flex-shrink-0 mt-0.5"
             style={{ backgroundColor: check.passed ? '#2EAA8A' : '#D1D5DB' }}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-sm font-medium text-neutral-900">{check.label}</span>
+              <span className="text-sm font-medium text-foreground">{check.label}</span>
               {check.value && (
-                <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${check.passed ? 'bg-teal-50 text-teal-700' : 'bg-neutral-100 text-neutral-500'}`}>
+                <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${check.passed ? 'bg-success-surface text-success-text' : 'bg-muted text-muted-foreground'}`}>
                   {check.value}
                 </span>
               )}
               {check.threshold && (
-                <span className="text-xs text-neutral-400">{check.threshold}</span>
+                <span className="text-xs text-muted-foreground">{check.threshold}</span>
               )}
             </div>
-            <p className="text-xs text-neutral-500 mt-0.5">{check.description}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{check.description}</p>
           </div>
         </div>
       ))}
@@ -211,10 +210,10 @@ export function CheckList({ checks }: { checks: DimensionScore['checks'] }) {
 // ─── pillarStatus ─────────────────────────────────────────────────────────────
 
 export function pillarStatus(score: number): { label: string; color: string; bg: string; dot: string } {
-  if (score >= 5) return { label: 'Forte',       color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-400' };
-  if (score >= 3) return { label: 'Equilibrado', color: 'text-slate-600',   bg: 'bg-slate-100',  dot: 'bg-slate-400'   };
-  if (score >= 2) return { label: 'Atenção',     color: 'text-amber-700',   bg: 'bg-amber-50',   dot: 'bg-amber-400'   };
-  return             { label: 'Pressionado', color: 'text-rose-700',    bg: 'bg-rose-50',    dot: 'bg-rose-400'    };
+  if (score >= 5) return { label: 'Forte',       color: 'text-success-text', bg: 'bg-success-surface', dot: 'bg-emerald-400' };
+  if (score >= 3) return { label: 'Equilibrado', color: 'text-muted-foreground',   bg: 'bg-muted',  dot: 'bg-muted-foreground'   };
+  if (score >= 2) return { label: 'Atenção',     color: 'text-warning-text',   bg: 'bg-warning-surface',   dot: 'bg-amber-400'   };
+  return             { label: 'Pressionado', color: 'text-danger-text',    bg: 'bg-danger-surface',    dot: 'bg-rose-400'    };
 }
 
 // ─── CriteriaIcon ─────────────────────────────────────────────────────────────
@@ -400,9 +399,10 @@ export function GaugeCard({
   const uid     = ariaLabel.replace(/\s+/g, '-').toLowerCase();
 
   return (
-    <section className="bg-white rounded-2xl shadow-sm overflow-hidden flex-1">
+    // DESIGN CHANGE — GaugeCard with analysis-card elevation and refined header
+    <section className="analysis-card overflow-hidden flex-1">
       <div className="px-6 pt-5 pb-4">
-        <h3 style={{ fontFamily: 'Inter, sans-serif' }} className="text-base font-semibold text-neutral-900">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
           {title}
         </h3>
       </div>
@@ -448,31 +448,31 @@ export function GaugeCard({
             <table className="text-xs border-collapse w-full">
               <thead>
                 <tr>
-                  <th colSpan={2} className="pb-1.5 text-left font-semibold text-neutral-600 text-[11px] whitespace-nowrap">{legendTitle}</th>
+                  <th colSpan={2} className="pb-1.5 text-left font-semibold text-muted-foreground text-[11px] whitespace-nowrap">{legendTitle}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="pr-6 py-0.5 text-[11px]" style={{ color: color1 }}>{legend1Label}</td>
-                  <td className="font-semibold text-neutral-800 text-[11px]">{safeNbr(value1)}%</td>
+                  <td className="font-semibold text-foreground text-[11px]">{safeNbr(value1)}%</td>
                 </tr>
                 <tr>
                   <td className="pr-6 py-0.5 text-[11px]" style={{ color: color2 }}>{legend2Label}</td>
-                  <td className="font-semibold text-neutral-800 text-[11px]">{safeNbr(value2)}%</td>
+                  <td className="font-semibold text-foreground text-[11px]">{safeNbr(value2)}%</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Statement */}
-        <blockquote className="flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50/60 px-4 py-4">
+        {/* DESIGN CHANGE — Statement with refined border and background */}
+        <blockquote className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-4">
           <div
             className="rounded-full flex-shrink-0 mt-1.5"
             style={{ width: 8, height: 8, backgroundColor: passed ? '#2EAA8A' : '#D1D5DB' }}
           />
-          <p className="text-sm text-neutral-700 leading-6 break-words">
-            <span className="font-semibold text-neutral-800">{statementLabel} </span>
+          <p className="text-sm text-dim leading-6 break-words">
+            <span className="font-semibold text-foreground">{statementLabel} </span>
             {statementText}
           </p>
         </blockquote>
@@ -535,7 +535,7 @@ export function GrowthBarChart({ title, bars }: {
           })}
         </svg>
       </div>
-      <h4 className="text-xs font-medium text-neutral-500 mt-2 text-center">{title}</h4>
+      <h4 className="text-xs font-medium text-muted-foreground mt-2 text-center">{title}</h4>
     </div>
   );
 }

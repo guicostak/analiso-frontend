@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { AnalysisTab } from '../interfaces';
 
-const SECTION_IDS = ['overview', 'value', 'future', 'past', 'health', 'dividend'] as const;
+const SECTION_IDS = ['overview', 'value', 'future', 'past', 'health', 'dividend', 'sources'] as const;
 
 export function useAnalysisNav(hasData: boolean) {
   const [activeSection, setActiveSection] = useState<AnalysisTab>('overview');
   const [companyCardPassed, setCompanyCardPassed] = useState(false);
-  const [sidebarMarginTop, setSidebarMarginTop] = useState(0);
   const companyCardRef = useRef<HTMLDivElement | null>(null);
   const navAlignRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>(
@@ -24,26 +23,6 @@ export function useAnalysisNav(hasData: boolean) {
     return () => obs.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasData]);
-
-  // Sidebar margin scroll effect — alinha com navAlignRef (Resumo da análise)
-  useEffect(() => {
-    const updateMargin = () => {
-      const alignEl = navAlignRef.current;
-      if (!alignEl) { setSidebarMarginTop(0); return; }
-      // offsetTop relativo ao pai do aside (o flex container)
-      const scrollY = window.scrollY;
-      const alignTop = alignEl.getBoundingClientRect().top + scrollY - 80; // 80 = AppTopBar height
-      const offset = Math.max(0, alignTop - scrollY);
-      setSidebarMarginTop(offset);
-    };
-    updateMargin();
-    window.addEventListener('scroll', updateMargin, { passive: true });
-    window.addEventListener('resize', updateMargin, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', updateMargin);
-      window.removeEventListener('resize', updateMargin);
-    };
-  }, []);
 
   // Section observers — re-run when data loads so refs are populated
   useEffect(() => {
@@ -71,5 +50,5 @@ export function useAnalysisNav(hasData: boolean) {
     window.scrollTo({ top, behavior: 'smooth' });
   }, []);
 
-  return { activeSection, companyCardPassed, sidebarMarginTop, companyCardRef, navAlignRef, sectionRefs, scrollToSection };
+  return { activeSection, companyCardPassed, companyCardRef, navAlignRef, sectionRefs, scrollToSection };
 }

@@ -17,6 +17,28 @@
   animation: luiz-neon 10s ease-in-out infinite;
 }
 
+/* ─── Luiz AI shimmer badge ─────────────────────────────────────────── */
+@keyframes luiz-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.luiz-ai-shimmer {
+  background: linear-gradient(
+    90deg,
+    #A855F7 0%,
+    #EC4899 25%,
+    #06B6D4 50%,
+    #A855F7 75%,
+    #6366F1 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: luiz-shimmer 4s ease-in-out infinite;
+}
+
 /* ─── Custom Easing Curves (Emil Kowalski) ─────────────────────────── */
 /* Built-in CSS easings are too weak — use stronger custom curves       */
 :root {
@@ -1060,4 +1082,222 @@ html {
 @keyframes spin-once {
   from { transform: rotate(0deg); }
   to   { transform: rotate(-360deg); }
+}
+
+/* ─── Analysis Page: Design Refresh Animations (Emil Kowalski) ─────────── */
+/* DESIGN CHANGE — fade+rise entry for sections and cards */
+
+@keyframes analysis-fade-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes analysis-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes analysis-scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes analysis-slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sidebar-header-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Utility classes for analysis page animations */
+.analysis-enter {
+  animation: analysis-fade-rise 350ms var(--ease-out) both;
+}
+
+.analysis-enter-scale {
+  animation: analysis-scale-in 300ms var(--ease-out) both;
+}
+
+.analysis-enter-slide {
+  animation: analysis-slide-in-left 300ms var(--ease-out) both;
+}
+
+/* Stagger delays for child elements */
+.analysis-stagger-1 { animation-delay: 60ms; }
+.analysis-stagger-2 { animation-delay: 120ms; }
+.analysis-stagger-3 { animation-delay: 180ms; }
+.analysis-stagger-4 { animation-delay: 240ms; }
+.analysis-stagger-5 { animation-delay: 300ms; }
+.analysis-stagger-6 { animation-delay: 360ms; }
+
+/* DESIGN CHANGE — Enhanced card elevation system */
+.analysis-card {
+  background: var(--card);
+  border-radius: 12px;
+  border: 0.5px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.analysis-card:hover {
+  border-color: var(--border);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Compare page island animations ──────────────────────────────────────── */
+.compare-island {
+  animation: analysis-fade-rise 400ms var(--ease-out) both;
+}
+.compare-stagger-1 { animation-delay: 80ms; }
+.compare-stagger-2 { animation-delay: 160ms; }
+.compare-stagger-3 { animation-delay: 240ms; }
+.compare-stagger-4 { animation-delay: 320ms; }
+.compare-stagger-5 { animation-delay: 400ms; }
+.compare-stagger-6 { animation-delay: 480ms; }
+
+.compare-surface {
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 18px 40px rgba(15, 23, 40, 0.04);
+}
+.dark .compare-surface {
+  box-shadow: none;
+}
+
+.compare-side-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 767px) {
+  .compare-side-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* DESIGN CHANGE — Section divider with dimension color accent */
+.analysis-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.analysis-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+
+/* Sidebar nav items — dimension-colored hover/active */
+.analysis-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-radius: 8px;
+  transition: color 200ms var(--ease-out), background-color 200ms var(--ease-out);
+  cursor: pointer;
+}
+
+.analysis-nav-item:hover {
+  color: var(--dim-color, var(--foreground));
+  background-color: color-mix(in srgb, var(--dim-color, var(--muted-foreground)) 12%, transparent);
+}
+
+/* DESIGN CHANGE — Loading spinner refined */
+.analysis-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: step-spin 800ms cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+/* ── Analysis chart skeleton loader ── */
+.analysis-skeleton-bar {
+  background: var(--border);
+  border-radius: 4px 4px 0 0;
+  animation: skeleton-bar-rise 1.8s ease-in-out infinite alternate;
+}
+.analysis-skeleton-bar:nth-child(1) { animation-delay: 0ms; }
+.analysis-skeleton-bar:nth-child(2) { animation-delay: 150ms; }
+.analysis-skeleton-bar:nth-child(3) { animation-delay: 300ms; }
+.analysis-skeleton-bar:nth-child(4) { animation-delay: 450ms; }
+.analysis-skeleton-bar:nth-child(5) { animation-delay: 600ms; }
+.analysis-skeleton-bar:nth-child(6) { animation-delay: 750ms; }
+.analysis-skeleton-bar:nth-child(7) { animation-delay: 900ms; }
+
+@keyframes skeleton-bar-rise {
+  0% { transform: scaleY(0.3); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 0.7; }
+  100% { transform: scaleY(0.3); opacity: 0.3; }
+}
+
+.analysis-skeleton-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--brand), transparent);
+  animation: skeleton-line-sweep 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-line-sweep {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.analysis-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in srgb, var(--border) 60%, transparent) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* DESIGN CHANGE — Dimension section accent bar */
+.analysis-section-accent {
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .analysis-enter,
+  .analysis-enter-scale,
+  .analysis-enter-slide {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .analysis-card:hover {
+    transform: none;
+  }
 }

@@ -10,6 +10,7 @@ import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, formatDate } from '../utils/formatters';
 import { SectionCard, CheckList, CriteriaIcon, AGFC_H, AGFC_MAX_BAR, AGFC_TOP_PAD } from './AnalysisShared';
+import { DimensionCheckCard } from './ScoreDots';
 
 function BalanceBarChart({ title, bars }: {
   title: string;
@@ -63,7 +64,7 @@ function BalanceBarChart({ title, bars }: {
           })}
         </svg>
       </div>
-      <h4 className="text-xs font-medium text-neutral-500 mt-2 text-center">{title}</h4>
+      <h4 className="text-xs font-medium text-muted-foreground mt-2 text-center">{title}</h4>
     </div>
   );
 }
@@ -120,22 +121,22 @@ function FinancialPositionSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-section="health" id="health-balance">
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Análise da Posição Financeira
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+      <div className="analysis-card p-6">
         <div className="flex gap-6">
           <BalanceBarChart title="Curto prazo" bars={shortTermBars} />
           <BalanceBarChart title="Longo prazo" bars={longTermBars} />
         </div>
         <div className="mt-4">
           {checks.map(check => (
-            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-neutral-100 first:border-0">
+            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-border first:border-0">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
                   <CriteriaIcon passed={check.passed} size={24} />
                 </div>
-                <p className="text-xs leading-5 text-neutral-700">
+                <p className="text-xs leading-5 text-foreground">
                   <span className={`font-semibold ${check.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {check.label}{' '}
                   </span>
@@ -181,10 +182,10 @@ function DebtHistorySection({ data }: { data: AnalysisData }) {
 
   return (
     <section>
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Histórico e análise da relação dívida/patrimônio líquido
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-5">
+      <div className="analysis-card p-5">
         <div className="h-[360px] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:fill-neutral-400">
           <TremorArea
             data={chartData}
@@ -204,7 +205,7 @@ function DebtHistorySection({ data }: { data: AnalysisData }) {
             <button
               key={s.key}
               onClick={() => toggleKey(s.key)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-neutral-200 bg-neutral-100 text-neutral-700 hover:bg-neutral-200 ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-border bg-muted text-muted-foreground hover:bg-hover ${
                 activeKeys.has(s.key) ? 'opacity-100' : 'opacity-40'
               }`}
             >
@@ -245,12 +246,12 @@ function DebtHistorySection({ data }: { data: AnalysisData }) {
               content: 'O WEGE3 rende mais juros do que paga, portanto, a cobertura de pagamentos de juros não é motivo de preocupação.',
             },
           ].map(check => (
-            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-neutral-100 first:border-0">
+            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-border first:border-0">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
                   <CriteriaIcon passed={check.passed} size={24} />
                 </div>
-                <p className="text-xs leading-5 text-neutral-700">
+                <p className="text-xs leading-5 text-foreground">
                   <span className={`font-semibold ${check.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {check.label}{' '}
                   </span>
@@ -313,9 +314,9 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
           <div key={seg.label} style={{ width: `${w}%` }} className="relative flex flex-col items-center justify-end">
             {w < BS_MIN_PCT && (
               <div className="flex flex-col items-center" style={{ overflow: 'visible', whiteSpace: 'nowrap' }}>
-                <span className="font-medium text-neutral-500" style={{ fontSize: 8 }}>{seg.short}</span>
-                <span className="font-bold text-neutral-700" style={{ fontSize: 9 }}>{fmt(seg.value)}</span>
-                <div className="w-px bg-neutral-300" style={{ height: 7, marginTop: 2 }} />
+                <span className="font-medium text-muted-foreground" style={{ fontSize: 8 }}>{seg.short}</span>
+                <span className="font-bold text-foreground" style={{ fontSize: 9 }}>{fmt(seg.value)}</span>
+                <div className="w-px bg-border" style={{ height: 7, marginTop: 2 }} />
               </div>
             )}
           </div>
@@ -352,35 +353,35 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
   // Legend row — accent left border for key metrics, tabular-nums, no zebra bg
   const LegendRow = ({ seg }: { seg: Seg }) => (
     <div
-      className="flex items-center gap-2 py-1.5 border-b border-neutral-50 last:border-0"
+      className="flex items-center gap-2 py-1.5 border-b border-border/50 last:border-0"
       style={seg.key ? { borderLeft: `3px solid ${seg.color}`, paddingLeft: 6 } : { paddingLeft: 0 }}
     >
       <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: seg.color }} />
-      <span className={`flex-1 text-xs truncate ${seg.key ? 'font-semibold text-neutral-800' : 'text-neutral-500'}`}>
+      <span className={`flex-1 text-xs truncate ${seg.key ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
         {seg.label}
       </span>
-      <span className="text-xs font-semibold text-neutral-800 tabular-nums ml-2">{fmt(seg.value)}</span>
-      <span className="text-[10px] text-neutral-400 tabular-nums w-12 text-right">{pct(seg.value)}</span>
+      <span className="text-xs font-semibold text-foreground tabular-nums ml-2">{fmt(seg.value)}</span>
+      <span className="text-[10px] text-muted-foreground tabular-nums w-12 text-right">{pct(seg.value)}</span>
     </div>
   );
 
   return (
     <section>
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Balanço Patrimonial
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+      <div className="analysis-card p-6">
 
         {/* Headers */}
         <div className="flex mb-1 items-end">
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-normal text-neutral-700">Ativos</div>
-            <div className="text-xs text-neutral-400 mt-0.5">menos líquido → mais líquido</div>
+            <div className="text-[11px] font-semibold uppercase tracking-normal text-foreground">Ativos</div>
+            <div className="text-xs text-muted-foreground mt-0.5">menos líquido → mais líquido</div>
           </div>
           <div style={{ width: AXIS_W }} />
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-normal text-neutral-700">Passivo + Patrimônio Líquido</div>
-            <div className="text-xs text-neutral-400 mt-0.5">mais exigível → menos exigível</div>
+            <div className="text-[11px] font-semibold uppercase tracking-normal text-foreground">Passivo + Patrimônio Líquido</div>
+            <div className="text-xs text-muted-foreground mt-0.5">mais exigível → menos exigível</div>
           </div>
         </div>
 
@@ -396,7 +397,7 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
           <BarSide segments={assetSegments} reverse />
           {/* Center axis — the accounting pivot */}
           <div className="flex-shrink-0 flex flex-col items-center" style={{ width: AXIS_W }}>
-            <div className="h-full" style={{ width: 4, backgroundColor: '#111827', borderRadius: 3 }} />
+            <div className="h-full" style={{ width: 4, backgroundColor: 'var(--foreground)', borderRadius: 3 }} />
           </div>
           <BarSide segments={liabilitySegments} reverse={false} />
         </div>
@@ -404,28 +405,28 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
         {/* Totals — "=" anchored exactly to axis center */}
         <div className="flex items-baseline mt-2">
           <div className="flex-1 text-right">
-            <span className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(total)}</span>
-            <span className="text-[10px] text-neutral-400 ml-1">total</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(total)}</span>
+            <span className="text-[10px] text-muted-foreground ml-1">total</span>
           </div>
           <div style={{ width: AXIS_W }} className="text-center">
-            <span className="text-xs text-neutral-400 font-light" style={{ letterSpacing: 1 }}>=</span>
+            <span className="text-xs text-muted-foreground font-light" style={{ letterSpacing: 1 }}>=</span>
           </div>
           <div className="flex-1">
-            <span className="text-sm font-bold text-neutral-800 tabular-nums">{fmt(total)}</span>
-            <span className="text-[10px] text-neutral-400 ml-1">total</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(total)}</span>
+            <span className="text-[10px] text-muted-foreground ml-1">total</span>
           </div>
         </div>
 
         {/* Legend */}
         <div className="mt-5 grid grid-cols-2 gap-x-10">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-normal text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
+            <div className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground mb-2 pb-1 border-b border-border">
               Ativos — por liquidez
             </div>
             {assetSegments.map(seg => <LegendRow key={seg.label} seg={seg} />)}
           </div>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-normal text-neutral-400 mb-2 pb-1 border-b border-neutral-100">
+            <div className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground mb-2 pb-1 border-b border-border">
               Passivo + PL — por exigibilidade
             </div>
             {liabilitySegments.map(seg => <LegendRow key={seg.label} seg={seg} />)}
@@ -462,7 +463,7 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
       headline:  'Balanço sólido, com baixa dívida e boa capacidade de pagamento',
       sub:       `Dívida em relação ao patrimônio de ${safeN(hdte)}% e capacidade de pagar juros de ${interestCoverage != null ? safeN(interestCoverage) + 'x' : '—'} indicam estrutura financeira conservadora.`,
       badge:     'Saúde forte',
-      badgeBg:   '#EFF6FF',
+      badgeBg:   'var(--brand-surface)',
       badgeColor:'#1D4ED8',
       badgeDot:  '#3B82F6',
       synthesis: `A estrutura financeira é conservadora, com folga para suportar períodos difíceis e capacidade de investir sem pressão excessiva sobre o caixa.`,
@@ -552,15 +553,15 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="analysis-card overflow-hidden">
 
         {/* ── 1. Header ── */}
         <div className="px-7 pt-7 pb-6 flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-[22px] font-bold text-[#0F172A] leading-snug mb-2">
+            <h2 className="text-[22px] font-bold text-foreground leading-snug mb-2">
               {thesis.headline}
             </h2>
-            <p className="text-[14px] text-slate-500 leading-relaxed max-w-xl">
+            <p className="text-[14px] text-muted-foreground leading-relaxed max-w-xl">
               {thesis.sub}
             </p>
           </div>
@@ -585,9 +586,9 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
         </div>
 
         {/* ── 2. Evidences + Limitations ── */}
-        <div className="border-t border-neutral-100 grid grid-cols-2 divide-x divide-neutral-100">
+        <div className="border-t border-border grid grid-cols-2 divide-x divide-border">
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que reforça essa conclusão
             </div>
             <div className="space-y-5">
@@ -596,21 +597,21 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
                   <div className="w-[3px] rounded-full bg-[#355CDE] shrink-0 self-stretch" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{e.observed}</span>
-                      {e.reference && <span className="text-[11px] text-slate-400">{e.reference}</span>}
+                      <span className="text-[15px] font-bold text-foreground tabular-nums">{e.observed}</span>
+                      {e.reference && <span className="text-[11px] text-muted-foreground">{e.reference}</span>}
                     </div>
-                    <div className="text-[12px] font-medium text-slate-600 mt-0.5">{e.criterion}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{e.micro}</div>
+                    <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{e.criterion}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{e.micro}</div>
                   </div>
                 </div>
               ))}
               {evidences.length === 0 && (
-                <div className="text-[12px] text-slate-400 italic">Sem evidências de saúde financeira robusta.</div>
+                <div className="text-[12px] text-muted-foreground italic">Sem evidências de saúde financeira robusta.</div>
               )}
             </div>
           </div>
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que limita essa leitura
             </div>
             <div className="space-y-5">
@@ -619,25 +620,25 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
                   <div className="w-[3px] rounded-full bg-amber-400 shrink-0 self-stretch" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{l.observed}</span>
-                      <span className="text-[11px] text-slate-400">{l.reference}</span>
+                      <span className="text-[15px] font-bold text-foreground tabular-nums">{l.observed}</span>
+                      <span className="text-[11px] text-muted-foreground">{l.reference}</span>
                     </div>
-                    <div className="text-[12px] font-medium text-slate-600 mt-0.5">{l.criterion}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{l.micro}</div>
+                    <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{l.criterion}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{l.micro}</div>
                   </div>
                 </div>
               ))}
               {limitations.length === 0 && (
-                <div className="text-[12px] text-slate-400 italic">Nenhum limitador relevante identificado.</div>
+                <div className="text-[12px] text-muted-foreground italic">Nenhum limitador relevante identificado.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* ── 3. Synthesis ── */}
-        <div className="border-t border-neutral-100 px-7 py-4 bg-neutral-50/50 flex items-center gap-3">
-          <div className="w-1 h-5 rounded-full bg-neutral-300 shrink-0" />
-          <p className="text-[12.5px] text-slate-500 leading-relaxed">
+        <div className="border-t border-border px-7 py-4 bg-muted/50 flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full bg-border shrink-0" />
+          <p className="text-[12.5px] text-muted-foreground leading-relaxed">
             {thesis.synthesis}
           </p>
         </div>
@@ -649,7 +650,6 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
 export function HealthTab({ data }: { data: AnalysisData }) {
   const h = data.health ?? {} as typeof data.health;
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
   const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
@@ -666,26 +666,27 @@ export function HealthTab({ data }: { data: AnalysisData }) {
 
       {/* ── Reading Card — same pattern as ValuationReadingCard ── */}
       <HealthReadingCard data={data} />
+      <DimensionCheckCard dimension="health" data={data} />
 
       {/* Key Information + Recent Updates — side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {/* Key Information */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <h3 className="text-sm font-semibold text-neutral-800 mb-4">Informações chave</h3>
+        <div className="analysis-card p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Informações chave</h3>
           <div className="flex gap-6 mb-4">
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nfp(h.debtToEquity, 2)}</p>
-                <p className="text-xs text-neutral-400">Dívida em relação ao patrimônio</p>
+                <p className="text-lg font-bold text-foreground">{nfp(h.debtToEquity, 2)}</p>
+                <p className="text-xs text-muted-foreground">Dívida em relação ao patrimônio</p>
               </div>
             </div>
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{fmtBRL(h.totalDebt)}</p>
-                <p className="text-xs text-neutral-400">Dívida total</p>
+                <p className="text-lg font-bold text-foreground">{fmtBRL(h.totalDebt)}</p>
+                <p className="text-xs text-muted-foreground">Dívida total</p>
               </div>
             </div>
           </div>
@@ -698,9 +699,9 @@ export function HealthTab({ data }: { data: AnalysisData }) {
                 { label: 'Total de dívidas e obrigações', value: fmtBRL(totalLiabilities) },
                 { label: 'Total de bens e direitos', value: fmtBRL(totalAssets) },
               ].map((row) => (
-                <tr key={row.label} className="border-t border-neutral-100">
-                  <td className="py-2 text-neutral-500 pr-4">{row.label}</td>
-                  <td className="py-2 text-right font-medium text-neutral-800">{row.value}</td>
+                <tr key={row.label} className="border-t border-border">
+                  <td className="py-2 text-muted-foreground pr-4">{row.label}</td>
+                  <td className="py-2 text-right font-medium text-foreground">{row.value}</td>
                 </tr>
               ))}
             </tbody>
@@ -708,15 +709,15 @@ export function HealthTab({ data }: { data: AnalysisData }) {
         </div>
 
         {/* Recent Health Updates */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col">
-          <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes de saúde financeira</h3>
+        <div className="analysis-card p-5 flex flex-col">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Atualizações recentes de saúde financeira</h3>
           <div className="flex-1">
             <ul className="space-y-0">
               {(data.healthUpdates ?? []).slice(0, 5).map((item) => {
-                const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
-                const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
+                const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-muted-foreground';
+                const bgColor = item.sentiment === 'good' ? 'bg-success-surface' : item.sentiment === 'bad' ? 'bg-danger-surface' : 'bg-muted';
                 return (
-                  <li key={item.id} className="flex items-start gap-3 py-2.5 border-b border-neutral-50">
+                  <li key={item.id} className="flex items-start gap-3 py-2.5 border-b border-border/50">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                       {item.sentiment === 'good' && (
                         <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
@@ -729,8 +730,8 @@ export function HealthTab({ data }: { data: AnalysisData }) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-neutral-800 leading-5 line-clamp-2">{item.title}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
+                      <p className="text-sm text-foreground leading-5 line-clamp-2">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
                     </div>
                   </li>
                 );
@@ -739,7 +740,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="mt-3 w-full rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-2 text-center transition-colors"
+            className="mt-3 w-full rounded-lg bg-brand-surface hover:bg-brand-surface/80 text-brand-text text-xs font-semibold py-2 text-center transition-colors"
           >
             Mostrar todas as atualizações
           </button>
@@ -753,12 +754,12 @@ export function HealthTab({ data }: { data: AnalysisData }) {
             className="fixed inset-0 bg-black/30 z-40"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
-              <h2 className="text-sm font-semibold text-neutral-800">Atualizações recentes de saúde financeira</h2>
+          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-card shadow-2xl z-50 flex flex-col">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+              <h2 className="text-sm font-semibold text-foreground">Atualizações recentes de saúde financeira</h2>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-1.5 rounded hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600"
+                className="p-1.5 rounded hover:bg-hover transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="Fechar"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -769,10 +770,10 @@ export function HealthTab({ data }: { data: AnalysisData }) {
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="space-y-0">
                 {(data.healthUpdates ?? []).map((item) => {
-                  const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
-                  const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
+                  const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-muted-foreground';
+                  const bgColor = item.sentiment === 'good' ? 'bg-success-surface' : item.sentiment === 'bad' ? 'bg-danger-surface' : 'bg-muted';
                   return (
-                    <li key={item.id} className="flex items-start gap-3 py-3 border-b border-neutral-50 last:border-0">
+                    <li key={item.id} className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                         {item.sentiment === 'good' && (
                           <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
@@ -785,8 +786,8 @@ export function HealthTab({ data }: { data: AnalysisData }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-neutral-800 leading-5">{item.title}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
+                        <p className="text-sm text-foreground leading-5">{item.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
                       </div>
                     </li>
                   );
@@ -800,35 +801,8 @@ export function HealthTab({ data }: { data: AnalysisData }) {
       {/* Análise da Posição Financeira */}
       <FinancialPositionSection data={data} />
 
-      {expanded ? (
-        <>
-          {/* Histórico e análise da relação dívida/patrimônio líquido */}
-          <DebtHistorySection data={data} />
-
-          {/* Balanço Patrimonial */}
-          <BalanceSheetSection data={data} />
-
-          <button
-            onClick={() => setExpanded(false)}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-neutral-500 hover:text-neutral-700 transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M3 10L8 5L13 10" />
-            </svg>
-            Recolher análise
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={() => setExpanded(true)}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-neutral-200 text-sm font-medium text-neutral-500 hover:border-teal-400 hover:text-teal-600 transition-colors bg-white"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <path d="M3 6L8 11L13 6" />
-          </svg>
-          Aprofundar análise de saúde financeira
-        </button>
-      )}
+      <DebtHistorySection data={data} />
+      <BalanceSheetSection data={data} />
 
     </div>
   );

@@ -6,18 +6,8 @@ type AnyObj = Record<string, any>;
 
 /**
  * Normalises the v2 backend response to match the frontend AnalysisData shape.
- *
- * The v2 endpoint already returns the correct flat structure, but a few field
- * names differ from the TypeScript interfaces:
- *
- *  - priceScenarios[].scenarioKey  → key
- *  - sensitivityDrivers[].driverKey → key
- *  - timelineEvents[].why           → description
- *  - health.balanceSheet            may be null → safe default
- *  - rewardsAndRisks[].text         may be "positive"/"negative" → use detail
  */
 function normalizeV2Response(raw: AnyObj): AnalysisData {
-  // ── priceScenarios ─────────────────────────────────────────────────────────
   const priceScenarios: PriceScenario[] = ((raw.priceScenarios ?? []) as AnyObj[]).map(s => ({
     key:            s.key ?? s.scenarioKey ?? '',
     label:          s.label ?? '',
@@ -28,14 +18,12 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
     note:           s.note ?? s.reading,
   }));
 
-  // ── sensitivityDrivers ─────────────────────────────────────────────────────
   const sensitivityDrivers: SensitivityDriver[] = ((raw.sensitivityDrivers ?? []) as AnyObj[]).map(d => ({
     key:    d.key ?? d.driverKey ?? '',
     label:  d.label ?? '',
     impact: d.impact ?? 'medium',
   }));
 
-  // ── timelineEvents ─────────────────────────────────────────────────────────
   const timelineEvents: TimelineEvent[] = ((raw.timelineEvents ?? []) as AnyObj[]).map(e => ({
     date:           e.date ?? '',
     title:          e.title ?? '',
@@ -46,7 +34,6 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
     description:    e.description ?? e.why,
   }));
 
-  // ── health.balanceSheet null guard ─────────────────────────────────────────
   const rawHealth = (raw.health ?? {}) as AnyObj;
   const health = {
     ...rawHealth,
@@ -62,16 +49,13 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
     debtHistorySeries:   rawHealth.debtHistorySeries   ?? [],
   };
 
-  // ── rewardsAndRisks: normalise text field ──────────────────────────────────
   const rewardsAndRisks = ((raw.rewardsAndRisks ?? []) as AnyObj[]).map(r => {
     const isSentinel = r.text === 'positive' || r.text === 'negative' || r.text === 'neutral';
     const text   = isSentinel ? (r.detail ?? r.text) : (r.text ?? r.detail ?? '');
-    // When text was promoted from detail, clear detail to avoid rendering the same string twice
     const detail = isSentinel ? '' : (r.detail ?? '');
     return { type: r.type as 'reward' | 'risk', text, detail };
   });
 
-  // ── safe-default arrays for every optional list field ─────────────────────
   return {
     ...(raw as unknown as AnalysisData),
     priceScenarios,
@@ -79,7 +63,6 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
     timelineEvents,
     health: health as AnalysisData['health'],
     rewardsAndRisks,
-    // ensure no undefined arrays crash components
     recentChanges:        raw.recentChanges        ?? [],
     futureUpdates:        raw.futureUpdates         ?? [],
     pastUpdates:          raw.pastUpdates           ?? [],
@@ -103,10 +86,46 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
   };
 }
 
+/* ── Section types (match backend section DTOs) ─────────────────────────── */
+
+export type SectionName = 'value' | 'future' | 'past' | 'health' | 'dividend';
+
+/* ── Fetch functions ────────────────────────────────────────────────────── */
+
 /**
- * Fetch analysis data from the v2 backend endpoint.
- * The v2 endpoint returns a flat AnalysisData-compatible structure which is
- * then lightly normalised to fix minor field-name differences.
+ * Fetch CORE analysis data (~10 KB) — company, snowflake, valuation, overview.
+ */
+export async function fetchAnalysisCoreData(
+  ticker: string,
+  token?: string | null,
+): Promise<Partial<AnalysisData>> {
+  const raw = await apiFetch<AnyObj>(
+    `/api/v2/company-analysis/${ticker.toUpperCase()}/core`,
+    {},
+    token,
+  );
+  return normalizeV2Response(raw);
+}
+
+/**
+ * Fetch a single section's data. Each section endpoint returns only
+ * the fields relevant to that tab, keeping the payload small.
+ */
+export async function fetchAnalysisSection(
+  ticker: string,
+  section: SectionName,
+  token?: string | null,
+): Promise<Partial<AnalysisData>> {
+  const raw = await apiFetch<AnyObj>(
+    `/api/v2/company-analysis/${ticker.toUpperCase()}/section/${section}`,
+    {},
+    token,
+  );
+  return normalizeV2Response(raw);
+}
+
+/**
+ * Fetch the FULL analysis data (~90 KB). Kept as fallback.
  */
 export async function fetchAnalysisData(
   ticker: string,

@@ -10,6 +10,7 @@ import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, formatDate } from '../utils/formatters';
 import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GaugeCard, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
+import { DimensionCheckCard } from './ScoreDots';
 import { SankeySection } from './SankeySection';
 
 const HISTORICO_CHART_SERIES: { key: string; color: string; hex: string }[] = [
@@ -53,10 +54,10 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
 
   return (
     <section>
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Histórico de ganhos e receitas
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-5">
+      <div className="analysis-card p-5">
         <div className="h-[360px] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:fill-neutral-400">
           <TremorArea
             data={chartData}
@@ -76,7 +77,7 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
             <button
               key={s.key}
               onClick={() => toggleKey(s.key)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-neutral-200 bg-neutral-100 text-neutral-700 hover:bg-neutral-200 ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-border bg-muted text-muted-foreground hover:bg-hover ${
                 activeKeys.has(s.key) ? 'opacity-100' : 'opacity-40'
               }`}
             >
@@ -96,12 +97,12 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
             { id: 'quality-earnings', passed: true,  label: 'Qualidade dos Lucros:', content: 'WEGE3 possui lucros de alta qualidade.' },
             { id: 'profit-margin',    passed: false, label: 'Margem de Lucro Crescente:', content: 'As margens de lucro líquido atuais da VALE3 (15,6%) são menores do que no ano passado (15,9%).' },
           ].map(check => (
-            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-neutral-100 first:border-0">
+            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-border first:border-0">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
                   <CriteriaIcon passed={check.passed} size={24} />
                 </div>
-                <p className="text-xs leading-5 text-neutral-700">
+                <p className="text-xs leading-5 text-foreground">
                   <span className={`font-semibold ${check.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {check.label}{' '}
                   </span>
@@ -226,10 +227,10 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-cy-id="report-sub-section-free-cash-flow-vs-earnings-analysis" data-section="past">
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Análise de Fluxo de Caixa Livre vs. Lucros
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-5">
+      <div className="analysis-card p-5">
         <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
           {/* Tooltip */}
           {hoveredBar && (
@@ -305,7 +306,7 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
                             key={li}
                             x={cx} y={BASELINE + 16 + li * 13}
                             textAnchor="middle" fontSize={9.5} fontWeight="500"
-                            fill="#111827" fontFamily="Inter, system-ui, sans-serif"
+                            fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif"
                           >
                             {line.join(' ')}
                           </text>
@@ -314,7 +315,7 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
                         <line
                           x1={cx - labelW / 2} y1={lastLineY + 3}
                           x2={cx + labelW / 2} y2={lastLineY + 3}
-                          stroke="#6b7280" strokeWidth="1" strokeDasharray="3,2"
+                          stroke="var(--muted-foreground)" strokeWidth="1" strokeDasharray="3,2"
                         />
                       </g>
                     );
@@ -327,12 +328,12 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
 
         <div className="mt-2">
           {checks.map(check => (
-            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-neutral-100 first:border-0">
+            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-border first:border-0">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
                   <CriteriaIcon passed={check.passed} size={24} />
                 </div>
-                <p className="text-xs leading-5 text-neutral-700">
+                <p className="text-xs leading-5 text-foreground">
                   <span className={`font-semibold ${check.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {check.label}{' '}
                   </span>
@@ -392,22 +393,22 @@ function PastEarningsGrowthSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-section="past">
-      <h3 className="text-base font-semibold text-neutral-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
         Análise do crescimento dos lucros passados
       </h3>
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+      <div className="analysis-card p-6">
         <div className="flex gap-6">
           <GrowthBarChart title="Crescimento Anual de Lucros (Histórico)" bars={earningsBars} />
           <GrowthBarChart title="Crescimento Anual de Receita (Histórico)" bars={revenueBars} />
         </div>
         <div className="mt-4">
           {checks.map(check => (
-            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-neutral-100 first:border-0">
+            <blockquote key={check.id} className="flex items-start gap-3 py-2.5 border-t border-border first:border-0">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
                   <CriteriaIcon passed={check.passed} size={24} />
                 </div>
-                <p className="text-xs leading-5 text-neutral-700">
+                <p className="text-xs leading-5 text-foreground">
                   <span className={`font-semibold ${check.passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {check.label}{' '}
                   </span>
@@ -437,9 +438,9 @@ function PastROESection({ data }: { data: AnalysisData }) {
   const passed = companyROE > industryROE;
 
   return (
-    <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <section className="analysis-card overflow-hidden">
       <div className="px-6 pt-5 pb-4">
-        <h3 style={{ fontFamily: 'Inter, sans-serif' }} className="text-base font-semibold text-neutral-900">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
           Retorno sobre o Patrimônio Líquido
         </h3>
       </div>
@@ -532,7 +533,7 @@ function PastROESection({ data }: { data: AnalysisData }) {
               <table className="text-xs border-collapse w-full">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="pb-1.5 text-left font-semibold text-neutral-600 text-[11px] whitespace-nowrap">
+                    <th colSpan={2} className="pb-1.5 text-left font-semibold text-muted-foreground text-[11px] whitespace-nowrap">
                       ROE
                     </th>
                   </tr>
@@ -540,11 +541,11 @@ function PastROESection({ data }: { data: AnalysisData }) {
                 <tbody>
                   <tr>
                     <td className="pr-6 py-0.5 text-[11px]" style={{ color: '#3b82f6' }}>Empresa</td>
-                    <td className="font-semibold text-neutral-800 text-[11px]">{companyROE}%</td>
+                    <td className="font-semibold text-foreground text-[11px]">{companyROE}%</td>
                   </tr>
                   <tr>
                     <td className="pr-6 py-0.5 text-[11px]" style={{ color: '#14b8a6' }}>Indústria</td>
-                    <td className="font-semibold text-neutral-800 text-[11px]">{industryROE}%</td>
+                    <td className="font-semibold text-foreground text-[11px]">{industryROE}%</td>
                   </tr>
                 </tbody>
               </table>
@@ -553,13 +554,13 @@ function PastROESection({ data }: { data: AnalysisData }) {
 
           {/* Right: statement */}
           <div className="flex-1 flex items-center self-stretch">
-            <blockquote className="w-full flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50/60 px-4 py-4">
+            <blockquote className="w-full flex items-start gap-3 rounded-xl border border-border bg-muted/60 px-4 py-4">
               <div
                 className="rounded-full flex-shrink-0 mt-1.5"
                 style={{ width: 8, height: 8, backgroundColor: passed ? '#2EAA8A' : '#D1D5DB' }}
               />
-              <p className="text-sm text-neutral-700 leading-6 break-words">
-                <span className="font-semibold text-neutral-800">Alto ROE: </span>
+              <p className="text-sm text-foreground leading-6 break-words">
+                <span className="font-semibold text-foreground">Alto ROE: </span>
                 <span className="font-medium">{data.company.ticker}</span>
                 {' '}Retorno sobre o Patrimônio Líquido ({companyROE.toFixed(1).replace('.', ',')}%) é considerado alto.
               </p>
@@ -627,7 +628,7 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
       headline:  'Histórico operacional sólido, acima do setor',
       sub:       `Os lucros cresceram ${safeN(peg)}% ao ano, acima da média da indústria de ${safeN(pig)}%.`,
       badge:     'Desempenho forte',
-      badgeBg:   '#EFF6FF',
+      badgeBg:   'var(--brand-surface)',
       badgeColor:'#1D4ED8',
       badgeDot:  '#3B82F6',
       synthesis: `O histórico de resultados mostra crescimento acima do setor, com margens e retornos saudáveis. É uma base sólida, mas o passado não garante resultados futuros.`,
@@ -717,15 +718,15 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="analysis-card overflow-hidden">
 
         {/* ── 1. Header ── */}
         <div className="px-7 pt-7 pb-6 flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-[22px] font-bold text-[#0F172A] leading-snug mb-2">
+            <h2 className="text-[22px] font-bold text-foreground leading-snug mb-2">
               {thesis.headline}
             </h2>
-            <p className="text-[14px] text-slate-500 leading-relaxed max-w-xl">
+            <p className="text-[14px] text-muted-foreground leading-relaxed max-w-xl">
               {thesis.sub}
             </p>
           </div>
@@ -750,9 +751,9 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
         </div>
 
         {/* ── 2. Evidences + Limitations ── */}
-        <div className="border-t border-neutral-100 grid grid-cols-2 divide-x divide-neutral-100">
+        <div className="border-t border-border grid grid-cols-2 divide-x divide-border">
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que reforça essa conclusão
             </div>
             <div className="space-y-5">
@@ -761,21 +762,21 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
                   <div className="w-[3px] rounded-full bg-[#355CDE] shrink-0 self-stretch" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{e.observed}</span>
-                      {e.reference && <span className="text-[11px] text-slate-400">{e.reference}</span>}
+                      <span className="text-[15px] font-bold text-foreground tabular-nums">{e.observed}</span>
+                      {e.reference && <span className="text-[11px] text-muted-foreground">{e.reference}</span>}
                     </div>
-                    <div className="text-[12px] font-medium text-slate-600 mt-0.5">{e.criterion}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{e.micro}</div>
+                    <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{e.criterion}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{e.micro}</div>
                   </div>
                 </div>
               ))}
               {evidences.length === 0 && (
-                <div className="text-[12px] text-slate-400 italic">Sem evidências de desempenho diferenciado.</div>
+                <div className="text-[12px] text-muted-foreground italic">Sem evidências de desempenho diferenciado.</div>
               )}
             </div>
           </div>
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que limita essa leitura
             </div>
             <div className="space-y-5">
@@ -784,25 +785,25 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
                   <div className="w-[3px] rounded-full bg-amber-400 shrink-0 self-stretch" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{l.observed}</span>
-                      <span className="text-[11px] text-slate-400">{l.reference}</span>
+                      <span className="text-[15px] font-bold text-foreground tabular-nums">{l.observed}</span>
+                      <span className="text-[11px] text-muted-foreground">{l.reference}</span>
                     </div>
-                    <div className="text-[12px] font-medium text-slate-600 mt-0.5">{l.criterion}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{l.micro}</div>
+                    <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{l.criterion}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{l.micro}</div>
                   </div>
                 </div>
               ))}
               {limitations.length === 0 && (
-                <div className="text-[12px] text-slate-400 italic">Nenhum limitador relevante identificado.</div>
+                <div className="text-[12px] text-muted-foreground italic">Nenhum limitador relevante identificado.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* ── 3. Synthesis ── */}
-        <div className="border-t border-neutral-100 px-7 py-4 bg-neutral-50/50 flex items-center gap-3">
-          <div className="w-1 h-5 rounded-full bg-neutral-300 shrink-0" />
-          <p className="text-[12.5px] text-slate-500 leading-relaxed">
+        <div className="border-t border-border px-7 py-4 bg-muted/50 flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full bg-border shrink-0" />
+          <p className="text-[12.5px] text-muted-foreground leading-relaxed">
             {thesis.synthesis}
           </p>
         </div>
@@ -814,7 +815,6 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
 export function PastTab({ data }: { data: AnalysisData }) {
   const p = data.pastPerformance ?? {} as typeof data.pastPerformance;
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
   const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
@@ -823,26 +823,27 @@ export function PastTab({ data }: { data: AnalysisData }) {
 
       {/* ── Reading Card — same pattern as ValuationReadingCard ── */}
       <PastReadingCard data={data} />
+      <DimensionCheckCard dimension="past" data={data} />
 
       {/* Key Information + Recent Updates — side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {/* Key Information */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <h3 className="text-sm font-semibold text-neutral-800 mb-4">Informações chave</h3>
+        <div className="analysis-card p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Informações chave</h3>
           <div className="flex gap-6 mb-4">
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nfp(p.earningsGrowthRate, 2)}</p>
-                <p className="text-xs text-neutral-400">Crescimento do lucro (% ao ano)</p>
+                <p className="text-lg font-bold text-foreground">{nfp(p.earningsGrowthRate, 2)}</p>
+                <p className="text-xs text-muted-foreground">Crescimento do lucro (% ao ano)</p>
               </div>
             </div>
             <div className="flex gap-2 items-start">
               <div className="w-1 rounded-full bg-amber-500 self-stretch mt-0.5" />
               <div>
-                <p className="text-lg font-bold text-neutral-900">{nfp(p.epsGrowthRate, 2)}</p>
-                <p className="text-xs text-neutral-400">Lucro por ação (% ao ano)</p>
+                <p className="text-lg font-bold text-foreground">{nfp(p.epsGrowthRate, 2)}</p>
+                <p className="text-xs text-muted-foreground">Lucro por ação (% ao ano)</p>
               </div>
             </div>
           </div>
@@ -855,9 +856,9 @@ export function PastTab({ data }: { data: AnalysisData }) {
                 { label: 'Margem líquida', value: nfp(p.netMargin) },
                 { label: 'Próximo balanço', value: formatDate(p.nextEarningsDate) },
               ].map((row) => (
-                <tr key={row.label} className="border-t border-neutral-100">
-                  <td className="py-2 text-neutral-500 pr-4">{row.label}</td>
-                  <td className="py-2 text-right font-medium text-neutral-800">{row.value}</td>
+                <tr key={row.label} className="border-t border-border">
+                  <td className="py-2 text-muted-foreground pr-4">{row.label}</td>
+                  <td className="py-2 text-right font-medium text-foreground">{row.value}</td>
                 </tr>
               ))}
             </tbody>
@@ -865,15 +866,15 @@ export function PastTab({ data }: { data: AnalysisData }) {
         </div>
 
         {/* Recent Past Performance Updates */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col">
-          <h3 className="text-sm font-semibold text-neutral-800 mb-3">Atualizações recentes</h3>
+        <div className="analysis-card p-5 flex flex-col">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Atualizações recentes</h3>
           <div className="flex-1">
             <ul className="space-y-0">
               {(data.pastUpdates ?? []).slice(0, 5).map((item) => {
-                const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
-                const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
+                const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-muted-foreground';
+                const bgColor = item.sentiment === 'good' ? 'bg-success-surface' : item.sentiment === 'bad' ? 'bg-danger-surface' : 'bg-muted';
                 return (
-                  <li key={item.id} className="flex items-start gap-3 py-2.5 border-b border-neutral-50">
+                  <li key={item.id} className="flex items-start gap-3 py-2.5 border-b border-border/50">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                       {item.sentiment === 'good' && (
                         <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
@@ -886,8 +887,8 @@ export function PastTab({ data }: { data: AnalysisData }) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-neutral-800 leading-5 line-clamp-2">{item.title}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
+                      <p className="text-sm text-foreground leading-5 line-clamp-2">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
                     </div>
                   </li>
                 );
@@ -896,7 +897,7 @@ export function PastTab({ data }: { data: AnalysisData }) {
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="mt-3 w-full rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-2 text-center transition-colors"
+            className="mt-3 w-full rounded-lg bg-brand-surface hover:bg-brand-surface/80 text-brand-text text-xs font-semibold py-2 text-center transition-colors"
           >
             Mostrar todas as atualizações
           </button>
@@ -910,12 +911,12 @@ export function PastTab({ data }: { data: AnalysisData }) {
             className="fixed inset-0 bg-black/30 z-40"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
-              <h2 className="text-sm font-semibold text-neutral-800">Atualizações de desempenho recentes</h2>
+          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-card shadow-2xl z-50 flex flex-col">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+              <h2 className="text-sm font-semibold text-foreground">Atualizações de desempenho recentes</h2>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-1.5 rounded hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600"
+                className="p-1.5 rounded hover:bg-hover transition-colors text-muted-foreground hover:text-foreground"
                 aria-label="Fechar"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -926,10 +927,10 @@ export function PastTab({ data }: { data: AnalysisData }) {
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="space-y-0">
                 {(data.pastUpdates ?? []).map((item) => {
-                  const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-neutral-400';
-                  const bgColor = item.sentiment === 'good' ? 'bg-teal-50' : item.sentiment === 'bad' ? 'bg-rose-50' : 'bg-neutral-50';
+                  const iconColor = item.sentiment === 'good' ? 'text-teal-500' : item.sentiment === 'bad' ? 'text-rose-500' : 'text-muted-foreground';
+                  const bgColor = item.sentiment === 'good' ? 'bg-success-surface' : item.sentiment === 'bad' ? 'bg-danger-surface' : 'bg-muted';
                   return (
-                    <li key={item.id} className="flex items-start gap-3 py-3 border-b border-neutral-50 last:border-0">
+                    <li key={item.id} className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bgColor}`}>
                         {item.sentiment === 'good' && (
                           <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M17 3a.5.5 0 000 1h2.207l-4.2 3.817A6.478 6.478 0 0011 6.02V4.5a.5.5 0 00-1 0v1.519A6.501 6.501 0 004.019 12H2.5a.5.5 0 000 1h1.519A6.501 6.501 0 0010 18.981V20.5a.5.5 0 001 0v-1.519A6.501 6.501 0 0016.981 13H18.5a.5.5 0 000-1h-1.519a6.467 6.467 0 00-1.308-3.436L20 4.63V7a.5.5 0 001 0V3h-4z" /></svg>
@@ -942,8 +943,8 @@ export function PastTab({ data }: { data: AnalysisData }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-neutral-800 leading-5">{item.title}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{formatDate(item.date)}</p>
+                        <p className="text-sm text-foreground leading-5">{item.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
                       </div>
                     </li>
                   );
@@ -960,41 +961,10 @@ export function PastTab({ data }: { data: AnalysisData }) {
       {/* Histórico de ganhos e receitas */}
       <HistoricoGanhosSection data={data} />
 
-      {expanded ? (
-        <>
-          {/* Análise de Fluxo de Caixa Livre vs. Lucros */}
-          <FreeCashFlowSection data={data} />
-
-          {/* Análise do crescimento dos lucros passados */}
-          <PastEarningsGrowthSection data={data} />
-
-          {/* Retorno sobre o Patrimônio Líquido */}
-          <PastROESection data={data} />
-
-          {/* Retorno sobre Ativos + Retorno sobre Capital Empregado */}
-          <PastROAROCESection data={data} />
-
-          <button
-            onClick={() => setExpanded(false)}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-neutral-500 hover:text-neutral-700 transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M3 10L8 5L13 10" />
-            </svg>
-            Recolher análise
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={() => setExpanded(true)}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-neutral-200 text-sm font-medium text-neutral-500 hover:border-teal-400 hover:text-teal-600 transition-colors bg-white"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <path d="M3 6L8 11L13 6" />
-          </svg>
-          Aprofundar análise de performance
-        </button>
-      )}
+      <FreeCashFlowSection data={data} />
+      <PastEarningsGrowthSection data={data} />
+      <PastROESection data={data} />
+      <PastROAROCESection data={data} />
 
     </div>
   );

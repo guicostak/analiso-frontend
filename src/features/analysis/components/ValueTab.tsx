@@ -13,6 +13,7 @@ import type {
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL } from '../utils/formatters';
 import { SectionCard, CheckList, SWSDonut } from './AnalysisShared';
+import { DimensionCheckCard } from './ScoreDots';
 
 function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   const myTicker = data.company.ticker;
@@ -103,13 +104,13 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   return (
     <div>
       <div className="mb-4">
-        <p className="text-[13px] font-semibold text-neutral-800 leading-snug">{headline}</p>
-        <p className="mt-0.5 text-[11.5px] text-neutral-400">
+        <p className="text-[13px] font-semibold text-foreground leading-snug">{headline}</p>
+        <p className="mt-0.5 text-[11.5px] text-muted-foreground">
           {allPEs.length} empresas · setor {data.company.industry}
         </p>
       </div>
 
-      <div className="rounded-2xl border border-neutral-100 bg-white p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <svg viewBox={`0 0 ${VW} ${VH}`} className="w-full h-auto" style={{ overflow: 'visible' }}>
           <defs>
             {/* Main bar: 3-stop gradient — deep top, tapers to near-transparent */}
@@ -230,7 +231,7 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
         </svg>
 
         {/* Support stats */}
-        <div className="mt-2 grid grid-cols-4 gap-3 border-t border-neutral-100 pt-3">
+        <div className="mt-2 grid grid-cols-4 gap-3 border-t border-border pt-3">
           {[
             { label: 'P/L ' + myTicker, value: myPE.toFixed(1) + 'x', accent: true },
             { label: 'Faixa mais comum', value: modalBinLabel },
@@ -238,10 +239,10 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
             { label: 'Cresc. lucro',     value: (myGrowth >= 0 ? '+' : '') + myGrowth.toFixed(0) + '%' },
           ].map(s => (
             <div key={s.label} className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-neutral-400 leading-none">
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground leading-none">
                 {s.label}
               </span>
-              <span className={`text-[13px] font-semibold leading-none ${s.accent ? 'text-[#355CDE]' : 'text-neutral-700'}`}>
+              <span className={`text-[13px] font-semibold leading-none ${s.accent ? 'text-[#355CDE]' : 'text-foreground'}`}>
                 {s.value}
               </span>
             </div>
@@ -250,9 +251,9 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
       </div>
 
       {/* Footer — leitura fechada, não nota de rodapé */}
-      <div className="mt-4 rounded-r-xl bg-neutral-50 px-4 py-3"
+      <div className="mt-4 rounded-r-xl bg-muted px-4 py-3"
         style={{ borderLeft: '2.5px solid #355CDE' }}>
-        <p className="text-[12px] text-neutral-600 leading-relaxed">{footerText}</p>
+        <p className="text-[12px] text-muted-foreground leading-relaxed">{footerText}</p>
       </div>
     </div>
   );
@@ -309,8 +310,8 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
             onClick={() => setActiveTab(tab.id)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-neutral-900 text-white'
-                : 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100'
+                ? 'bg-foreground text-white'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
             {tab.label}
@@ -321,8 +322,8 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
       <div className="flex items-center gap-5">
         {/* Callout cinza — ocupa o espaço restante à esquerda */}
         <div className="bg-neutral-200/60 rounded-xl p-3 flex-1">
-          <p className="text-xs text-neutral-600 leading-relaxed">
-            <span className="font-semibold text-neutral-800">Métrica principal: </span>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-semibold text-foreground">Métrica principal: </span>
             {active.desc}
           </p>
         </div>
@@ -342,9 +343,9 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
             />
           </div>
 
-          <div className="pl-5 border-l border-neutral-100">
-            <div className="text-[3rem] font-bold leading-none text-neutral-900">{active.ratio}x</div>
-            <div className="text-xs text-neutral-400 mt-1.5">{active.label}</div>
+          <div className="pl-5 border-l border-border">
+            <div className="text-[3rem] font-bold leading-none text-foreground">{active.ratio}x</div>
+            <div className="text-xs text-muted-foreground mt-1.5">{active.label}</div>
           </div>
         </div>
       </div>
@@ -472,11 +473,11 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
 
   return (
     <div>
-      <p className="text-sm leading-relaxed text-neutral-600">
+      <p className="text-sm leading-relaxed text-muted-foreground">
         O índice histórico compara o preço da ação com seus fundamentos ao longo do tempo. Valores mais altos indicam que o mercado está pagando mais caro pelo papel.
       </p>
 
-      <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50/70 p-4">
+      <div className="mt-4 rounded-2xl border border-border bg-muted/70 p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           {/* Ratio selector — only show available tabs */}
           <div className="flex gap-1">
@@ -487,8 +488,8 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
                 onClick={() => setActiveRatio(key)}
                 className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                   activeRatio === key
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-50'
+                    ? 'border-neutral-900 bg-foreground text-white'
+                    : 'border-border bg-card text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {ratioLabels[key]}
@@ -496,14 +497,14 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
             ))}
           </div>
 
-          <div className="inline-flex w-fit items-center rounded-md bg-neutral-100 p-1">
+          <div className="inline-flex w-fit items-center rounded-md bg-muted p-1">
             {[['3M', '3M'], ['1Y', '1 ano'], ['3Y', '3 anos'], ['5Y', '5 anos']].map(period => (
               <button
                 key={period[0]}
                 type="button"
                 disabled={activePeriod === period[0]}
                 onClick={() => setActivePeriod(period[0] as '3M' | '1Y' | '3Y' | '5Y')}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition ${activePeriod === period[0] ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-white'}`}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition ${activePeriod === period[0] ? 'bg-foreground text-white' : 'text-muted-foreground hover:bg-card'}`}
               >
                 {period[1]}
               </button>
@@ -548,9 +549,9 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
 
             <g transform={`translate(${Math.min(Math.max(focusPoint.x - 90, 90), 360)}, 6)`}>
               <rect width="220" height="48" rx="4" fill="#ffffff" fillOpacity="0.96" />
-              <text x="10" y="18" fill="#111827" fontSize="12" fontWeight="700">{tooltipDate}</text>
+              <text x="10" y="18" fill="var(--foreground)" fontSize="12" fontWeight="700">{tooltipDate}</text>
               <line x1="10" x2="210" y1="26" y2="26" stroke="#e5e7eb" />
-              <text x="10" y="40" fill="#111827" fontSize="12" fontWeight="700">{seriesLabel}</text>
+              <text x="10" y="40" fill="var(--foreground)" fontSize="12" fontWeight="700">{seriesLabel}</text>
               <text x="74" y="40" fill="#1f9cf0" fontSize="12" fontWeight="700">
                 {focusPoint.value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x
               </text>
@@ -558,7 +559,7 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
           </svg>
 
           <div className="mt-2 flex items-center">
-            <span className="inline-flex items-center rounded-md border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-[11px] font-medium text-neutral-600">
+            <span className="inline-flex items-center rounded-md border border-border bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
               BOVESPA:{ticker}
             </span>
           </div>
@@ -644,7 +645,7 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
   return (
     <div>
       {/* Headline */}
-      <p className="text-[13px] font-semibold text-neutral-800 leading-snug mb-5">{headline}</p>
+      <p className="text-[13px] font-semibold text-foreground leading-snug mb-5">{headline}</p>
 
       {/* ── SVG dot plot ──────────────────────────────────────────────────── */}
       <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" style={{ overflow: 'visible', display: 'block' }}>
@@ -805,7 +806,7 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
       </svg>
 
       {/* ── Legend ───────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-5 mt-3 text-[10px] text-neutral-400">
+      <div className="flex flex-wrap items-center gap-5 mt-3 text-[10px] text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">
             <circle cx="6" cy="6" r="5.5" fill="#355CDE" />
@@ -832,8 +833,8 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
       </div>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <div className="mt-4 pt-3 border-t border-neutral-100 pl-3" style={{ borderLeftWidth: 2, borderLeftColor: '#355CDE', borderLeftStyle: 'solid', paddingLeft: 10 }}>
-        <p className="text-[11.5px] text-neutral-500 leading-relaxed">{footer}</p>
+      <div className="mt-4 pt-3 border-t border-border pl-3" style={{ borderLeftWidth: 2, borderLeftColor: '#355CDE', borderLeftStyle: 'solid', paddingLeft: 10 }}>
+        <p className="text-[11.5px] text-muted-foreground leading-relaxed">{footer}</p>
       </div>
     </div>
   );
@@ -985,7 +986,7 @@ function FairPEGauge({ data }: { data: AnalysisData }) {
             <path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM0 12C0 5.37258 5.37258 0 12 0C18.6274 0 24 5.37258 24 12C24 18.6274 18.6274 24 12 24C5.37258 24 0 18.6274 0 12ZM12 10L8.70711 6.70711C8.31658 6.31658 7.68342 6.31658 7.29289 6.70711L6.70711 7.29289C6.31658 7.68342 6.31658 8.31658 6.70711 8.70711L10 12L6.70711 15.2929C6.31658 15.6834 6.31658 16.3166 6.70711 16.7071L7.29289 17.2929C7.68342 17.6834 8.31658 17.6834 8.70711 17.2929L12 14L15.2929 17.2929C15.6834 17.6834 16.3166 17.6834 16.7071 17.2929L17.2929 16.7071C17.6834 16.3166 17.6834 15.6834 17.2929 15.2929L14 12L17.2929 8.70711C17.6834 8.31658 17.6834 7.68342 17.2929 7.29289L16.7071 6.70711C16.3166 6.31658 15.6834 6.31658 15.2929 6.70711L12 10Z" />
           </svg>
         )}
-        <p className="text-sm text-neutral-600 leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           <span className={`font-semibold ${isGood ? 'text-green-700' : 'text-red-700'}`}>
             Relação Preço/Lucro vs. Preço Justo:{' '}
           </span>
@@ -1056,7 +1057,7 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
       {/* ── Closing sentence ── */}
       <div className="flex items-start gap-2.5">
         <div className="w-[3px] h-5 rounded-full bg-[#355CDE] shrink-0 mt-0.5" />
-        <p className="text-[13.5px] font-semibold text-[#0F172A] leading-snug">{closingSentence}</p>
+        <p className="text-[13.5px] font-semibold text-foreground leading-snug">{closingSentence}</p>
       </div>
 
       {/* ── SVG Ruler ── */}
@@ -1120,49 +1121,49 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
       <div className="grid grid-cols-3 pt-1">
 
         {/* Conservador — ② slightly more present */}
-        <div className="pr-6 border-r border-neutral-100">
+        <div className="pr-6 border-r border-border">
           <div className="flex items-center gap-1.5 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            <span className="text-[10.5px] font-semibold text-slate-500">Conservador</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+            <span className="text-[10.5px] font-semibold text-muted-foreground">Conservador</span>
           </div>
-          <div className="text-[19px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[19px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[0].estimatedValue)}
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">
+          <div className="text-[11px] text-muted-foreground mt-0.5">
             {fmtPct(scn[0].gapVsCurrent)} vs. atual
           </div>
           {scn[0].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[0].wacc, 1)}% · g {fmt(scn[0].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[0].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[0].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[0].note}</div>
           )}
         </div>
 
         {/* Base — protagonist */}
-        <div className="px-6 border-r border-neutral-100">
+        <div className="px-6 border-r border-border">
           <div className="flex items-center gap-1.5 mb-2">
             <div className="w-2 h-2 rounded-full bg-[#355CDE]" />
             <span className="text-[10.5px] font-semibold text-[#355CDE]">Base</span>
           </div>
-          <div className="text-[24px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[24px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[1].estimatedValue)}
           </div>
           <div
             className="inline-flex text-[11px] font-semibold px-2 py-0.5 rounded-full mt-1"
-            style={{ backgroundColor: '#EFF6FF', color: '#355CDE' }}
+            style={{ backgroundColor: 'var(--brand-surface)', color: 'var(--brand)' }}
           >
             {fmtPct(scn[1].gapVsCurrent)} vs. atual
           </div>
           {scn[1].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[1].wacc, 1)}% · g {fmt(scn[1].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[1].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[1].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[1].note}</div>
           )}
         </div>
 
@@ -1170,27 +1171,27 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
         <div className="pl-6">
           <div className="flex items-center gap-1.5 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span className="text-[10.5px] font-medium text-slate-400">Otimista</span>
+            <span className="text-[10.5px] font-medium text-muted-foreground">Otimista</span>
           </div>
-          <div className="text-[19px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[19px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[2].estimatedValue)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
+          <div className="text-[11px] text-muted-foreground mt-0.5">
             {fmtPct(scn[2].gapVsCurrent)} vs. atual
           </div>
           {scn[2].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[2].wacc, 1)}% · g {fmt(scn[2].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[2].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[2].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[2].note}</div>
           )}
         </div>
       </div>
 
       {/* ── Footnote ── ⑤ contrast raised */}
-      <div className="text-[10.5px] text-slate-400 border-t border-neutral-100 pt-3">
+      <div className="text-[10.5px] text-muted-foreground border-t border-border pt-3">
         Estimativas baseadas em DCF com variação de WACC e crescimento terminal. Sujeitas a revisão.
       </div>
 
@@ -1206,15 +1207,15 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
   const isOver     = diffPct > 10;
   const isUnder    = diffPct < -10;
 
-  // ── Design tokens ──
-  const accent      = isUnder ? '#0F766E' : isOver ? '#B91C1C' : '#475569';
+  // ── Design tokens (semantic, dark-mode safe) ──
+  const accent      = isUnder ? 'var(--success-text)' : isOver ? 'var(--danger-text)' : 'var(--muted-foreground)';
   const accentAlpha = isUnder ? 'rgba(15,118,110,0.12)' : isOver ? 'rgba(185,28,28,0.10)' : 'rgba(71,85,105,0.08)';
   const accentBand  = isUnder ? 'rgba(15,118,110,0.18)' : isOver ? 'rgba(185,28,28,0.18)' : 'rgba(71,85,105,0.12)';
   const accentHalo  = isUnder ? 'rgba(20,184,166,0.25)' : isOver ? 'rgba(185,28,28,0.20)' : 'rgba(71,85,105,0.15)';
 
-  const chipBg    = isUnder ? '#F0FDF4' : isOver ? '#FEF2F2' : '#F1F5F9';
-  const chipColor = isUnder ? '#0F766E' : isOver ? '#B91C1C' : '#475569';
-  const chipDot   = isUnder ? '#14B8A6' : isOver ? '#B91C1C' : '#94A3B8';
+  const chipBg    = isUnder ? 'var(--success-surface)' : isOver ? 'var(--danger-surface)' : 'var(--muted)';
+  const chipColor = isUnder ? 'var(--success-text)' : isOver ? 'var(--danger-text)' : 'var(--muted-foreground)';
+  const chipDot   = isUnder ? '#14B8A6' : isOver ? '#EF4444' : 'var(--muted-foreground)';
   // ① More analytical chip label
   const chipLabel = isUnder ? 'Abaixo do valor estimado' : isOver ? 'Acima do valor estimado' : 'Próximo do valor estimado';
 
@@ -1254,7 +1255,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
     <div className="w-full">
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: isUnder ? 'linear-gradient(160deg, #F0FDF4 0%, #ffffff 55%)' : isOver ? 'linear-gradient(160deg, #FEF2F2 0%, #ffffff 55%)' : 'linear-gradient(160deg, #F8FAFC 0%, #ffffff 55%)' }}
+        style={{ background: isUnder ? 'linear-gradient(160deg, var(--success-surface) 0%, var(--card) 55%)' : isOver ? 'linear-gradient(160deg, var(--danger-surface) 0%, var(--card) 55%)' : 'linear-gradient(160deg, var(--muted) 0%, var(--card) 55%)' }}
       >
         {/* ③ Top stripe — removed (was ornamental, not informational) */}
 
@@ -1263,11 +1264,11 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Headline block ── */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-medium text-neutral-400 mb-2 uppercase">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2 uppercase">
                 Posicionamento de preço
               </div>
               {/* Full-sentence headline with % bold */}
-              <div className="text-[22px] font-bold leading-snug text-[#0F172A]">
+              <div className="text-[22px] font-bold leading-snug text-foreground">
                 {headlinePrefix}
                 <span style={{ color: accent }}>{headlineBold}</span>
                 {headlineSuffix}
@@ -1297,7 +1298,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Ruler section ── */}
           <div className="space-y-1.5">
             {/* Track */}
-            <div className="relative h-[10px] rounded-full" style={{ backgroundColor: '#E2E8F0' }}>
+            <div className="relative h-[10px] rounded-full" style={{ backgroundColor: 'var(--border)' }}>
 
               {/* Gap band — filled distance between price and fair value */}
               <div
@@ -1317,8 +1318,8 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
                 style={{ left: `calc(${fvPct}% - 7px)` }}
               >
                 <div
-                  className="w-[14px] h-[14px] rounded-full bg-white"
-                  style={{ border: '2.5px solid #94A3B8', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+                  className="w-[14px] h-[14px] rounded-full bg-card"
+                  style={{ border: '2.5px solid var(--muted-foreground)', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
                 />
               </div>
 
@@ -1348,9 +1349,9 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
                   transform: tooClose && !cpBelow ? 'translateX(-100%)' : 'translateX(-50%)',
                 }}
               >
-                <div className="w-px h-2 bg-slate-300" />
-                <div className="text-[10px] text-slate-400 whitespace-nowrap mt-0.5">Valor estimado</div>
-                <div className="text-[12px] font-semibold text-slate-500 tabular-nums">
+                <div className="w-px h-2 bg-muted-foreground" />
+                <div className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">Valor estimado</div>
+                <div className="text-[12px] font-semibold text-muted-foreground tabular-nums">
                   R$ {(fairValue ?? 0).toFixed(2)}
                 </div>
               </div>
@@ -1377,12 +1378,12 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Compact value row ── */}
           <div
             className="flex items-center justify-between rounded-xl px-4 py-3"
-            style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}
+            style={{ backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
-              <span className="text-[12px] text-slate-500">Preço atual</span>
-              <span className="text-[13px] font-semibold text-[#0F172A] tabular-nums">
+              <span className="text-[12px] text-muted-foreground">Preço atual</span>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
                 R$ {(currentPrice ?? 0).toFixed(2)}
               </span>
             </div>
@@ -1394,16 +1395,16 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
               {pillText}
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[12px] text-slate-500">Valor estimado</span>
-              <span className="text-[13px] font-semibold text-[#0F172A] tabular-nums">
+              <span className="text-[12px] text-muted-foreground">Valor estimado</span>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
                 R$ {(fairValue ?? 0).toFixed(2)}
               </span>
-              <div className="w-2 h-2 rounded-full bg-slate-300" />
+              <div className="w-2 h-2 rounded-full bg-muted-foreground" />
             </div>
           </div>
 
           {/* ── Footnote ── */}
-          <div className="text-[10.5px] text-slate-400 leading-relaxed">
+          <div className="text-[10.5px] text-muted-foreground leading-relaxed">
             Estimativa baseada em fluxo de caixa descontado. Sujeita a revisão conforme novas projeções.
           </div>
         </div>
@@ -1433,7 +1434,7 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
       headline:  'O preço está bem abaixo do valor estimado',
       sub:       `A ação negocia ${fmt(disc)}% abaixo do valor estimado. O preço parece atrativo em múltiplas comparações.`,
       badge:     'Atrativo',
-      badgeBg:   '#EFF6FF',
+      badgeBg:   'var(--brand-surface)',
       badgeColor:'#1D4ED8',
       badgeDot:  '#3B82F6',
       synthesis: `A ação negocia com desconto em múltiplas referências: valor calculado por fluxo de caixa, múltiplo de lucro e múltiplo de patrimônio. Existe margem de segurança relevante, mas ela não é garantia de retorno.`,
@@ -1442,8 +1443,8 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
       headline:  'O preço parece atrativo, mas sem desconto extremo',
       sub:       `A ação negocia ${fmt(disc)}% abaixo do valor estimado, com indicadores abaixo da média do mercado e do setor.`,
       badge:     'Com desconto',
-      badgeBg:   '#F0FDF4',
-      badgeColor:'#0F766E',
+      badgeBg:   'var(--success-surface)',
+      badgeColor:'var(--success-text)',
       badgeDot:  '#14B8A6',
       synthesis: `Existe desconto em múltiplas comparações, mas sem sinal claro de grande oportunidade. O crescimento e os indicadores de preço merecem acompanhamento.`,
     },
@@ -1451,17 +1452,17 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
       headline:  'O preço está próximo do valor estimado',
       sub:       'Desconto moderado frente ao valor estimado. Indicadores próximos da média das empresas comparáveis.',
       badge:     'Neutro',
-      badgeBg:   '#F8FAFC',
-      badgeColor:'#475569',
-      badgeDot:  '#94A3B8',
+      badgeBg:   'var(--muted)',
+      badgeColor:'var(--muted-foreground)',
+      badgeDot:  'var(--muted-foreground)',
       synthesis: `O preço não parece excessivo, mas o desconto não é grande o suficiente para uma oportunidade evidente. Acompanhe a evolução dos resultados.`,
     },
     premium: {
       headline:  'O preço está acima do valor estimado',
       sub:       'O preço atual supera o valor calculado. A empresa precisaria crescer muito para justificar o preço pago.',
       badge:     'Com prêmio',
-      badgeBg:   '#FFF7ED',
-      badgeColor:'#C2410C',
+      badgeBg:   'var(--warning-surface)',
+      badgeColor:'var(--warning-text)',
       badgeDot:  '#F97316',
       synthesis: `O mercado está pagando um prêmio sobre o valor estimado. Qualquer revisão negativa nas expectativas de crescimento pode pressionar o preço.`,
     },
@@ -1530,13 +1531,13 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
     <div className="space-y-4">
 
       {/* ── 1. Main reading block ── */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="analysis-card overflow-hidden">
         <div className="px-7 pt-7 pb-6 flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-[22px] font-bold text-[#0F172A] leading-snug mb-2">
+            <h2 className="text-[22px] font-bold text-foreground leading-snug mb-2">
               {thesis.headline}
             </h2>
-            <p className="text-[14px] text-slate-500 leading-relaxed max-w-xl">
+            <p className="text-[14px] text-muted-foreground leading-relaxed max-w-xl">
               {thesis.sub}
             </p>
           </div>
@@ -1562,11 +1563,11 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
         </div>
 
         {/* ── 2 + 3. Evidences + Limitations — equal-weight grid ── */}
-        <div className="border-t border-neutral-100 grid grid-cols-2 divide-x divide-neutral-100">
+        <div className="border-t border-border grid grid-cols-2 divide-x divide-border">
 
           {/* Left: evidences */}
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que reforça essa conclusão
             </div>
             <div className="space-y-5">
@@ -1577,26 +1578,26 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
                     {/* Grouped reference (P/L vs mercado + indústria) */}
                     {e.grouped ? (
                       <>
-                        <div className="text-[12px] font-semibold text-slate-700 mb-1.5">{e.criterion}</div>
+                        <div className="text-[12px] font-semibold text-foreground mb-1.5">{e.criterion}</div>
                         <div className="flex gap-4">
                           {e.grouped.map((g, gi) => (
                             <div key={gi} className="flex items-baseline gap-1.5">
-                              <span className="text-[11px] text-slate-400">{g.label}</span>
-                              <span className="text-[13px] font-bold text-[#0F172A] tabular-nums">{g.val}</span>
-                              <span className="text-[11px] text-slate-400 tabular-nums">{g.ref}</span>
+                              <span className="text-[11px] text-muted-foreground">{g.label}</span>
+                              <span className="text-[13px] font-bold text-foreground tabular-nums">{g.val}</span>
+                              <span className="text-[11px] text-muted-foreground tabular-nums">{g.ref}</span>
                             </div>
                           ))}
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-1">{e.micro}</div>
+                        <div className="text-[11px] text-muted-foreground mt-1">{e.micro}</div>
                       </>
                     ) : (
                       <>
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{e.observed}</span>
-                          {e.reference && <span className="text-[11px] text-slate-400">{e.reference}</span>}
+                          <span className="text-[15px] font-bold text-foreground tabular-nums">{e.observed}</span>
+                          {e.reference && <span className="text-[11px] text-muted-foreground">{e.reference}</span>}
                         </div>
-                        <div className="text-[12px] font-medium text-slate-600 mt-0.5">{e.criterion}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">{e.micro}</div>
+                        <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{e.criterion}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">{e.micro}</div>
                       </>
                     )}
                   </div>
@@ -1607,7 +1608,7 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
 
           {/* Right: limitations — same spacing, same typographic weight */}
           <div className="px-7 py-6">
-            <div className="text-[10.5px] font-semibold text-neutral-400 uppercase mb-5">
+            <div className="text-[10.5px] font-semibold text-muted-foreground uppercase mb-5">
               O que limita essa leitura
             </div>
             <div className="space-y-5">
@@ -1616,25 +1617,25 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
                   <div className="w-[3px] rounded-full bg-amber-400 shrink-0 self-stretch" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[15px] font-bold text-[#0F172A] tabular-nums">{l.observed}</span>
-                      <span className="text-[11px] text-slate-400">{l.reference}</span>
+                      <span className="text-[15px] font-bold text-foreground tabular-nums">{l.observed}</span>
+                      <span className="text-[11px] text-muted-foreground">{l.reference}</span>
                     </div>
-                    <div className="text-[12px] font-medium text-slate-600 mt-0.5">{l.criterion}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{l.micro}</div>
+                    <div className="text-[12px] font-medium text-muted-foreground mt-0.5">{l.criterion}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{l.micro}</div>
                   </div>
                 </div>
               ))}
               {limitations.length === 0 && (
-                <div className="text-[12px] text-slate-400 italic">Nenhuma limitação relevante identificada.</div>
+                <div className="text-[12px] text-muted-foreground italic">Nenhuma limitação relevante identificada.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* ── 4. Synthesis — dense, editorial ── */}
-        <div className="border-t border-neutral-100 px-7 py-4 bg-neutral-50/50 flex items-center gap-3">
-          <div className="w-1 h-5 rounded-full bg-neutral-300 shrink-0" />
-          <p className="text-[12.5px] text-slate-500 leading-relaxed">
+        <div className="border-t border-border px-7 py-4 bg-muted/50 flex items-center gap-3">
+          <div className="w-1 h-5 rounded-full bg-border shrink-0" />
+          <p className="text-[12.5px] text-muted-foreground leading-relaxed">
             {thesis.synthesis}
           </p>
         </div>
@@ -1647,78 +1648,50 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
 
 export function ValueTab({ data }: { data: AnalysisData }) {
   const v  = data.valuation ?? {} as typeof data.valuation;
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="space-y-6">
       <ValuationReadingCard data={data} />
+      <DimensionCheckCard dimension="value" data={data} />
 
-      {/* Share Price vs Fair Value */}
       <SectionCard title="O preço atual está caro ou barato?" subtitle="Comparação entre o preço de mercado e o valor estimado da empresa">
         <SharePriceVsFairValue currentPrice={v.currentPrice} fairValue={v.fairValue} />
       </SectionCard>
 
-      {/* Valuation Scenarios */}
       <SectionCard id="val-scenarios" title="Quanto a ação poderia valer?" subtitle="Três cenários possíveis: otimista, base e conservador. Cada um usa premissas diferentes de crescimento.">
         <ValuationScenariosChart data={data} />
       </SectionCard>
 
-      {/* Key Valuation Metric — SWS style */}
       <SectionCard id="val-pe" title="Qual indicador usar para avaliar o preço?" subtitle="P/L, P/Receita e P/Patrimônio: cada um serve para um tipo de empresa. Veja qual faz mais sentido aqui.">
         <KeyValuationMetric data={data} />
       </SectionCard>
 
-      {/* Progressive disclosure — secondary charts */}
-      {expanded ? (
-        <>
-          <SectionCard
-            title="O preço está alto comparado a empresas parecidas?"
-            subtitle={`Como o P/L (Preço sobre Lucro) da ${data.company.ticker} se compara com concorrentes diretas`}
-          >
-            <PEVsPeersChart data={data} />
-          </SectionCard>
+      <SectionCard
+        title="O preço está alto comparado a empresas parecidas?"
+        subtitle={`Como o P/L (Preço sobre Lucro) da ${data.company.ticker} se compara com concorrentes diretas`}
+      >
+        <PEVsPeersChart data={data} />
+      </SectionCard>
 
-          {data.ratioTrends && data.ratioTrends.length > 0 && (
-            <SectionCard title="Como o múltiplo evoluiu ao longo do tempo?" subtitle="Evolução histórica mensal do P/L e P/VP com dados reais da B3.">
-              <HistoricalRatioChartExact data={data} />
-            </SectionCard>
-          )}
-
-          <SectionCard
-            title="Como o preço se compara ao setor inteiro?"
-            subtitle={`Distribuição do P/L entre todas as empresas do setor ${data.company.industry}. Mostra onde a ${data.company.ticker} se posiciona.`}
-          >
-            <PEVsIndustryChart data={data} />
-          </SectionCard>
-
-          <SectionCard
-            title="O P/L atual é justo para essa empresa?"
-            subtitle={`Compara o P/L real da ${data.company.ticker} com o P/L esperado, considerando o crescimento projetado e o risco do negócio.`}
-          >
-            <FairPEGauge data={data} />
-          </SectionCard>
-
-          <button
-            onClick={() => setExpanded(false)}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-neutral-500 hover:text-neutral-700 transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M3 10L8 5L13 10" />
-            </svg>
-            Recolher análise
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={() => setExpanded(true)}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-neutral-200 text-sm font-medium text-neutral-500 hover:border-teal-400 hover:text-teal-600 transition-colors bg-white"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <path d="M3 6L8 11L13 6" />
-          </svg>
-          Aprofundar análise de valuation
-        </button>
+      {data.ratioTrends && data.ratioTrends.length > 0 && (
+        <SectionCard title="Como o múltiplo evoluiu ao longo do tempo?" subtitle="Evolução histórica mensal do P/L e P/VP com dados reais da B3.">
+          <HistoricalRatioChartExact data={data} />
+        </SectionCard>
       )}
+
+      <SectionCard
+        title="Como o preço se compara ao setor inteiro?"
+        subtitle={`Distribuição do P/L entre todas as empresas do setor ${data.company.industry}. Mostra onde a ${data.company.ticker} se posiciona.`}
+      >
+        <PEVsIndustryChart data={data} />
+      </SectionCard>
+
+      <SectionCard
+        title="O P/L atual é justo para essa empresa?"
+        subtitle={`Compara o P/L real da ${data.company.ticker} com o P/L esperado, considerando o crescimento projetado e o risco do negócio.`}
+      >
+        <FairPEGauge data={data} />
+      </SectionCard>
     </div>
   );
 }

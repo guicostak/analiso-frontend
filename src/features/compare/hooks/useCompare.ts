@@ -20,6 +20,7 @@ import {
   PILLAR_LABEL,
   RANGES,
   companies,
+  enrichedCompanies,
   events,
   deriveScoreboard,
   derivePillarDiffs,
@@ -42,6 +43,7 @@ import type {
   ComparePillar,
   CompareRangeKey,
   CompareCompany,
+  CompareEnrichedCompany,
   CompareEvidence,
   CompareEventItem,
   CompareMetric,
@@ -87,6 +89,8 @@ export interface UseCompareReturn {
   pair: CompareCompany[];
   a: CompareCompany | undefined;
   b: CompareCompany | undefined;
+  enrichedA: CompareEnrichedCompany | undefined;
+  enrichedB: CompareEnrichedCompany | undefined;
   canCompare: boolean;
   available: CompareCompany[];
 
@@ -113,6 +117,7 @@ export interface UseCompareReturn {
   setOpenPicker: (v: boolean | ((prev: boolean) => boolean)) => void;
   setSelectedTickers: (v: string[] | ((prev: string[]) => string[])) => void;
   addTicker: (ticker: string) => void;
+  swapCompanies: () => void;
 
   // Ações do painel
   selectPillar: (pillar: ComparePillar) => void;
@@ -149,7 +154,7 @@ export function useCompare(): UseCompareReturn {
   const mounted = useRef(false);
 
   // — Estado de seleção —
-  const [selectedTickers, setSelectedTickers] = useState<string[]>(["WEGE3", "VALE3"]);
+  const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
 
@@ -185,6 +190,16 @@ export function useCompare(): UseCompareReturn {
   const a = pair[0];
   const b = pair[1];
   const canCompare = pair.length >= 2;
+
+  const enrichedA = useMemo(
+    () => enrichedCompanies.find((c) => c.ticker === a?.ticker),
+    [a],
+  );
+  const enrichedB = useMemo(
+    () => enrichedCompanies.find((c) => c.ticker === b?.ticker),
+    [b],
+  );
+
 
   const available = useMemo(
     () =>
@@ -406,6 +421,15 @@ export function useCompare(): UseCompareReturn {
     [selectedTickers],
   );
 
+  const swapCompanies = useCallback(() => {
+    setSelectedTickers((prev) => {
+      if (prev.length < 2) return prev;
+      const swapped = [...prev];
+      [swapped[0], swapped[1]] = [swapped[1], swapped[0]];
+      return swapped;
+    });
+  }, []);
+
   const selectPillar = useCallback(
     (pillar: ComparePillar) => {
       setActivePillar(pillar);
@@ -503,6 +527,8 @@ export function useCompare(): UseCompareReturn {
     pair,
     a,
     b,
+    enrichedA,
+    enrichedB,
     canCompare,
     available,
 
@@ -529,6 +555,7 @@ export function useCompare(): UseCompareReturn {
     setOpenPicker,
     setSelectedTickers,
     addTicker,
+    swapCompanies,
 
     // Ações do painel
     selectPillar,

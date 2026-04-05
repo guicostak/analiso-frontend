@@ -28,6 +28,7 @@ export const DIMENSION_COLORS: Record<string, string> = {
   past: COLORS.past,
   health: COLORS.health,
   dividend: COLORS.dividend,
+  sources: COLORS.neutral,
 };
 
 // ─── Tab Config ──────────────────────────────────────────────────────────────

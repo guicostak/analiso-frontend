@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { ArrowLeft, Calendar, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, Calendar, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, MoreHorizontal, Bookmark, Share2, GitCompareArrows, Bell } from 'lucide-react';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -16,10 +16,74 @@ import type {
 } from '../interfaces';
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo, formatDate } from '../utils/formatters';
-import { FavoriteButton, SectionCard, SWSDonut } from './AnalysisShared';
+import { SectionCard, SWSDonut } from './AnalysisShared';
+import { ScoreChecks } from './ScoreDots';
+import { SnowflakeChart } from '@/src/components/shared/SnowflakeChart';
 import { LuizAvatar } from '@/src/features/luiz/components';
+import { useLuizContext } from '@/src/components/layout/LuizContext';
+import { Send } from 'lucide-react';
 
+// ─── Typewriter placeholder input for Luiz AI ───────────────────────────────
 
+function LuizPromptInput({ ticker, onFocus }: { ticker: string; onFocus: () => void }) {
+  const placeholders = useMemo(() => [
+    `${ticker} está barata agora?`,
+    `Qual o risco de investir em ${ticker}?`,
+    `Os dividendos de ${ticker} são sustentáveis?`,
+    `Me explique o valuation de ${ticker}`,
+    `Qual a saúde financeira de ${ticker}?`,
+    `${ticker} tem potencial de crescimento?`,
+    `Compare ${ticker} com os concorrentes`,
+  ], [ticker]);
+
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = placeholders[phraseIdx];
+
+    if (!isDeleting) {
+      // Typing
+      if (displayed.length < current.length) {
+        const timeout = setTimeout(() => {
+          setDisplayed(current.slice(0, displayed.length + 1));
+        }, 45 + Math.random() * 30);
+        return () => clearTimeout(timeout);
+      }
+      // Pause before deleting
+      const pause = setTimeout(() => setIsDeleting(true), 2500);
+      return () => clearTimeout(pause);
+    }
+
+    // Deleting
+    if (displayed.length > 0) {
+      const timeout = setTimeout(() => {
+        setDisplayed(displayed.slice(0, -1));
+      }, 25);
+      return () => clearTimeout(timeout);
+    }
+
+    // Move to next phrase
+    setIsDeleting(false);
+    setPhraseIdx((phraseIdx + 1) % placeholders.length);
+  }, [displayed, isDeleting, phraseIdx, placeholders]);
+
+  return (
+    <div
+      className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 cursor-text group hover:border-[rgba(168,85,247,0.35)] transition-colors duration-150"
+      onClick={onFocus}
+    >
+      <span className="text-[13px] text-muted-foreground flex-1 select-none">
+        {displayed}
+        <span className="inline-block w-[2px] h-[14px] bg-muted-foreground/50 ml-px align-middle animate-pulse" />
+      </span>
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors duration-150 group-hover:bg-[rgba(168,85,247,0.15)]" style={{ backgroundColor: 'rgba(168,85,247,0.08)' }}>
+        <Send className="w-4 h-4 transition-colors duration-150" style={{ color: 'rgba(168,85,247,0.6)' }} />
+      </div>
+    </div>
+  );
+}
 
 function buildPriceInsight(data: AnalysisData) {
   const oneYearVsMarket = (data.priceHistory?.return1y ?? 0) - (data.priceHistory?.marketReturn1y ?? 0);
@@ -96,33 +160,33 @@ function BulletChart({
 
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-xs text-neutral-500">
+      <div className="flex justify-between text-xs text-muted-foreground">
         <span>{label}</span>
-        <span className="font-mono font-medium text-neutral-700">{value}{unit}</span>
+        <span className="font-mono font-medium text-foreground">{value}{unit}</span>
       </div>
       <div className="relative h-8 rounded-lg overflow-hidden">
         {/* Background ranges: poor → fair → good */}
         <div className="absolute inset-0 flex">
-          <div className="h-full bg-rose-50" style={{ width: `${pct(ranges[0])}%` }} />
-          <div className="h-full bg-amber-50" style={{ width: `${pct(ranges[1]) - pct(ranges[0])}%` }} />
-          <div className="h-full bg-teal-50" style={{ width: `${100 - pct(ranges[1])}%` }} />
+          <div className="h-full bg-danger-surface" style={{ width: `${pct(ranges[0])}%` }} />
+          <div className="h-full bg-warning-surface" style={{ width: `${pct(ranges[1]) - pct(ranges[0])}%` }} />
+          <div className="h-full bg-success-surface" style={{ width: `${100 - pct(ranges[1])}%` }} />
         </div>
         {/* Actual value bar */}
         <div
-          className="absolute top-1.5 left-0 h-5 rounded bg-neutral-600"
+          className="absolute top-1.5 left-0 h-5 rounded bg-foreground"
           style={{ width: `${Math.min(pct(value), 100)}%` }}
         />
         {/* Target marker */}
         <div
-          className="absolute top-0 w-px h-full bg-neutral-400"
+          className="absolute top-0 w-px h-full bg-muted-foreground"
           style={{ left: `${pct(target)}%` }}
         />
         <div
-          className="absolute -top-0.5 w-2 h-2 bg-neutral-400 rounded-full transform -translate-x-1/2"
+          className="absolute -top-0.5 w-2 h-2 bg-muted-foreground rounded-full transform -translate-x-1/2"
           style={{ left: `${pct(target)}%` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] text-neutral-400">
+      <div className="flex justify-between text-[10px] text-muted-foreground">
         <span>{min}{unit}</span>
         <span>Referência: {target}{unit}</span>
         <span>{max}{unit}</span>
@@ -220,13 +284,13 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
   return (
     <div>
       <div className="mb-4">
-        <p className="text-[13px] font-semibold text-neutral-800 leading-snug">{headline}</p>
-        <p className="mt-0.5 text-[11.5px] text-neutral-400">
+        <p className="text-[13px] font-semibold text-foreground leading-snug">{headline}</p>
+        <p className="mt-0.5 text-[11.5px] text-muted-foreground">
           {allPEs.length} empresas · setor {data.company.industry}
         </p>
       </div>
 
-      <div className="rounded-2xl border border-neutral-100 bg-white p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <svg viewBox={`0 0 ${VW} ${VH}`} className="w-full h-auto" style={{ overflow: 'visible' }}>
           <defs>
             {/* Main bar: 3-stop gradient — deep top, tapers to near-transparent */}
@@ -347,7 +411,7 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
         </svg>
 
         {/* Support stats */}
-        <div className="mt-2 grid grid-cols-4 gap-3 border-t border-neutral-100 pt-3">
+        <div className="mt-2 grid grid-cols-4 gap-3 border-t border-border pt-3">
           {[
             { label: 'P/L ' + myTicker, value: myPE.toFixed(1) + 'x', accent: true },
             { label: 'Faixa mais comum', value: modalBinLabel },
@@ -355,10 +419,10 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
             { label: 'Cresc. lucro',     value: (myGrowth >= 0 ? '+' : '') + myGrowth.toFixed(0) + '%' },
           ].map(s => (
             <div key={s.label} className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-neutral-400 leading-none">
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground leading-none">
                 {s.label}
               </span>
-              <span className={`text-[13px] font-semibold leading-none ${s.accent ? 'text-[#355CDE]' : 'text-neutral-700'}`}>
+              <span className={`text-[13px] font-semibold leading-none ${s.accent ? 'text-[#355CDE]' : 'text-foreground'}`}>
                 {s.value}
               </span>
             </div>
@@ -367,9 +431,9 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
       </div>
 
       {/* Footer — leitura fechada, não nota de rodapé */}
-      <div className="mt-4 rounded-r-xl bg-neutral-50 px-4 py-3"
+      <div className="mt-4 rounded-r-xl bg-muted px-4 py-3"
         style={{ borderLeft: '2.5px solid #355CDE' }}>
-        <p className="text-[12px] text-neutral-600 leading-relaxed">{footerText}</p>
+        <p className="text-[12px] text-muted-foreground leading-relaxed">{footerText}</p>
       </div>
     </div>
   );
@@ -386,11 +450,11 @@ function DistributionHistogram({ distribution }: { distribution: MetricDistribut
       <div className="flex items-center gap-4 mb-2 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
-          <span className="text-neutral-600">{distribution.metric} da empresa: <strong>{distribution.currentValue}x</strong></span>
+          <span className="text-muted-foreground">{distribution.metric} da empresa: <strong>{distribution.currentValue}x</strong></span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          <span className="text-neutral-600">Mediana setor: <strong>{distribution.sectorMedian}x</strong></span>
+          <span className="text-muted-foreground">Mediana setor: <strong>{distribution.sectorMedian}x</strong></span>
         </div>
       </div>
       <div className="h-60">
@@ -427,7 +491,7 @@ function LollipopComparison({
     <div className="space-y-3">
       {items.map((item) => (
         <div key={item.name} className="flex items-center gap-3">
-          <span className={`text-sm w-24 text-right ${item.isHighlight ? 'font-bold text-neutral-900' : 'text-neutral-600'}`}>
+          <span className={`text-sm w-24 text-right ${item.isHighlight ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
             {item.name}
           </span>
           <div className="flex-1 relative h-6 flex items-center">
@@ -489,14 +553,14 @@ function DumbbellScenarios({
         return (
           <div key={s.label} className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="font-medium text-neutral-700">{s.label}</span>
+              <span className="font-medium text-foreground">{s.label}</span>
               <span className={`font-mono font-bold ${isUpside ? 'text-teal-600' : 'text-rose-500'}`}>
                 R$ {safeN(s.value, 2)} ({isUpside ? '+' : ''}{safeN(s.gap)}%)
               </span>
             </div>
             <div className="relative h-6">
               {/* Track */}
-              <div className="absolute top-2.5 left-0 right-0 h-0.5 bg-neutral-200 rounded" />
+              <div className="absolute top-2.5 left-0 right-0 h-0.5 bg-border rounded" />
               {/* Connection line */}
               <div
                 className="absolute top-2.5 h-1 rounded"
@@ -508,7 +572,7 @@ function DumbbellScenarios({
               />
               {/* Current price dot */}
               <div
-                className="absolute top-0.5 w-4 h-4 rounded-full bg-neutral-500 border-2 border-white shadow"
+                className="absolute top-0.5 w-4 h-4 rounded-full bg-muted0 border-2 border-white shadow"
                 style={{ left: `calc(${pct(currentPrice)}% - 8px)` }}
               />
               {/* Scenario dot */}
@@ -523,9 +587,9 @@ function DumbbellScenarios({
           </div>
         );
       })}
-      <div className="flex items-center gap-4 text-xs text-neutral-400 mt-2">
+      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-neutral-500" />
+          <div className="w-3 h-3 rounded-full bg-muted0" />
           <span>Preço atual</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -549,13 +613,13 @@ function EventTimeline({ events }: { events: TimelineEvent[] }) {
   const impactConfig = {
     positive: { color: '#16a34a', bg: 'bg-green-50', icon: <ArrowUpRight className="w-3.5 h-3.5" /> },
     negative: { color: '#dc2626', bg: 'bg-red-50', icon: <ArrowDownRight className="w-3.5 h-3.5" /> },
-    neutral: { color: '#6b7280', bg: 'bg-neutral-50', icon: <Minus className="w-3.5 h-3.5" /> },
+    neutral: { color: 'var(--muted-foreground)', bg: 'bg-muted', icon: <Minus className="w-3.5 h-3.5" /> },
   };
 
   return (
     <div className="relative">
       {/* Vertical line */}
-      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-neutral-200" />
+      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
 
       <div className="space-y-0">
         {events.map((event, idx) => {
@@ -570,22 +634,22 @@ function EventTimeline({ events }: { events: TimelineEvent[] }) {
                 <span className="text-white">{config.icon}</span>
               </div>
               {/* Content */}
-              <div className={`flex-1 p-3 rounded-xl ${config.bg} border border-neutral-100`}>
+              <div className={`flex-1 p-3 rounded-xl ${config.bg} border border-border`}>
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sm font-semibold text-neutral-900">{event.title}</span>
-                  <span className="text-xs text-neutral-400 flex items-center gap-1 flex-shrink-0">
+                  <span className="text-sm font-semibold text-foreground">{event.title}</span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
                     <Calendar className="w-3 h-3" />
                     {formatDate(event.date)}
                   </span>
                 </div>
                 {event.description && (
-                  <p className="text-xs text-neutral-600">{event.description}</p>
+                  <p className="text-xs text-muted-foreground">{event.description}</p>
                 )}
                 <div className="mt-2 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center rounded-full bg-white/80 px-2 py-1 text-[10px] font-medium text-neutral-600">
+                  <span className="inline-flex items-center rounded-full bg-card/80 px-2 py-1 text-[10px] font-medium text-muted-foreground">
                     Impacta: {inferTimelineImpact(event)}
                   </span>
-                  <span className="text-[10px] text-neutral-400 block">Fonte: {event.source}</span>
+                  <span className="text-[10px] text-muted-foreground block">Fonte: {event.source}</span>
                 </div>
               </div>
             </div>
@@ -602,18 +666,18 @@ function EventTimeline({ events }: { events: TimelineEvent[] }) {
  */
 function SensitivityChart({ drivers }: { drivers: { key: string; label: string; impact: 'high' | 'medium' | 'low' }[] }) {
   const impactWeight = { high: 3, medium: 2, low: 1 };
-  const impactDot: Record<string, string> = { high: 'bg-rose-400', medium: 'bg-amber-400', low: 'bg-neutral-300' };
+  const impactDot: Record<string, string> = { high: 'bg-rose-400', medium: 'bg-amber-400', low: 'bg-border' };
   const impactLabel = { high: 'Alto', medium: 'Médio', low: 'Baixo' };
-  const impactText: Record<string, string> = { high: 'text-rose-500', medium: 'text-amber-500', low: 'text-neutral-400' };
+  const impactText: Record<string, string> = { high: 'text-rose-500', medium: 'text-amber-500', low: 'text-muted-foreground' };
   const sorted = [...drivers].sort((a, b) => impactWeight[b.impact] - impactWeight[a.impact]);
 
   return (
     <div className="space-y-1">
       {sorted.map((d, idx) => (
-        <div key={d.key} className="flex items-center gap-4 px-3 py-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
-          <span className="text-[11px] font-mono text-neutral-300 w-5 text-right flex-shrink-0">{idx + 1}</span>
+        <div key={d.key} className="flex items-center gap-4 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors">
+          <span className="text-[11px] font-mono text-muted-foreground/40 w-5 text-right flex-shrink-0">{idx + 1}</span>
           <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${impactDot[d.impact]}`} />
-          <span className="text-sm text-neutral-800 flex-1">{d.label}</span>
+          <span className="text-sm text-foreground flex-1">{d.label}</span>
           <span className={`text-[11px] font-medium ${impactText[d.impact]}`}>{impactLabel[d.impact]}</span>
         </div>
       ))}
@@ -635,10 +699,10 @@ function DCFSensitivityHeatmap({
   const growthValues = [...new Set(cells.map(c => c.terminalGrowth))].sort((a, b) => a - b);
 
   const getColor = (fv: number) => {
-    if (fv >= currentPrice * 1.2) return { bg: 'bg-teal-100', text: 'text-teal-800' };
-    if (fv >= currentPrice) return { bg: 'bg-teal-50', text: 'text-teal-700' };
-    if (fv >= currentPrice * 0.9) return { bg: 'bg-amber-50', text: 'text-amber-700' };
-    return { bg: 'bg-rose-50', text: 'text-rose-600' };
+    if (fv >= currentPrice * 1.2) return { bg: 'bg-success-surface', text: 'text-success-text' };
+    if (fv >= currentPrice) return { bg: 'bg-success-surface', text: 'text-success-text' };
+    if (fv >= currentPrice * 0.9) return { bg: 'bg-warning-surface', text: 'text-warning-text' };
+    return { bg: 'bg-danger-surface', text: 'text-danger-text' };
   };
 
   return (
@@ -646,9 +710,9 @@ function DCFSensitivityHeatmap({
       <table className="w-full text-sm border-separate border-spacing-1">
         <thead>
           <tr>
-            <th className="p-2 text-left text-neutral-400 text-[11px] font-medium">WACC ↓ / Cresc. →</th>
+            <th className="p-2 text-left text-muted-foreground text-[11px] font-medium">WACC ↓ / Cresc. →</th>
             {growthValues.map(g => (
-              <th key={g} className={`p-2 text-center text-[11px] font-medium rounded ${g === baseGrowth ? 'text-indigo-600 bg-indigo-50' : 'text-neutral-400'}`}>
+              <th key={g} className={`p-2 text-center text-[11px] font-medium rounded ${g === baseGrowth ? 'text-brand-text bg-brand-surface' : 'text-muted-foreground'}`}>
                 {g}%
               </th>
             ))}
@@ -657,7 +721,7 @@ function DCFSensitivityHeatmap({
         <tbody>
           {waccValues.map(w => (
             <tr key={w}>
-              <td className={`p-2 text-[11px] font-mono rounded ${w === baseWacc ? 'font-semibold text-indigo-600 bg-indigo-50' : 'text-neutral-500'}`}>
+              <td className={`p-2 text-[11px] font-mono rounded ${w === baseWacc ? 'font-semibold text-brand-text bg-brand-surface' : 'text-muted-foreground'}`}>
                 {w}%
               </td>
               {growthValues.map(g => {
@@ -675,11 +739,11 @@ function DCFSensitivityHeatmap({
           ))}
         </tbody>
       </table>
-      <div className="flex items-center gap-4 mt-4 text-[11px] text-neutral-400">
+      <div className="flex items-center gap-4 mt-4 text-[11px] text-muted-foreground">
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-teal-100" />Forte desconto (+20%)</div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-teal-50" />Acima do preço</div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-50" />Próximo do preço</div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-rose-50" />Abaixo do preço</div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-success-surface" />Acima do preço</div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-warning-surface" />Próximo do preço</div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-danger-surface" />Abaixo do preço</div>
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded ring-2 ring-indigo-400" />Base</div>
       </div>
     </div>
@@ -695,8 +759,8 @@ function RatioTrendSmallMultiples({ trends }: { trends: RatioTrend[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {trends.map((trend) => (
-        <div key={trend.metric} className="bg-neutral-50 rounded-xl p-4">
-          <h4 className="text-sm font-semibold text-neutral-700 mb-2">{trend.metric}</h4>
+        <div key={trend.metric} className="bg-muted rounded-xl p-4">
+          <h4 className="text-sm font-semibold text-foreground mb-2">{trend.metric}</h4>
           <div className="h-40">
             <TremorLine
               data={trend.series}
@@ -709,9 +773,9 @@ function RatioTrendSmallMultiples({ trends }: { trends: RatioTrend[] }) {
               yAxisWidth={36}
             />
           </div>
-          <div className="flex items-center gap-3 mt-2 text-[10px] text-neutral-500">
+          <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
             <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-blue-500 rounded" />Empresa</div>
-            <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-neutral-400 rounded border-dashed" />Indústria</div>
+            <div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-muted-foreground rounded border-dashed" />Indústria</div>
           </div>
         </div>
       ))}
@@ -802,19 +866,19 @@ function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-        <p className="text-sm font-semibold text-neutral-900">
+      <div className="rounded-2xl border border-border bg-muted p-4">
+        <p className="text-sm font-semibold text-foreground">
           {leadReward?.text ?? 'A tese tem pontos fortes relevantes'}
           {leadRisk ? `, mas pede cuidado com ${leadRisk.text.toLowerCase()}.` : '.'}
         </p>
-        <p className="mt-2 text-sm text-neutral-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {leadReward?.detail ?? 'Os fundamentos positivos aparecem de forma consistente na leitura atual.'}
           {leadRisk?.detail ? ` O principal ponto de atencao hoje vem de ${leadRisk.detail.toLowerCase()}.` : ''}
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <h4 className="text-sm font-semibold text-neutral-700 mb-3 flex items-center gap-2">
+        <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
           Pontos fortes
         </h4>
@@ -823,15 +887,15 @@ function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
             <div key={i} className="flex items-start gap-3">
               <div className="w-[3px] self-stretch rounded-full bg-emerald-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-neutral-800 font-medium">{r.text}</p>
-                {r.detail && <p className="text-xs text-neutral-500 mt-0.5">{r.detail}</p>}
+                <p className="text-sm text-foreground font-medium">{r.text}</p>
+                {r.detail && <p className="text-xs text-muted-foreground mt-0.5">{r.detail}</p>}
               </div>
             </div>
           ))}
         </div>
       </div>
       <div>
-        <h4 className="text-sm font-semibold text-neutral-700 mb-3 flex items-center gap-2">
+        <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0" />
           Pontos de atenção
         </h4>
@@ -840,8 +904,8 @@ function RewardsAndRisks({ items }: { items: RewardRisk[] }) {
             <div key={i} className="flex items-start gap-3">
               <div className="w-[3px] self-stretch rounded-full bg-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-neutral-800 font-medium">{r.text}</p>
-                {r.detail && <p className="text-xs text-neutral-500 mt-0.5">{r.detail}</p>}
+                <p className="text-sm text-foreground font-medium">{r.text}</p>
+                {r.detail && <p className="text-xs text-muted-foreground mt-0.5">{r.detail}</p>}
               </div>
             </div>
           ))}
@@ -865,15 +929,15 @@ function CompetitorGrid({ competitors }: { competitors: Competitor[] }) {
         const summary = getCompetitorSummary(comp);
 
         return (
-          <div key={comp.ticker} className="bg-neutral-50 rounded-xl p-4 hover:bg-neutral-100 transition-colors cursor-pointer border border-transparent hover:border-neutral-200">
-            <div className="text-sm font-bold text-neutral-900">{comp.name}</div>
-            <div className="text-xs text-neutral-500 font-mono">{comp.exchange}:{comp.ticker}</div>
-            <div className="mt-3 rounded-xl bg-white/80 p-3 text-left">
-              <div className="text-xs font-semibold uppercase text-neutral-500">Sintese</div>
-              <div className="mt-1 text-sm font-semibold text-neutral-900">{summary.synthesis}</div>
-              <div className="mt-1 text-xs text-neutral-600">{summary.differential}</div>
+          <div key={comp.ticker} className="bg-muted rounded-xl p-4 hover:bg-muted transition-colors cursor-pointer border border-transparent hover:border-border">
+            <div className="text-sm font-bold text-foreground">{comp.name}</div>
+            <div className="text-xs text-muted-foreground font-mono">{comp.exchange}:{comp.ticker}</div>
+            <div className="mt-3 rounded-xl bg-card/80 p-3 text-left">
+              <div className="text-xs font-semibold uppercase text-muted-foreground">Sintese</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{summary.synthesis}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{summary.differential}</div>
             </div>
-            <div className="text-xs text-neutral-400 mt-2">{comp.marketCap}</div>
+            <div className="text-xs text-muted-foreground mt-2">{comp.marketCap}</div>
           </div>
         );
       })}
@@ -935,8 +999,8 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
             onClick={() => setActiveTab(tab.id)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-neutral-900 text-white'
-                : 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100'
+                ? 'bg-foreground text-white'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
             {tab.label}
@@ -946,9 +1010,9 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
 
       <div className="flex items-center gap-5">
         {/* Callout cinza — ocupa o espaço restante à esquerda */}
-        <div className="bg-neutral-200/60 rounded-xl p-3 flex-1">
-          <p className="text-xs text-neutral-600 leading-relaxed">
-            <span className="font-semibold text-neutral-800">Métrica principal: </span>
+        <div className="bg-border/60 rounded-xl p-3 flex-1">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-semibold text-foreground">Métrica principal: </span>
             {active.desc}
           </p>
         </div>
@@ -968,9 +1032,9 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
             />
           </div>
 
-          <div className="pl-5 border-l border-neutral-100">
-            <div className="text-[3rem] font-bold leading-none text-neutral-900">{active.ratio}x</div>
-            <div className="text-xs text-neutral-400 mt-1.5">{active.label}</div>
+          <div className="pl-5 border-l border-border">
+            <div className="text-[3rem] font-bold leading-none text-foreground">{active.ratio}x</div>
+            <div className="text-xs text-muted-foreground mt-1.5">{active.label}</div>
           </div>
         </div>
       </div>
@@ -1102,11 +1166,11 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
 
   return (
     <div>
-      <p className="text-sm leading-relaxed text-neutral-600">
+      <p className="text-sm leading-relaxed text-muted-foreground">
         O índice histórico compara o preço da ação com seus fundamentos ao longo do tempo. Valores mais altos indicam que o mercado está pagando mais caro pelo papel.
       </p>
 
-      <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50/70 p-4">
+      <div className="mt-4 rounded-2xl border border-border bg-muted/70 p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           {/* Ratio selector — only show available tabs */}
           <div className="flex gap-1">
@@ -1117,8 +1181,8 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
                 onClick={() => setActiveRatio(key)}
                 className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                   activeRatio === key
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-50'
+                    ? 'border-foreground bg-foreground text-white'
+                    : 'border-border bg-card text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {ratioLabels[key]}
@@ -1126,14 +1190,14 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
             ))}
           </div>
 
-          <div className="inline-flex w-fit items-center rounded-md bg-neutral-100 p-1">
+          <div className="inline-flex w-fit items-center rounded-md bg-muted p-1">
             {[['3M', '3M'], ['1Y', '1 ano'], ['3Y', '3 anos'], ['5Y', '5 anos']].map(period => (
               <button
                 key={period[0]}
                 type="button"
                 disabled={activePeriod === period[0]}
                 onClick={() => setActivePeriod(period[0] as '3M' | '1Y' | '3Y' | '5Y')}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition ${activePeriod === period[0] ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-white'}`}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition ${activePeriod === period[0] ? 'bg-foreground text-white' : 'text-muted-foreground hover:bg-card'}`}
               >
                 {period[1]}
               </button>
@@ -1178,9 +1242,9 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
 
             <g transform={`translate(${Math.min(Math.max(focusPoint.x - 90, 90), 360)}, 6)`}>
               <rect width="220" height="48" rx="4" fill="#ffffff" fillOpacity="0.96" />
-              <text x="10" y="18" fill="#111827" fontSize="12" fontWeight="700">{tooltipDate}</text>
+              <text x="10" y="18" fill="var(--foreground)" fontSize="12" fontWeight="700">{tooltipDate}</text>
               <line x1="10" x2="210" y1="26" y2="26" stroke="#e5e7eb" />
-              <text x="10" y="40" fill="#111827" fontSize="12" fontWeight="700">{seriesLabel}</text>
+              <text x="10" y="40" fill="var(--foreground)" fontSize="12" fontWeight="700">{seriesLabel}</text>
               <text x="74" y="40" fill="#1f9cf0" fontSize="12" fontWeight="700">
                 {focusPoint.value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x
               </text>
@@ -1188,7 +1252,7 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
           </svg>
 
           <div className="mt-2 flex items-center">
-            <span className="inline-flex items-center rounded-md border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-[11px] font-medium text-neutral-600">
+            <span className="inline-flex items-center rounded-md border border-border bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
               BOVESPA:{ticker}
             </span>
           </div>
@@ -1274,7 +1338,7 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
   return (
     <div>
       {/* Headline */}
-      <p className="text-[13px] font-semibold text-neutral-800 leading-snug mb-5">{headline}</p>
+      <p className="text-[13px] font-semibold text-foreground leading-snug mb-5">{headline}</p>
 
       {/* ── SVG dot plot ──────────────────────────────────────────────────── */}
       <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" style={{ overflow: 'visible', display: 'block' }}>
@@ -1435,7 +1499,7 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
       </svg>
 
       {/* ── Legend ───────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-5 mt-3 text-[10px] text-neutral-400">
+      <div className="flex flex-wrap items-center gap-5 mt-3 text-[10px] text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">
             <circle cx="6" cy="6" r="5.5" fill="#355CDE" />
@@ -1462,8 +1526,8 @@ function PEVsPeersChart({ data }: { data: AnalysisData }) {
       </div>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <div className="mt-4 pt-3 border-t border-neutral-100 pl-3" style={{ borderLeftWidth: 2, borderLeftColor: '#355CDE', borderLeftStyle: 'solid', paddingLeft: 10 }}>
-        <p className="text-[11.5px] text-neutral-500 leading-relaxed">{footer}</p>
+      <div className="mt-4 pt-3 border-t border-border pl-3" style={{ borderLeftWidth: 2, borderLeftColor: '#355CDE', borderLeftStyle: 'solid', paddingLeft: 10 }}>
+        <p className="text-[11.5px] text-muted-foreground leading-relaxed">{footer}</p>
       </div>
     </div>
   );
@@ -1619,7 +1683,7 @@ function FairPEGauge({ data }: { data: AnalysisData }) {
             <path fillRule="evenodd" clipRule="evenodd" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM0 12C0 5.37258 5.37258 0 12 0C18.6274 0 24 5.37258 24 12C24 18.6274 18.6274 24 12 24C5.37258 24 0 18.6274 0 12ZM12 10L8.70711 6.70711C8.31658 6.31658 7.68342 6.31658 7.29289 6.70711L6.70711 7.29289C6.31658 7.68342 6.31658 8.31658 6.70711 8.70711L10 12L6.70711 15.2929C6.31658 15.6834 6.31658 16.3166 6.70711 16.7071L7.29289 17.2929C7.68342 17.6834 8.31658 17.6834 8.70711 17.2929L12 14L15.2929 17.2929C15.6834 17.6834 16.3166 17.6834 16.7071 17.2929L17.2929 16.7071C17.6834 16.3166 17.6834 15.6834 17.2929 15.2929L14 12L17.2929 8.70711C17.6834 8.31658 17.6834 7.68342 17.2929 7.29289L16.7071 6.70711C16.3166 6.31658 15.6834 6.31658 15.2929 6.70711L12 10Z" />
           </svg>
         )}
-        <p className="text-sm text-neutral-600 leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           <span className={`font-semibold ${isGood ? 'text-green-700' : 'text-red-700'}`}>
             Relação Preço/Lucro vs. Preço Justo:{' '}
           </span>
@@ -1685,7 +1749,7 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
       {/* ── Closing sentence ── */}
       <div className="flex items-start gap-2.5">
         <div className="w-[3px] h-5 rounded-full bg-[#355CDE] shrink-0 mt-0.5" />
-        <p className="text-[13.5px] font-semibold text-[#0F172A] leading-snug">{closingSentence}</p>
+        <p className="text-[13.5px] font-semibold text-foreground leading-snug">{closingSentence}</p>
       </div>
 
       {/* ── SVG Ruler ── */}
@@ -1749,49 +1813,49 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
       <div className="grid grid-cols-3 pt-1">
 
         {/* Conservador — ② slightly more present */}
-        <div className="pr-6 border-r border-neutral-100">
+        <div className="pr-6 border-r border-border">
           <div className="flex items-center gap-1.5 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            <span className="text-[10.5px] font-semibold text-slate-500">Conservador</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+            <span className="text-[10.5px] font-semibold text-muted-foreground">Conservador</span>
           </div>
-          <div className="text-[19px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[19px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[0].estimatedValue)}
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">
+          <div className="text-[11px] text-muted-foreground mt-0.5">
             {fmtPct(scn[0].gapVsCurrent)} vs. atual
           </div>
           {scn[0].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[0].wacc, 1)}% · g {fmt(scn[0].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[0].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[0].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[0].note}</div>
           )}
         </div>
 
         {/* Base — protagonist */}
-        <div className="px-6 border-r border-neutral-100">
+        <div className="px-6 border-r border-border">
           <div className="flex items-center gap-1.5 mb-2">
             <div className="w-2 h-2 rounded-full bg-[#355CDE]" />
             <span className="text-[10.5px] font-semibold text-[#355CDE]">Base</span>
           </div>
-          <div className="text-[24px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[24px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[1].estimatedValue)}
           </div>
           <div
             className="inline-flex text-[11px] font-semibold px-2 py-0.5 rounded-full mt-1"
-            style={{ backgroundColor: '#EFF6FF', color: '#355CDE' }}
+            style={{ backgroundColor: 'var(--brand-surface)', color: 'var(--brand)' }}
           >
             {fmtPct(scn[1].gapVsCurrent)} vs. atual
           </div>
           {scn[1].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[1].wacc, 1)}% · g {fmt(scn[1].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[1].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[1].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[1].note}</div>
           )}
         </div>
 
@@ -1799,27 +1863,27 @@ function ValuationScenariosChart({ data }: { data: AnalysisData }) {
         <div className="pl-6">
           <div className="flex items-center gap-1.5 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span className="text-[10.5px] font-medium text-slate-400">Otimista</span>
+            <span className="text-[10.5px] font-medium text-muted-foreground">Otimista</span>
           </div>
-          <div className="text-[19px] font-bold tabular-nums text-[#0F172A]">
+          <div className="text-[19px] font-bold tabular-nums text-foreground">
             R$ {fmt(scn[2].estimatedValue)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
+          <div className="text-[11px] text-muted-foreground mt-0.5">
             {fmtPct(scn[2].gapVsCurrent)} vs. atual
           </div>
           {scn[2].wacc && (
-            <div className="text-[10.5px] text-slate-500 mt-2">
+            <div className="text-[10.5px] text-muted-foreground mt-2">
               WACC {fmt(scn[2].wacc, 1)}% · g {fmt(scn[2].growthRate ?? 0, 1)}%
             </div>
           )}
           {scn[2].note && (
-            <div className="text-[11px] text-slate-600 mt-1 leading-snug">{scn[2].note}</div>
+            <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{scn[2].note}</div>
           )}
         </div>
       </div>
 
       {/* ── Footnote ── ⑤ contrast raised */}
-      <div className="text-[10.5px] text-slate-400 border-t border-neutral-100 pt-3">
+      <div className="text-[10.5px] text-muted-foreground border-t border-border pt-3">
         Estimativas baseadas em DCF com variação de WACC e crescimento terminal. Sujeitas a revisão.
       </div>
 
@@ -1896,8 +1960,8 @@ function DCFWidget({ data }: { data: AnalysisData }) {
       {/* ── Headline + KPIs ── */}
       <div className="flex items-start justify-between gap-6 flex-wrap">
         <div>
-          <div className="text-[11px] font-medium text-neutral-400 mb-1.5">Valor intrínseco via fluxo de caixa descontado</div>
-          <div className="text-[20px] font-bold text-[#0F172A] leading-snug">
+          <div className="text-[11px] font-medium text-muted-foreground mb-1.5">Valor intrínseco via fluxo de caixa descontado</div>
+          <div className="text-[20px] font-bold text-foreground leading-snug">
             Preço negocia{' '}
             <span style={{ color: priceColor }}>
               {fmt(Math.abs(v.discountPercent))}% {isUnder ? 'abaixo' : 'acima'}
@@ -1907,14 +1971,14 @@ function DCFWidget({ data }: { data: AnalysisData }) {
         </div>
 
         {/* KPI trio */}
-        <div className="flex items-center gap-0 divide-x divide-neutral-100 shrink-0">
+        <div className="flex items-center gap-0 divide-x divide-border shrink-0">
           {[
             { label: 'Preço atual',      value: `R$ ${fmt(v.currentPrice, 2)}`,  color: priceColor },
             { label: 'Valor justo (DCF)', value: `R$ ${fmt(fv, 2)}`,              color: '#0F172A'   },
             { label: 'Desconto',         value: `−${fmt(v.discountPercent)}%`,    color: priceColor },
           ].map((k, i) => (
             <div key={i} className="px-5 first:pl-0 last:pr-0 text-right">
-              <div className="text-[10.5px] text-neutral-400 mb-0.5 whitespace-nowrap">{k.label}</div>
+              <div className="text-[10.5px] text-muted-foreground mb-0.5 whitespace-nowrap">{k.label}</div>
               <div className="text-[16px] font-bold tabular-nums whitespace-nowrap" style={{ color: k.color }}>
                 {k.value}
               </div>
@@ -2021,14 +2085,14 @@ function DCFWidget({ data }: { data: AnalysisData }) {
         {/* Zone pills — only active one has presence */}
         <div className="flex items-center gap-2">
           {([
-            { key: 'under', label: 'Abaixo do valor justo',  active: isUnder,  activeBg: 'bg-teal-50',   activeText: 'text-teal-700',  dot: 'bg-teal-500'  },
-            { key: 'near',  label: 'Próximo do valor justo', active: !isUnder && v.discountPercent > -10, activeBg: 'bg-slate-100', activeText: 'text-slate-600', dot: 'bg-slate-400' },
+            { key: 'under', label: 'Abaixo do valor justo',  active: isUnder,  activeBg: 'bg-success-surface',   activeText: 'text-success-text',  dot: 'bg-success-text'  },
+            { key: 'near',  label: 'Próximo do valor justo', active: !isUnder && v.discountPercent > -10, activeBg: 'bg-muted', activeText: 'text-muted-foreground', dot: 'bg-muted-foreground' },
             { key: 'over',  label: 'Acima do valor justo',   active: !isUnder && v.discountPercent <= -10, activeBg: 'bg-red-50', activeText: 'text-red-700', dot: 'bg-red-500' },
           ] as const).map(z => (
             <div
               key={z.key}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
-                z.active ? `${z.activeBg} ${z.activeText}` : 'text-neutral-300'
+                z.active ? `${z.activeBg} ${z.activeText}` : 'text-muted-foreground/40'
               }`}
             >
               {z.active && <div className={`w-1.5 h-1.5 rounded-full ${z.dot}`} />}
@@ -2038,7 +2102,7 @@ function DCFWidget({ data }: { data: AnalysisData }) {
         </div>
 
         {/* Legend + model params */}
-        <div className="flex items-center gap-4 text-[10.5px] text-neutral-400">
+        <div className="flex items-center gap-4 text-[10.5px] text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-[2.5px] rounded-full" style={{ backgroundColor: priceColor }} />
             <span>Preço histórico</span>
@@ -2049,7 +2113,7 @@ function DCFWidget({ data }: { data: AnalysisData }) {
             </svg>
             <span>Valor justo (DCF)</span>
           </div>
-          <span className="text-neutral-200">·</span>
+          <span className="text-border">·</span>
           <span>WACC {fmt(v.discountRate)}% · crescimento terminal {fmt(v.terminalGrowthRate)}%</span>
         </div>
       </div>
@@ -2070,15 +2134,15 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
   const isOver     = diffPct > 10;
   const isUnder    = diffPct < -10;
 
-  // ── Design tokens ──
-  const accent      = isUnder ? '#0F766E' : isOver ? '#B91C1C' : '#475569';
+  // ── Design tokens (semantic, dark-mode safe) ──
+  const accent      = isUnder ? 'var(--success-text)' : isOver ? 'var(--danger-text)' : 'var(--muted-foreground)';
   const accentAlpha = isUnder ? 'rgba(15,118,110,0.12)' : isOver ? 'rgba(185,28,28,0.10)' : 'rgba(71,85,105,0.08)';
   const accentBand  = isUnder ? 'rgba(15,118,110,0.18)' : isOver ? 'rgba(185,28,28,0.18)' : 'rgba(71,85,105,0.12)';
   const accentHalo  = isUnder ? 'rgba(20,184,166,0.25)' : isOver ? 'rgba(185,28,28,0.20)' : 'rgba(71,85,105,0.15)';
 
-  const chipBg    = isUnder ? '#F0FDF4' : isOver ? '#FEF2F2' : '#F1F5F9';
-  const chipColor = isUnder ? '#0F766E' : isOver ? '#B91C1C' : '#475569';
-  const chipDot   = isUnder ? '#14B8A6' : isOver ? '#B91C1C' : '#94A3B8';
+  const chipBg    = isUnder ? 'var(--success-surface)' : isOver ? 'var(--danger-surface)' : 'var(--muted)';
+  const chipColor = isUnder ? 'var(--success-text)' : isOver ? 'var(--danger-text)' : 'var(--muted-foreground)';
+  const chipDot   = isUnder ? '#14B8A6' : isOver ? '#EF4444' : 'var(--muted-foreground)';
   // ① More analytical chip label
   const chipLabel = isUnder ? 'Abaixo do valor estimado' : isOver ? 'Acima do valor estimado' : 'Próximo do valor estimado';
 
@@ -2118,7 +2182,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
     <div className="w-full">
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: isUnder ? 'linear-gradient(160deg, #F0FDF4 0%, #ffffff 55%)' : isOver ? 'linear-gradient(160deg, #FEF2F2 0%, #ffffff 55%)' : 'linear-gradient(160deg, #F8FAFC 0%, #ffffff 55%)' }}
+        style={{ background: isUnder ? 'linear-gradient(160deg, var(--success-surface) 0%, var(--card) 55%)' : isOver ? 'linear-gradient(160deg, var(--danger-surface) 0%, var(--card) 55%)' : 'linear-gradient(160deg, var(--muted) 0%, var(--card) 55%)' }}
       >
         {/* ③ Top stripe — removed (was ornamental, not informational) */}
 
@@ -2127,11 +2191,11 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Headline block ── */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-medium text-neutral-400 mb-2 uppercase">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2 uppercase">
                 Posicionamento de preço
               </div>
               {/* Full-sentence headline with % bold */}
-              <div className="text-[22px] font-bold leading-snug text-[#0F172A]">
+              <div className="text-[22px] font-bold leading-snug text-foreground">
                 {headlinePrefix}
                 <span style={{ color: accent }}>{headlineBold}</span>
                 {headlineSuffix}
@@ -2161,7 +2225,7 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Ruler section ── */}
           <div className="space-y-1.5">
             {/* Track */}
-            <div className="relative h-[10px] rounded-full" style={{ backgroundColor: '#E2E8F0' }}>
+            <div className="relative h-[10px] rounded-full" style={{ backgroundColor: 'var(--border)' }}>
 
               {/* Gap band — filled distance between price and fair value */}
               <div
@@ -2175,14 +2239,14 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
                 }}
               />
 
-              {/* Fair value marker — white disc with slate ring + diamond tick */}
+              {/* Fair value marker */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 z-10"
                 style={{ left: `calc(${fvPct}% - 7px)` }}
               >
                 <div
-                  className="w-[14px] h-[14px] rounded-full bg-white"
-                  style={{ border: '2.5px solid #94A3B8', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+                  className="w-[14px] h-[14px] rounded-full bg-card"
+                  style={{ border: '2.5px solid var(--muted-foreground)', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
                 />
               </div>
 
@@ -2212,9 +2276,9 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
                   transform: tooClose && !cpBelow ? 'translateX(-100%)' : 'translateX(-50%)',
                 }}
               >
-                <div className="w-px h-2 bg-slate-300" />
-                <div className="text-[10px] text-slate-400 whitespace-nowrap mt-0.5">Valor estimado</div>
-                <div className="text-[12px] font-semibold text-slate-500 tabular-nums">
+                <div className="w-px h-2 bg-muted-foreground" />
+                <div className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">Valor estimado</div>
+                <div className="text-[12px] font-semibold text-muted-foreground tabular-nums">
                   R$ {(fairValue ?? 0).toFixed(2)}
                 </div>
               </div>
@@ -2241,12 +2305,12 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
           {/* ── Compact value row ── */}
           <div
             className="flex items-center justify-between rounded-xl px-4 py-3"
-            style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}
+            style={{ backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
-              <span className="text-[12px] text-slate-500">Preço atual</span>
-              <span className="text-[13px] font-semibold text-[#0F172A] tabular-nums">
+              <span className="text-[12px] text-muted-foreground">Preço atual</span>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
                 R$ {(currentPrice ?? 0).toFixed(2)}
               </span>
             </div>
@@ -2258,16 +2322,16 @@ function SharePriceVsFairValue({ currentPrice, fairValue }: { currentPrice: numb
               {pillText}
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[12px] text-slate-500">Valor estimado</span>
-              <span className="text-[13px] font-semibold text-[#0F172A] tabular-nums">
+              <span className="text-[12px] text-muted-foreground">Valor estimado</span>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
                 R$ {(fairValue ?? 0).toFixed(2)}
               </span>
-              <div className="w-2 h-2 rounded-full bg-slate-300" />
+              <div className="w-2 h-2 rounded-full bg-muted-foreground" />
             </div>
           </div>
 
           {/* ── Footnote ── */}
-          <div className="text-[10.5px] text-slate-400 leading-relaxed">
+          <div className="text-[10.5px] text-muted-foreground leading-relaxed">
             Estimativa baseada em fluxo de caixa descontado. Sujeita a revisão conforme novas projeções.
           </div>
         </div>
@@ -2300,8 +2364,8 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
         {/* Center label */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-[10px] text-neutral-500">Cap. de Mercado</div>
-            <div className="text-sm font-bold text-neutral-900">R$ {formatNumber(composition.marketCap)}</div>
+            <div className="text-[10px] text-muted-foreground">Cap. de Mercado</div>
+            <div className="text-sm font-bold text-foreground">R$ {formatNumber(composition.marketCap)}</div>
           </div>
         </div>
       </div>
@@ -2309,25 +2373,25 @@ function MarketCapDonut({ composition }: { composition: AnalysisData['marketCapC
         <div>
           <div className="flex items-center gap-2 text-sm">
             <div className="w-3 h-3 rounded-full bg-teal-500" />
-            <span className="text-neutral-600">Lucro</span>
+            <span className="text-muted-foreground">Lucro</span>
           </div>
-          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.earnings)}</div>
+          <div className="text-lg font-bold text-foreground ml-5">R$ {formatNumber(composition.earnings)}</div>
         </div>
         <div>
           <div className="flex items-center gap-2 text-sm">
             <div className="w-3 h-3 rounded-full bg-sky-500" />
-            <span className="text-neutral-600">Receita</span>
+            <span className="text-muted-foreground">Receita</span>
           </div>
-          <div className="text-lg font-bold text-neutral-900 ml-5">R$ {formatNumber(composition.revenue)}</div>
+          <div className="text-lg font-bold text-foreground ml-5">R$ {formatNumber(composition.revenue)}</div>
         </div>
-        <div className="border-t border-neutral-200 pt-3 grid grid-cols-2 gap-4">
+        <div className="border-t border-border pt-3 grid grid-cols-2 gap-4">
           <div>
-            <div className="text-2xl font-bold text-neutral-900">{composition.peRatio}x</div>
-            <div className="text-xs text-neutral-500">Índice P/L</div>
+            <div className="text-2xl font-bold text-foreground">{composition.peRatio}x</div>
+            <div className="text-xs text-muted-foreground">Índice P/L</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-neutral-900">{composition.psRatio}x</div>
-            <div className="text-xs text-neutral-500">Índice P/S</div>
+            <div className="text-2xl font-bold text-foreground">{composition.psRatio}x</div>
+            <div className="text-xs text-muted-foreground">Índice P/S</div>
           </div>
         </div>
       </div>
@@ -2394,9 +2458,9 @@ function CommunityFairValuesChart({ buckets, lastPrice }: { buckets: CommunityFa
       />
       <div className="flex items-center gap-2 mt-2 text-xs">
         <div className="w-3 h-3 bg-indigo-600 rounded-sm" />
-        <span className="text-neutral-600">Último Preço: <strong className="text-indigo-700">R$ {lastPrice.toFixed(2)}</strong></span>
-        <span className="text-neutral-400 ml-2">|</span>
-        <span className="text-neutral-500">{buckets.reduce((s, b) => s + b.count, 0)} estimativas da comunidade</span>
+        <span className="text-muted-foreground">Último Preço: <strong className="text-brand-text">R$ {lastPrice.toFixed(2)}</strong></span>
+        <span className="text-muted-foreground ml-2">|</span>
+        <span className="text-muted-foreground">{buckets.reduce((s, b) => s + b.count, 0)} estimativas da comunidade</span>
       </div>
     </div>
   );
@@ -2430,6 +2494,7 @@ const EVENT_LABELS: Record<string, string> = {
 export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null>; navAlignRef?: React.RefObject<HTMLDivElement | null> }) {
   const headline = data.company.name + " — análise fundamentalista";
   const [descExpanded, setDescExpanded] = React.useState(false);
+  const luizContext = useLuizContext();
 
   const rewards = (data.rewardsAndRisks ?? []).filter((r) => r.type === 'reward').slice(0, 3);
   const risks   = (data.rewardsAndRisks ?? []).filter((r) => r.type === 'risk').slice(0, 3);
@@ -2452,19 +2517,23 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
   const priceUp = (data.priceHistory?.return1y ?? 0) >= 0;
 
   return (
-    <div className="space-y-5">
+    // DESIGN CHANGE — Entire overview section with refined spacing and card system
+    <div className="space-y-6">
 
       {/* ── 1. Identidade da empresa ────────────────────────────────────── */}
-      <div ref={companyCardRef} className="bg-white rounded-2xl shadow-sm p-6">
-        <div className="flex items-start justify-between gap-6 flex-wrap">
-          <div className="flex items-start gap-4 min-w-0">
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="w-14 h-14 rounded-xl bg-neutral-100 flex items-center justify-center overflow-hidden">
+      <div ref={companyCardRef} className="analysis-card overflow-hidden">
+
+        {/* Header: Logo + Identity + Price — highlighted zone */}
+        <div className="bg-muted/50 px-6 py-5 md:px-8 md:py-6">
+          <div className="flex items-start justify-between gap-6 flex-wrap">
+            <div className="flex items-center gap-5 min-w-0">
+              {/* Logo */}
+              <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center">
                 {data.company.logo ? (
                   <img
                     src={data.company.logo}
                     alt={data.company.ticker}
-                    className="w-11 h-11 object-contain"
+                    className="w-16 h-16 rounded-full object-cover"
                     onError={(e) => {
                       const el = e.currentTarget;
                       el.style.display = 'none';
@@ -2473,110 +2542,270 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
                   />
                 ) : null}
                 <span
-                  className="text-[11px] font-bold text-neutral-500 font-mono tracking-tight"
+                  className="text-sm font-medium text-muted-foreground font-mono"
                   style={{ display: data.company.logo ? 'none' : undefined }}
                 >
                   {data.company.ticker.slice(0, 4)}
                 </span>
               </div>
-              <FavoriteButton ticker={data.company.ticker} />
+
+              {/* Name + meta */}
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-2.5 flex-wrap">
+                  <h1 className="text-xl font-medium text-foreground leading-tight tracking-tight">{data.company.name}</h1>
+                  <span className="text-[11px] font-mono text-muted-foreground tracking-wide whitespace-nowrap">
+                    ({data.company.ticker})
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 mt-1.5">
+                  <p className="text-[12px] text-muted-foreground leading-relaxed">
+                    <span className="text-dim font-medium">Setor:</span> {data.company.sector}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground leading-relaxed">
+                    <span className="text-dim font-medium">Cap. de mercado:</span> {fmtBRL(Number(data.company.marketCap))}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl font-bold text-neutral-900 leading-tight">{data.company.name}</h1>
-                <span className="text-[11px] font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-md whitespace-nowrap">
-                  {data.company.exchange}:{data.company.ticker}
+
+            {/* Price block */}
+            <div className="text-right flex-shrink-0">
+              <div className="text-[26px] font-medium text-muted-foreground tabular-nums tracking-tight leading-none">
+                R$ {safeN(data.valuation?.currentPrice, 2)}
+              </div>
+              <div className="flex items-center justify-end gap-1.5 mt-3">
+                <span
+                  className={`inline-flex items-center gap-1 text-[12px] font-medium tabular-nums px-1.5 py-0.5 rounded-md ${
+                    priceUp
+                      ? 'text-success-text bg-success-surface'
+                      : 'text-danger-text bg-danger-surface'
+                  }`}
+                >
+                  {priceUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {priceUp ? '+' : ''}{data.priceHistory?.return1y}% em 12 meses
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-400 mt-0.5">
-                Capitalização de mercado {fmtBRL(Number(data.company.marketCap)).replace('bi', ' bilhões').replace('mi', ' milhões')}
-              </p>
-              {data.generatedAt && (
-                <p className="text-[11px] text-neutral-400 mt-0.5">{timeAgo(data.generatedAt)}</p>
-              )}
-              <p className="text-[12px] text-neutral-500 mt-1 leading-5">
-                {data.company.sector}
-                <span className="mx-1.5 text-neutral-300">·</span>
-                {data.company.industry}
-              </p>
-            </div>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-neutral-900 tabular-nums">R$ {safeN(data.valuation?.currentPrice, 2)}</div>
-            <div className={`text-[12px] font-medium mt-0.5 tabular-nums ${priceUp ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {priceUp ? '+' : ''}{data.priceHistory?.return1y}% em 12 meses
             </div>
           </div>
         </div>
+
+        {/* Description */}
         {data.company.longDescription && (
-          <div className="mt-5 pt-5 border-t border-neutral-100">
-            <p className={`text-[13.5px] leading-7 text-neutral-600 max-w-3xl ${descExpanded ? '' : 'line-clamp-3'}`}>
+          <div className="px-6 md:px-8 pt-5">
+            <span className="text-[12px] text-dim font-medium mb-1.5 block">Sobre a empresa:</span>
+            <p
+              className={`text-[13px] md:text-[14px] leading-relaxed text-muted-foreground ${descExpanded ? '' : 'line-clamp-4'}`}
+              style={{ transition: 'max-height 300ms ease-out' }}
+            >
               {data.company.longDescription}
             </p>
             <button
               onClick={() => setDescExpanded(v => !v)}
-              className="mt-1.5 text-[12px] font-medium text-teal-600 hover:text-teal-700 transition-colors"
+              className="inline-flex items-center gap-1 text-[12px] font-medium text-brand-text hover:text-brand transition-colors mt-2 px-2 py-1 -ml-2 rounded-md hover:bg-brand-surface"
             >
-              {descExpanded ? 'Ver menos ↑' : 'Ver mais ↓'}
+              {descExpanded ? 'Ver menos' : 'Ver mais'}
+              <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${descExpanded ? '-rotate-90' : 'rotate-90'}`} />
             </button>
           </div>
         )}
+
+        {/* Actions */}
+        <div className="flex items-center justify-between px-6 md:px-8 py-4 mt-2 border-t border-border">
+          <div className="flex items-center gap-1">
+            {[
+              { icon: Bookmark, title: 'Favoritar' },
+              { icon: Share2, title: 'Compartilhar' },
+              { icon: GitCompareArrows, title: 'Comparar' },
+              { icon: Bell, title: 'Alertas' },
+            ].map(({ icon: Icon, title }) => (
+              <button
+                key={title}
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground opacity-60 hover:opacity-100 hover:text-foreground hover:bg-muted transition-all duration-150"
+                title={title}
+              >
+                <Icon className="w-[16px] h-[16px]" />
+              </button>
+            ))}
+          </div>
+          {data.generatedAt && (
+            <span className="text-[10px] text-muted-foreground tabular-nums">{timeAgo(data.generatedAt)}</span>
+          )}
+        </div>
       </div>
 
-      {/* ── 2. Leitura atual ────────────────────────────────────────────── */}
-      <div ref={navAlignRef} className="bg-[#F8FAFC] border border-neutral-200/80 rounded-2xl px-6 py-5">
-        <div className="text-[12px] font-semibold text-neutral-500 mb-2.5">Resumo da análise</div>
-        {data.company.summaryText
-          ? <p className="text-[15px] leading-7 text-neutral-700 max-w-3xl">{data.company.summaryText}</p>
-          : <p className="text-[17px] font-semibold leading-relaxed text-neutral-800 max-w-3xl">{headline}</p>
-        }
+      {/* ── 2. Luiz IA — Resumo + Chat ────────────────────────────────── */}
+      <div className="relative">
+        <div
+          className="absolute inset-x-4 -bottom-3 top-4 rounded-2xl blur-xl opacity-[0.12] pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)' }}
+        />
+        <div
+          ref={navAlignRef}
+          className="relative rounded-xl overflow-hidden"
+          style={{
+            padding: 1,
+            background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)',
+            boxShadow: '0 0 20px rgba(168,85,247,0.12), 0 0 40px rgba(99,102,241,0.06)',
+          }}
+        >
+          <div className="rounded-[11px] bg-card">
+
+            {/* ── Região 1: Resumo da IA + CTA ──────────── */}
+            <div className="px-6 py-5 md:px-7 md:py-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Resumo gerado por</span>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none tracking-wide text-white"
+                    style={{ background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)' }}
+                  >
+                    IA
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => luizContext.open()}
+                  className="inline-flex items-center gap-2 text-[12px] font-medium px-4 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap border"
+                  style={{
+                    color: 'rgba(168,85,247,0.85)',
+                    borderColor: 'rgba(168,85,247,0.2)',
+                    backgroundColor: 'rgba(168,85,247,0.06)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)';
+                    e.currentTarget.style.backgroundColor = 'rgba(168,85,247,0.12)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'rgba(168,85,247,0.2)';
+                    e.currentTarget.style.backgroundColor = 'rgba(168,85,247,0.06)';
+                  }}
+                >
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L15.5 8.5L22 12L15.5 15.5L12 22L8.5 15.5L2 12L8.5 8.5L12 2Z" fill="url(#luiz-cta-grad)" />
+                    <defs>
+                      <linearGradient id="luiz-cta-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#EC4899" />
+                        <stop offset="40%" stopColor="#A855F7" />
+                        <stop offset="75%" stopColor="#6366F1" />
+                        <stop offset="100%" stopColor="#06B6D4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  Gerar relatório comentado
+                </button>
+              </div>
+
+              {data.company.summaryText
+                ? <p className="text-[15px] leading-7 text-dim mt-6">{data.company.summaryText}</p>
+                : <p className="text-[17px] font-semibold leading-relaxed text-foreground mt-6">{headline}</p>
+              }
+            </div>
+
+            {/* ── Divisor ────────────────────────────────── */}
+            <div className="border-t border-border/50" />
+
+            {/* ── Região 2: Chat com Luiz ────────────────── */}
+            <div className="px-6 py-5 md:px-7 md:py-6">
+              <div className="flex items-start gap-3">
+                <LuizAvatar size="sm" shape="circle" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[12px] font-bold text-foreground">Luiz</span>
+                    <span
+                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none tracking-wide text-white"
+                      style={{ background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)' }}
+                    >
+                      IA
+                    </span>
+                  </div>
+                  <div className="bg-muted/60 rounded-2xl rounded-tl-sm px-4 py-3">
+                    <p className="text-[12px] text-muted-foreground leading-relaxed">
+                      Tem alguma dúvida sobre esta análise? Posso explicar qualquer indicador, comparar com concorrentes ou detalhar riscos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <LuizPromptInput ticker={data.company.ticker} onFocus={() => luizContext.open()} />
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
 
-      {/* ── 3 + 4. Sustenta a tese / Merece atenção ─────────────────────── */}
+      {/* ── 3 + 4. O que sustenta / O que monitorar ─────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {/* O que sustenta */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-4 rounded-full bg-emerald-400 flex-shrink-0" />
-            <span className="text-[12px] font-semibold text-neutral-600">Pontos fortes</span>
+        <div className="analysis-card overflow-hidden">
+          {/* Header com fundo semântico verde */}
+          <div className="px-6 py-4 md:px-7 flex items-center gap-3" style={{ backgroundColor: 'var(--success-surface)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'color-mix(in srgb, var(--success-text) 15%, transparent)' }}>
+              <svg className="w-4 h-4" style={{ color: 'var(--success-text)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div>
+              <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--success-text)' }}>O que sustenta a tese</span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{rewards.length} {rewards.length === 1 ? 'ponto identificado' : 'pontos identificados'}</p>
+            </div>
           </div>
-          <div className="flex flex-col divide-y divide-neutral-100">
+          {/* Items */}
+          <div className="px-6 py-5 md:px-7">
             {rewards.map((r, i) => {
               const RAW_SENTINEL = /^(attention|negative|positive|neutral|good|bad|reward|risk)$/i;
               const showTitle = r.text && !RAW_SENTINEL.test(r.text.trim());
+              const hasDetail = !!r.detail;
               return (
-                <div key={i} className={i > 0 ? 'pt-3.5 pb-0.5' : 'pb-3.5'}>
-                  {showTitle && (
-                    <div className="text-[13.5px] font-semibold text-neutral-800 leading-snug">{r.text}</div>
-                  )}
-                  {r.detail && (
-                    <div className={`text-[12px] text-neutral-500 leading-[1.65] ${showTitle ? 'mt-1' : ''}`}>{r.detail}</div>
-                  )}
+                <div key={i} className={`flex gap-2.5 items-start ${i > 0 ? 'pt-4 border-t border-border/40 mt-4' : ''}`}>
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--success-text)' }} />
+                  <div>
+                    {showTitle && (
+                      <div className={`leading-snug ${hasDetail ? 'text-[14px] font-medium text-foreground' : 'text-[14px] font-normal text-muted-foreground leading-[1.7]'}`}>{r.text}</div>
+                    )}
+                    {r.detail && (
+                      <div className={`text-[13px] text-muted-foreground leading-[1.7] ${showTitle ? 'mt-1' : ''}`}>{r.detail}</div>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* O que merece atenção */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-4 rounded-full bg-amber-400 flex-shrink-0" />
-            <span className="text-[12px] font-semibold text-neutral-600">Pontos de atenção</span>
+        <div className="analysis-card overflow-hidden">
+          {/* Header com fundo semântico amarelo */}
+          <div className="px-6 py-4 md:px-7 flex items-center gap-3" style={{ backgroundColor: 'var(--warning-surface)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'color-mix(in srgb, var(--warning-text) 15%, transparent)' }}>
+              <svg className="w-4 h-4" style={{ color: 'var(--warning-text)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div>
+              <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--warning-text)' }}>O que monitorar</span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{risks.length} {risks.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}</p>
+            </div>
           </div>
-          <div className="flex flex-col divide-y divide-neutral-100">
+          {/* Items */}
+          <div className="px-6 py-5 md:px-7">
             {risks.map((r, i) => {
               const RAW_SENTINEL = /^(attention|negative|positive|neutral|good|bad|reward|risk)$/i;
               const showTitle = r.text && !RAW_SENTINEL.test(r.text.trim());
+              const hasDetail = !!r.detail;
               return (
-                <div key={i} className={i > 0 ? 'pt-3.5 pb-0.5' : 'pb-3.5'}>
-                  {showTitle && (
-                    <div className="text-[13.5px] font-semibold text-neutral-800 leading-snug">{r.text}</div>
-                  )}
-                  {r.detail && (
-                    <div className={`text-[12px] text-neutral-500 leading-[1.65] ${showTitle ? 'mt-1' : ''}`}>{r.detail}</div>
-                  )}
+                <div key={i} className={`flex gap-2.5 items-start ${i > 0 ? 'pt-4 border-t border-border/40 mt-4' : ''}`}>
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--warning-text)' }} />
+                  <div>
+                    {showTitle && (
+                      <div className={`leading-snug ${hasDetail ? 'text-[14px] font-medium text-foreground' : 'text-[14px] font-normal text-muted-foreground leading-[1.7]'}`}>{r.text}</div>
+                    )}
+                    {r.detail && (
+                      <div className={`text-[13px] text-muted-foreground leading-[1.7] ${showTitle ? 'mt-1' : ''}`}>{r.detail}</div>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -2584,54 +2813,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
         </div>
       </div>
 
-      {/* ── 5. Luiz — insight da análise ────────────────────────────────── */}
-      <div className="rounded-2xl p-4 flex items-center gap-4 border border-border" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.06) 0%, rgba(168,85,247,0.06) 35%, rgba(99,102,241,0.06) 68%, rgba(6,182,212,0.06) 100%)' }}>
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          <LuizAvatar size="md" shape="circle" />
-        </div>
-
-        {/* Texto */}
-        <div className="flex-1 min-w-0">
-          {/* Nome + badge IA */}
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[12px] font-bold text-foreground">Luiz</span>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none tracking-wide text-white" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #A855F7 35%, #6366F1 68%, #06B6D4 100%)' }}>
-              IA
-            </span>
-          </div>
-          <p className="text-[13px] font-semibold text-foreground leading-snug">
-            {startingMeta[startingTab].tab === 'Preço justo'
-              ? `O preço de ${data.company.ticker} pode estar abaixo do valor estimado.`
-              : startingMeta[startingTab].tab === 'Dividendos'
-              ? `${data.company.ticker} distribui dividendos consistentemente. Veja a sustentabilidade.`
-              : `O ponto mais relevante desta análise está em ${startingMeta[startingTab].tab}.`}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
-            {startingMeta[startingTab].reason}
-          </p>
-        </div>
-
-        {/* CTA */}
-        <button
-          type="button"
-          onClick={() => onSelectTab(startingTab)}
-          className="flex-shrink-0 flex items-center gap-2 text-[13px] font-medium text-foreground bg-white/90 hover:bg-white px-4 py-2 rounded-full transition-colors whitespace-nowrap shadow-sm"
-        >
-          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L15.5 8.5L22 12L15.5 15.5L12 22L8.5 15.5L2 12L8.5 8.5L12 2Z" fill="url(#luiz-btn-grad)" />
-            <defs>
-              <linearGradient id="luiz-btn-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#EC4899" />
-                <stop offset="40%" stopColor="#A855F7" />
-                <stop offset="75%" stopColor="#6366F1" />
-                <stop offset="100%" stopColor="#06B6D4" />
-              </linearGradient>
-            </defs>
-          </svg>
-          Análise completa
-        </button>
-      </div>
+      {/* Section 5 removed — Luiz insight merged into AI summary card above */}
 
       {/* ── 6. O que mudou desde a última atualização ───────────────────── */}
       {(data.recentChanges ?? []).length > 0 && (() => {
@@ -2640,64 +2822,58 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
           past: 'Histórico', health: 'Saúde financeira', dividend: 'Dividendos',
         };
         return (
+          // DESIGN CHANGE — Recent changes with analysis-card style, improved spacing
           <div>
-            <div className="text-[13px] font-semibold text-neutral-600 mb-3 px-0.5">
+            <div className="text-[12px] font-semibold text-dim uppercase tracking-wide mb-4 px-0.5">
               O que mudou desde a última atualização
             </div>
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3">
               {(data.recentChanges ?? []).map((change, i) => {
                 const isWorse   = change.direction === 'worse';
                 const isBetter  = change.direction === 'better';
-                const arrowColor = isBetter ? 'text-emerald-500' : isWorse ? 'text-rose-500' : 'text-slate-400';
+                const arrowColor = isBetter ? 'text-success-text' : isWorse ? 'text-danger-text' : 'text-muted-foreground';
                 const arrowPath  = isBetter
-                  ? 'M8 12V4M4 8l4-4 4 4'     // up
+                  ? 'M8 12V4M4 8l4-4 4 4'
                   : isWorse
-                  ? 'M8 4v8M4 8l4 4 4-4'      // down
-                  : 'M4 8h8';                  // right
+                  ? 'M8 4v8M4 8l4 4 4-4'
+                  : 'M4 8h8';
                 return (
                   <div
                     key={i}
-                    className="bg-white rounded-2xl shadow-sm px-5 py-4 flex items-start gap-4"
+                    className="analysis-card px-5 py-4 flex items-start gap-4"
                   >
-                    {/* Direction arrow */}
                     <div className={`flex-shrink-0 mt-0.5 ${arrowColor}`}>
                       <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d={arrowPath} />
                       </svg>
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div>
-                          {/* Pillar badge */}
-                          <span className="inline-block text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md mb-1.5">
+                          <span className="inline-block text-[11px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-md mb-1.5 border border-border">
                             {PILLAR_LABEL[change.pillar] ?? change.pillar}
                           </span>
-                          {/* Summary */}
-                          <div className="text-[13.5px] font-semibold text-neutral-800 leading-snug">
+                          <div className="text-[13.5px] font-semibold text-foreground leading-snug">
                             {change.summary}
                           </div>
-                          {/* Detail */}
-                          <div className="text-[12px] text-neutral-500 leading-[1.6] mt-0.5">
+                          <div className="text-[12px] text-muted-foreground leading-[1.65] mt-0.5">
                             {change.detail}
                           </div>
                         </div>
-                        {/* Date */}
-                        <span className="flex-shrink-0 text-[11px] text-neutral-400 mt-0.5 whitespace-nowrap">
+                        <span className="flex-shrink-0 text-[11px] text-muted-foreground mt-0.5 whitespace-nowrap">
                           {formatDate(change.date)}
                         </span>
                       </div>
 
-                      {/* Before → After */}
-                      <div className="flex items-center gap-2 mt-2.5">
-                        <span className="text-[11px] font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-[11px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                           {change.before}
                         </span>
-                        <svg className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M3 8h10M9 4l4 4-4 4" />
                         </svg>
-                        <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${isBetter ? 'text-emerald-700 bg-emerald-50' : isWorse ? 'text-rose-700 bg-rose-50' : 'text-slate-600 bg-slate-100'}`}>
+                        <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md ${isBetter ? 'text-success-text bg-success-surface' : isWorse ? 'text-danger-text bg-danger-surface' : 'text-dim bg-muted'}`}>
                           {change.after}
                         </span>
                       </div>
@@ -2738,9 +2914,9 @@ function PriceContextSection({
   };
 
   const impactCfg = {
-    positive:  { dot: 'bg-emerald-400', text: 'text-emerald-700', bg: 'bg-emerald-50' },
-    neutral:   { dot: 'bg-slate-300',   text: 'text-slate-600',   bg: 'bg-slate-100'  },
-    attention: { dot: 'bg-amber-400',   text: 'text-amber-700',   bg: 'bg-amber-50'   },
+    positive:  { dot: 'bg-emerald-400', text: 'text-success-text', bg: 'bg-success-surface' },
+    neutral:   { dot: 'bg-muted-foreground',   text: 'text-muted-foreground',   bg: 'bg-muted'  },
+    attention: { dot: 'bg-amber-400',   text: 'text-warning-text',   bg: 'bg-warning-surface'   },
   };
 
   const PERIODS = [
@@ -2823,18 +2999,18 @@ function PriceContextSection({
     <div className="space-y-5">
 
       {/* ── Block 1: Preço em contexto ─────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-sm p-5">
+      <div className="analysis-card p-5">
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div>
-            <h2 className="text-base font-semibold text-neutral-900">Preço em contexto</h2>
-            <p className="text-[12px] text-neutral-500 mt-0.5">
+            <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Preço em contexto</h2>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
               Movimento da ação no período e relação com o valor justo estimado
             </p>
           </div>
           {/* Period tabs */}
-          <div className="flex items-center gap-0.5 bg-neutral-100 rounded-lg p-0.5 flex-shrink-0">
+          <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5 flex-shrink-0">
             {PERIODS.map(p => (
               <button
                 key={p.id}
@@ -2842,8 +3018,8 @@ function PriceContextSection({
                 onClick={() => setPeriod(p.id)}
                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-md transition-all ${
                   period === p.id
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-700'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {p.label}
@@ -2855,25 +3031,25 @@ function PriceContextSection({
         {/* KPI strip */}
         <div className="flex items-center gap-5 mb-6 flex-wrap">
           <div>
-            <div className="text-[11px] text-neutral-500 mb-0.5">Variação no período</div>
+            <div className="text-[11px] text-muted-foreground mb-0.5">Variação no período</div>
             <div className={`text-[20px] font-bold tabular-nums leading-none ${stockVar >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
               {stockVar >= 0 ? '+' : ''}{stockVar.toFixed(1)}%
             </div>
           </div>
-          <div className="w-px h-8 bg-neutral-100 flex-shrink-0" />
+          <div className="w-px h-8 bg-muted flex-shrink-0" />
           <div>
-            <div className="text-[11px] text-neutral-500 mb-0.5">vs. IBOVESPA</div>
+            <div className="text-[11px] text-muted-foreground mb-0.5">vs. IBOVESPA</div>
             <div className={`text-[20px] font-bold tabular-nums leading-none ${vsMkt >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
               {vsMkt >= 0 ? '+' : ''}{vsMkt.toFixed(1)}{' '}
               <span className="text-[13px] font-medium">pp</span>
             </div>
           </div>
-          <div className="w-px h-8 bg-neutral-100 flex-shrink-0" />
+          <div className="w-px h-8 bg-muted flex-shrink-0" />
           <div>
-            <div className="text-[11px] text-neutral-500 mb-0.5">Distância ao valor justo</div>
+            <div className="text-[11px] text-muted-foreground mb-0.5">Distância ao valor justo</div>
             <div className={`text-[20px] font-bold tabular-nums leading-none ${discount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
               {discount >= 0 ? '−' : '+'}{Math.abs(discount).toFixed(0)}%
-              <span className="text-[12px] font-normal text-neutral-400 ml-1.5">{discount >= 0 ? 'desconto' : 'prêmio'}</span>
+              <span className="text-[12px] font-normal text-muted-foreground ml-1.5">{discount >= 0 ? 'desconto' : 'prêmio'}</span>
             </div>
           </div>
         </div>
@@ -2936,15 +3112,15 @@ function PriceContextSection({
         <div className="flex items-center gap-5 mt-1" style={{ paddingLeft: PAD.left }}>
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-0.5 bg-[#355CDE] rounded-full" />
-            <span className="text-[11px] text-neutral-600 font-medium">{data.company.ticker}</span>
+            <span className="text-[11px] text-muted-foreground font-medium">{data.company.ticker}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <svg width="18" height="3" viewBox="0 0 18 3">
               <line x1="0" y1="1.5" x2="18" y2="1.5" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="5 3" />
             </svg>
-            <span className="text-[11px] text-neutral-400">IBOVESPA</span>
+            <span className="text-[11px] text-muted-foreground">IBOVESPA</span>
           </div>
-          <span className="text-[10px] text-neutral-300 ml-auto">indexado a 100 no início do período</span>
+          <span className="text-[10px] text-muted-foreground/40 ml-auto">indexado a 100 no início do período</span>
         </div>
       </div>
 
@@ -2961,7 +3137,7 @@ function PriceContextSection({
           const month = (parts[1] ?? '').toUpperCase();
 
           return (
-            <div className={`flex items-start gap-4 py-4 ${!isLast ? 'border-b border-neutral-100' : ''}`}>
+            <div className={`flex items-start gap-4 py-4 ${!isLast ? 'border-b border-border' : ''}`}>
 
               {/* Calendar tile */}
               <div className="flex-shrink-0 w-10 rounded-lg overflow-hidden border border-blue-100 shadow-sm">
@@ -2975,17 +3151,17 @@ function PriceContextSection({
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <div className="text-[13.5px] font-semibold text-neutral-800 leading-snug mb-2">{evt.title}</div>
+                <div className="text-[13.5px] font-semibold text-foreground leading-snug mb-2">{evt.title}</div>
                 {evt.pillar && (
                   <button
                     type="button"
                     onClick={() => onSelectTab(evt.pillar!)}
-                    className="inline-flex items-center text-[11px] font-semibold text-neutral-500 bg-neutral-100 hover:bg-blue-50 hover:text-[#355CDE] px-2 py-0.5 rounded-md transition-colors mb-2"
+                    className="inline-flex items-center text-[11px] font-semibold text-muted-foreground bg-muted hover:bg-brand-surface hover:text-[#355CDE] px-2 py-0.5 rounded-md transition-colors mb-2"
                   >
                     {PILLAR_LABEL[evt.pillar]}
                   </button>
                 )}
-                <p className="text-[12px] text-neutral-500 leading-[1.65]">{evt.explanation}</p>
+                <p className="text-[12px] text-muted-foreground leading-[1.65]">{evt.explanation}</p>
               </div>
             </div>
           );
@@ -2993,10 +3169,10 @@ function PriceContextSection({
 
         return (
           <>
-            <div className="bg-white rounded-2xl shadow-sm p-5">
+            <div className="analysis-card p-5">
               <div className="mb-5">
-                <h2 className="text-base font-semibold text-neutral-900">Eventos que ajudam a explicar o movimento</h2>
-                <p className="text-[12px] text-neutral-500 mt-0.5">Fatos que alteraram ou podem alterar a leitura da empresa</p>
+                <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Eventos que ajudam a explicar o movimento</h2>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Fatos que alteraram ou podem alterar a leitura da empresa</p>
               </div>
 
               <div className="flex flex-col">
@@ -3006,7 +3182,7 @@ function PriceContextSection({
               </div>
 
               {overflow.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-neutral-100">
+                <div className="mt-4 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setEventsDrawer(true)}
@@ -3030,17 +3206,17 @@ function PriceContextSection({
                   onClick={() => setEventsDrawer(false)}
                 />
                 {/* Panel */}
-                <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col h-full overflow-hidden">
+                <div className="relative w-full max-w-md bg-card shadow-2xl flex flex-col h-full overflow-hidden">
                   {/* Drawer header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                     <div>
-                      <h3 className="text-[15px] font-semibold text-neutral-900">Todas as atualizações</h3>
-                      <p className="text-[11px] text-neutral-500 mt-0.5">{(data.contextEvents ?? []).length} eventos relevantes</p>
+                      <h3 className="text-[15px] font-semibold text-foreground">Todas as atualizações</h3>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{(data.contextEvents ?? []).length} eventos relevantes</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setEventsDrawer(false)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-muted-foreground"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                         <path d="M3 3l10 10M13 3L3 13" />
@@ -3084,14 +3260,14 @@ function AboutSection({ data }: { data: AnalysisData }) {
   if (!c.longDescription && meta.every(m => m.value === '—')) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-5">
-      <h2 className="text-base font-semibold text-neutral-900 mb-5">Sobre a empresa</h2>
+    <div className="analysis-card p-5">
+      <h2 className="text-[15px] font-semibold text-foreground tracking-tight mb-5">Sobre a empresa</h2>
 
       {/* Meta row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-6 mb-5 pb-5 border-b border-neutral-100">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-6 mb-5 pb-5 border-b border-border">
         {meta.map(({ label, value, href }) => (
           <div key={label}>
-            <div className="text-[11px] text-neutral-400 mb-0.5">{label}</div>
+            <div className="text-[11px] text-muted-foreground mb-0.5">{label}</div>
             {href ? (
               <a
                 href={href}
@@ -3102,7 +3278,7 @@ function AboutSection({ data }: { data: AnalysisData }) {
                 {value}
               </a>
             ) : (
-              <div className="text-[13px] font-semibold text-neutral-800">{value}</div>
+              <div className="text-[13px] font-semibold text-foreground">{value}</div>
             )}
           </div>
         ))}
@@ -3110,7 +3286,7 @@ function AboutSection({ data }: { data: AnalysisData }) {
 
       {/* Long description */}
       {c.longDescription && (
-        <p className="text-[13.5px] leading-7 text-neutral-600 max-w-3xl">
+        <p className="text-[13.5px] leading-7 text-muted-foreground max-w-3xl">
           {c.longDescription}
         </p>
       )}
@@ -3119,6 +3295,10 @@ function AboutSection({ data }: { data: AnalysisData }) {
 }
 
 // ─── Base da Leitura Section ─────────────────────────────────────────────────
+
+/* ── Snowflake Radar Chart (reuses shared component) ─────────────────── */
+
+/* ── BaseSection — Snowflake chart + dimension modules ───────────────────── */
 
 function BaseSection({
   data,
@@ -3136,123 +3316,140 @@ function BaseSection({
   const cov = (h.ebit != null && h.interestExpense != null && h.interestExpense !== 0) ? safeN(h.ebit / h.interestExpense) : '—';
   const fmt$ = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
+  const snowflakeMap = Object.fromEntries(
+    (data.snowflake ?? []).map(d => [d.dimension, d])
+  );
+
   type Module = {
     pillar: string;
     tab: AnalysisTab;
     name: string;
-    state: string;
-    stateColor: string;
     primary: string;
     primaryLabel: string;
     secondary: string;
-    micro: string;
+    score: number;
   };
 
-  // Growth gap for visual clarity
   const growthGap = Math.abs((g.earningsGrowthRate ?? 0) - (g.industryEarningsGrowth ?? 0)).toFixed(1);
-  const growthAbove = (g.earningsGrowthRate ?? 0) >= (g.industryEarningsGrowth ?? 0);
-
-  // Dividend state: conclusive based on yield + payout coverage
-  const divState =
-    dv.payoutRatio > 90  ? 'Pressionado' :
-    dv.currentYield > 5 && dv.payoutRatio <= 80 ? 'Atrativo' :
-    dv.currentYield >= 3 ? 'Moderado' : 'Atenção';
-  const divColor =
-    divState === 'Atrativo'    ? 'text-emerald-600' :
-    divState === 'Pressionado' ? 'text-rose-600'    :
-    divState === 'Atenção'     ? 'text-amber-600'   : 'text-slate-400';
 
   const modules: Module[] = [
     {
       pillar: 'value', tab: 'value',
-      name: 'Valuation',
-      state: (v.discountPercent ?? 0) > 10 ? 'Atrativo' : (v.discountPercent ?? 0) >= 0 ? 'Moderado' : 'Atenção',
-      stateColor: (v.discountPercent ?? 0) > 10 ? 'text-emerald-600' : (v.discountPercent ?? 0) >= 0 ? 'text-slate-400' : 'text-amber-600',
+      name: 'Valor',
       primary: `${(v.discountPercent ?? 0) >= 0 ? '−' : '+'}${Math.abs(v.discountPercent ?? 0)}%`,
       primaryLabel: (v.discountPercent ?? 0) >= 0 ? 'desconto ao valor justo' : 'prêmio ao valor justo',
       secondary: `P/L ${rv.peRatio ?? '—'}x  ·  P/VP ${rv.pbRatio ?? '—'}x`,
-      micro: `Preço ${Math.abs(v.discountPercent ?? 0)}% ${(v.discountPercent ?? 0) >= 0 ? 'abaixo' : 'acima'} da estimativa de valor intrínseco pelo DCF.`,
+      score: snowflakeMap['value']?.score ?? 0,
     },
     {
       pillar: 'future', tab: 'future',
-      name: 'Crescimento futuro',
-      state: growthAbove ? 'Forte' : 'Atenção',
-      stateColor: growthAbove ? 'text-blue-600' : 'text-amber-600',
-      primary: g.earningsGrowthRate != null ? `+${g.earningsGrowthRate.toFixed(1)}%` : '—',
+      name: 'Futuro',
+      primary: g.earningsGrowthRate != null ? `${g.earningsGrowthRate > 0 ? '+' : ''}${g.earningsGrowthRate.toFixed(1)}%` : '—',
       primaryLabel: 'crescimento do lucro / ano',
-      secondary: `vs. setor ${g.industryEarningsGrowth != null ? `+${g.industryEarningsGrowth.toFixed(1)}%` : '—'}  ·  receita ${g.revenueGrowthRate != null ? `+${g.revenueGrowthRate.toFixed(1)}%` : '—'}`,
-      micro: `Lucro projetado ${growthGap}pp ${growthAbove ? 'acima' : 'abaixo'} da média do setor (${g.industryEarningsGrowth != null ? `${g.industryEarningsGrowth.toFixed(1)}%` : '—'}/ano).`,
+      secondary: `vs. setor ${g.industryEarningsGrowth != null ? `+${g.industryEarningsGrowth.toFixed(1)}%` : '—'}`,
+      score: snowflakeMap['future']?.score ?? 0,
     },
     {
       pillar: 'past', tab: 'past',
-      name: 'Performance passada',
-      state: p.currentROE > 18 ? 'Forte' : p.currentROE > 10 ? 'Moderado' : 'Pressionado',
-      stateColor: p.currentROE > 18 ? 'text-emerald-600' : p.currentROE > 10 ? 'text-slate-400' : 'text-rose-600',
+      name: 'Passado',
       primary: fmt$(p.currentROE),
       primaryLabel: 'retorno sobre patrimônio',
       secondary: `Margem líq. ${fmt$(p.netMargin)}  ·  ROCE ${fmt$(p.currentROCE)}`,
-      micro: `ROE de ${fmt$(p.currentROE)} com margem líquida de ${fmt$(p.netMargin)} no último exercício.`,
+      score: snowflakeMap['past']?.score ?? 0,
     },
     {
       pillar: 'health', tab: 'health',
-      name: 'Saúde financeira',
-      state: h.debtToEquity < 0.5 ? 'Forte' : h.debtToEquity < 1 ? 'Moderado' : 'Pressionado',
-      stateColor: h.debtToEquity < 0.5 ? 'text-emerald-600' : h.debtToEquity < 1 ? 'text-slate-400' : 'text-rose-600',
+      name: 'Saúde',
       primary: h.debtToEquity != null ? `${h.debtToEquity.toFixed(1)}x` : '—',
       primaryLabel: 'dívida / patrimônio',
-      secondary: `Juros cobertos ${cov !== '—' ? `${cov}x` : '—'}  ·  Caixa ${fmtBRL(h.cash)}`,
-      micro: `Dívida ${h.debtToEquity != null ? `${h.debtToEquity.toFixed(1)}x` : '—'} o patrimônio, com cobertura de ${cov !== '—' ? `${cov}x` : '—'} pelo EBIT.`,
+      secondary: `Cobertura ${cov !== '—' ? `${cov}x` : '—'}  ·  Caixa ${fmtBRL(h.cash)}`,
+      score: snowflakeMap['health']?.score ?? 0,
     },
     {
       pillar: 'dividend', tab: 'dividend',
       name: 'Dividendos',
-      state: divState,
-      stateColor: divColor,
       primary: fmt$(dv.currentYield),
       primaryLabel: 'dividend yield atual',
-      secondary: `Payout ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'}  ·  ${dv.yearsWithoutInterruption ?? '—'} anos sem corte`,
-      micro: divState === 'Pressionado'
-        ? `Yield de ${fmt$(dv.currentYield)} com payout de ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'} — pouca margem de segurança.`
-        : divState === 'Atrativo'
-          ? `Yield de ${fmt$(dv.currentYield)} sustentável com payout de ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'} nos últimos ${dv.yearsWithoutInterruption ?? '—'} anos.`
-          : `Distribuição consistente há ${dv.yearsWithoutInterruption ?? '—'} anos com yield de ${fmt$(dv.currentYield)}.`,
+      secondary: `Payout ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'}  ·  ${dv.yearsWithoutInterruption ?? '—'} anos`,
+      score: snowflakeMap['dividend']?.score ?? 0,
     },
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm px-6 py-5">
-      <h2 className="text-[13px] font-semibold text-neutral-900 mb-6">Base da leitura</h2>
+    <div className="analysis-card px-6 py-6">
+      <h2 className="text-[13px] font-semibold text-foreground mb-5">Visão geral dos pilares</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-5 divide-x divide-neutral-100">
-        {modules.map((mod, idx) => (
-          <button
-            key={mod.pillar}
-            type="button"
-            onClick={() => onSelectTab(mod.tab)}
-            className={`text-left flex flex-col gap-3 hover:opacity-75 transition-opacity
-              ${idx === 0 ? 'pr-6' : idx === modules.length - 1 ? 'pl-6' : 'px-6'}`}
-          >
-            {/* Name + state */}
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-[10.5px] font-semibold text-neutral-400 uppercase">{mod.name}</span>
-              <span className={`text-[10px] font-semibold flex-shrink-0 ${mod.stateColor}`}>{mod.state}</span>
-            </div>
+      <div className="flex flex-col md:flex-row items-center gap-6">
+        {/* Snowflake chart */}
+        <div className="flex-shrink-0">
+          <SnowflakeChart
+            dimensions={(() => {
+              const dimOrder = [
+                { key: 'value', label: 'Valor' },
+                { key: 'future', label: 'Futuro' },
+                { key: 'health', label: 'Saúde' },
+                { key: 'dividend', label: 'Dividendos' },
+                { key: 'past', label: 'Passado' },
+              ];
+              return dimOrder.map(d => {
+                const sf = snowflakeMap[d.key];
+                return {
+                  label: d.label,
+                  value: sf ? (sf.score / 6) * 100 : 5,
+                  color: DIMENSION_COLORS[d.key],
+                  metric: sf ? `${sf.score}/6 critérios` : '0/6',
+                  why: sf?.summary ?? '',
+                };
+              });
+            })()}
+            size="large"
+            status={(() => {
+              const totalScore = (data.snowflake ?? []).reduce((sum, d) => sum + d.score, 0);
+              const maxScore = (data.snowflake ?? []).length * 6;
+              const ratio = maxScore > 0 ? totalScore / maxScore : 0;
+              if (ratio >= 0.6) return 'healthy' as const;
+              if (ratio >= 0.35) return 'attention' as const;
+              return 'risk' as const;
+            })()}
+            onSelect={(label) => {
+              const labelToTab: Record<string, AnalysisTab> = {
+                'Valor': 'value', 'Futuro': 'future', 'Saúde': 'health',
+                'Dividendos': 'dividend', 'Passado': 'past',
+              };
+              if (labelToTab[label]) onSelectTab(labelToTab[label]);
+            }}
+            showTooltip
+          />
+        </div>
 
-            {/* Primary */}
-            <div>
-              <div className="text-[30px] font-bold text-neutral-900 tabular-nums leading-none">
+        {/* Dimension modules */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
+          {modules.map((mod) => (
+            <button
+              key={mod.pillar}
+              type="button"
+              onClick={() => onSelectTab(mod.tab)}
+              className="text-left p-3.5 rounded-lg border border-border/50 hover:border-border hover:bg-muted/30 transition-all duration-150"
+            >
+              {/* Header: name + score */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide" style={{ color: DIMENSION_COLORS[mod.pillar] }}>
+                  {mod.name}
+                </span>
+                <ScoreChecks score={mod.score} size="xs" />
+              </div>
+
+              {/* Primary metric */}
+              <div className="text-[22px] font-bold text-foreground tabular-nums leading-none">
                 {mod.primary}
               </div>
-              <div className="text-[10.5px] text-neutral-400 mt-1.5 leading-none">{mod.primaryLabel}</div>
-            </div>
+              <div className="text-[10px] text-muted-foreground mt-1 leading-none">{mod.primaryLabel}</div>
 
-            {/* Secondary */}
-            <div className="text-[11.5px] text-neutral-500 tabular-nums">{mod.secondary}</div>
-
-            {/* Micro */}
-            <p className="text-[11px] text-neutral-400 leading-[1.45] mt-0.5">{mod.micro}</p>
-          </button>
-        ))}
+              {/* Secondary */}
+              <div className="text-[10.5px] text-muted-foreground tabular-nums mt-2">{mod.secondary}</div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

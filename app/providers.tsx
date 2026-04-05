@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ThemeProvider } from "next-themes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "../src/features/auth/AuthContext";
@@ -8,8 +9,16 @@ import { ChatbotPanelProvider } from "../src/components/layout/ChatbotContext";
 import { SidebarProvider } from "../src/components/layout/SidebarContext";
 import { LuizProvider } from "../src/components/layout/LuizContext";
 import { SubscriptionProvider } from "../src/features/assinatura/hooks";
-import { ChatbotPanel } from "../src/features/chatbot/components";
-import { LuizChatPanel } from "../src/features/luiz/components";
+
+// Lazy-load chat panels — they are heavy and not needed on initial render
+const ChatbotPanel = dynamic(
+  () => import("../src/features/chatbot/components").then(m => ({ default: m.ChatbotPanel })),
+  { ssr: false }
+);
+const LuizChatPanel = dynamic(
+  () => import("../src/features/luiz/components").then(m => ({ default: m.LuizChatPanel })),
+  { ssr: false }
+);
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ??

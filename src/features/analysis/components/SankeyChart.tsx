@@ -146,8 +146,8 @@ function Label({ n, val, isBottom }: { n: LNode; val: number; isBottom?: boolean
   if (n.layer === 0) {
     return (
       <g style={{ pointerEvents: 'none' }}>
-        <text x={n.x - 8} y={cy - 6} textAnchor="end" fontSize={10} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
-        <text x={n.x - 8} y={cy + 7} textAnchor="end" fontSize={10} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+        <text x={n.x - 8} y={cy - 6} textAnchor="end" fontSize={10} fill="var(--muted-foreground)" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
+        <text x={n.x - 8} y={cy + 7} textAnchor="end" fontSize={10} fontWeight="700" fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
       </g>
     )
   }
@@ -156,8 +156,8 @@ function Label({ n, val, isBottom }: { n: LNode; val: number; isBottom?: boolean
   if (n.layer === 3) {
     return (
       <g style={{ pointerEvents: 'none' }}>
-        <text x={n.x + NW + 8} y={cy - 6} textAnchor="start" fontSize={10} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
-        <text x={n.x + NW + 8} y={cy + 7} textAnchor="start" fontSize={10} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+        <text x={n.x + NW + 8} y={cy - 6} textAnchor="start" fontSize={10} fill="var(--muted-foreground)" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
+        <text x={n.x + NW + 8} y={cy + 7} textAnchor="start" fontSize={10} fontWeight="700" fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
       </g>
     )
   }
@@ -174,7 +174,7 @@ function Label({ n, val, isBottom }: { n: LNode; val: number; isBottom?: boolean
       <g style={{ pointerEvents: 'none' }}>
         <rect x={bx} y={by} width={bw} height={bh} rx={4} fill={bg} />
         <text x={cx} y={by + 12} textAnchor="middle" fontSize={9} fontWeight="600" fill={fg} fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
-        <text x={cx} y={n.y - 2} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+        <text x={cx} y={n.y - 2} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
       </g>
     )
   }
@@ -183,15 +183,15 @@ function Label({ n, val, isBottom }: { n: LNode; val: number; isBottom?: boolean
   if (isBottom) {
     return (
       <g style={{ pointerEvents: 'none' }}>
-        <text x={cx} y={n.y + n.h + 11} textAnchor="middle" fontSize={9} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
-        <text x={cx} y={n.y + n.h + 21} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+        <text x={cx} y={n.y + n.h + 11} textAnchor="middle" fontSize={9} fill="var(--muted-foreground)" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
+        <text x={cx} y={n.y + n.h + 21} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
       </g>
     )
   }
   return (
     <g style={{ pointerEvents: 'none' }}>
-      <text x={cx} y={n.y - 20} textAnchor="middle" fontSize={9} fill="#6b7280" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
-      <text x={cx} y={n.y - 11} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="#111827" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
+      <text x={cx} y={n.y - 20} textAnchor="middle" fontSize={9} fill="var(--muted-foreground)" fontFamily="Inter, system-ui, sans-serif">{n.label}</text>
+      <text x={cx} y={n.y - 11} textAnchor="middle" fontSize={9.5} fontWeight="700" fill="var(--foreground)" fontFamily="Inter, system-ui, sans-serif">{valStr}</text>
     </g>
   )
 }
