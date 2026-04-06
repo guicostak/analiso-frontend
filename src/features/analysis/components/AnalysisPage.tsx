@@ -9,6 +9,7 @@ import type { SectionName } from '../services';
 import { TABS, DIMENSION_COLORS } from '../constants/colors';
 import { useAnalysis } from '../hooks/useAnalysis';
 import { useAnalysisNav } from '../hooks/useAnalysisNav';
+import { useAnalysisPageState } from '../hooks/useAnalysisPageState';
 import { Sidebar } from '@/src/components/layout/Sidebar';
 import { AppTopBar } from '@/src/components/layout/AppTopBar';
 import { MainContent } from '@/src/components/layout/MainContent';
@@ -78,6 +79,9 @@ export function AnalysisPage() {
 
   // ── Data fetching with loading / error states ──────────────────────────
   const { data, loading, error, sectionsLoaded, fetchSection, setData, setLoading, setError } = useAnalysis(ticker);
+
+  // ── Centralized UI state for all tabs ────────────────────────────────
+  const pageState = useAnalysisPageState();
 
   // ── Active section tracking + scroll navigation ───────────────────────
   const { activeSection, companyCardPassed, companyCardRef, navAlignRef, sectionRefs, scrollToSection } = useAnalysisNav(!!data);
@@ -158,9 +162,9 @@ export function AnalysisPage() {
     );
   }
 
-  // Map snowflake scores by dimension for section dividers
+  // Map snowflake entries by dimension for section dividers
   const sfMap = Object.fromEntries(
-    (data.snowflake ?? []).map(d => [d.dimension, d.score])
+    (data.snowflake ?? []).map(d => [d.dimension, d])
   );
 
   return (
@@ -244,7 +248,7 @@ export function AnalysisPage() {
                     <span className="flex items-center justify-between gap-1.5 w-full">
                       <span className="truncate">{tab.label}</span>
                       {dimScore != null && (
-                        <ScoreIndicator score={dimScore.score} size={16} />
+                        <ScoreIndicator score={dimScore.score} total={dimScore.checks?.length ?? 6} size={16} />
                       )}
                     </span>
                   </button>
@@ -263,7 +267,7 @@ export function AnalysisPage() {
             id="section-overview"
             className="analysis-enter"
           >
-            <OverviewTab data={data} onSelectTab={scrollToSection} companyCardRef={companyCardRef} navAlignRef={navAlignRef} />
+            <OverviewTab data={data} onSelectTab={scrollToSection} companyCardRef={companyCardRef} navAlignRef={navAlignRef} state={pageState.overview} />
           </section>
 
           {/* Each section loads its data independently via scroll trigger */}
@@ -272,8 +276,8 @@ export function AnalysisPage() {
             id="section-value"
             className="analysis-enter analysis-stagger-1"
           >
-            <SectionDivider label="Valuation" dimensionId="value" score={sfMap['value']} />
-            {sectionsLoaded.has('value') ? <ValueTab data={data} /> : <SectionSkeleton />}
+            <SectionDivider label="Valuation" dimensionId="value" score={sfMap['value']?.score} total={sfMap['value']?.checks?.length ?? 6} />
+            {sectionsLoaded.has('value') ? <ValueTab data={data} state={pageState.value} /> : <SectionSkeleton />}
           </section>
 
           <section
@@ -281,8 +285,8 @@ export function AnalysisPage() {
             id="section-future"
             className="analysis-enter analysis-stagger-2"
           >
-            <SectionDivider label="Crescimento Futuro" dimensionId="future" score={sfMap['future']} />
-            {sectionsLoaded.has('future') ? <FutureTab data={data} /> : <SectionSkeleton />}
+            <SectionDivider label="Crescimento Futuro" dimensionId="future" score={sfMap['future']?.score} total={sfMap['future']?.checks?.length ?? 6} />
+            {sectionsLoaded.has('future') ? <FutureTab data={data} state={pageState.future} /> : <SectionSkeleton />}
           </section>
 
           <section
@@ -290,8 +294,8 @@ export function AnalysisPage() {
             id="section-past"
             className="analysis-enter analysis-stagger-3"
           >
-            <SectionDivider label="Performance Passada" dimensionId="past" score={sfMap['past']} />
-            {sectionsLoaded.has('past') ? <PastTab data={data} /> : <SectionSkeleton />}
+            <SectionDivider label="Performance Passada" dimensionId="past" score={sfMap['past']?.score} total={sfMap['past']?.checks?.length ?? 6} />
+            {sectionsLoaded.has('past') ? <PastTab data={data} state={pageState.past} /> : <SectionSkeleton />}
           </section>
 
           <section
@@ -299,8 +303,8 @@ export function AnalysisPage() {
             id="section-health"
             className="analysis-enter analysis-stagger-4"
           >
-            <SectionDivider label="Saúde Financeira" dimensionId="health" score={sfMap['health']} />
-            {sectionsLoaded.has('health') ? <HealthTab data={data} /> : <SectionSkeleton />}
+            <SectionDivider label="Saúde Financeira" dimensionId="health" score={sfMap['health']?.score} total={sfMap['health']?.checks?.length ?? 6} />
+            {sectionsLoaded.has('health') ? <HealthTab data={data} state={pageState.health} /> : <SectionSkeleton />}
           </section>
 
           <section
@@ -308,8 +312,8 @@ export function AnalysisPage() {
             id="section-dividend"
             className="analysis-enter analysis-stagger-5"
           >
-            <SectionDivider label="Dividendos" dimensionId="dividend" score={sfMap['dividend']} />
-            {sectionsLoaded.has('dividend') ? <DividendTab data={data} /> : <SectionSkeleton />}
+            <SectionDivider label="Dividendos" dimensionId="dividend" score={sfMap['dividend']?.score} total={sfMap['dividend']?.checks?.length ?? 6} />
+            {sectionsLoaded.has('dividend') ? <DividendTab data={data} state={pageState.dividend} /> : <SectionSkeleton />}
           </section>
 
           <section

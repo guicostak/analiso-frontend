@@ -456,6 +456,38 @@ export type AnalysisData = {
   communityFairValues: CommunityFairValue[];
   incomeBreakdown: IncomeBreakdownYear[];
   generatedAt?: string;
+  marketCycle?: MarketCycle;
+};
+
+// Market Cycle (ML Investment Clock)
+
+export type MarketCyclePhase = 'RECOVERY' | 'OVERHEAT' | 'STAGFLATION' | 'REFLATION';
+export type CycleAlignment = 'FAVORED' | 'NEUTRAL' | 'UNFAVORED';
+
+export type MarketCycle = {
+  phaseKey: MarketCyclePhase;
+  phaseLabel: string;
+  growthStatus: 'ABOVE_TREND' | 'BELOW_TREND';
+  inflationStatus: 'RISING' | 'FALLING';
+  selicStatus: 'RISING' | 'STABLE' | 'FALLING';
+  confidence: 'high' | 'medium' | 'low';
+  indicators: {
+    selicCurrent: number;
+    selic6mAgo: number;
+    ipca12m: number;
+    ipca12m3mAgo: number;
+    ibcBrYoy: number;
+    ibcBrTrend: number;
+  };
+  description: string;
+  metaLine: string;
+  sectorAlignment: {
+    sector: string;
+    alignment: CycleAlignment;
+    alignmentLabel: string;
+    reason: string;
+  };
+  referenceDate: string;
 };
 
 // ─── Active tab ──────────────────────────────────────────────────────────────

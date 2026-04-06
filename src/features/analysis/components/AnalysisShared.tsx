@@ -491,7 +491,11 @@ export function GrowthBarChart({ title, bars }: {
   title: string;
   bars: { label: string; value: number; color: string; textColor: string }[];
 }) {
-  const maxVal = Math.max(...bars.map(b => b.value), 0.01);
+  const normalizedBars = bars.map((bar) => ({
+    ...bar,
+    value: Number.isFinite(bar.value) ? bar.value : 0,
+  }));
+  const maxVal = Math.max(...normalizedBars.map((bar) => Math.abs(bar.value)), 0.01);
   const n = bars.length;
   const pct = 100 / n;
   return (
@@ -508,8 +512,8 @@ export function GrowthBarChart({ title, bars }: {
           aria-label={title}
           style={{ position: 'absolute', top: 0, left: 0 }}
         >
-          {bars.map((bar, i) => {
-            const barH = (bar.value / maxVal) * AGFC_MAX_BAR;
+          {normalizedBars.map((bar, i) => {
+            const barH = (Math.abs(bar.value) / maxVal) * AGFC_MAX_BAR;
             const ty = AGFC_H - barH;
             return (
               <svg key={bar.label} x={`${i * pct}%`} y="0" width={`${pct}%`} height={AGFC_H}>

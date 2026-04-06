@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import type { HealthTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -16,10 +17,15 @@ function BalanceBarChart({ title, bars }: {
   title: string;
   bars: { label: string; value: number; color: string; textColor: string }[];
 }) {
-  const maxVal = Math.max(...bars.map(b => b.value), 0.01);
+  const normalizedBars = bars.map((bar) => ({
+    ...bar,
+    value: Number.isFinite(bar.value) ? bar.value : 0,
+  }));
+  const maxVal = Math.max(...normalizedBars.map((bar) => Math.abs(bar.value)), 0.01);
   const n = bars.length;
   const pct = 100 / n;
-  const fmt = (v: number) => {
+  const fmt = (v: number | null | undefined) => {
+    if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
     const abs = Math.abs(v);
     if (abs >= 1e9) return `R$${(v / 1e9).toFixed(1)}bi`;
     if (abs >= 1e6) return `R$${(v / 1e6).toFixed(1)}mi`;
@@ -39,8 +45,8 @@ function BalanceBarChart({ title, bars }: {
           aria-label={title}
           style={{ position: 'absolute', top: 0, left: 0 }}
         >
-          {bars.map((bar, i) => {
-            const barH = (bar.value / maxVal) * AGFC_MAX_BAR;
+          {normalizedBars.map((bar, i) => {
+            const barH = (Math.abs(bar.value) / maxVal) * AGFC_MAX_BAR;
             const ty = AGFC_H - barH;
             return (
               <svg key={bar.label} x={`${i * pct}%`} y="0" width={`${pct}%`} height={AGFC_H}>
@@ -157,11 +163,12 @@ const DEBT_CHART_SERIES: { key: string; color: string; hex: string }[] = [
   { key: 'Dinheiro e equivalentes',   color: 'teal',   hex: '#14b8a6' },
 ];
 
-function DebtHistorySection({ data }: { data: AnalysisData }) {
+function DebtHistorySection({ data, activeKeys, setActiveKeys }: {
+  data: AnalysisData;
+  activeKeys: Set<string>;
+  setActiveKeys: React.Dispatch<React.SetStateAction<Set<string>>>;
+}) {
   const h = data.health;
-  const [activeKeys, setActiveKeys] = useState<Set<string>>(
-    new Set(DEBT_CHART_SERIES.map(s => s.key))
-  );
 
   const chartData = (h.debtHistorySeries ?? []).map(d => ({
     year: d.year,
@@ -273,34 +280,56 @@ const BS_MIN_PCT = 10; // % below which inline label is replaced by external ann
 
 function BalanceSheetSection({ data }: { data: AnalysisData }) {
   const bs    = data.health?.balanceSheet;
-  if (!bs) return null;
-  const total = bs.assets.cash + bs.assets.receivables + bs.assets.inventory +
-                bs.assets.physicalAssets + bs.assets.longTermAssets;
+  if (!bs?.assets || !bs?.liabilities) return null;
+  const safeValue = (value: number | null | undefined): number => (
+    typeof value === 'number' && Number.isFinite(value) ? value : 0
+  );
+  const assets = {
+    cash: safeValue(bs.assets.cash),
+    receivables: safeValue(bs.assets.receivables),
+    inventory: safeValue(bs.assets.inventory),
+    physicalAssets: safeValue(bs.assets.physicalAssets),
+    longTermAssets: safeValue(bs.assets.longTermAssets),
+  };
+  const liabilities = {
+    accountsPayable: safeValue(bs.liabilities.accountsPayable),
+    debt: safeValue(bs.liabilities.debt),
+    otherLiabilities: safeValue(bs.liabilities.otherLiabilities),
+    equity: safeValue(bs.liabilities.equity),
+  };
+  const assetsSum = assets.cash + assets.receivables + assets.inventory +
+                assets.physicalAssets + assets.longTermAssets;
+  const liabilitiesSum = liabilities.accountsPayable + liabilities.debt +
+                liabilities.otherLiabilities + liabilities.equity;
+  // Use the larger side so both bars are proportioned on the same scale
+  const totalRaw = Math.max(assetsSum, liabilitiesSum);
+  const total = totalRaw > 0 ? totalRaw : 1;
 
-  const fmt = (v: number) => {
+  const fmt = (v: number | null | undefined) => {
+    if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
     const abs = Math.abs(v);
     if (abs >= 1e9) return `R$${(v / 1e9).toFixed(1)}bi`;
     if (abs >= 1e6) return `R$${(v / 1e6).toFixed(1)}mi`;
     return `R$${v.toFixed(0)}`;
   };
-  const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
+  const pct = (v: number | null | undefined) => `${((safeValue(v) / total) * 100).toFixed(1)}%`;
 
   // first = rightmost (flex-row-reverse → most liquid at center).
   // Blues: wider luminosity steps for scannability — light at center, dark at edge.
   const assetSegments = [
-    { label: 'Caixa e Invest. de Curto Prazo', short: 'Caixa & CP',  value: bs.assets.cash,            color: '#93c5fd', textDark: true,  key: true  },
-    { label: 'Recebíveis',                     short: 'Recebíveis',  value: bs.assets.receivables,     color: '#3b82f6', textDark: false, key: false },
-    { label: 'Estoques',                       short: 'Estoques',    value: bs.assets.inventory,        color: '#1d4ed8', textDark: false, key: false },
-    { label: 'Ativos Físicos',                 short: 'Ativos Fís.', value: bs.assets.physicalAssets,  color: '#1e40af', textDark: false, key: false },
-    { label: 'Ativos de LP e Outros',          short: 'LP & Outros', value: bs.assets.longTermAssets,  color: '#1e3a8a', textDark: false, key: true  },
+    { label: 'Caixa e Invest. de Curto Prazo', short: 'Caixa & CP',  value: assets.cash,               color: '#93c5fd', textDark: true,  key: true  },
+    { label: 'Recebíveis',                     short: 'Recebíveis',  value: assets.receivables,        color: '#3b82f6', textDark: false, key: false },
+    { label: 'Estoques',                       short: 'Estoques',    value: assets.inventory,           color: '#1d4ed8', textDark: false, key: false },
+    { label: 'Ativos Físicos',                 short: 'Ativos Fís.', value: assets.physicalAssets,     color: '#1e40af', textDark: false, key: false },
+    { label: 'Ativos de LP e Outros',          short: 'LP & Outros', value: assets.longTermAssets,     color: '#1e3a8a', textDark: false, key: true  },
   ];
 
   // first = leftmost (most urgent at center). Red for debt, orange for others, green for equity.
   const liabilitySegments = [
-    { label: 'Contas a Pagar',     short: 'A Pagar',     value: bs.liabilities.accountsPayable,  color: '#f97316', textDark: false, key: false },
-    { label: 'Dívida',             short: 'Dívida',       value: bs.liabilities.debt,             color: '#dc2626', textDark: false, key: true  },
-    { label: 'Outros Passivos',    short: 'Outros Pass.', value: bs.liabilities.otherLiabilities, color: '#fb923c', textDark: false, key: false },
-    { label: 'Patrimônio Líquido', short: 'Patrim. L.',   value: bs.liabilities.equity,           color: '#15803d', textDark: false, key: true  },
+    { label: 'Contas a Pagar',     short: 'A Pagar',     value: liabilities.accountsPayable,      color: '#f97316', textDark: false, key: false },
+    { label: 'Dívida',             short: 'Dívida',       value: liabilities.debt,                 color: '#dc2626', textDark: false, key: true  },
+    { label: 'Outros Passivos',    short: 'Outros Pass.', value: liabilities.otherLiabilities,     color: '#fb923c', textDark: false, key: false },
+    { label: 'Patrimônio Líquido', short: 'Patrim. L.',   value: liabilities.equity,               color: '#15803d', textDark: false, key: true  },
   ];
 
   type Seg = typeof assetSegments[number];
@@ -309,7 +338,7 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
   const AnnotStrip = ({ segments, reverse }: { segments: Seg[]; reverse: boolean }) => (
     <div className={`flex-1 flex ${reverse ? 'flex-row-reverse' : ''}`}>
       {segments.map((seg) => {
-        const w = (seg.value / total) * 100;
+        const w = Math.max(0, (seg.value / total) * 100);
         return (
           <div key={seg.label} style={{ width: `${w}%` }} className="relative flex flex-col items-center justify-end">
             {w < BS_MIN_PCT && (
@@ -329,7 +358,7 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
   const BarSide = ({ segments, reverse }: { segments: Seg[]; reverse: boolean }) => (
     <div className={`flex-1 flex ${reverse ? 'flex-row-reverse' : ''} overflow-hidden ${reverse ? 'rounded-l-lg' : 'rounded-r-lg'}`}>
       {segments.map((seg) => {
-        const w = (seg.value / total) * 100;
+        const w = Math.max(0, (seg.value / total) * 100);
         const tc = seg.textDark ? '#1e3a8a' : '#ffffff';
         return (
           <div
@@ -405,14 +434,14 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
         {/* Totals — "=" anchored exactly to axis center */}
         <div className="flex items-baseline mt-2">
           <div className="flex-1 text-right">
-            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(total)}</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(assetsSum > 0 ? assetsSum : null)}</span>
             <span className="text-[10px] text-muted-foreground ml-1">total</span>
           </div>
           <div style={{ width: AXIS_W }} className="text-center">
             <span className="text-xs text-muted-foreground font-light" style={{ letterSpacing: 1 }}>=</span>
           </div>
           <div className="flex-1">
-            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(total)}</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">{fmt(liabilitiesSum > 0 ? liabilitiesSum : null)}</span>
             <span className="text-[10px] text-muted-foreground ml-1">total</span>
           </div>
         </div>
@@ -647,9 +676,9 @@ function HealthReadingCard({ data }: { data: AnalysisData }) {
   );
 }
 
-export function HealthTab({ data }: { data: AnalysisData }) {
+export function HealthTab({ data, state }: { data: AnalysisData; state: HealthTabState }) {
   const h = data.health ?? {} as typeof data.health;
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { drawerOpen, setDrawerOpen, activeKeys, setActiveKeys } = state;
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
   const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
@@ -801,7 +830,7 @@ export function HealthTab({ data }: { data: AnalysisData }) {
       {/* Análise da Posição Financeira */}
       <FinancialPositionSection data={data} />
 
-      <DebtHistorySection data={data} />
+      <DebtHistorySection data={data} activeKeys={activeKeys} setActiveKeys={setActiveKeys} />
       <BalanceSheetSection data={data} />
 
     </div>

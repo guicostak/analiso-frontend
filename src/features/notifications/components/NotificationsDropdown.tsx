@@ -47,7 +47,7 @@ function NotificationItem({
   onRead,
 }: {
   item:   Notification;
-  onRead: (id: string) => void;
+  onRead: (id: number) => void;
 }) {
   const { Icon, iconClass, bgClass } = TYPE_CONFIG[item.type];
 

@@ -46,7 +46,7 @@ const GROUPS: NavGroup[] = [
   },
   {
     items: [
-      { id: "agenda", label: "Agenda", href: "#", icon: CalendarDays },
+      { id: "agenda", label: "Agenda", href: "/agenda", icon: CalendarDays },
     ],
   },
 ];
