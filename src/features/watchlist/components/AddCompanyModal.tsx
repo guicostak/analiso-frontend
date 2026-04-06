@@ -4,27 +4,28 @@
  * AddCompanyModal
  *
  * Modal genérico para buscar e selecionar uma empresa.
- * Usado tanto em Favoritas quanto em Comparar.
+ * Usado tanto em Watchlist quanto em Comparar.
  */
 
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { getCompanyLogo } from "@/src/features/explore/services";
-import { API_BASE_URL_URL } from "@/src/lib/api-base";
+import { API_BASE_URL } from "@/src/lib/api-base";
 
 interface SuggestResult {
   ticker: string;
   companyName: string;
   exchange: string;
   type: string;
+  logoUrl?: string | null;
 }
 
 interface AddCompanyModalProps {
   isOpen: boolean;
   onClose: () => void;
   /** Chamado ao clicar em uma empresa da lista */
-  onSelect: (ticker: string, companyName: string) => void;
+  onSelect: (ticker: string, companyName: string, logoUrl?: string | null) => void;
   /** Tickers a serem ocultados da lista (ex: já favoritados ou já na comparação) */
   excludeTickers?: Set<string>;
   /** Texto exibido no rodapé do modal */
@@ -64,13 +65,14 @@ export function AddCompanyModal({
       setIsLoading(true);
       fetch(`${API_BASE_URL}/api/search?size=20`)
         .then((res) => (res.ok ? res.json() : { items: [] }))
-        .then((data: { items?: Array<{ ticker: string; companyName: string; cdCvm: number }> }) => {
+        .then((data: { items?: Array<{ ticker: string; companyName: string; cdCvm: number; logoUrl?: string | null }> }) => {
           setResults(
             (data.items ?? []).map((item) => ({
               ticker: item.ticker,
               companyName: item.companyName,
               exchange: "B3",
               type: "ON",
+              logoUrl: item.logoUrl,
             })),
           );
         })
@@ -80,10 +82,18 @@ export function AddCompanyModal({
     }
 
     setIsLoading(true);
-    fetch(`${API_BASE_URL}/api/search/suggest?q=${encodeURIComponent(debouncedQuery)}&limit=12`)
-      .then((res) => (res.ok ? res.json() : { results: [] }))
-      .then((data: { results?: SuggestResult[] }) => {
-        setResults(data.results ?? []);
+    fetch(`${API_BASE_URL}/api/search?query=${encodeURIComponent(debouncedQuery)}&size=12`)
+      .then((res) => (res.ok ? res.json() : { items: [] }))
+      .then((data: { items?: Array<{ ticker: string; companyName: string; logoUrl?: string | null }> }) => {
+        setResults(
+          (data.items ?? []).map((item) => ({
+            ticker: item.ticker,
+            companyName: item.companyName,
+            exchange: "B3",
+            type: "ON",
+            logoUrl: item.logoUrl,
+          })),
+        );
       })
       .catch(() => setResults([]))
       .finally(() => setIsLoading(false));
@@ -157,13 +167,13 @@ export function AddCompanyModal({
           )}
 
           {!isLoading && visibleResults.map((item) => {
-            const logo = getCompanyLogo(item.ticker);
+            const logo = item.logoUrl || getCompanyLogo(item.ticker);
 
             return (
               <button
                 key={item.ticker}
                 onClick={() => {
-                  onSelect(item.ticker, item.companyName);
+                  onSelect(item.ticker, item.companyName, item.logoUrl);
                   onClose();
                 }}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-muted"

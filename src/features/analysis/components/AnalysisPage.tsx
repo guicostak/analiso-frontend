@@ -201,7 +201,7 @@ export function AnalysisPage() {
             {/* Action buttons */}
             <div className="flex items-center gap-0.5">
               {[
-                { icon: Bookmark, title: 'Favoritar' },
+                { icon: Bookmark, title: 'Watchlist' },
                 { icon: Share2, title: 'Compartilhar' },
                 { icon: GitCompareArrows, title: 'Comparar' },
                 { icon: Bell, title: 'Alertas' },

@@ -243,7 +243,13 @@
       "Bash(./mvnw.cmd compile:*)",
       "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-backend && mvnw.cmd compile -q\")",
       "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-backend''; .\\\\mvnw.cmd compile -q 2>&1 | Select-Object -Last 20\")",
-      "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-backend''; .\\\\mvnw.cmd compile -q 2>&1 | Select-Object -Last 10\")"
+      "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-backend''; .\\\\mvnw.cmd compile -q 2>&1 | Select-Object -Last 10\")",
+      "Bash(grep -r api/explorar /c/Users/guilh/Desktop/analiso-frontend/src --include=*.ts --include=*.tsx)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend/src /c/Users/guilh/Desktop/analiso-frontend/app -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx -o -name *.json \\\\\\))",
+      "Bash(/dev/null --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.json\")",
+      "Bash(/dev/null --include=*.tsx --include=*.ts)",
+      "Read(//c/Users/guilh/Desktop/**)",
+      "Read(//c/Users/guilh/**)"
     ]
   }
 }

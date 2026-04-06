@@ -6,7 +6,7 @@
  * Card presentacional reutilizável para exibir uma empresa com métricas,
  * status, botões de ação e data de atualização.
  *
- * Usado em: Buscar Mercado (Explore), Busca Avançada, Favoritas (Watchlist).
+ * Usado em: Buscar Mercado (Explore), Busca Avançada, Watchlist.
  */
 
 import { useMemo } from "react";
@@ -93,6 +93,8 @@ export interface CompanyCardProps {
   // ─── Botões de ação (aparecem apenas quando callback é fornecido) ────────
   isComparing?: boolean;
   isFavorite?: boolean;
+  /** Quando true, o card inteiro vira o botão de comparar (primeiro clique). */
+  compareIsFirstAction?: boolean;
   onToggleCompare?: () => void;
   onToggleFavorite?: () => void;
   onAlert?: () => void;
@@ -115,11 +117,13 @@ export function CompanyCard({
   whyOpen,
   isComparing,
   isFavorite,
+  compareIsFirstAction,
   onToggleCompare,
   onToggleFavorite,
   onAlert,
 }: CompanyCardProps) {
   const destination = href ?? `/empresa/${ticker}`;
+  const cardIsCompareTarget = compareIsFirstAction && onToggleCompare && !isComparing;
 
   const visibleMetrics = useMemo(() => {
     return Object.entries(KNOWN_METRICS).map(([key, meta]) => ({
@@ -134,13 +138,30 @@ export function CompanyCard({
 
   const hasActions = onToggleCompare || onToggleFavorite || onAlert;
 
+  const cardClassName = `group flex cursor-pointer flex-col gap-4 rounded-[18px] border bg-card p-5 shadow-[0_2px_8px_rgba(15,23,40,0.04)] transition-[transform,box-shadow,border-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,40,0.08)] dark:shadow-none ${
+    status ? `border-l-[3px] ${statusBorderLeft[status]}` : "border-border"
+  } ${cardIsCompareTarget ? "ring-1 ring-brand/20 hover:ring-brand/40" : ""}`;
+
+  const Wrapper = cardIsCompareTarget
+    ? ({ children }: { children: React.ReactNode }) => (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onToggleCompare!()}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleCompare!(); } }}
+          className={cardClassName}
+        >
+          {children}
+        </div>
+      )
+    : ({ children }: { children: React.ReactNode }) => (
+        <Link href={destination} className={cardClassName}>
+          {children}
+        </Link>
+      );
+
   return (
-    <Link
-      href={destination}
-      className={`group flex cursor-pointer flex-col gap-4 rounded-[18px] border bg-card p-5 shadow-[0_2px_8px_rgba(15,23,40,0.04)] transition-[transform,box-shadow,border-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,40,0.08)] dark:shadow-none ${
-        status ? `border-l-[3px] ${statusBorderLeft[status]}` : "border-border"
-      }`}
-    >
+    <Wrapper>
       {/* ── Header: logo + info + badges ── */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3.5">
@@ -280,7 +301,7 @@ export function CompanyCard({
                 className={`h-3.5 w-3.5 shrink-0 ${isFavorite ? "fill-white group-hover/fav:fill-danger-text" : ""}`}
               />
               <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/fav:ml-1.5 group-hover/fav:max-w-[80px] group-hover/fav:opacity-100">
-                {isFavorite ? "Remover" : "Favoritar"}
+                {isFavorite ? "Remover" : "Watchlist"}
               </span>
             </button>
           )}
@@ -300,6 +321,14 @@ export function CompanyCard({
           )}
         </div>
       )}
-    </Link>
+
+      {/* Hint visual: card inteiro é o botão de comparar */}
+      {cardIsCompareTarget && (
+        <div className="flex items-center gap-2 text-[12px] font-medium text-brand">
+          <GitCompare className="h-3.5 w-3.5" />
+          Clique para adicionar à comparação
+        </div>
+      )}
+    </Wrapper>
   );
 }

@@ -132,6 +132,25 @@ export type CompareQualityTone = {
   label: string;
 };
 
+// ─── Category-based navigation ─────────────────────────────────────────────
+
+export type CompareCategorySlug =
+  | "todas"
+  | "visao-geral"
+  | "valuation"
+  | "crescimento"
+  | "passado"
+  | "saude"
+  | "dividendos"
+  | "metricas"
+  | "timeline"
+  | "fontes";
+
+export type CompareCategoryDef = {
+  slug: CompareCategorySlug;
+  label: string;
+};
+
 // ─── Enriched data for side-by-side islands ──────────────────────────────────
 
 export type CompareSnowflakeScore = {

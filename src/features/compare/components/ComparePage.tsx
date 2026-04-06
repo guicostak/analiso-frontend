@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Bookmark,
   History,
@@ -14,8 +14,10 @@ import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import { AddCompanyModal } from "@/src/features/watchlist/components/AddCompanyModal";
+import { getCompanyLogo } from "@/src/features/explore/services";
 import { useCompare } from "../hooks/useCompare";
 import { PILLARS } from "../services";
+import type { CompareCategorySlug } from "../interfaces";
 import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
 import {
   CompareHeader,
@@ -52,21 +54,11 @@ const TimelineIsland = dynamic(
   { ssr: false },
 );
 
-/* ── Section definitions ─────────────────────────────────────────────────── */
+/* ── Visibility helper ───────────────────────────────────────────────────── */
 
-const SECTIONS = [
-  { id: "snowflake", label: "Visão geral" },
-  { id: "veredito", label: "Veredito" },
-  { id: "fatores", label: "Fatores" },
-  { id: "valuation", label: "Valuation" },
-  { id: "crescimento", label: "Crescimento" },
-  { id: "passado", label: "Passado" },
-  { id: "saude", label: "Saúde" },
-  { id: "dividendos", label: "Dividendos" },
-  { id: "metricas", label: "Métricas" },
-  { id: "timeline", label: "Timeline" },
-  { id: "fontes", label: "Fontes" },
-] as const;
+function showSection(categoria: CompareCategorySlug, ...slugs: CompareCategorySlug[]): boolean {
+  return categoria === "todas" || slugs.includes(categoria);
+}
 
 /* ── Loading skeleton ────────────────────────────────────────────────────── */
 
@@ -86,6 +78,7 @@ export function ComparePage() {
   const {
     detailRef,
     verdictRef,
+    categoria,
     activePillar,
     range,
     refreshing,
@@ -113,7 +106,10 @@ export function ComparePage() {
     selectedTickers,
     setSelectedTickers,
     addTicker,
+    companyNames,
+    companyLogos,
     swapCompanies,
+    setCategoria,
     selectPillar,
     setRange,
     setEvidence,
@@ -123,6 +119,7 @@ export function ComparePage() {
     saveComparison,
     PILLAR_LABEL,
     RANGES,
+    CATEGORIES,
     formatMetric,
     metricDelta,
     metricWinner,
@@ -134,32 +131,6 @@ export function ComparePage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>(SECTIONS[0].id);
-
-  // ── Scroll-based section tracking ──
-  useEffect(() => {
-    if (!canCompare) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        }
-      },
-      { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
-    );
-    for (const s of SECTIONS) {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, [canCompare, enrichedA, enrichedB]);
-
-  const navigateToSection = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -168,7 +139,7 @@ export function ComparePage() {
       <AddCompanyModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSelect={(ticker) => addTicker(ticker)}
+        onSelect={(ticker, companyName, logoUrl) => addTicker(ticker, companyName, logoUrl)}
         excludeTickers={new Set(selectedTickers)}
         searchPlaceholder="Buscar empresa para comparar..."
         footerText={`${selectedTickers.length} de 4 empresas selecionadas`}
@@ -195,37 +166,52 @@ export function ComparePage() {
                 a={enrichedA}
                 b={enrichedB}
                 activePillar={activePillar}
+                categoria={categoria}
                 range={range}
                 onSelectPillar={selectPillar}
+                onSetCategoria={setCategoria}
                 onSetRange={setRange}
                 onSwap={swapCompanies}
                 PILLAR_LABEL={PILLAR_LABEL}
                 RANGES={RANGES}
                 PILLARS={PILLARS}
+                CATEGORIES={CATEGORIES}
                 compactSticky={compactSticky}
               />
             ) : (
               /* Fallback: company selector only */
               <section className="sticky top-14 z-10 mb-2 rounded-[28px] border border-border bg-[rgba(255,255,255,0.94)] p-6 shadow-[0_16px_36px_rgba(15,23,40,0.07)] backdrop-blur dark:bg-[rgba(15,23,40,0.94)] dark:shadow-none">
                 <div className="flex flex-wrap items-center gap-2">
-                  {selected.map((company) => (
-                    <span
-                      key={company.ticker}
-                      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground"
-                    >
-                      <span className="inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border border-border bg-muted text-[10px] font-semibold text-muted-foreground">
-                        {company.ticker.slice(0, 1)}
-                      </span>
-                      {company.ticker}
-                      <button
-                        onClick={() => setSelectedTickers((c) => c.filter((t) => t !== company.ticker))}
-                        className="rounded-full p-0.5 text-muted-foreground transition hover:bg-hover hover:text-foreground"
+                  {selectedTickers.map((ticker) => {
+                    const logo = companyLogos[ticker] || getCompanyLogo(ticker);
+                    const name = companyNames[ticker];
+                    return (
+                      <span
+                        key={ticker}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground"
                       >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </span>
-                  ))}
-                  {selected.length < 4 && (
+                        {logo ? (
+                          <img
+                            src={logo}
+                            alt={ticker}
+                            className="h-[22px] w-[22px] rounded-full border border-border bg-muted object-cover"
+                          />
+                        ) : (
+                          <span className="inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border border-border bg-muted text-[10px] font-semibold text-muted-foreground">
+                            {ticker.slice(0, 1)}
+                          </span>
+                        )}
+                        {name ? `${name} (${ticker})` : ticker}
+                        <button
+                          onClick={() => setSelectedTickers((c) => c.filter((t) => t !== ticker))}
+                          className="rounded-full p-0.5 text-muted-foreground transition hover:bg-hover hover:text-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {selectedTickers.length < 4 && (
                     <button
                       onClick={() => setShowAddModal(true)}
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
@@ -321,129 +307,115 @@ export function ComparePage() {
                   Selecione duas empresas para comparar
                 </h2>
                 <p className="mx-auto mt-3 max-w-[640px] text-[15px] leading-7 text-muted-foreground">
-                  Adicione Empresa A e Empresa B para ver quem está melhor hoje, onde está o risco e como confirmar.
+                  Escolha duas empresas nos campos acima e compare lado a lado indicadores financeiros, valuation, rentabilidade e risco.
                 </p>
-                <div className="mt-6 flex flex-wrap justify-center gap-2">
-                  {["WEGE3", "VALE3", "ITUB4"].map((ticker) => (
-                    <button
-                      key={ticker}
-                      onClick={() => addTicker(ticker)}
-                      className="rounded-full border border-border bg-muted px-4 py-2 text-[12px] font-medium text-muted-foreground transition hover:bg-card"
-                    >
-                      {ticker}
-                    </button>
-                  ))}
-                </div>
               </section>
             ) : refreshing ? (
               <LoadingBlocks />
             ) : enrichedA && enrichedB && a && b ? (
               <div className="space-y-8">
-                {/* ── Section navigation (sticky horizontal) ── */}
-                <nav className="sticky top-[120px] z-20 -mx-2 mb-2">
-                  <div className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-card/95 px-2 py-1.5 shadow-sm backdrop-blur-sm scrollbar-hide">
-                    {SECTIONS.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => navigateToSection(s.id)}
-                        className={`shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                          activeSection === s.id
-                            ? "bg-brand/10 text-brand"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </nav>
+                {/* ── Visão geral: Snowflake + Veredito + Fatores ── */}
+                {showSection(categoria, "visao-geral") && (
+                  <>
+                    {scoreboard && (
+                      <section id="snowflake" className="compare-island compare-stagger-1 scroll-mt-[160px]">
+                        <SnowflakeDual a={enrichedA} b={enrichedB} scoreboard={scoreboard} />
+                      </section>
+                    )}
+                    {verdict && scoreboard && (
+                      <section id="veredito" ref={verdictRef} className="compare-island compare-stagger-2 scroll-mt-[160px]">
+                        <VerdictIsland verdict={verdict} scoreboard={scoreboard} formatNumber={formatNumber} />
+                      </section>
+                    )}
+                    <section id="fatores" className="compare-island compare-stagger-3 scroll-mt-[160px]">
+                      <TopFactorsIsland
+                        a={enrichedA}
+                        b={enrichedB}
+                        topPillarDiffs={topPillarDiffs}
+                        PILLAR_LABEL={PILLAR_LABEL}
+                        formatNumber={formatNumber}
+                        pillarInsight={pillarInsight}
+                        trendContext={trendContext}
+                        activePillar={activePillar}
+                        onSelectPillar={selectPillar}
+                      />
+                    </section>
+                  </>
+                )}
 
-                {/* ── ILHA 1: Snowflake Dual ── */}
-                {scoreboard && (
-                  <section id="snowflake" className="compare-island compare-stagger-1 scroll-mt-[160px]">
-                    <SnowflakeDual a={enrichedA} b={enrichedB} scoreboard={scoreboard} />
+                {/* ── Valuation ── */}
+                {showSection(categoria, "valuation") && (
+                  <section id="valuation" className="compare-island compare-stagger-4 compare-surface p-6 scroll-mt-[160px]">
+                    <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
                   </section>
                 )}
 
-                {/* ── ILHA 2: Veredito Inteligente ── */}
-                {verdict && scoreboard && (
-                  <section id="veredito" ref={verdictRef} className="compare-island compare-stagger-2 scroll-mt-[160px]">
-                    <VerdictIsland verdict={verdict} scoreboard={scoreboard} formatNumber={formatNumber} />
+                {/* ── Crescimento ── */}
+                {showSection(categoria, "crescimento") && (
+                  <section id="crescimento" className="compare-island compare-stagger-5 compare-surface p-6 scroll-mt-[160px]">
+                    <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
                   </section>
                 )}
 
-                {/* ── ILHA 3: Top 3 Fatores Separadores ── */}
-                <section id="fatores" className="compare-island compare-stagger-3 scroll-mt-[160px]">
-                  <TopFactorsIsland
-                    a={enrichedA}
-                    b={enrichedB}
-                    topPillarDiffs={topPillarDiffs}
-                    PILLAR_LABEL={PILLAR_LABEL}
-                    formatNumber={formatNumber}
-                    pillarInsight={pillarInsight}
-                    trendContext={trendContext}
-                    activePillar={activePillar}
-                    onSelectPillar={selectPillar}
-                  />
-                </section>
+                {/* ── Passado ── */}
+                {showSection(categoria, "passado") && (
+                  <section id="passado" className="compare-island compare-stagger-6 compare-surface p-6 scroll-mt-[160px]">
+                    <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                  </section>
+                )}
 
-                {/* ── ILHA 4: Valuation Side-by-Side ── */}
-                <section id="valuation" className="compare-island compare-stagger-4 compare-surface p-6 scroll-mt-[160px]">
-                  <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
-                </section>
+                {/* ── Saúde ── */}
+                {showSection(categoria, "saude") && (
+                  <section id="saude" className="compare-island compare-surface p-6 scroll-mt-[160px]">
+                    <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                  </section>
+                )}
 
-                {/* ── ILHA 5: Crescimento Futuro ── */}
-                <section id="crescimento" className="compare-island compare-stagger-5 compare-surface p-6 scroll-mt-[160px]">
-                  <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
-                </section>
+                {/* ── Dividendos ── */}
+                {showSection(categoria, "dividendos") && (
+                  <section id="dividendos" className="compare-island compare-surface p-6 scroll-mt-[160px]">
+                    <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                  </section>
+                )}
 
-                {/* ── ILHA 6: Desempenho Passado ── */}
-                <section id="passado" className="compare-island compare-stagger-6 compare-surface p-6 scroll-mt-[160px]">
-                  <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
-                </section>
+                {/* ── Métricas ── */}
+                {showSection(categoria, "metricas") && (
+                  <section id="metricas" ref={detailRef} className="compare-island compare-surface p-6 scroll-mt-[160px]">
+                    <MetricsTableIsland
+                      a={enrichedA}
+                      b={enrichedB}
+                      tableRows={tableRows}
+                      activePillar={activePillar}
+                      PILLAR_LABEL={PILLAR_LABEL}
+                      formatMetric={formatMetric}
+                      formatNumber={formatNumber}
+                      metricWinner={metricWinner}
+                      metricDelta={metricDelta}
+                      evidenceReadLabel={evidenceReadLabel}
+                      openEvidence={openEvidence}
+                      activePillarWinnerSummary={activePillarWinnerSummary}
+                    />
+                  </section>
+                )}
 
-                {/* ── ILHA 7: Saúde Financeira ── */}
-                <section id="saude" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                  <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
-                </section>
+                {/* ── Timeline ── */}
+                {showSection(categoria, "timeline") && (
+                  <section id="timeline" className="compare-island compare-surface p-6 scroll-mt-[160px]">
+                    <TimelineIsland
+                      a={enrichedA}
+                      b={enrichedB}
+                      events={recentEvents}
+                      PILLAR_LABEL={PILLAR_LABEL}
+                    />
+                  </section>
+                )}
 
-                {/* ── ILHA 8: Dividendos ── */}
-                <section id="dividendos" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                  <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
-                </section>
-
-                {/* ── ILHA 9: Métricas Detalhadas ── */}
-                <section id="metricas" ref={detailRef} className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                  <MetricsTableIsland
-                    a={enrichedA}
-                    b={enrichedB}
-                    tableRows={tableRows}
-                    activePillar={activePillar}
-                    PILLAR_LABEL={PILLAR_LABEL}
-                    formatMetric={formatMetric}
-                    formatNumber={formatNumber}
-                    metricWinner={metricWinner}
-                    metricDelta={metricDelta}
-                    evidenceReadLabel={evidenceReadLabel}
-                    openEvidence={openEvidence}
-                    activePillarWinnerSummary={activePillarWinnerSummary}
-                  />
-                </section>
-
-                {/* ── ILHA 10: Timeline de Eventos ── */}
-                <section id="timeline" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                  <TimelineIsland
-                    a={enrichedA}
-                    b={enrichedB}
-                    events={recentEvents}
-                    PILLAR_LABEL={PILLAR_LABEL}
-                  />
-                </section>
-
-                {/* ── ILHA 11: Fontes & Qualidade ── */}
-                <section id="fontes" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                  <SourcesIsland a={enrichedA} b={enrichedB} qualityTone={qualityTone} />
-                </section>
+                {/* ── Fontes ── */}
+                {showSection(categoria, "fontes") && (
+                  <section id="fontes" className="compare-island compare-surface p-6 scroll-mt-[160px]">
+                    <SourcesIsland a={enrichedA} b={enrichedB} qualityTone={qualityTone} />
+                  </section>
+                )}
               </div>
             ) : null}
           </div>

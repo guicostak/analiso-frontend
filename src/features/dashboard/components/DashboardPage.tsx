@@ -8,8 +8,8 @@ import {
   Database,
   LayoutGrid,
   GitCompare,
-  Compass,
   RotateCcw,
+  Search,
 } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
@@ -205,9 +205,9 @@ export function Dashboard() {
     return () => clearTimeout(timer);
   }, [animStep, animDone, dataResolved, dashboardData]);
 
-  const stepLabels   = ["Carregando Favoritas", "Fazendo Análise", "Montando Painel"];
+  const stepLabels   = ["Carregando Watchlist", "Fazendo Análise", "Montando Painel"];
   const stepSubtitles = [
-    "Carregando suas ações favoritas...",
+    "Carregando sua watchlist...",
     "Processando análises das ações...",
     "Montando seu painel...",
   ];
@@ -416,7 +416,7 @@ export function Dashboard() {
                         Seu painel está esperando por você
                       </h1>
                       <p className="max-w-[44ch] text-[14px] leading-6 text-muted-foreground">
-                        Adicione suas ações favoritas e comece a acompanhar o que importa para você.
+                        Adicione ações à sua watchlist e comece a acompanhar o que importa para você.
                       </p>
                       <div className="flex items-center gap-3 pt-3">
                         <button
@@ -484,10 +484,10 @@ export function Dashboard() {
                 {([
                   {
                     icon: LayoutGrid,
-                    title: "Adicionar às Favoritas",
+                    title: "Adicionar à Watchlist",
                     desc: "Monitore as empresas que importam para você",
-                    cta: "Ir para Favoritas",
-                    href: "/favoritas",
+                    cta: "Ir para Watchlist",
+                    href: "/watchlist",
                   },
                   {
                     icon: GitCompare,
@@ -497,11 +497,11 @@ export function Dashboard() {
                     href: "/comparar",
                   },
                   {
-                    icon: Compass,
-                    title: "Explorar mercado",
+                    icon: Search,
+                    title: "Buscar ações",
                     desc: "Descubra empresas e oportunidades",
-                    cta: "Explorar",
-                    href: "/explorar",
+                    cta: "Buscar",
+                    href: "/buscar",
                   },
                 ] as const).map(({ icon: Icon, title, desc, cta, href }) => (
                   <button

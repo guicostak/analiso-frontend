@@ -6,7 +6,7 @@ import type { DimensionScore, AnalysisData, AnalysisTab } from '../interfaces';
 import { DIMENSION_INTRO } from '../constants/colors';
 import { safeN, safeNbr } from '../utils/formatters';
 
-// ─── FavoriteButton ───────────────────────────────────────────────────────────
+// ─── WatchlistButton ──────────────────────────────────────────────────────────
 
 export function FavoriteButton({ ticker }: { ticker: string }) {
   const key = `fav:${ticker}`;
@@ -21,7 +21,7 @@ export function FavoriteButton({ ticker }: { ticker: string }) {
   return (
     <button
       onClick={toggle}
-      title={faved ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+      title={faved ? 'Remover da watchlist' : 'Adicionar à watchlist'}
       className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
         faved
           ? 'text-brand-text bg-brand-surface'

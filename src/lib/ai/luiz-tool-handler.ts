@@ -20,7 +20,7 @@ interface ToolCallInput {
 
 const PAGE_ROUTES: Record<string, string> = {
   dashboard: "/painel",
-  explorar: "/explorar",
+  explorar: "/buscar",
   watchlist: "/watchlist",
   comparar: "/comparar",
   perfil: "/perfil",
