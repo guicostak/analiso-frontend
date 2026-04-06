@@ -20,6 +20,7 @@ export const COLORS = {
   forecast: '#8CBAE0',    // Pastel steel blue
   historical: '#3E8ED0',  // Matches future
   bg: '#F7F8FA',          // Near-white with cool undertone
+  cycle: '#E07C4F',       // Warm terra — macro, economic cycle
 };
 
 export const DIMENSION_COLORS: Record<string, string> = {
@@ -56,3 +57,18 @@ export const DIMENSION_INTRO: Record<string, string> = {
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 
 export const SECTION_IDS = ['overview', 'value', 'future', 'past', 'health', 'dividend', 'sources'] as const;
+
+// ─── Market Cycle Colors ─────────────────────────────────────────────────────
+
+export const CYCLE_PHASE_COLORS: Record<string, string> = {
+  RECOVERY: '#2D9F6F',      // Green — optimism, recovery
+  OVERHEAT: '#D4913B',      // Amber — attention, overheating
+  STAGFLATION: '#C74B4B',   // Coral — risk, stagflation
+  REFLATION: '#3E8ED0',     // Blue — reflation, expectation
+};
+
+export const ALIGNMENT_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  FAVORED: { label: 'Favorecido', color: '#2D9F6F', bg: '#F0FDF4' },
+  NEUTRAL: { label: 'Neutro', color: '#8A8F9C', bg: '#F7F8FA' },
+  UNFAVORED: { label: 'Desfavorecido', color: '#C74B4B', bg: '#FEF2F2' },
+};

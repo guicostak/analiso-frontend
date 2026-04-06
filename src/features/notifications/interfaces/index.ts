@@ -3,11 +3,11 @@
 export type NotificationType = "alerta" | "atualizacao" | "agenda" | "sistema";
 
 export interface Notification {
-  id:        string;
+  id:        number;
   type:      NotificationType;
   title:     string;
   body:      string;
-  ticker?:   string;
+  ticker?:   string | null;
   timestamp: string; // ISO 8601
   read:      boolean;
 }

@@ -92,6 +92,7 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
       lucroLiquido: item.lucroLiquido ?? item.netIncome       ?? item.netProfit       ?? 0,
     })),
     snowflake:            raw.snowflake              ?? [],
+    marketCycle:          raw.marketCycle             ?? undefined,
   };
 }
 

@@ -18,6 +18,7 @@ import type {
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo, formatDate } from '../utils/formatters';
 import { SectionCard, SWSDonut } from './AnalysisShared';
+import { MarketCycleSection } from './MarketCycleSection';
 import { ScoreChecks } from './ScoreDots';
 import { SnowflakeChart } from '@/src/components/shared/SnowflakeChart';
 import { LuizAvatar } from '@/src/features/luiz/components';
@@ -2817,6 +2818,11 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef, st
       </div>
 
       {/* Section 5 removed — Luiz insight merged into AI summary card above */}
+
+      {/* ── 5b. Ciclo de Mercado ───────────────────────────────────────── */}
+      {data.marketCycle && (
+        <MarketCycleSection marketCycle={data.marketCycle} ticker={data.company.ticker} />
+      )}
 
       {/* ── 6. O que mudou desde a última atualização ───────────────────── */}
       {(data.recentChanges ?? []).length > 0 && (() => {

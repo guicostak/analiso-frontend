@@ -4,13 +4,18 @@
  * useNotifications
  *
  * Gerencia estado e ações do painel de notificações.
+ * Polling a cada 5 minutos — dados financeiros não mudam com frequência.
  * Segue architecture_skill.md: toda lógica no hook, HTTP no service.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/src/features/auth";
 import { notificationsService } from "../services/notifications.service";
 import type { Notification } from "../interfaces";
+
+// ─── Constantes ──────────────────────────────────────────────────────────────
+
+const POLLING_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
 
 // ─── Tipos retornados ────────────────────────────────────────────────────────
 
@@ -19,7 +24,7 @@ interface UseNotificationsReturn {
   unreadCount: number;
   isLoading:   boolean;
   error:       string | null;
-  markAsRead:    (id: string) => Promise<void>;
+  markAsRead:    (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
 }
 
@@ -33,35 +38,43 @@ export function useNotifications(): UseNotificationsReturn {
   const [isLoading,   setIsLoading]   = useState(true);
   const [error,       setError]       = useState<string | null>(null);
 
-  // Busca inicial
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch reutilizável (chamado na montagem e no polling)
+  const fetchNotifications = useCallback(
+    async (showLoading: boolean) => {
+      if (showLoading) setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await notificationsService.getNotifications(token);
+        setItems(res.items);
+        setUnreadCount(res.unreadCount);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar notificações");
+      } finally {
+        if (showLoading) setIsLoading(false);
+      }
+    },
+    [token],
+  );
+
+  // Busca inicial + polling a cada 5 minutos
   useEffect(() => {
-    let cancelled = false;
+    fetchNotifications(true);
 
-    setIsLoading(true);
-    setError(null);
+    intervalRef.current = setInterval(() => {
+      fetchNotifications(false);
+    }, POLLING_INTERVAL_MS);
 
-    notificationsService
-      .getNotifications(token)
-      .then((res) => {
-        if (!cancelled) {
-          setItems(res.items);
-          setUnreadCount(res.unreadCount);
-          setIsLoading(false);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Erro ao carregar notificações");
-          setIsLoading(false);
-        }
-      });
-
-    return () => { cancelled = true; };
-  }, [token]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [fetchNotifications]);
 
   // Marca uma notificação como lida (otimista)
   const markAsRead = useCallback(
-    async (id: string) => {
+    async (id: number) => {
       setItems((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
