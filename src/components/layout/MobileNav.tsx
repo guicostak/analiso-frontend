@@ -3,16 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Bookmark,
   Building2,
   CalendarDays,
-  Compass,
   GitCompare,
+  Globe,
   Home,
   LayoutGrid,
   Menu,
+  Newspaper,
   NotebookPen,
-  SearchCheck,
+  Radar,
+  Search,
   Users,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -43,11 +44,12 @@ const navGroups: NavGroup[] = [
   {
     title: "Geral",
     items: [
-      { id: "dashboard", label: "Meu Painel", href: "/painel", icon: Home },
-      { id: "explorar", label: "Explorar mercado", href: "/explorar", icon: Compass },
-      { id: "favoritas", label: "Favoritas", href: "/favoritas", icon: LayoutGrid },
-      { id: "comparar", label: "Comparar empresas", href: "/comparar", icon: GitCompare },
-      { id: "busca",    label: "Busca avançada",    href: "/busca",     icon: SearchCheck },
+      { id: "dashboard", label: "Meu Painel",           href: "/painel",    icon: Home },
+      { id: "mercado",  label: "Contexto de mercado", href: "/mercado",   icon: Globe },
+      { id: "buscar",   label: "Buscar ações",        href: "/buscar",    icon: Search },
+      { id: "noticias", label: "Notícias",            href: "/noticias",  icon: Newspaper },
+      { id: "watchlist", label: "Watchlist",            href: "/watchlist", icon: Radar },
+      { id: "comparar", label: "Comparar empresas",   href: "/comparar",  icon: GitCompare },
     ],
   },
   {
@@ -57,7 +59,7 @@ const navGroups: NavGroup[] = [
       { id: "notas", label: "Notas", href: "#", icon: NotebookPen },
       { id: "empresas", label: "Empresas", href: "#", icon: Building2 },
       { id: "time", label: "Time", href: "#", icon: Users },
-      { id: "bookmarks", label: "Salvos", href: "#", icon: Bookmark },
+      { id: "bookmarks", label: "Salvos", href: "#", icon: LayoutGrid },
     ],
   },
 ];

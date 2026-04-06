@@ -140,7 +140,7 @@ export function CompanyWatchlistMock() {
                   <p className="mt-1 text-[18px] font-semibold text-foreground">4</p>
                 </div>
                 <div className="rounded-[18px] border border-border bg-muted p-3">
-                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Ações Favoritas</p>
+                  <p className="text-[10px] font-semibold uppercase text-muted-foreground">Watchlist</p>
                   <p className="mt-1 text-[18px] font-semibold text-foreground">12</p>
                 </div>
               </div>

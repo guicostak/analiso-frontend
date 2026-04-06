@@ -6,8 +6,10 @@ export const APP_DESCRIPTION = "Análise financeira guiada";
 export const ROUTES = {
   HOME: "/",
   DASHBOARD: "/painel",
-  EXPLORAR: "/explorar",
-  WATCHLIST: "/favoritas",
+  MERCADO: "/mercado",
+  BUSCAR: "/buscar",
+  NOTICIAS: "/noticias",
+  WATCHLIST: "/watchlist",
   COMPARAR: "/comparar",
   ASSINATURA: "/assinatura",
   PERFIL: "/perfil",

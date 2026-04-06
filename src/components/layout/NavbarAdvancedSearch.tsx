@@ -112,7 +112,7 @@ export function NavbarAdvancedSearch() {
       if (f.max !== "") params.set(`${metric.key}Max`, f.max);
     }
     const qs = params.toString();
-    router.push(qs ? `/explorar?${qs}` : "/explorar");
+    router.push(qs ? `/buscar?${qs}` : "/buscar");
     setIsOpen(false);
   };
 

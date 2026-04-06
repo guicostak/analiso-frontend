@@ -2616,7 +2616,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef, st
         <div className="flex items-center justify-between px-6 md:px-8 py-4 mt-2 border-t border-border">
           <div className="flex items-center gap-1">
             {[
-              { icon: Bookmark, title: 'Favoritar' },
+              { icon: Bookmark, title: 'Watchlist' },
               { icon: Share2, title: 'Compartilhar' },
               { icon: GitCompareArrows, title: 'Comparar' },
               { icon: Bell, title: 'Alertas' },

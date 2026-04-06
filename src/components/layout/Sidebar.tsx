@@ -1,14 +1,16 @@
 "use client";
 
 import {
-  Bookmark,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Compass,
   GitCompare,
+  Globe,
   Home,
   LayoutGrid,
+  Newspaper,
+  Radar,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 import logoImage from "@/src/assets/logos/logo.png";
@@ -34,10 +36,12 @@ type NavGroup = { items: NavItem[] };
 const GROUPS: NavGroup[] = [
   {
     items: [
-      { id: "dashboard",  label: "Meu Painel",         href: "/painel",     icon: LayoutGrid },
-      { id: "explorar",   label: "Explorar mercado",  href: "/explorar",   icon: Compass },
-      { id: "favoritas",  label: "Favoritas",          href: "/favoritas",  icon: Bookmark },
-      { id: "comparar",   label: "Comparar empresas", href: "/comparar",   icon: GitCompare },
+      { id: "dashboard",  label: "Meu Painel",           href: "/painel",     icon: LayoutGrid },
+      { id: "mercado",   label: "Contexto de mercado", href: "/mercado",    icon: Globe },
+      { id: "buscar",    label: "Buscar ações",        href: "/buscar",     icon: Search },
+      { id: "noticias",  label: "Notícias",            href: "/noticias",   icon: Newspaper },
+      { id: "watchlist",  label: "Watchlist",             href: "/watchlist",  icon: Radar },
+      { id: "comparar",  label: "Comparar empresas",   href: "/comparar",   icon: GitCompare },
     ],
   },
   {

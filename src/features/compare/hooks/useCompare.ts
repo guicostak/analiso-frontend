@@ -20,6 +20,7 @@ import {
   PILLARS,
   PILLAR_LABEL,
   RANGES,
+  CATEGORIES,
   companies,
   enrichedCompanies,
   events,
@@ -43,6 +44,7 @@ import {
 import type {
   ComparePillar,
   CompareRangeKey,
+  CompareCategorySlug,
   CompareCompany,
   CompareEnrichedCompany,
   CompareEvidence,
@@ -68,6 +70,7 @@ export interface UseCompareReturn {
   openPicker: boolean;
 
   // Estado do painel principal
+  categoria: CompareCategorySlug;
   activePillar: ComparePillar;
   range: CompareRangeKey;
   eventsOpen: boolean;
@@ -117,10 +120,13 @@ export interface UseCompareReturn {
   setSearch: (s: string) => void;
   setOpenPicker: (v: boolean | ((prev: boolean) => boolean)) => void;
   setSelectedTickers: (v: string[] | ((prev: string[]) => string[])) => void;
-  addTicker: (ticker: string) => void;
+  addTicker: (ticker: string, companyName?: string, logoUrl?: string | null) => void;
+  companyNames: Record<string, string>;
+  companyLogos: Record<string, string>;
   swapCompanies: () => void;
 
   // Ações do painel
+  setCategoria: (c: CompareCategorySlug) => void;
   selectPillar: (pillar: ComparePillar) => void;
   setRange: (r: CompareRangeKey) => void;
   setEventsOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
@@ -137,6 +143,7 @@ export interface UseCompareReturn {
   PILLARS: typeof PILLARS;
   PILLAR_LABEL: typeof PILLAR_LABEL;
   RANGES: typeof RANGES;
+  CATEGORIES: typeof CATEGORIES;
   formatMetric: typeof formatMetric;
   metricDelta: typeof metricDelta;
   metricWinner: typeof metricWinner;
@@ -164,8 +171,15 @@ export function useCompare(): UseCompareReturn {
   });
   const [search, setSearch] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
+  const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
+  const [companyLogos, setCompanyLogos] = useState<Record<string, string>>({});
 
   // — Estado do painel —
+  const [categoria, setCategoriaState] = useState<CompareCategorySlug>(() => {
+    const param = searchParams.get("categoria");
+    if (param && CATEGORIES.some((c) => c.slug === param)) return param as CompareCategorySlug;
+    return "todas";
+  });
   const [activePillar, setActivePillar] = useState<ComparePillar>("Divida");
   const [range, setRange] = useState<CompareRangeKey>("1a");
   const [eventsOpen, setEventsOpen] = useState(false);
@@ -184,7 +198,7 @@ export function useCompare(): UseCompareReturn {
   }>>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // — Sincroniza tickers → URL —
+  // — Sincroniza tickers + categoria → URL —
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (selectedTickers.length > 0) {
@@ -192,11 +206,16 @@ export function useCompare(): UseCompareReturn {
     } else {
       params.delete("tickers");
     }
+    if (categoria !== "todas") {
+      params.set("categoria", categoria);
+    } else {
+      params.delete("categoria");
+    }
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     if (newUrl !== `${window.location.pathname}${window.location.search}`) {
       router.replace(newUrl, { scroll: false });
     }
-  }, [selectedTickers, router, searchParams]);
+  }, [selectedTickers, categoria, router, searchParams]);
 
   // — Dados derivados básicos —
   const selected = useMemo(
@@ -432,10 +451,21 @@ export function useCompare(): UseCompareReturn {
 
   // — Callbacks —
 
+  const setCategoria = useCallback((slug: CompareCategorySlug) => {
+    setCategoriaState(slug);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const addTicker = useCallback(
-    (ticker: string) => {
+    (ticker: string, companyName?: string, logoUrl?: string | null) => {
       if (selectedTickers.includes(ticker) || selectedTickers.length >= 4) return;
       setSelectedTickers((prev) => [...prev, ticker]);
+      if (companyName) {
+        setCompanyNames((prev) => ({ ...prev, [ticker]: companyName }));
+      }
+      if (logoUrl) {
+        setCompanyLogos((prev) => ({ ...prev, [ticker]: logoUrl }));
+      }
       setOpenPicker(false);
       setSearch("");
     },
@@ -526,6 +556,7 @@ export function useCompare(): UseCompareReturn {
     openPicker,
 
     // Estado do painel
+    categoria,
     activePillar,
     range,
     eventsOpen,
@@ -576,9 +607,12 @@ export function useCompare(): UseCompareReturn {
     setOpenPicker,
     setSelectedTickers,
     addTicker,
+    companyNames,
+    companyLogos,
     swapCompanies,
 
     // Ações do painel
+    setCategoria,
     selectPillar,
     setRange,
     setEventsOpen,
@@ -595,6 +629,7 @@ export function useCompare(): UseCompareReturn {
     PILLARS,
     PILLAR_LABEL,
     RANGES,
+    CATEGORIES,
     formatMetric,
     metricDelta,
     metricWinner,

@@ -6,6 +6,8 @@ import type {
   ComparePillar,
   CompareRangeKey,
   CompareRangeOption,
+  CompareCategorySlug,
+  CompareCategoryDef,
 } from "../../interfaces";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -14,13 +16,16 @@ interface CompareHeaderProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   activePillar: ComparePillar;
+  categoria: CompareCategorySlug;
   range: CompareRangeKey;
   onSelectPillar: (p: ComparePillar) => void;
+  onSetCategoria: (c: CompareCategorySlug) => void;
   onSetRange: (r: CompareRangeKey) => void;
   onSwap: () => void;
   PILLAR_LABEL: Record<ComparePillar, string>;
   RANGES: CompareRangeOption[];
   PILLARS: ComparePillar[];
+  CATEGORIES: CompareCategoryDef[];
   compactSticky?: boolean;
 }
 
@@ -79,13 +84,16 @@ export function CompareHeader({
   a,
   b,
   activePillar,
+  categoria,
   range,
   onSelectPillar,
+  onSetCategoria,
   onSetRange,
   onSwap,
   PILLAR_LABEL,
   RANGES,
   PILLARS,
+  CATEGORIES,
   compactSticky = false,
 }: CompareHeaderProps) {
   return (
@@ -133,23 +141,23 @@ export function CompareHeader({
           <CompanyBadge company={b} side="b" />
         </div>
 
-        {/* ── Bottom row: Pillar navigation tabs ── */}
+        {/* ── Category navigation tabs ── */}
         <div
-          className={`mt-3 flex items-center justify-center gap-1 overflow-x-auto ${
+          className={`flex items-center gap-1 overflow-x-auto scrollbar-hide ${
             compactSticky ? "mt-2" : "mt-3"
           }`}
         >
-          {PILLARS.map((p) => (
+          {CATEGORIES.map((c) => (
             <button
-              key={p}
-              onClick={() => onSelectPillar(p)}
+              key={c.slug}
+              onClick={() => onSetCategoria(c.slug)}
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-colors whitespace-nowrap ${
-                activePillar === p
+                categoria === c.slug
                   ? "bg-brand text-white"
                   : "border border-border bg-card text-muted-foreground hover:bg-muted"
               }`}
             >
-              {PILLAR_LABEL[p]}
+              {c.label}
             </button>
           ))}
         </div>

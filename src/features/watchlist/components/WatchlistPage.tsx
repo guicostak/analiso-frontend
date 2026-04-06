@@ -49,7 +49,7 @@ export function WatchlistPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar currentPage="favoritas" />
+      <Sidebar currentPage="watchlist" />
       <AppTopBar sidebarOffsetClassName="left-0 xl:left-[240px]" />
 
       <MainContent className="relative overflow-hidden pt-20">
@@ -62,8 +62,8 @@ export function WatchlistPage() {
           <div className="mx-auto max-w-[1480px]">
             <WatchlistHeader
               activeTab="list"
-              title={pageHeader?.title ?? "Ações Favoritas"}
-              subtitle={pageHeader?.subtitle ?? "Acompanhe suas ações favoritas e receba notificações de mudanças."}
+              title={pageHeader?.title ?? "Watchlist"}
+              subtitle={pageHeader?.subtitle ?? "Acompanhe suas ações e receba notificações de mudanças."}
             />
 
             <AddCompanyModal
@@ -71,7 +71,7 @@ export function WatchlistPage() {
               onClose={() => setShowAddModal(false)}
               onSelect={(ticker) => favorites.toggle(ticker)}
               excludeTickers={favorites.tickers}
-              footerText={`${favorites.tickers.size} ${favorites.tickers.size === 1 ? "ação favoritada" : "ações favoritadas"}`}
+              footerText={`${favorites.tickers.size} ${favorites.tickers.size === 1 ? "ação na watchlist" : "ações na watchlist"}`}
             />
 
             <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
@@ -83,16 +83,16 @@ export function WatchlistPage() {
                         Sessão expirada
                       </h2>
                       <p className="mt-2 max-w-md text-[14px] leading-6 text-muted-foreground">
-                        Não foi possível carregar suas ações favoritas. Faça login novamente para continuar.
+                        Não foi possível carregar sua watchlist. Faça login novamente para continuar.
                       </p>
                     </div>
                   ) : (
                   <div className="flex flex-col items-center rounded-[24px] border border-border bg-card px-7 py-12 text-center shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
                     <h2 className="text-[22px] font-semibold leading-[28px] tracking-[-0.02em] text-foreground">
-                      Comece adicionando suas ações favoritas
+                      Comece adicionando ações à sua watchlist
                     </h2>
                     <p className="mt-2 max-w-md text-[14px] leading-6 text-muted-foreground">
-                      Favorite empresas para acompanhar mudanças sem ruído.
+                      Adicione empresas para acompanhar mudanças sem ruído.
                     </p>
                     <button
                       onClick={() => setShowAddModal(true)}
@@ -123,7 +123,7 @@ export function WatchlistPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
-                        {favorites.tickers.size} {favorites.tickers.size === 1 ? "ação favoritada" : "ações favoritadas"}
+                        {favorites.tickers.size} {favorites.tickers.size === 1 ? "ação na watchlist" : "ações na watchlist"}
                       </p>
                       <button
                         onClick={() => setShowAddModal(true)}
@@ -171,6 +171,7 @@ export function WatchlistPage() {
                               metrics={m}
                               isComparing={compareTickers.includes(company.ticker)}
                               isFavorite={favorites.tickers.has(company.ticker)}
+                              compareIsFirstAction={compareTickers.length === 0}
                               onToggleCompare={() => toggleCompare(company.ticker)}
                               onToggleFavorite={() => favorites.toggle(company.ticker)}
                               onAlert={() => {}}

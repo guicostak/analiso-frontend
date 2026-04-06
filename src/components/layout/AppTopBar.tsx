@@ -42,7 +42,7 @@ function buildSearchUrl(query: string, filters: CompanySearchFilters): string {
   }
 
   const qs = params.toString();
-  return `/explorar${qs ? `?${qs}` : ""}`;
+  return `/buscar${qs ? `?${qs}` : ""}`;
 }
 
 const SKIP_COUNT_KEYS = new Set(["page", "size", "sortBy", "sortOrder", "query", "sector"]);

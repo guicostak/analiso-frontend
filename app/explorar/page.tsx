@@ -1,12 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { ExplorePage } from "../../src/features/explore/components";
-import { ProtectedRoute } from "@/src/components/layout";
-
-export default function Explorar() {
-  return (
-    <ProtectedRoute>
-      <ExplorePage />
-    </ProtectedRoute>
-  );
+export default function ExplorarRedirect() {
+  redirect("/mercado");
 }

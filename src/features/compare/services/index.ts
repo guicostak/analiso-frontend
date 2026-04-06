@@ -25,6 +25,7 @@ import type {
   CompareScoreboard,
   CompareVerdict,
   CompareEnrichedCompany,
+  CompareCategoryDef,
 } from "../interfaces";
 
 // ─── Constantes de domínio ────────────────────────────────────────────────────
@@ -54,6 +55,19 @@ export const RANGES: CompareRangeOption[] = [
   { key: "10a",    label: "10A",  years: 10              },
   { key: "max",    label: "Máx",  years: null            },
   { key: "custom", label: "Período personalizado", years: null },
+];
+
+export const CATEGORIES: CompareCategoryDef[] = [
+  { slug: "todas",       label: "Todas" },
+  { slug: "visao-geral", label: "Visão geral" },
+  { slug: "valuation",   label: "Valuation" },
+  { slug: "crescimento", label: "Crescimento" },
+  { slug: "passado",     label: "Passado" },
+  { slug: "saude",       label: "Saúde" },
+  { slug: "dividendos",  label: "Dividendos" },
+  { slug: "metricas",    label: "Métricas" },
+  { slug: "timeline",    label: "Timeline" },
+  { slug: "fontes",      label: "Fontes" },
 ];
 
 export const pillarCopy: Record<

@@ -20,7 +20,7 @@ export interface LuizCommand {
   type: LuizCommandType;
   /**
    * Valor do comando:
-   * - navigate: rota de destino (ex: "/explorar?pl_max=10")
+   * - navigate: rota de destino (ex: "/buscar?pl_max=10")
    * - theme: "dark" | "light"
    * - glossary: "" (sem valor)
    * - watchlist_add/remove: ticker (ex: "PETR4")

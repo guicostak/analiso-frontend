@@ -413,7 +413,7 @@ export function WatchlistListTab({
                       className="absolute right-0 top-12 z-10 w-48 rounded-[18px] border border-border bg-card p-2 shadow-[0_18px_40px_rgba(15,23,40,0.08)]"
                     >
                       <button
-                        title={favoriteTickers.has(company.ticker) ? "Remover dos favoritos" : "Favoritar"}
+                        title={favoriteTickers.has(company.ticker) ? "Remover da watchlist" : "Adicionar à watchlist"}
                         onClick={() => {
                           onToggleFavorite(company.ticker);
                           setQuickActionsTicker(null);
@@ -423,7 +423,7 @@ export function WatchlistListTab({
                         }`}
                       >
                         <Bookmark className={`h-3.5 w-3.5 ${favoriteTickers.has(company.ticker) ? "fill-brand" : ""}`} />
-                        {favoriteTickers.has(company.ticker) ? "Remover dos favoritos" : "Favoritar"}
+                        {favoriteTickers.has(company.ticker) ? "Remover da watchlist" : "Adicionar à watchlist"}
                       </button>
                       <button
                         title="Criar alerta"
@@ -453,7 +453,7 @@ export function WatchlistListTab({
                         {seenTickers.includes(company.ticker) ? "Marcar como não visto" : "Marcar visto"}
                       </button>
                       <button
-                        title="Remover dos favoritos"
+                        title="Remover da watchlist"
                         onClick={() => {
                           if (favoriteTickers.has(company.ticker)) {
                             onToggleFavorite(company.ticker);
@@ -462,7 +462,7 @@ export function WatchlistListTab({
                         }}
                         className="w-full rounded-[12px] px-3 py-2 text-left text-[12px] text-danger-text hover:bg-danger-surface"
                       >
-                        Remover dos favoritos
+                        Remover da watchlist
                       </button>
                     </div>
                   )}

@@ -10,10 +10,10 @@ export function WatchlistHeader({ activeTab, title, subtitle }: WatchlistHeaderP
   return (
     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
       <div className="space-y-3">
-        <p className="text-[12px] font-medium uppercase text-muted-foreground">Minhas favoritas</p>
+        <p className="text-[12px] font-medium uppercase text-muted-foreground">Minha watchlist</p>
         <div className="max-w-[780px] space-y-3">
           <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-foreground">
-            {title ?? "Ações favoritas"}
+            {title ?? "Watchlist"}
           </h1>
           <p className="text-[15px] leading-7 text-muted-foreground">
             {subtitle ??

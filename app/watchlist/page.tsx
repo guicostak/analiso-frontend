@@ -1,5 +1,12 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { WatchlistPage } from "../../src/features/watchlist/components";
+import { ProtectedRoute } from "@/src/components/layout";
 
 export default function Watchlist() {
-  redirect("/favoritas");
+  return (
+    <ProtectedRoute>
+      <WatchlistPage />
+    </ProtectedRoute>
+  );
 }

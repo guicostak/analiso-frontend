@@ -108,9 +108,9 @@ const MOCK_PATTERNS: ResponsePattern[] = [
   {
     regex: /filtrar|buscar a[çc][õo]es|encontrar a[çc][õo]es/i,
     response: {
-      content: "Levando você para o Explorador com filtros avançados!",
+      content: "Levando você para a busca com filtros avançados!",
       suggestions: ["Filtrar por P/L baixo", "Filtrar por DY alto", "Filtrar por ROE alto"],
-      command: { type: "navigate", href: "/explorar" },
+      command: { type: "navigate", href: "/buscar" },
       delay: 600,
     },
   },
@@ -126,9 +126,9 @@ const MOCK_PATTERNS: ResponsePattern[] = [
   {
     regex: /\b(ir|abrir|acessar|navegar|leva|vai).*(explorar|explorador)/i,
     response: {
-      content: "Levando você para o Explorador!",
+      content: "Levando você para a busca de ações!",
       suggestions: ["Filtrar por P/L baixo", "Filtrar por DY alto", "Filtrar por ROE alto"],
-      command: { type: "navigate", href: "/explorar" },
+      command: { type: "navigate", href: "/buscar" },
       delay: 500,
     },
   },
@@ -320,8 +320,8 @@ function getMockResponse(message: string): LuizServiceResponse {
       ];
     } else {
       // Sem ticker identificado, navegar para explorar
-      response.command = { type: "navigate", href: "/explorar" };
-      response.content = "Não identifiquei o ticker. Levando você para o Explorador!";
+      response.command = { type: "navigate", href: "/buscar" };
+      response.content = "Não identifiquei o ticker. Levando você para a busca de ações!";
     }
   }
 

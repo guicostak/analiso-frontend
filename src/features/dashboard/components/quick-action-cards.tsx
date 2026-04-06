@@ -11,7 +11,7 @@ export function QuickActionCards() {
       description: 'Descobrir oportunidades com filtros avançados',
       iconBg: 'bg-blue-50',
       iconColor: 'text-blue-600',
-      href: '/explorar',
+      href: '/buscar',
     },
     {
       icon: GitCompare,
