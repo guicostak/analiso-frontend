@@ -81,7 +81,16 @@ function normalizeV2Response(raw: AnyObj): AnalysisData {
     earningsRevenueSeries:raw.earningsRevenueSeries  ?? [],
     priceEvents:          raw.priceEvents            ?? [],
     communityFairValues:  raw.communityFairValues    ?? [],
-    incomeBreakdown:      raw.incomeBreakdown        ?? [],
+    incomeBreakdown: ((raw.incomeBreakdown ?? raw.pastPerformance?.incomeBreakdown ?? []) as AnyObj[]).map((item: AnyObj) => ({
+      year:         String(item.year ?? ''),
+      receita:      item.receita      ?? item.netRevenue      ?? item.revenue         ?? 0,
+      cpv:          item.cpv          ?? item.cogs            ?? item.costOfRevenue   ?? item.costOfGoodsSold ?? 0,
+      lucroBruto:   item.lucroBruto   ?? item.grossProfit     ?? 0,
+      despesasOp:   item.despesasOp   ?? item.operatingExpenses ?? item.opex          ?? 0,
+      ebit:         item.ebit         ?? 0,
+      financeiroIR: item.financeiroIR ?? item.financialAndTax ?? item.nonOperatingAndTax ?? item.financialResult ?? 0,
+      lucroLiquido: item.lucroLiquido ?? item.netIncome       ?? item.netProfit       ?? 0,
+    })),
     snowflake:            raw.snowflake              ?? [],
   };
 }

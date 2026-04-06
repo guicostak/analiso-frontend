@@ -83,10 +83,22 @@ export function useAnalysis(ticker: string) {
       .then(sectionData => {
         fetchingRef.current.delete(key);
 
-        // Merge section data into existing data
+        // Merge section data into existing data.
+        // Smart merge: never replace a non-empty array from the core data with an
+        // empty array that is just a normalizer default from the section response.
         setData(prev => {
           if (!prev) return prev;
-          const merged = { ...prev, ...sectionData } as AnalysisData;
+          const merged: AnalysisData = { ...prev };
+          for (const [key, val] of Object.entries(sectionData as object)) {
+            const existing = (prev as Record<string, unknown>)[key];
+            if (
+              Array.isArray(val) && val.length === 0 &&
+              Array.isArray(existing) && existing.length > 0
+            ) {
+              continue; // keep the richer array already in state
+            }
+            (merged as Record<string, unknown>)[key] = val;
+          }
           dataCache.set(ticker, merged);
           const canonical = prev.company?.ticker?.toUpperCase();
           if (canonical && canonical !== ticker) dataCache.set(canonical, merged);

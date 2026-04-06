@@ -45,19 +45,9 @@ export function useLuizAssistant() {
   const hasGreetedRef  = useRef(false);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Saudação na primeira abertura ────────────────────────────────────────
-
+  // ── Marca abertura (sem injetar mensagem — greeting é visual no empty state)
   useEffect(() => {
-    if (!isOpen || hasGreetedRef.current) return;
-    hasGreetedRef.current = true;
-    setIsTyping(true);
-
-    typingTimerRef.current = setTimeout(() => {
-      setIsTyping(false);
-      setMessages([buildGreeting()]);
-    }, 900);
-
-    return () => clearTimeout(typingTimerRef.current ?? undefined);
+    if (isOpen) hasGreetedRef.current = true;
   }, [isOpen]);
 
   // ── Histórico no formato da API ────────────────────────────────────────
@@ -172,7 +162,6 @@ export function useLuizAssistant() {
   // ── Limpar conversa ────────────────────────────────────────────────────
 
   const clear = useCallback(() => {
-    hasGreetedRef.current = false;
     clearTimeout(typingTimerRef.current ?? undefined);
     setMessages([]);
     setIsTyping(false);

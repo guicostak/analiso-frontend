@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import type { OverviewTabState } from '../hooks/useAnalysisPageState';
 import { ArrowLeft, Calendar, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, MoreHorizontal, Bookmark, Share2, GitCompareArrows, Bell } from 'lucide-react';
 import {
   AreaChart as TremorArea,
@@ -1138,7 +1139,9 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
   };
 
   const linePath = buildSmoothPath(coordinates);
-  const areaPath = `${linePath} L${coordinates[coordinates.length - 1].x},${plotBottom} L${coordinates[0].x},${plotBottom} Z`;
+  const areaPath = linePath
+    ? `${linePath} L${coordinates[coordinates.length - 1].x},${plotBottom} L${coordinates[0].x},${plotBottom} Z`
+    : '';
   const focusIndex = Math.max(1, Math.round(coordinates.length * (activePeriod === '5Y' ? 0.82 : 0.58)));
   const focusPoint = coordinates[Math.min(focusIndex, coordinates.length - 1)];
 
@@ -1235,8 +1238,8 @@ function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
               </g>
             ))}
 
-            <path d={areaPath} fill="url(#historical-chart-area)" />
-            <path d={linePath} fill="transparent" stroke="#1f9cf0" strokeWidth="3" strokeLinecap="round" />
+            {areaPath && <path d={areaPath} fill="url(#historical-chart-area)" />}
+            {linePath && <path d={linePath} fill="transparent" stroke="#1f9cf0" strokeWidth="3" strokeLinecap="round" />}
             <rect y={plotTop} x={focusPoint.x} width="1" height={plotHeight} fill="#94a3b8" fillOpacity="0.5" />
             <circle cx={focusPoint.x} cy={focusPoint.y} r="4" fill="#1f9cf0" stroke="#ffffff" strokeWidth="1" />
 
@@ -2491,9 +2494,9 @@ const EVENT_LABELS: Record<string, string> = {
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
-export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null>; navAlignRef?: React.RefObject<HTMLDivElement | null> }) {
+export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef, state }: { data: AnalysisData; onSelectTab: (tab: AnalysisTab) => void; companyCardRef?: React.RefObject<HTMLDivElement | null>; navAlignRef?: React.RefObject<HTMLDivElement | null>; state: OverviewTabState }) {
   const headline = data.company.name + " — análise fundamentalista";
-  const [descExpanded, setDescExpanded] = React.useState(false);
+  const { descExpanded, setDescExpanded, period, setPeriod, eventsDrawer, setEventsDrawer } = state;
   const luizContext = useLuizContext();
 
   const rewards = (data.rewardsAndRisks ?? []).filter((r) => r.type === 'reward').slice(0, 3);
@@ -2887,7 +2890,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
       })()}
 
       {/* ── 7. Preço em contexto + Eventos ──────────────────────────────── */}
-      <PriceContextSection data={data} onSelectTab={onSelectTab} />
+      <PriceContextSection data={data} onSelectTab={onSelectTab} period={period} setPeriod={setPeriod} eventsDrawer={eventsDrawer} setEventsDrawer={setEventsDrawer} />
       <BaseSection data={data} onSelectTab={onSelectTab} />
 
     </div>
@@ -2899,12 +2902,18 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef }: 
 function PriceContextSection({
   data,
   onSelectTab,
+  period,
+  setPeriod,
+  eventsDrawer,
+  setEventsDrawer,
 }: {
   data: AnalysisData;
   onSelectTab: (tab: AnalysisTab) => void;
+  period: '6m' | '1y' | '3y' | '5y';
+  setPeriod: React.Dispatch<React.SetStateAction<'6m' | '1y' | '3y' | '5y'>>;
+  eventsDrawer: boolean;
+  setEventsDrawer: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [period, setPeriod] = useState<'6m' | '1y' | '3y' | '5y'>('1y');
-  const [eventsDrawer, setEventsDrawer] = useState(false);
 
   const MONTH_ABBR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -3320,6 +3329,18 @@ function BaseSection({
     (data.snowflake ?? []).map(d => [d.dimension, d])
   );
 
+  // Parse the Nth value (0-indexed) from a check's value_text (e.g. "0.1500; 0.0800").
+  // Pipeline stores all ratios/rates as decimal fractions (0.15 = 15%).
+  const checkVal = (dim: string, id: string, idx = 0): number | null => {
+    const chk = snowflakeMap[dim]?.checks?.find(c => c.id === id);
+    if (!chk?.value) return null;
+    const n = parseFloat((chk.value.split(';')[idx] ?? '').trim());
+    return isNaN(n) ? null : n;
+  };
+  // Format a decimal fraction as a percentage string (e.g. 0.15 → "+15.0%")
+  const fmtDecPct = (n: number | null, showSign = false) =>
+    n == null ? '—' : `${showSign && n > 0 ? '+' : ''}${(n * 100).toFixed(1)}%`;
+
   type Module = {
     pillar: string;
     tab: AnalysisTab;
@@ -3330,7 +3351,14 @@ function BaseSection({
     score: number;
   };
 
-  const growthGap = Math.abs((g.earningsGrowthRate ?? 0) - (g.industryEarningsGrowth ?? 0)).toFixed(1);
+  // Interest coverage: try section data first, then derive from h6 check (ebit; interest)
+  const covFromChecks = (() => {
+    const ebit = checkVal('health', 'h6', 0);
+    const interest = checkVal('health', 'h6', 1);
+    if (ebit != null && interest != null && interest !== 0) return safeN(ebit / interest);
+    return null;
+  })();
+  const covDisplay = cov !== '—' ? `${cov}x` : covFromChecks != null ? `${covFromChecks}x` : '—';
 
   const modules: Module[] = [
     {
@@ -3344,33 +3372,62 @@ function BaseSection({
     {
       pillar: 'future', tab: 'future',
       name: 'Futuro',
-      primary: g.earningsGrowthRate != null ? `${g.earningsGrowthRate > 0 ? '+' : ''}${g.earningsGrowthRate.toFixed(1)}%` : '—',
+      primary: g.earningsGrowthRate != null
+        ? `${g.earningsGrowthRate > 0 ? '+' : ''}${g.earningsGrowthRate.toFixed(1)}%`
+        : fmtDecPct(checkVal('future', 'f2'), true),
       primaryLabel: 'crescimento do lucro / ano',
-      secondary: `vs. setor ${g.industryEarningsGrowth != null ? `+${g.industryEarningsGrowth.toFixed(1)}%` : '—'}`,
+      secondary: g.industryEarningsGrowth != null
+        ? `vs. setor ${g.industryEarningsGrowth > 0 ? '+' : ''}${g.industryEarningsGrowth.toFixed(1)}%`
+        : `vs. mercado ${fmtDecPct(checkVal('future', 'f2', 1), true)}`,
       score: snowflakeMap['future']?.score ?? 0,
     },
     {
       pillar: 'past', tab: 'past',
       name: 'Passado',
-      primary: fmt$(p.currentROE),
+      primary: p.currentROE != null ? fmt$(p.currentROE) : fmtDecPct(checkVal('past', 'p6')),
       primaryLabel: 'retorno sobre patrimônio',
-      secondary: `Margem líq. ${fmt$(p.netMargin)}  ·  ROCE ${fmt$(p.currentROCE)}`,
+      secondary: `Margem líq. ${p.netMargin != null ? fmt$(p.netMargin) : fmtDecPct(checkVal('past', 'p2'))}  ·  ROCE ${fmt$(p.currentROCE)}`,
       score: snowflakeMap['past']?.score ?? 0,
     },
     {
       pillar: 'health', tab: 'health',
       name: 'Saúde',
-      primary: h.debtToEquity != null ? `${h.debtToEquity.toFixed(1)}x` : '—',
+      primary: h.debtToEquity != null
+        ? `${h.debtToEquity.toFixed(1)}x`
+        : (() => {
+          // h3 has current D/E decimal when trend data is available
+          const deH3 = checkVal('health', 'h3');
+          if (deH3 != null) return `${(deH3 * 100).toFixed(1)}x`;
+          // h4 stores total_debt (val1) and equity (val2) as absolute amounts
+          const debt = checkVal('health', 'h4', 0);
+          const eq   = checkVal('health', 'h4', 1);
+          if (debt != null && eq != null && eq > 0) return `${(debt / eq * 100).toFixed(1)}x`;
+          return '—';
+        })(),
       primaryLabel: 'dívida / patrimônio',
-      secondary: `Cobertura ${cov !== '—' ? `${cov}x` : '—'}  ·  Caixa ${fmtBRL(h.cash)}`,
+      secondary: `Cobertura ${covDisplay}  ·  Caixa ${fmtBRL(h.cash)}`,
       score: snowflakeMap['health']?.score ?? 0,
     },
     {
       pillar: 'dividend', tab: 'dividend',
       name: 'Dividendos',
-      primary: fmt$(dv.currentYield),
+      primary: dv.currentYield != null
+        ? fmt$(dv.currentYield)
+        : (() => {
+          // d4 has yield decimal when market percentile data is available
+          const yieldDec = checkVal('dividend', 'd4');
+          if (yieldDec != null) return `${(yieldDec * 100).toFixed(1)}%`;
+          // d3 always has dps_latest; compute yield from DPS ÷ price
+          const dps = checkVal('dividend', 'd3');
+          if (dps != null && dps > 0 && v.currentPrice != null && v.currentPrice > 0)
+            return `${(dps / v.currentPrice * 100).toFixed(1)}%`;
+          return '—';
+        })(),
       primaryLabel: 'dividend yield atual',
-      secondary: `Payout ${dv.payoutRatio != null ? `${dv.payoutRatio}%` : '—'}  ·  ${dv.yearsWithoutInterruption ?? '—'} anos`,
+      secondary: (() => {
+        const payout = dv.payoutRatio != null ? `${dv.payoutRatio}%` : (() => { const d5 = checkVal('dividend', 'd5'); return d5 != null ? `${(d5 * 100).toFixed(0)}%` : '—'; })();
+        return `Payout ${payout}  ·  ${dv.yearsWithoutInterruption ?? '—'} anos`;
+      })(),
       score: snowflakeMap['dividend']?.score ?? 0,
     },
   ];
@@ -3393,11 +3450,12 @@ function BaseSection({
               ];
               return dimOrder.map(d => {
                 const sf = snowflakeMap[d.key];
+                const total = sf?.checks?.length ?? 6;
                 return {
                   label: d.label,
-                  value: sf ? (sf.score / 6) * 100 : 5,
+                  value: sf ? sf.normalizedScore : 5,
                   color: DIMENSION_COLORS[d.key],
-                  metric: sf ? `${sf.score}/6 critérios` : '0/6',
+                  metric: sf ? `${sf.score}/${total} critérios` : '0/6',
                   why: sf?.summary ?? '',
                 };
               });
@@ -3405,7 +3463,7 @@ function BaseSection({
             size="large"
             status={(() => {
               const totalScore = (data.snowflake ?? []).reduce((sum, d) => sum + d.score, 0);
-              const maxScore = (data.snowflake ?? []).length * 6;
+              const maxScore = (data.snowflake ?? []).reduce((sum, d) => sum + (d.checks?.length ?? 6), 0);
               const ratio = maxScore > 0 ? totalScore / maxScore : 0;
               if (ratio >= 0.6) return 'healthy' as const;
               if (ratio >= 0.35) return 'attention' as const;
@@ -3436,7 +3494,7 @@ function BaseSection({
                 <span className="text-[10.5px] font-semibold uppercase tracking-wide" style={{ color: DIMENSION_COLORS[mod.pillar] }}>
                   {mod.name}
                 </span>
-                <ScoreChecks score={mod.score} size="xs" />
+                <ScoreChecks score={mod.score} total={snowflakeMap[mod.pillar]?.checks?.length ?? 6} size="xs" />
               </div>
 
               {/* Primary metric */}

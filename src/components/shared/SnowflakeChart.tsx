@@ -102,14 +102,15 @@ export function SnowflakeChart({
   const cx = svgSize / 2;
   const cy = svgSize / 2;
   const maxR = isLarge ? 95 : 48;
+  const dataMaxR = isLarge ? 115 : 56; // data shape uses a larger radius than the rings
   const n = dimensions.length;
 
   const accent = STATUS_COLORS[status];
 
-  // Data points
+  // Data points — use dataMaxR so the shape fills more of the chart
   const dataPoints: [number, number][] = dimensions.map((d, i) => {
     const frac = Math.max(d.value / 100, 0.05);
-    return polarToXY(cx, cy, maxR * frac, getAngle(i, n));
+    return polarToXY(cx, cy, dataMaxR * frac, getAngle(i, n));
   });
 
   const dataPath = smoothClosedPath(dataPoints, 0.35);

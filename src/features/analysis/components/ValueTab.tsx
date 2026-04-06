@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import type { ValueTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -260,8 +261,11 @@ function PEVsIndustryChart({ data }: { data: AnalysisData }) {
 
 }
 
-function KeyValuationMetric({ data }: { data: AnalysisData }) {
-  const [activeTab, setActiveTab] = useState<'pe' | 'ps' | 'pb'>('pe');
+function KeyValuationMetric({ data, activeTab, setActiveTab }: {
+  data: AnalysisData;
+  activeTab: 'pe' | 'ps' | 'pb';
+  setActiveTab: React.Dispatch<React.SetStateAction<'pe' | 'ps' | 'pb'>>;
+}) {
   const rv = data.relativeValuation ?? {} as typeof data.relativeValuation;
   const comp = data.marketCapComposition ?? {} as typeof data.marketCapComposition;
 
@@ -354,26 +358,19 @@ function KeyValuationMetric({ data }: { data: AnalysisData }) {
   );
 }
 
-function HistoricalRatioChartExact({ data }: { data: AnalysisData }) {
+function HistoricalRatioChartExact({ data, activeRatio, setActiveRatio, activePeriod, setActivePeriod }: {
+  data: AnalysisData;
+  activeRatio: 'pe' | 'ps' | 'pb';
+  setActiveRatio: React.Dispatch<React.SetStateAction<'pe' | 'ps' | 'pb'>>;
+  activePeriod: '3M' | '1Y' | '3Y' | '5Y';
+  setActivePeriod: React.Dispatch<React.SetStateAction<'3M' | '1Y' | '3Y' | '5Y'>>;
+}) {
   // Map tab key → backend metric name; ps has no backend data yet
   const METRIC_MAP: Record<'pe' | 'ps' | 'pb', string | null> = {
     pe: 'P/L',
     ps: null,
     pb: 'P/VP',
   };
-
-  // Determine default tab: first one that has real data, fallback to 'pe'
-  const defaultRatio = useMemo((): 'pe' | 'ps' | 'pb' => {
-    const order: ('pe' | 'ps' | 'pb')[] = ['pe', 'pb'];
-    for (const key of order) {
-      const metric = METRIC_MAP[key];
-      if (metric && data.ratioTrends?.find(t => t.metric === metric && t.series.length >= 3)) return key;
-    }
-    return 'pe';
-  }, [data.ratioTrends]);
-
-  const [activeRatio, setActiveRatio] = useState<'pe' | 'ps' | 'pb'>(defaultRatio);
-  const [activePeriod, setActivePeriod] = useState<'3M' | '1Y' | '3Y' | '5Y'>('5Y');
 
   const ticker = data.company.ticker;
   const chartWidth = 640;
@@ -1646,8 +1643,9 @@ function ValuationReadingCard({ data }: { data: AnalysisData }) {
 
 // ─── Value Tab ───────────────────────────────────────────────────────────────
 
-export function ValueTab({ data }: { data: AnalysisData }) {
+export function ValueTab({ data, state }: { data: AnalysisData; state: ValueTabState }) {
   const v  = data.valuation ?? {} as typeof data.valuation;
+  const { activeTab, setActiveTab, activeRatio, setActiveRatio, activePeriod, setActivePeriod } = state;
 
   return (
     <div className="space-y-6">
@@ -1663,7 +1661,7 @@ export function ValueTab({ data }: { data: AnalysisData }) {
       </SectionCard>
 
       <SectionCard id="val-pe" title="Qual indicador usar para avaliar o preço?" subtitle="P/L, P/Receita e P/Patrimônio: cada um serve para um tipo de empresa. Veja qual faz mais sentido aqui.">
-        <KeyValuationMetric data={data} />
+        <KeyValuationMetric data={data} activeTab={activeTab} setActiveTab={setActiveTab} />
       </SectionCard>
 
       <SectionCard
@@ -1675,7 +1673,7 @@ export function ValueTab({ data }: { data: AnalysisData }) {
 
       {data.ratioTrends && data.ratioTrends.length > 0 && (
         <SectionCard title="Como o múltiplo evoluiu ao longo do tempo?" subtitle="Evolução histórica mensal do P/L e P/VP com dados reais da B3.">
-          <HistoricalRatioChartExact data={data} />
+          <HistoricalRatioChartExact data={data} activeRatio={activeRatio} setActiveRatio={setActiveRatio} activePeriod={activePeriod} setActivePeriod={setActivePeriod} />
         </SectionCard>
       )}
 

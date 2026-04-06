@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
+import type { FutureTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -19,11 +20,12 @@ const EARNINGS_CHART_SERIES: { key: string; color: string; hex: string }[] = [
   { key: 'Fluxo de Caixa das Atividades Operacionais (FCO)',     color: 'violet', hex: '#8b5cf6' },
 ];
 
-function EarningsRevenueGrowthSection({ data }: { data: AnalysisData }) {
+function EarningsRevenueGrowthSection({ data, activeKeys, setActiveKeys }: {
+  data: AnalysisData;
+  activeKeys: Set<string>;
+  setActiveKeys: React.Dispatch<React.SetStateAction<Set<string>>>;
+}) {
   const g = data.growth ?? {} as typeof data.growth;
-  const [activeKeys, setActiveKeys] = useState<Set<string>>(
-    new Set(EARNINGS_CHART_SERIES.map(s => s.key))
-  );
 
   const earningsSeries = g.earningsSeries ?? [];
   const revenueSeries = g.revenueSeries ?? [];
@@ -269,13 +271,16 @@ const EPS_SERIES = [
   { key: 'LPA Estimado', color: 'teal' as const, hex: '#14b8a6' },
 ];
 
-function EPSGrowthSection({ data }: { data: AnalysisData }) {
+function EPSGrowthSection({ data, lpaActive, setLpaActive }: {
+  data: AnalysisData;
+  lpaActive: boolean;
+  setLpaActive: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const g   = data.growth ?? {} as typeof data.growth;
   const pts = g.epsCombinedSeries ?? [];
 
-  const [lpaActive, setLpaActive]           = useState(true);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [mouseX, setMouseX]                = useState<number | null>(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
+  const [mouseX, setMouseX]                = React.useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Mede a largura real do container
@@ -876,9 +881,9 @@ function FutureReadingCard({ data }: { data: AnalysisData }) {
   );
 }
 
-export function FutureTab({ data }: { data: AnalysisData }) {
+export function FutureTab({ data, state }: { data: AnalysisData; state: FutureTabState }) {
   const g = data.growth ?? {} as typeof data.growth;
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { drawerOpen, setDrawerOpen, earningsActiveKeys, setEarningsActiveKeys, lpaActive, setLpaActive } = state;
   // Null-safe number formatter: returns "—" for null/undefined, else formatted number
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
   // Null-safe percentage: returns "—" for null, else "X.X%"
@@ -1024,10 +1029,10 @@ export function FutureTab({ data }: { data: AnalysisData }) {
       )}
 
       {/* ── Chart sections ── */}
-      <EarningsRevenueGrowthSection data={data} />
+      <EarningsRevenueGrowthSection data={data} activeKeys={earningsActiveKeys} setActiveKeys={setEarningsActiveKeys} />
 
       <AnalystFutureGrowthSection data={data} />
-      <EPSGrowthSection data={data} />
+      <EPSGrowthSection data={data} lpaActive={lpaActive} setLpaActive={setLpaActive} />
       <FutureROESection data={data} />
 
     </div>

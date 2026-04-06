@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import type { DividendTabState } from '../hooks/useAnalysisPageState';
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, formatDate } from '../utils/formatters';
 import { SectionCard, CheckList } from './AnalysisShared';
 import { DimensionCheckCard } from './ScoreDots';
 
-function DividendHistorySection({ data }: { data: AnalysisData }) {
+function DividendHistorySection({ data, hovered, setHovered }: {
+  data: AnalysisData;
+  hovered: number | null;
+  setHovered: React.Dispatch<React.SetStateAction<number | null>>;
+}) {
   const d = data.dividend ?? {} as typeof data.dividend;
   const series = d.dividendQualitySeries ?? [];
-  const [hovered, setHovered] = useState<number | null>(null);
 
   // Layout constants
   const PAD = { top: 32, right: 52, bottom: 38, left: 56 };
@@ -854,9 +858,9 @@ function DividendReadingCard({ data }: { data: AnalysisData }) {
   );
 }
 
-export function DividendTab({ data }: { data: AnalysisData }) {
+export function DividendTab({ data, state }: { data: AnalysisData; state: DividendTabState }) {
   const d = data.dividend ?? {} as typeof data.dividend;
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { drawerOpen, setDrawerOpen, hovered, setHovered } = state;
   const nf  = (n: number | null | undefined, dec = 1) => n == null ? '—' : n.toFixed(dec);
   const nfp = (n: number | null | undefined, dec = 1) => n == null ? '—' : `${n.toFixed(dec)}%`;
 
@@ -1002,7 +1006,7 @@ export function DividendTab({ data }: { data: AnalysisData }) {
       )}
 
       {/* Histórico e qualidade dos dividendos */}
-      <DividendHistorySection data={data} />
+      <DividendHistorySection data={data} hovered={hovered} setHovered={setHovered} />
 
       <DividendYieldVsMarketSection data={data} />
       <DividendCoverageSection data={data} />

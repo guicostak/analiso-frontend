@@ -24,15 +24,28 @@ export async function apiFetch<T>(
   token?: string | null,
 ): Promise<T> {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(options.headers as Record<string, string> | undefined),
   };
+
+  if (options.body && !(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const url = `${API_BASE_URL}${path}`;
+  let response: Response;
+
+  try {
+    response = await fetch(url, { ...options, headers });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "Network error";
+    throw new Error(
+      `Nao foi possivel conectar ao backend em ${url}. Verifique se o frontend esta em http://localhost:3000, se o backend esta acessivel em http://localhost:8080 e se nao ha bloqueio de mixed content/CORS. Motivo original: ${reason}`,
+    );
+  }
 
   if (!response.ok) {
     let code = "unknown_error";

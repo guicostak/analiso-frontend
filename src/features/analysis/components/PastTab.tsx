@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import type { PastTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -21,11 +22,12 @@ const HISTORICO_CHART_SERIES: { key: string; color: string; hex: string }[] = [
   { key: 'Despesas Operacionais',                                color: 'rose',   hex: '#f43f5e' },
 ];
 
-function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
+function HistoricoGanhosSection({ data, activeKeys, setActiveKeys }: {
+  data: AnalysisData;
+  activeKeys: Set<string>;
+  setActiveKeys: React.Dispatch<React.SetStateAction<Set<string>>>;
+}) {
   const g = data.growth ?? {} as typeof data.growth;
-  const [activeKeys, setActiveKeys] = useState<Set<string>>(
-    new Set(HISTORICO_CHART_SERIES.map(s => s.key))
-  );
 
   const eS = (g.earningsSeries ?? []).filter(e => e.type === 'historical');
   const rS = (g.revenueSeries ?? []).filter(r => r.type === 'historical');
@@ -33,14 +35,23 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
   const cS = (g.cashFromOpSeries ?? []).filter(r => r.type === 'historical');
   const oS = (g.operatingExpensesSeries ?? []).filter(r => r.type === 'historical');
 
-  const chartData = eS.map((e, i) => ({
-      year: e.year,
-      'Receita':                                              rS[i]?.value ?? 0,
-      'Ganhos':                                               e.value,
-      'Fluxo de Caixa Livre':                                fS[i]?.value ?? 0,
-      'Fluxo de Caixa das Atividades Operacionais (FCO)':    cS[i]?.value ?? 0,
-      'Despesas Operacionais':                               oS[i]?.value ?? 0,
-    }));
+  // Join by year to avoid index-misalignment when series have different lengths/ranges
+  const byYear = new Map<string, Record<string, number>>();
+  const ensureYear = (year: string) => {
+    if (!byYear.has(year)) byYear.set(year, {
+      'Receita': 0, 'Ganhos': 0, 'Fluxo de Caixa Livre': 0,
+      'Fluxo de Caixa das Atividades Operacionais (FCO)': 0, 'Despesas Operacionais': 0,
+    });
+    return byYear.get(year)!;
+  };
+  for (const e of eS) ensureYear(e.year)['Ganhos'] = e.value;
+  for (const r of rS) ensureYear(r.year)['Receita'] = r.value;
+  for (const f of fS) ensureYear(f.year)['Fluxo de Caixa Livre'] = f.value;
+  for (const c of cS) ensureYear(c.year)['Fluxo de Caixa das Atividades Operacionais (FCO)'] = c.value;
+  for (const o of oS) ensureYear(o.year)['Despesas Operacionais'] = o.value;
+  const chartData = Array.from(byYear.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([year, vals]) => ({ year, ...vals }));
 
   const activeSeries = HISTORICO_CHART_SERIES.filter(s => activeKeys.has(s.key));
 
@@ -59,7 +70,7 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
       </h3>
       <div className="analysis-card p-5">
         <div className="h-[360px] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:fill-neutral-400">
-          <TremorArea
+          <TremorLine
             data={chartData}
             index="year"
             categories={activeSeries.map(s => s.key)}
@@ -68,7 +79,6 @@ function HistoricoGanhosSection({ data }: { data: AnalysisData }) {
             showLegend={false}
             showGridLines={true}
             yAxisWidth={56}
-            /* fill="gradient" */
             curveType="monotone"
           />
         </div>
@@ -812,9 +822,9 @@ function PastReadingCard({ data }: { data: AnalysisData }) {
   );
 }
 
-export function PastTab({ data }: { data: AnalysisData }) {
+export function PastTab({ data, state }: { data: AnalysisData; state: PastTabState }) {
   const p = data.pastPerformance ?? {} as typeof data.pastPerformance;
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { drawerOpen, setDrawerOpen, activeKeys, setActiveKeys } = state;
   const nf  = (n: number | null | undefined, d = 1) => n == null ? '—' : n.toFixed(d);
   const nfp = (n: number | null | undefined, d = 1) => n == null ? '—' : `${n.toFixed(d)}%`;
 
@@ -959,7 +969,7 @@ export function PastTab({ data }: { data: AnalysisData }) {
       <SankeySection data={data.incomeBreakdown} />
 
       {/* Histórico de ganhos e receitas */}
-      <HistoricoGanhosSection data={data} />
+      <HistoricoGanhosSection data={data} activeKeys={activeKeys} setActiveKeys={setActiveKeys} />
 
       <FreeCashFlowSection data={data} />
       <PastEarningsGrowthSection data={data} />
