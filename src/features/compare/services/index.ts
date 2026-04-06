@@ -5,11 +5,12 @@
  *  1. Dados mock (companies, events)
  *  2. Constantes de domínio (PILLARS, PILLAR_LABEL, RANGES, pillarCopy)
  *  3. Funções puras de formatação, cálculo e derivação
+ *  4. Fetch de dados reais via API de análise
  *
  * Independente de React — sem imports de hooks ou JSX.
- * Preparado para substituição por chamadas HTTP reais.
  */
 
+import { API_BASE_URL } from "@/src/lib/api-base";
 import type {
   ComparePillar,
   CompareTrend,
@@ -26,6 +27,14 @@ import type {
   CompareVerdict,
   CompareEnrichedCompany,
   CompareCategoryDef,
+  CompareDimensionKey,
+  CompareDimensionReading,
+  CompareDimensionReadings,
+  CompareDimensionCheck,
+  CompareDimensionChecks,
+  CompareSectionCriteriaItem,
+  CompareBalanceSheet,
+  CompareDiagnosis,
 } from "../interfaces";
 
 // ─── Constantes de domínio ────────────────────────────────────────────────────
@@ -47,6 +56,7 @@ export const PILLAR_LABEL: Record<ComparePillar, string> = {
 };
 
 export const RANGES: CompareRangeOption[] = [
+  { key: "1m",     label: "1M",   years: null, months: 1  },
   { key: "6m",     label: "6M",   years: null, months: 6  },
   { key: "1a",     label: "1A",   years: 1               },
   { key: "2a",     label: "2A",   years: 2               },
@@ -67,7 +77,6 @@ export const CATEGORIES: CompareCategoryDef[] = [
   { slug: "dividendos",  label: "Dividendos" },
   { slug: "metricas",    label: "Métricas" },
   { slug: "timeline",    label: "Timeline" },
-  { slug: "fontes",      label: "Fontes" },
 ];
 
 export const pillarCopy: Record<
@@ -625,9 +634,357 @@ const itub: CompareCompany = {
 
 export const companies: CompareCompany[] = [weg, vale, itub];
 
+// ─── Helpers para gerar Reading/Check/Criteria/Balance/Diagnosis defaults ────
+
+function badgeFromScore(dim: CompareDimensionKey, score: number): string {
+  if (dim === "value") {
+    if (score >= 5) return "ATRATIVO";
+    if (score >= 4) return "DESCONTO";
+    if (score >= 2) return "NEUTRO";
+    return "PREMIO";
+  }
+  if (score >= 5) return "FORTE";
+  if (score >= 4) return "BOM";
+  if (score >= 2) return "MODERADO";
+  return "FRACO";
+}
+
+function headlineFromScore(dim: CompareDimensionKey, score: number): { headline: string; subtitle: string } {
+  const strong = score >= 5;
+  const ok = score >= 3;
+  switch (dim) {
+    case "value":
+      return strong
+        ? { headline: "Negociado abaixo do valor justo estimado", subtitle: "Multiplos atrativos vs setor" }
+        : ok
+        ? { headline: "Valuation proximo do justo", subtitle: "Multiplos alinhados com a media" }
+        : { headline: "Negociado acima do valor justo", subtitle: "Multiplos esticados vs setor" };
+    case "future":
+      return strong
+        ? { headline: "Crescimento projetado robusto", subtitle: "Projecao acima da media setorial" }
+        : ok
+        ? { headline: "Crescimento projetado moderado", subtitle: "Em linha com setor" }
+        : { headline: "Crescimento projetado fraco", subtitle: "Abaixo da media setorial" };
+    case "past":
+      return strong
+        ? { headline: "Historico solido de crescimento", subtitle: "Lucros e margens consistentes" }
+        : ok
+        ? { headline: "Historico estavel", subtitle: "Crescimento moderado" }
+        : { headline: "Historico irregular", subtitle: "Volatilidade nos resultados" };
+    case "health":
+      return strong
+        ? { headline: "Balanco saudavel e bem capitalizado", subtitle: "Cobertura de juros confortavel" }
+        : ok
+        ? { headline: "Balanco em nivel adequado", subtitle: "Alavancagem controlada" }
+        : { headline: "Balanco pressionado", subtitle: "Alavancagem elevada" };
+    case "dividend":
+      return strong
+        ? { headline: "Pagador consistente de dividendos", subtitle: "Yield acima da media" }
+        : ok
+        ? { headline: "Distribuicao moderada", subtitle: "Yield em linha com mercado" }
+        : { headline: "Dividendos limitados", subtitle: "Distribuicao abaixo do mercado" };
+  }
+}
+
+function defaultReading(dim: CompareDimensionKey, score: number): CompareDimensionReading {
+  const { headline, subtitle } = headlineFromScore(dim, score);
+  return {
+    headline,
+    subtitle,
+    badge: badgeFromScore(dim, score),
+    evidences: [],
+    limitations: [],
+    synthesis: undefined,
+  };
+}
+
+function defaultDimensionCheck(
+  dim: CompareDimensionKey,
+  score: number,
+): CompareDimensionCheck {
+  const total = 6;
+  const passed = Math.max(0, Math.min(total, Math.round(score)));
+  const labels: Record<CompareDimensionKey, string[]> = {
+    value: [
+      "P/L abaixo da industria",
+      "P/L abaixo do mercado",
+      "P/VP razoavel",
+      "PEG abaixo de 1",
+      "DCF mostra desconto",
+      "EV/EBITDA atrativo",
+    ],
+    future: [
+      "Lucro projetado em alta",
+      "Receita projetada em alta",
+      "Crescimento acima do setor",
+      "Crescimento acima do mercado",
+      "ROE futuro forte",
+      "Cobertura de analistas adequada",
+    ],
+    past: [
+      "Lucros crescentes",
+      "Receita crescente",
+      "Margens estaveis",
+      "ROE saudavel",
+      "ROCE saudavel",
+      "Lucros de qualidade",
+    ],
+    health: [
+      "Ativos CP cobrem passivos CP",
+      "Ativos CP cobrem passivos LP",
+      "Divida em reducao",
+      "Cobertura de juros confortavel",
+      "Divida bem coberta por FCO",
+      "D/E moderado",
+    ],
+    dividend: [
+      "Yield acima do mercado",
+      "Pagamentos sem interrupcao",
+      "Pagamentos crescentes",
+      "Payout sustentavel",
+      "Cash payout sustentavel",
+      "Buyback adicional",
+    ],
+  };
+  const items = labels[dim].map((label, i) => ({
+    label,
+    passes: i < passed,
+    observed: i < passed ? "OK" : "—",
+    reference: "",
+    microText: "",
+  }));
+  return { dimension: dim, passed, total, items };
+}
+
+function defaultReadings(
+  snowflake: { dimension: string; score: number }[],
+): CompareDimensionReadings {
+  const score = (d: CompareDimensionKey) =>
+    snowflake.find((s) => s.dimension === d)?.score ?? 3;
+  return {
+    value: defaultReading("value", score("value")),
+    future: defaultReading("future", score("future")),
+    past: defaultReading("past", score("past")),
+    health: defaultReading("health", score("health")),
+    dividend: defaultReading("dividend", score("dividend")),
+  };
+}
+
+function defaultDimensionChecks(
+  snowflake: { dimension: string; score: number }[],
+): CompareDimensionChecks {
+  const score = (d: CompareDimensionKey) =>
+    snowflake.find((s) => s.dimension === d)?.score ?? 3;
+  return {
+    value: defaultDimensionCheck("value", score("value")),
+    future: defaultDimensionCheck("future", score("future")),
+    past: defaultDimensionCheck("past", score("past")),
+    health: defaultDimensionCheck("health", score("health")),
+    dividend: defaultDimensionCheck("dividend", score("dividend")),
+  };
+}
+
+function defaultBalanceSheetFromHealth(
+  shortTermAssets: number,
+  shortTermLiabilities: number,
+  longTermAssets: number,
+  longTermLiabilities: number,
+  cash: number,
+  totalDebt: number,
+  equity: number,
+): CompareBalanceSheet {
+  const cashVal = Math.max(0, cash);
+  const receivables = Math.max(0, shortTermAssets * 0.45);
+  const inventory = Math.max(0, shortTermAssets * 0.25);
+  const physical = Math.max(0, longTermAssets * 0.6);
+  const longTermOther = Math.max(0, longTermAssets * 0.4);
+  const totalAssets =
+    cashVal + receivables + inventory + physical + longTermOther || 1;
+
+  const payables = Math.max(0, shortTermLiabilities * 0.6);
+  const debt = Math.max(0, totalDebt);
+  const otherLiab = Math.max(0, longTermLiabilities * 0.4);
+  const equityVal = Math.max(0, equity);
+  const totalLiab = payables + debt + otherLiab + equityVal || 1;
+
+  return {
+    assets: [
+      { key: "cash", label: "Caixa & CP", value: cashVal, percent: cashVal / totalAssets },
+      { key: "receivables", label: "Recebiveis", value: receivables, percent: receivables / totalAssets },
+      { key: "inventory", label: "Estoques", value: inventory, percent: inventory / totalAssets },
+      { key: "physical", label: "Fisicos", value: physical, percent: physical / totalAssets },
+      { key: "longTermOther", label: "LP & Outros", value: longTermOther, percent: longTermOther / totalAssets },
+    ],
+    liabilities: [
+      { key: "payables", label: "Contas a Pagar", value: payables, percent: payables / totalLiab },
+      { key: "debt", label: "Divida", value: debt, percent: debt / totalLiab },
+      { key: "otherLiab", label: "Outros Passivos", value: otherLiab, percent: otherLiab / totalLiab },
+      { key: "equity", label: "PL", value: equityVal, percent: equityVal / totalLiab },
+    ],
+  };
+}
+
+function defaultDiagnosisFromRatio(
+  ratio: number,
+  goodMax: number,
+  warnMax: number,
+  goodText: string,
+  warnText: string,
+  badText: string,
+): CompareDiagnosis {
+  if (ratio <= goodMax) return { status: "COVERED", text: goodText };
+  if (ratio <= warnMax) return { status: "PRESSURED", text: warnText };
+  return { status: "NOT_COVERED", text: badText };
+}
+
+function defaultSectionCriteria(
+  pairs: { label: string; passes: boolean; statement: string }[],
+): CompareSectionCriteriaItem[] {
+  return pairs.map((p) => ({ ...p }));
+}
+
+type EnrichedNoExtras = Omit<CompareEnrichedCompany, "readings" | "dimensionChecks">;
+
+function withCompareDefaults(c: EnrichedNoExtras): CompareEnrichedCompany {
+  // Auto-generate balance sheet from health data if not provided
+  const healthAny = c.healthData as any;
+  const balanceSheet: CompareBalanceSheet =
+    healthAny.balanceSheet ??
+    defaultBalanceSheetFromHealth(
+      c.healthData.shortTermAssets ?? 0,
+      c.healthData.shortTermLiabilities ?? 0,
+      c.healthData.longTermAssets ?? 0,
+      c.healthData.longTermLiabilities ?? 0,
+      c.healthData.cash ?? 0,
+      c.healthData.totalDebt ?? 0,
+      c.healthData.equity ?? 0,
+    );
+
+  // Auto-generate diagnoses for dividend coverage
+  const dividendAny = c.dividendData as any;
+  const payoutRatioDiagnosis: CompareDiagnosis =
+    dividendAny.payoutRatioDiagnosis ??
+    defaultDiagnosisFromRatio(
+      c.dividendData.payoutRatio ?? 0,
+      60,
+      85,
+      "Payout coberto pelos lucros",
+      "Payout pressionado",
+      "Payout acima dos lucros",
+    );
+  const cashPayoutRatioDiagnosis: CompareDiagnosis =
+    dividendAny.cashPayoutRatioDiagnosis ??
+    defaultDiagnosisFromRatio(
+      c.dividendData.cashPayoutRatio ?? 0,
+      70,
+      95,
+      "Cash payout coberto pelo FCO",
+      "Cash payout pressionado",
+      "Cash payout acima do FCO",
+    );
+
+  // Interest coverage diagnosis
+  const interestCoverage =
+    (c.healthData.interestExpense ?? 0) > 0
+      ? (c.healthData.ebit ?? 0) / (c.healthData.interestExpense ?? 1)
+      : 99;
+  const interestCoverageDiagnosis: CompareDiagnosis =
+    healthAny.interestCoverageDiagnosis ??
+    (interestCoverage >= 5
+      ? { status: "OK", text: `Cobertura de ${interestCoverage.toFixed(1)}x` }
+      : interestCoverage >= 2
+      ? { status: "WARN", text: `Cobertura ajustada de ${interestCoverage.toFixed(1)}x` }
+      : { status: "RISK", text: `Cobertura fraca de ${interestCoverage.toFixed(1)}x` });
+
+  // Default section criteria stubs (used by Phase 4 islands)
+  const score = (d: CompareDimensionKey) =>
+    c.snowflake.find((s) => s.dimension === d)?.score ?? 3;
+  const futureScore = score("future");
+  const pastScore = score("past");
+  const healthScore = score("health");
+
+  const analystForecastCriteria =
+    (c.growthData as any).analystForecastCriteria ??
+    defaultSectionCriteria([
+      { label: "Lucro projetado em alta", passes: futureScore >= 3, statement: `Projecao de lucro ${futureScore >= 3 ? "positiva" : "negativa"}` },
+      { label: "Receita projetada em alta", passes: futureScore >= 3, statement: `Projecao de receita ${futureScore >= 3 ? "positiva" : "negativa"}` },
+      { label: "Crescimento acima do setor", passes: futureScore >= 4, statement: "Comparacao vs media setorial" },
+      { label: "ROE futuro forte", passes: futureScore >= 4, statement: "ROE projetado vs setor" },
+      { label: "Cobertura de analistas", passes: true, statement: "Cobertura disponivel" },
+    ]);
+
+  const earningsQualityCriteria =
+    (c.pastData as any).earningsQualityCriteria ??
+    defaultSectionCriteria([
+      { label: "Lucros de qualidade", passes: pastScore >= 3, statement: "Lucros sustentados por geracao de caixa" },
+      { label: "Margem crescente", passes: pastScore >= 4, statement: "Trajetoria de margem" },
+    ]);
+
+  const fcfCriteria =
+    (c.pastData as any).fcfCriteria ??
+    defaultSectionCriteria([
+      { label: "FCL positivo", passes: ((c.pastData.cashFlowWaterfall?.freeCashFlow ?? 0) > 0), statement: "Fluxo de caixa livre" },
+      { label: "FCL vs Lucro", passes: pastScore >= 3, statement: "Conversao de lucro em caixa" },
+    ]);
+
+  const growthCriteria =
+    (c.pastData as any).growthCriteria ??
+    defaultSectionCriteria([
+      { label: "Lucros vs setor", passes: (c.pastData.earningsGrowthRate ?? 0) > (c.pastData.industryGrowth ?? 0), statement: "Crescimento de lucros vs setor" },
+      { label: "Alto crescimento", passes: (c.pastData.earningsGrowthRate ?? 0) > 10, statement: "Acima do limite de 10%" },
+      { label: "Receita vs setor", passes: (c.pastData.revenueGrowthRate ?? 0) > (c.pastData.industryGrowth ?? 0), statement: "Crescimento de receita vs setor" },
+    ]);
+
+  const positionCriteria =
+    (c.healthData as any).positionCriteria ??
+    defaultSectionCriteria([
+      { label: "Passivos CP cobertos", passes: (c.healthData.shortTermAssets ?? 0) > (c.healthData.shortTermLiabilities ?? 0), statement: "Ativos CP vs Passivos CP" },
+      { label: "Passivos LP cobertos", passes: (c.healthData.shortTermAssets ?? 0) > (c.healthData.longTermLiabilities ?? 0), statement: "Ativos CP vs Passivos LP" },
+    ]);
+
+  const debtCriteria =
+    (c.healthData as any).debtCriteria ??
+    defaultSectionCriteria([
+      { label: "Nivel de endividamento", passes: healthScore >= 3, statement: `D/E em ${(c.healthData.debtToEquity ?? 0).toFixed(0)}%` },
+      { label: "Reducao da divida", passes: (c.healthData.debtToEquity ?? 0) < (c.healthData.debtToEquity5yAgo ?? 0), statement: "Trajetoria 5 anos" },
+      { label: "Cobertura da divida", passes: ((c.healthData.operatingCashFlow ?? 0) / Math.max(1, c.healthData.totalDebt ?? 1)) > 0.2, statement: "FCO vs Divida total" },
+      { label: "Cobertura de juros", passes: interestCoverage >= 5, statement: `${interestCoverage.toFixed(1)}x EBIT/juros` },
+    ]);
+
+  return {
+    ...c,
+    healthData: {
+      ...c.healthData,
+      balanceSheet,
+      interestCoverageDiagnosis,
+      positionCriteria,
+      debtCriteria,
+    },
+    pastData: {
+      ...c.pastData,
+      balanceSheet:
+        (c.pastData as any).balanceSheet ?? balanceSheet,
+      earningsQualityCriteria,
+      fcfCriteria,
+      growthCriteria,
+    },
+    growthData: {
+      ...c.growthData,
+      analystForecastCriteria,
+    },
+    dividendData: {
+      ...c.dividendData,
+      payoutRatioDiagnosis,
+      cashPayoutRatioDiagnosis,
+    },
+    readings: defaultReadings(c.snowflake),
+    dimensionChecks: defaultDimensionChecks(c.snowflake),
+  };
+}
+
 // ─── Enriched mock data for side-by-side islands ─────────────────────────────
 
-const wegEnriched: CompareEnrichedCompany = {
+const wegEnriched: CompareEnrichedCompany = withCompareDefaults({
   ...weg,
   price: 52.34,
   change1d: 1.24,
@@ -639,25 +996,27 @@ const wegEnriched: CompareEnrichedCompany = {
     { dimension: "dividend", label: "Dividendo", score: 3, normalized: 50 },
   ],
   valuation: {
-    fairValue: 38.50,
-    currentPrice: 52.34,
-    discountPercent: -35.9,
-    model: "2-Stage FCF",
-    pe: 32.1,
-    peIndustry: 18.4,
-    evEbitda: 22.8,
-    pvp: 8.9,
+    fairValue: 38.50, currentPrice: 52.34, discountPercent: -35.9, model: "2-Stage FCF",
+    discountRate: 9.5, terminalGrowthRate: 3.0,
+    pe: 32.1, peIndustry: 18.4, peMarket: 15.2, pegRatio: 1.76, evEbitda: 22.8, pvp: 8.9, pvpIndustry: 3.2,
   },
   priceScenarios: [
-    { key: "conservador", label: "Conservador", value: 34.20, gapPercent: -34.7 },
-    { key: "base", label: "Base", value: 38.50, gapPercent: -26.4 },
-    { key: "otimista", label: "Otimista", value: 48.80, gapPercent: -6.8 },
+    { key: "conservador", label: "Conservador", value: 34.20, gapPercent: -34.7, wacc: 11.0, growthRate: 2.0 },
+    { key: "base", label: "Base", value: 38.50, gapPercent: -26.4, wacc: 9.5, growthRate: 3.0 },
+    { key: "otimista", label: "Otimista", value: 48.80, gapPercent: -6.8, wacc: 8.0, growthRate: 4.0 },
   ],
+  ratioTrends: [],
+  dcfSensitivity: [],
+  competitors: [],
   growthData: {
     earningsGrowth: 18.2,
     revenueGrowth: 14.5,
     industryEarningsGrowth: 12.0,
     marketEarningsGrowth: 10.8,
+    industryRevenueGrowth: 10.0,
+    marketRevenueGrowth: 8.5,
+    futureROE: 25.0,
+    futureROEIndustry: 18.0,
     epsSeries: [
       { year: "2022", value: 1.12, type: "historical" },
       { year: "2023", value: 1.28, type: "historical" },
@@ -665,6 +1024,13 @@ const wegEnriched: CompareEnrichedCompany = {
       { year: "2025", value: 1.62, type: "forecast" },
       { year: "2026", value: 1.88, type: "forecast" },
       { year: "2027", value: 2.18, type: "forecast" },
+    ],
+    earningsSeries: [
+      { year: "2022", value: 4680, type: "historical" as const },
+      { year: "2023", value: 4980, type: "historical" as const },
+      { year: "2024", value: 5390, type: "historical" as const },
+      { year: "2025", value: 6200, type: "forecast" as const },
+      { year: "2026", value: 7100, type: "forecast" as const },
     ],
     revenueSeries: [
       { year: "2022", value: 29800, type: "historical" },
@@ -674,12 +1040,22 @@ const wegEnriched: CompareEnrichedCompany = {
       { year: "2026", value: 46100, type: "forecast" },
       { year: "2027", value: 52400, type: "forecast" },
     ],
+    freeCashFlowSeries: [
+      { year: "2022", value: 3800, type: "historical" as const },
+      { year: "2023", value: 4200, type: "historical" as const },
+      { year: "2024", value: 4600, type: "historical" as const },
+    ],
   },
   pastData: {
     earningsGrowthRate: 22.4,
     revenueGrowthRate: 18.1,
+    industryGrowth: 12.0,
     roe: 23.2,
     roce: 19.8,
+    roa: 12.4,
+    industryROE: 18.0,
+    industryROCE: 14.5,
+    industryROA: 9.2,
     netMargin: 14.9,
     grossMargin: 34.2,
     operatingMargin: 20.1,
@@ -714,15 +1090,18 @@ const wegEnriched: CompareEnrichedCompany = {
       { year: "2022", value: 18.5 }, { year: "2023", value: 19.2 },
       { year: "2024", value: 19.8 },
     ],
+    cashFlowWaterfall: { earnings: 5390, depreciation: 1200, stockBasedComp: 80, netWorkingCapital: -320, others: 150, freeCashFlow: 4600 },
   },
   healthData: {
     shortTermAssets: 18200,
     shortTermLiabilities: 9800,
+    longTermAssets: 22000,
     longTermLiabilities: 5600,
     debtToEquity: 24.5,
     debtToEquity5yAgo: 28.1,
     cash: 8400,
     totalDebt: 6200,
+    equity: 33800,
     ebit: 7800,
     interestExpense: 420,
     operatingCashFlow: 6900,
@@ -733,14 +1112,26 @@ const wegEnriched: CompareEnrichedCompany = {
       { year: "2023", debt: 6500, equity: 31200, cash: 7800 },
       { year: "2024", debt: 6200, equity: 33800, cash: 8400 },
     ],
+    debtToEquitySeries: [
+      { year: "2020", value: 32.2 }, { year: "2021", value: 26.9 },
+      { year: "2022", value: 23.1 }, { year: "2023", value: 20.8 },
+      { year: "2024", value: 18.3 },
+    ],
   },
   dividendData: {
     currentYield: 2.3,
+    sectorMedianYield: 3.2,
     marketMedianYield: 4.8,
+    marketYield25th: 2.5,
+    marketYield75th: 7.2,
+    marketPercentile: 22,
     payoutRatio: 44,
+    cashPayoutRatio: 40,
     yearsWithoutInterruption: 28,
     cagr5y: 14.2,
     avgPayout5y: 42.5,
+    buybackYield: 0.8,
+    totalShareholderReturn: 3.1,
     dpaSeries: [
       { year: "2020", dpa: 0.48, payout: 38, type: "historical" },
       { year: "2021", dpa: 0.56, payout: 40, type: "historical" },
@@ -751,9 +1142,9 @@ const wegEnriched: CompareEnrichedCompany = {
       { year: "2026", dpa: 1.04, payout: 42, type: "forecast" },
     ],
   },
-};
+});
 
-const valeEnriched: CompareEnrichedCompany = {
+const valeEnriched: CompareEnrichedCompany = withCompareDefaults({
   ...vale,
   price: 58.92,
   change1d: -0.87,
@@ -765,25 +1156,27 @@ const valeEnriched: CompareEnrichedCompany = {
     { dimension: "dividend", label: "Dividendo", score: 5, normalized: 83 },
   ],
   valuation: {
-    fairValue: 82.40,
-    currentPrice: 58.92,
-    discountPercent: 28.5,
-    model: "2-Stage FCF",
-    pe: 6.8,
-    peIndustry: 9.2,
-    evEbitda: 4.1,
-    pvp: 1.2,
+    fairValue: 82.40, currentPrice: 58.92, discountPercent: 28.5, model: "2-Stage FCF",
+    discountRate: 10.0, terminalGrowthRate: 2.5,
+    pe: 6.8, peIndustry: 9.2, peMarket: 15.2, pegRatio: 1.42, evEbitda: 4.1, pvp: 1.2, pvpIndustry: 1.8,
   },
   priceScenarios: [
-    { key: "conservador", label: "Conservador", value: 64.50, gapPercent: 9.5 },
-    { key: "base", label: "Base", value: 82.40, gapPercent: 39.9 },
-    { key: "otimista", label: "Otimista", value: 98.20, gapPercent: 66.7 },
+    { key: "conservador", label: "Conservador", value: 64.50, gapPercent: 9.5, wacc: 12.0, growthRate: 1.5 },
+    { key: "base", label: "Base", value: 82.40, gapPercent: 39.9, wacc: 10.0, growthRate: 2.5 },
+    { key: "otimista", label: "Otimista", value: 98.20, gapPercent: 66.7, wacc: 8.5, growthRate: 3.5 },
   ],
+  ratioTrends: [],
+  dcfSensitivity: [],
+  competitors: [],
   growthData: {
     earningsGrowth: 4.8,
     revenueGrowth: 3.2,
     industryEarningsGrowth: 8.5,
     marketEarningsGrowth: 10.8,
+    industryRevenueGrowth: 6.0,
+    marketRevenueGrowth: 8.5,
+    futureROE: 16.0,
+    futureROEIndustry: 14.0,
     epsSeries: [
       { year: "2022", value: 8.42, type: "historical" },
       { year: "2023", value: 7.18, type: "historical" },
@@ -791,6 +1184,12 @@ const valeEnriched: CompareEnrichedCompany = {
       { year: "2025", value: 7.14, type: "forecast" },
       { year: "2026", value: 7.48, type: "forecast" },
       { year: "2027", value: 7.84, type: "forecast" },
+    ],
+    earningsSeries: [
+      { year: "2022", value: 42800, type: "historical" as const },
+      { year: "2023", value: 32600, type: "historical" as const },
+      { year: "2024", value: 23700, type: "historical" as const },
+      { year: "2025", value: 25200, type: "forecast" as const },
     ],
     revenueSeries: [
       { year: "2022", value: 198400, type: "historical" },
@@ -800,12 +1199,22 @@ const valeEnriched: CompareEnrichedCompany = {
       { year: "2026", value: 178100, type: "forecast" },
       { year: "2027", value: 184200, type: "forecast" },
     ],
+    freeCashFlowSeries: [
+      { year: "2022", value: 28000, type: "historical" as const },
+      { year: "2023", value: 22000, type: "historical" as const },
+      { year: "2024", value: 18000, type: "historical" as const },
+    ],
   },
   pastData: {
     earningsGrowthRate: -8.2,
     revenueGrowthRate: -5.4,
+    industryGrowth: 6.0,
     roe: 18.6,
     roce: 14.2,
+    roa: 8.4,
+    industryROE: 14.0,
+    industryROCE: 11.0,
+    industryROA: 7.2,
     netMargin: 14.1,
     grossMargin: 42.8,
     operatingMargin: 23.4,
@@ -840,15 +1249,18 @@ const valeEnriched: CompareEnrichedCompany = {
       { year: "2022", value: 20.4 }, { year: "2023", value: 16.8 },
       { year: "2024", value: 14.2 },
     ],
+    cashFlowWaterfall: { earnings: 23700, depreciation: 8200, stockBasedComp: 0, netWorkingCapital: -2800, others: -1100, freeCashFlow: 18000 },
   },
   healthData: {
     shortTermAssets: 62400,
     shortTermLiabilities: 48200,
+    longTermAssets: 180000,
     longTermLiabilities: 82400,
     debtToEquity: 62.8,
     debtToEquity5yAgo: 48.2,
     cash: 28400,
     totalDebt: 68200,
+    equity: 108600,
     ebit: 42800,
     interestExpense: 8200,
     operatingCashFlow: 38400,
@@ -859,14 +1271,26 @@ const valeEnriched: CompareEnrichedCompany = {
       { year: "2023", debt: 62400, equity: 128200, cash: 32800 },
       { year: "2024", debt: 68200, equity: 108600, cash: 28400 },
     ],
+    debtToEquitySeries: [
+      { year: "2020", value: 42.5 }, { year: "2021", value: 28.6 },
+      { year: "2022", value: 38.5 }, { year: "2023", value: 48.7 },
+      { year: "2024", value: 62.8 },
+    ],
   },
   dividendData: {
     currentYield: 7.2,
+    sectorMedianYield: 5.5,
     marketMedianYield: 4.8,
+    marketYield25th: 2.5,
+    marketYield75th: 7.2,
+    marketPercentile: 78,
     payoutRatio: 52,
+    cashPayoutRatio: 48,
     yearsWithoutInterruption: 12,
     cagr5y: 8.4,
     avgPayout5y: 48.2,
+    buybackYield: 2.4,
+    totalShareholderReturn: 9.6,
     dpaSeries: [
       { year: "2020", dpa: 2.18, payout: 42, type: "historical" },
       { year: "2021", dpa: 8.24, payout: 68, type: "historical" },
@@ -877,9 +1301,9 @@ const valeEnriched: CompareEnrichedCompany = {
       { year: "2026", dpa: 4.72, payout: 48, type: "forecast" },
     ],
   },
-};
+});
 
-const itubEnriched: CompareEnrichedCompany = {
+const itubEnriched: CompareEnrichedCompany = withCompareDefaults({
   ...itub,
   price: 34.82,
   change1d: 0.42,
@@ -891,25 +1315,27 @@ const itubEnriched: CompareEnrichedCompany = {
     { dimension: "dividend", label: "Dividendo", score: 4, normalized: 67 },
   ],
   valuation: {
-    fairValue: 38.20,
-    currentPrice: 34.82,
-    discountPercent: 8.8,
-    model: "Excess Returns",
-    pe: 8.2,
-    peIndustry: 9.8,
-    evEbitda: 0,
-    pvp: 1.8,
+    fairValue: 38.20, currentPrice: 34.82, discountPercent: 8.8, model: "Excess Returns",
+    discountRate: 12.0, terminalGrowthRate: 3.0,
+    pe: 8.2, peIndustry: 9.8, peMarket: 15.2, pegRatio: 0.73, evEbitda: 0, pvp: 1.8, pvpIndustry: 1.5,
   },
   priceScenarios: [
-    { key: "conservador", label: "Conservador", value: 32.40, gapPercent: -7.0 },
-    { key: "base", label: "Base", value: 38.20, gapPercent: 9.7 },
-    { key: "otimista", label: "Otimista", value: 44.80, gapPercent: 28.7 },
+    { key: "conservador", label: "Conservador", value: 32.40, gapPercent: -7.0, wacc: 14.0, growthRate: 2.0 },
+    { key: "base", label: "Base", value: 38.20, gapPercent: 9.7, wacc: 12.0, growthRate: 3.0 },
+    { key: "otimista", label: "Otimista", value: 44.80, gapPercent: 28.7, wacc: 10.0, growthRate: 4.0 },
   ],
+  ratioTrends: [],
+  dcfSensitivity: [],
+  competitors: [],
   growthData: {
     earningsGrowth: 11.2,
     revenueGrowth: 8.4,
     industryEarningsGrowth: 10.5,
     marketEarningsGrowth: 10.8,
+    industryRevenueGrowth: 7.0,
+    marketRevenueGrowth: 8.5,
+    futureROE: 22.0,
+    futureROEIndustry: 16.0,
     epsSeries: [
       { year: "2022", value: 3.12, type: "historical" },
       { year: "2023", value: 3.48, type: "historical" },
@@ -917,6 +1343,12 @@ const itubEnriched: CompareEnrichedCompany = {
       { year: "2025", value: 4.12, type: "forecast" },
       { year: "2026", value: 4.52, type: "forecast" },
       { year: "2027", value: 4.98, type: "forecast" },
+    ],
+    earningsSeries: [
+      { year: "2022", value: 28600, type: "historical" as const },
+      { year: "2023", value: 32800, type: "historical" as const },
+      { year: "2024", value: 38400, type: "historical" as const },
+      { year: "2025", value: 42000, type: "forecast" as const },
     ],
     revenueSeries: [
       { year: "2022", value: 142800, type: "historical" },
@@ -926,12 +1358,18 @@ const itubEnriched: CompareEnrichedCompany = {
       { year: "2026", value: 198200, type: "forecast" },
       { year: "2027", value: 214800, type: "forecast" },
     ],
+    freeCashFlowSeries: [],
   },
   pastData: {
     earningsGrowthRate: 16.8,
     revenueGrowthRate: 12.4,
+    industryGrowth: 10.5,
     roe: 21.4,
     roce: 0,
+    roa: 1.8,
+    industryROE: 16.0,
+    industryROCE: 0,
+    industryROA: 1.2,
     netMargin: 24.8,
     grossMargin: 0,
     operatingMargin: 0,
@@ -952,20 +1390,29 @@ const itubEnriched: CompareEnrichedCompany = {
       { year: "2024", value: 21.4 },
     ],
     roceSeries: [],
+    cashFlowWaterfall: null,
   },
   healthData: {
-    shortTermAssets: 0, shortTermLiabilities: 0, longTermLiabilities: 0,
+    shortTermAssets: 0, shortTermLiabilities: 0, longTermAssets: 0, longTermLiabilities: 0,
     debtToEquity: 0, debtToEquity5yAgo: 0,
-    cash: 0, totalDebt: 0, ebit: 0, interestExpense: 0, operatingCashFlow: 0,
+    cash: 0, totalDebt: 0, equity: 0, ebit: 0, interestExpense: 0, operatingCashFlow: 0,
     debtSeries: [],
+    debtToEquitySeries: [],
   },
   dividendData: {
     currentYield: 5.4,
+    sectorMedianYield: 4.2,
     marketMedianYield: 4.8,
+    marketYield25th: 2.5,
+    marketYield75th: 7.2,
+    marketPercentile: 58,
     payoutRatio: 38,
+    cashPayoutRatio: 35,
     yearsWithoutInterruption: 22,
     cagr5y: 18.2,
     avgPayout5y: 36.8,
+    buybackYield: 1.2,
+    totalShareholderReturn: 6.6,
     dpaSeries: [
       { year: "2020", dpa: 0.82, payout: 32, type: "historical" },
       { year: "2021", dpa: 1.04, payout: 34, type: "historical" },
@@ -976,7 +1423,7 @@ const itubEnriched: CompareEnrichedCompany = {
       { year: "2026", dpa: 2.38, payout: 37, type: "forecast" },
     ],
   },
-};
+});
 
 export const enrichedCompanies: CompareEnrichedCompany[] = [wegEnriched, valeEnriched, itubEnriched];
 
@@ -1019,3 +1466,325 @@ export const events: CompareEventItem[] = [
     ),
   },
 ];
+
+// ─── Fetch real data from analysis API ──────────────────────────────────────
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Maps a raw AnalysisResponse JSON to CompareEnrichedCompany.
+ */
+function mapRawReading(raw: any): CompareDimensionReading | undefined {
+  if (!raw) return undefined;
+  return {
+    headline: raw.headline ?? "",
+    subtitle: raw.subtitle ?? "",
+    badge: raw.badge ?? "",
+    evidences: ((raw.evidences ?? []) as any[]).map((e: any) => ({
+      observed: e.observed ?? "",
+      reference: e.reference ?? "",
+      criterion: e.criterion ?? "",
+      microText: e.microText ?? "",
+    })),
+    limitations: ((raw.limitations ?? []) as any[]).map((e: any) => ({
+      observed: e.observed ?? "",
+      reference: e.reference ?? "",
+      criterion: e.criterion ?? "",
+      microText: e.microText ?? "",
+    })),
+    synthesis: raw.synthesis ?? undefined,
+  };
+}
+
+function mapAnalysisToEnriched(raw: any, ticker: string): CompareEnrichedCompany {
+  const company = raw.company ?? {};
+  const snowflakeRaw: any[] = raw.snowflake ?? [];
+  const valuation = raw.valuation ?? {};
+  const relVal = raw.relativeValuation ?? {};
+  const growth = raw.growth ?? {};
+  const past = raw.pastPerformance ?? {};
+  const health = raw.health ?? {};
+  const dividend = raw.dividend ?? {};
+  const priceHistory = raw.priceHistory ?? {};
+  const priceSeries: { date: string; price: number }[] =
+    priceHistory.series ?? [];
+
+  const currentPrice =
+    valuation.currentPrice ??
+    (priceSeries.length > 0
+      ? priceSeries[priceSeries.length - 1].price
+      : 0);
+  const prevPrice =
+    priceSeries.length > 1
+      ? priceSeries[priceSeries.length - 2].price
+      : currentPrice;
+  const change1d =
+    prevPrice !== 0 ? ((currentPrice - prevPrice) / prevPrice) * 100 : 0;
+
+  type ComparePillarData = CompareCompany["pillars"][ComparePillar];
+
+  const stubPillarData = (score: number): ComparePillarData => ({
+    score,
+    status: score >= 7 ? "Saudavel" : score >= 4 ? "Atencao" : "Risco",
+    thresholdLabel: "Maior melhor",
+    domain: [0, 10] as [number, number],
+    bands: {
+      safe: [7, 10] as [number, number],
+      warning: [4, 7] as [number, number],
+      risk: [0, 4] as [number, number],
+    },
+    series: [],
+    metrics: [],
+  });
+
+  const dimScore = (dim: string): number => {
+    const found = snowflakeRaw.find((s: any) => s.dimension === dim);
+    return found ? (found.score ?? 0) : 0;
+  };
+
+  const pillars: Record<ComparePillar, ComparePillarData> = {
+    Divida: stubPillarData(dimScore("health")),
+    CaixaFCF: stubPillarData(dimScore("health")),
+    Margens: stubPillarData(dimScore("past")),
+    Retorno: stubPillarData(dimScore("past")),
+    Proventos: stubPillarData(dimScore("dividend")),
+  };
+
+  const marginSeries: any[] = raw.marginSeries ?? [];
+
+  const base: EnrichedNoExtras = {
+    ticker: company.ticker ?? ticker.toUpperCase(),
+    name: company.name ?? ticker.toUpperCase(),
+    sector: company.sector ?? "",
+    updatedAt: raw.generatedAt ?? new Date().toLocaleDateString("pt-BR"),
+    primarySource: "CVM / B3 / RI",
+    confidence: "Alta" as CompareConfidence,
+    gaps: [],
+    pillars,
+    logo: company.logo ?? undefined,
+    price: currentPrice,
+    change1d,
+    snowflake: snowflakeRaw.map((s: any) => ({
+      dimension: s.dimension,
+      label: s.displayName ?? s.dimension,
+      score: s.score ?? 0,
+      normalized: s.normalizedScore ?? 0,
+    })),
+    valuation: {
+      fairValue: valuation.fairValue ?? 0,
+      currentPrice,
+      discountPercent: valuation.discountPercent ?? 0,
+      model: valuation.model ?? "DCF",
+      discountRate: valuation.discountRate ?? 0,
+      terminalGrowthRate: valuation.terminalGrowthRate ?? 0,
+      pe: relVal.peRatio ?? 0,
+      peIndustry: relVal.peIndustry ?? 0,
+      peMarket: relVal.peMarket ?? 0,
+      pegRatio: relVal.pegRatio ?? 0,
+      evEbitda: 0,
+      pvp: relVal.pbRatio ?? 0,
+      pvpIndustry: relVal.pbIndustry ?? 0,
+    },
+    priceScenarios: ((raw.priceScenarios ?? []) as any[]).map((s: any) => ({
+      key: s.key ?? "",
+      label: s.label ?? "",
+      value: s.estimatedValue ?? 0,
+      gapPercent: s.gapVsCurrent ?? 0,
+      wacc: s.wacc ?? 0,
+      growthRate: s.growthRate ?? 0,
+    })),
+    ratioTrends: ((raw.ratioTrends ?? []) as any[]).map((rt: any) => ({
+      metric: rt.metric ?? "",
+      series: ((rt.series ?? []) as any[]).map((p: any) => ({
+        year: p.year ?? "",
+        company: p.company ?? 0,
+        industry: p.industry ?? 0,
+      })),
+    })),
+    dcfSensitivity: ((raw.dcfSensitivity ?? []) as any[]).map((c: any) => ({
+      wacc: c.wacc ?? 0,
+      terminalGrowth: c.terminalGrowth ?? 0,
+      fairValue: c.fairValue ?? 0,
+    })),
+    competitors: ((raw.competitors ?? []) as any[]).map((c: any) => ({
+      ticker: c.ticker ?? "",
+      name: c.name ?? "",
+      pe: c.pe ?? 0,
+      earningsGrowth: c.earningsGrowth ?? 0,
+    })),
+    growthData: {
+      earningsGrowth: growth.earningsGrowthRate ?? 0,
+      revenueGrowth: growth.revenueGrowthRate ?? 0,
+      industryEarningsGrowth: growth.industryEarningsGrowth ?? 0,
+      marketEarningsGrowth: growth.marketEarningsGrowth ?? 0,
+      industryRevenueGrowth: growth.industryRevenueGrowth ?? 0,
+      marketRevenueGrowth: growth.marketRevenueGrowth ?? 0,
+      futureROE: growth.futureROE ?? 0,
+      futureROEIndustry: growth.futureROEIndustry ?? 0,
+      epsSeries: ((growth.epsCombinedSeries ?? growth.earningsSeries ?? []) as any[]).map(
+        (e: any) => ({
+          year: e.year ?? "",
+          value: e.value ?? 0,
+          type: e.type ?? "historical",
+        }),
+      ),
+      earningsSeries: ((growth.earningsSeries ?? []) as any[]).map((e: any) => ({
+        year: e.year ?? "",
+        value: e.value ?? 0,
+        type: e.type ?? "historical",
+      })),
+      revenueSeries: ((growth.revenueSeries ?? []) as any[]).map((e: any) => ({
+        year: e.year ?? "",
+        value: e.value ?? 0,
+        type: e.type ?? "historical",
+      })),
+      freeCashFlowSeries: ((growth.freeCashFlowSeries ?? []) as any[]).map((e: any) => ({
+        year: e.year ?? "",
+        value: e.value ?? 0,
+        type: e.type ?? "historical",
+      })),
+    },
+    pastData: {
+      earningsGrowthRate: past.earningsGrowthRate ?? 0,
+      revenueGrowthRate: past.revenueGrowthRate ?? 0,
+      industryGrowth: past.industryGrowth ?? 0,
+      roe: past.currentROE ?? 0,
+      roce: past.currentROCE ?? 0,
+      roa: past.currentROA ?? 0,
+      industryROE: past.industryROE ?? 0,
+      industryROCE: past.industryROCE ?? 0,
+      industryROA: past.industryROA ?? 0,
+      netMargin: past.netMargin ?? 0,
+      grossMargin: marginSeries.length > 0 ? marginSeries[marginSeries.length - 1].grossMargin ?? 0 : 0,
+      operatingMargin: marginSeries.length > 0 ? marginSeries[marginSeries.length - 1].operatingMargin ?? 0 : 0,
+      revenueSeries: ((raw.earningsRevenueSeries ?? []) as any[]).map(
+        (e: any) => ({ year: e.year ?? "", value: e.revenue ?? 0 }),
+      ),
+      earningsSeries: ((raw.earningsRevenueSeries ?? []) as any[]).map(
+        (e: any) => ({ year: e.year ?? "", value: e.earnings ?? 0 }),
+      ),
+      marginSeries: marginSeries.map((m: any) => ({
+        year: m.year ?? "",
+        gross: m.grossMargin ?? 0,
+        operating: m.operatingMargin ?? 0,
+        net: m.netMargin ?? 0,
+      })),
+      roeSeries: ((past.roeSeries ?? []) as any[]).map((e: any) => ({
+        year: e.year ?? "",
+        value: e.value ?? 0,
+      })),
+      roceSeries: ((past.roceSeries ?? []) as any[]).map((e: any) => ({
+        year: e.year ?? "",
+        value: e.value ?? 0,
+      })),
+      cashFlowWaterfall: past.cashFlowWaterfall ? {
+        earnings: past.cashFlowWaterfall.earnings ?? 0,
+        depreciation: past.cashFlowWaterfall.depreciation ?? 0,
+        stockBasedComp: past.cashFlowWaterfall.stockBasedComp ?? 0,
+        netWorkingCapital: past.cashFlowWaterfall.netWorkingCapital ?? 0,
+        others: past.cashFlowWaterfall.others ?? 0,
+        freeCashFlow: past.cashFlowWaterfall.freeCashFlow ?? 0,
+      } : null,
+    },
+    healthData: {
+      shortTermAssets: health.shortTermAssets ?? 0,
+      shortTermLiabilities: health.shortTermLiabilities ?? 0,
+      longTermAssets: health.assetsVsLiabilities?.longTermAssets ?? 0,
+      longTermLiabilities: health.longTermLiabilities ?? 0,
+      debtToEquity: health.debtToEquity ?? 0,
+      debtToEquity5yAgo: health.debtToEquity5yAgo ?? 0,
+      cash: health.cash ?? 0,
+      totalDebt: health.totalDebt ?? 0,
+      equity: health.equity ?? 0,
+      ebit: health.ebit ?? 0,
+      interestExpense: health.interestExpense ?? 0,
+      operatingCashFlow: health.operatingCashFlow ?? 0,
+      debtSeries: ((health.debtHistorySeries ?? []) as any[]).map(
+        (e: any) => ({
+          year: e.year ?? "",
+          debt: e.debt ?? 0,
+          equity: e.equity ?? 0,
+          cash: e.cash ?? 0,
+        }),
+      ),
+      debtToEquitySeries: ((health.debtToEquitySeries ?? []) as any[]).map(
+        (e: any) => ({
+          year: e.year ?? "",
+          value: e.value ?? 0,
+        }),
+      ),
+    },
+    dividendData: {
+      currentYield: dividend.currentYield ?? 0,
+      sectorMedianYield: dividend.sectorMedianYield ?? 0,
+      marketMedianYield: dividend.marketMedianYield ?? 0,
+      marketYield25th: dividend.marketYield25th ?? 0,
+      marketYield75th: dividend.marketYield75th ?? 0,
+      marketPercentile: dividend.marketPercentile ?? 0,
+      payoutRatio: dividend.payoutRatio ?? 0,
+      cashPayoutRatio: dividend.cashPayoutRatio ?? 0,
+      yearsWithoutInterruption: dividend.yearsWithoutInterruption ?? 0,
+      cagr5y: dividend.cagr5y ?? 0,
+      avgPayout5y: dividend.avgPayout5y ?? 0,
+      buybackYield: dividend.buybackYield ?? 0,
+      totalShareholderReturn: dividend.totalShareholderReturn ?? 0,
+      dpaSeries: ((dividend.dividendQualitySeries ?? []) as any[]).map(
+        (e: any) => ({
+          year: e.year ?? "",
+          dpa: e.dpa ?? 0,
+          payout: e.payout ?? null,
+          type: e.type ?? "historical",
+        }),
+      ),
+    },
+  };
+
+  const enriched = withCompareDefaults(base);
+
+  // Override defaults with backend-provided readings if present
+  const valueReading = mapRawReading(raw.valueReading);
+  const futureReading = mapRawReading(raw.futureReading);
+  const pastReading = mapRawReading(raw.pastReading);
+  const healthReading = mapRawReading(raw.healthReading);
+  const dividendReading = mapRawReading(raw.dividendReading);
+  if (valueReading) enriched.readings.value = valueReading;
+  if (futureReading) enriched.readings.future = futureReading;
+  if (pastReading) enriched.readings.past = pastReading;
+  if (healthReading) enriched.readings.health = healthReading;
+  if (dividendReading) enriched.readings.dividend = dividendReading;
+
+  return enriched;
+}
+
+/**
+ * Fetches both companies in a single request via /api/v2/compare.
+ */
+export async function fetchCompareData(
+  tickerA: string,
+  tickerB: string,
+): Promise<{ a: CompareEnrichedCompany; b: CompareEnrichedCompany }> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v2/compare?tickerA=${tickerA.toUpperCase()}&tickerB=${tickerB.toUpperCase()}`,
+  );
+  if (!res.ok) throw new Error(`Failed to fetch comparison for ${tickerA} vs ${tickerB}`);
+  const json: any = await res.json();
+  return {
+    a: mapAnalysisToEnriched(json.a, tickerA),
+    b: mapAnalysisToEnriched(json.b, tickerB),
+  };
+}
+
+/**
+ * Fetches the full analysis for a single ticker and converts to CompareEnrichedCompany.
+ */
+export async function fetchCompareCompany(
+  ticker: string,
+): Promise<CompareEnrichedCompany> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v2/company-analysis/${ticker.toUpperCase()}`,
+  );
+  if (!res.ok) throw new Error(`Failed to fetch analysis for ${ticker}`);
+  const raw: any = await res.json();
+  return mapAnalysisToEnriched(raw, ticker);
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

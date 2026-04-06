@@ -39,6 +39,7 @@ import {
   trendNarrative,
   parseDate,
   confidenceLabel,
+  fetchCompareData,
 } from "../services";
 
 import type {
@@ -76,6 +77,7 @@ export interface UseCompareReturn {
   eventsOpen: boolean;
   qualityOpen: boolean;
   refreshing: boolean;
+  loadingApi: boolean;
   evidence: CompareEvidence | null;
   toast: string;
   compactSticky: boolean;
@@ -167,7 +169,7 @@ export function useCompare(): UseCompareReturn {
   const [selectedTickers, setSelectedTickers] = useState<string[]>(() => {
     const param = searchParams.get("tickers");
     if (!param) return [];
-    return param.split(",").map((t) => t.trim().toUpperCase()).filter(Boolean).slice(0, 4);
+    return param.split(",").map((t) => t.trim().toUpperCase()).filter(Boolean).slice(0, 2);
   });
   const [search, setSearch] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
@@ -181,7 +183,7 @@ export function useCompare(): UseCompareReturn {
     return "todas";
   });
   const [activePillar, setActivePillar] = useState<ComparePillar>("Divida");
-  const [range, setRange] = useState<CompareRangeKey>("1a");
+  const [range, setRange] = useState<CompareRangeKey>("1m");
   const [eventsOpen, setEventsOpen] = useState(false);
   const [qualityOpen, setQualityOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -218,28 +220,49 @@ export function useCompare(): UseCompareReturn {
   }, [selectedTickers, categoria, router, searchParams]);
 
   // — Dados derivados básicos —
+  const tickerA = selectedTickers[0] ?? null;
+  const tickerB = selectedTickers[1] ?? null;
+  const canCompare = selectedTickers.length >= 2;
+
+  // Fetched enriched data from API
+  const [enrichedA, setEnrichedA] = useState<CompareEnrichedCompany | undefined>(undefined);
+  const [enrichedB, setEnrichedB] = useState<CompareEnrichedCompany | undefined>(undefined);
+  const [loadingApi, setLoadingApi] = useState(false);
+
+  // Fetch both companies in a single request when both tickers are set
+  useEffect(() => {
+    if (!tickerA || !tickerB) {
+      if (!tickerA) setEnrichedA(undefined);
+      if (!tickerB) setEnrichedB(undefined);
+      return;
+    }
+    let cancelled = false;
+    setLoadingApi(true);
+    fetchCompareData(tickerA, tickerB)
+      .then(({ a: dataA, b: dataB }) => {
+        if (cancelled) return;
+        setEnrichedA(dataA);
+        setEnrichedB(dataB);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEnrichedA(undefined);
+        setEnrichedB(undefined);
+      })
+      .finally(() => { if (!cancelled) setLoadingApi(false); });
+    return () => { cancelled = true; };
+  }, [tickerA, tickerB]);
+
+  // Derive CompareCompany from enriched (for backward compat with scoreboard/verdict)
+  const a: CompareCompany | undefined = enrichedA;
+  const b: CompareCompany | undefined = enrichedB;
+
   const selected = useMemo(
-    () =>
-      selectedTickers
-        .map((t) => companies.find((c) => c.ticker === t))
-        .filter(Boolean) as CompareCompany[],
-    [selectedTickers],
+    () => [enrichedA, enrichedB].filter(Boolean) as CompareCompany[],
+    [enrichedA, enrichedB],
   );
 
   const pair = selected.slice(0, 2);
-  const a = pair[0];
-  const b = pair[1];
-  const canCompare = pair.length >= 2;
-
-  const enrichedA = useMemo(
-    () => enrichedCompanies.find((c) => c.ticker === a?.ticker),
-    [a],
-  );
-  const enrichedB = useMemo(
-    () => enrichedCompanies.find((c) => c.ticker === b?.ticker),
-    [b],
-  );
-
 
   const available = useMemo(
     () =>
@@ -458,7 +481,7 @@ export function useCompare(): UseCompareReturn {
 
   const addTicker = useCallback(
     (ticker: string, companyName?: string, logoUrl?: string | null) => {
-      if (selectedTickers.includes(ticker) || selectedTickers.length >= 4) return;
+      if (selectedTickers.includes(ticker) || selectedTickers.length >= 2) return;
       setSelectedTickers((prev) => [...prev, ticker]);
       if (companyName) {
         setCompanyNames((prev) => ({ ...prev, [ticker]: companyName }));
@@ -562,6 +585,7 @@ export function useCompare(): UseCompareReturn {
     eventsOpen,
     qualityOpen,
     refreshing,
+    loadingApi,
     evidence,
     toast,
     compactSticky,

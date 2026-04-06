@@ -115,7 +115,7 @@ export function Sidebar({ currentPage = "dashboard" }: SidebarProps) {
             <img
               src={logoImage.src}
               alt="Analiso"
-              className="h-[26px] w-auto"
+              className="h-[34px] w-auto"
               draggable="false"
             />
           )}

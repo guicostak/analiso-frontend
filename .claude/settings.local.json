@@ -249,7 +249,13 @@
       "Bash(/dev/null --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.json\")",
       "Bash(/dev/null --include=*.tsx --include=*.ts)",
       "Read(//c/Users/guilh/Desktop/**)",
-      "Read(//c/Users/guilh/**)"
+      "Read(//c/Users/guilh/**)",
+      "Bash(./mvnw.cmd clean:*)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend -maxdepth 3 -type f \\\\\\(-name *.md -o -name *.txt -o -name *.prompt \\\\\\))",
+      "Bash(find /c/Users/guilh/Desktop/analiso-frontend/src/features/compare -type f -name *.ts -o -name *.tsx)",
+      "Bash(curl -s \"http://localhost:8080/api/v2/compare?tickerA=ABEV3&tickerB=BBAS3\")",
+      "Bash(wc -l \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\features\\\\analysis\\\\components\"/*.tsx)",
+      "Bash(mvn -q -o compile)"
     ]
   }
 }

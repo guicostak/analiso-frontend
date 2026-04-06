@@ -32,7 +32,7 @@ export function LandingNav({ showAuthButton = true }: LandingNavProps) {
           <img
             src={logoImage.src}
             alt="Analiso"
-            className="h-[25px] w-auto max-md:h-[20px]"
+            className="h-[34px] w-auto max-md:h-[26px]"
             draggable="false"
           />
         </a>

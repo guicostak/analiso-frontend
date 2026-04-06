@@ -25,7 +25,6 @@ import {
   VerdictIsland,
   TopFactorsIsland,
   MetricsTableIsland,
-  SourcesIsland,
 } from "./islands";
 
 // Lazy-load heavier islands below the fold
@@ -82,6 +81,7 @@ export function ComparePage() {
     activePillar,
     range,
     refreshing,
+    loadingApi,
     evidence,
     toast,
     compactSticky,
@@ -102,7 +102,6 @@ export function ComparePage() {
     tableRows,
     activePillarWinnerSummary,
     recentEvents,
-    qualityTone,
     selectedTickers,
     setSelectedTickers,
     addTicker,
@@ -142,7 +141,7 @@ export function ComparePage() {
         onSelect={(ticker, companyName, logoUrl) => addTicker(ticker, companyName, logoUrl)}
         excludeTickers={new Set(selectedTickers)}
         searchPlaceholder="Buscar empresa para comparar..."
-        footerText={`${selectedTickers.length} de 4 empresas selecionadas`}
+        footerText={`${selectedTickers.length} de 2 empresas selecionadas`}
       />
       <MainContent className="relative overflow-hidden pt-20">
         {/* Background gradients */}
@@ -171,7 +170,6 @@ export function ComparePage() {
                 onSelectPillar={selectPillar}
                 onSetCategoria={setCategoria}
                 onSetRange={setRange}
-                onSwap={swapCompanies}
                 PILLAR_LABEL={PILLAR_LABEL}
                 RANGES={RANGES}
                 PILLARS={PILLARS}
@@ -211,7 +209,7 @@ export function ComparePage() {
                       </span>
                     );
                   })}
-                  {selectedTickers.length < 4 && (
+                  {selectedTickers.length < 2 && (
                     <button
                       onClick={() => setShowAddModal(true)}
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
@@ -310,7 +308,7 @@ export function ComparePage() {
                   Escolha duas empresas nos campos acima e compare lado a lado indicadores financeiros, valuation, rentabilidade e risco.
                 </p>
               </section>
-            ) : refreshing ? (
+            ) : loadingApi || refreshing || !enrichedA || !enrichedB ? (
               <LoadingBlocks />
             ) : enrichedA && enrichedB && a && b ? (
               <div className="space-y-8">
@@ -410,12 +408,7 @@ export function ComparePage() {
                   </section>
                 )}
 
-                {/* ── Fontes ── */}
-                {showSection(categoria, "fontes") && (
-                  <section id="fontes" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                    <SourcesIsland a={enrichedA} b={enrichedB} qualityTone={qualityTone} />
-                  </section>
-                )}
+
               </div>
             ) : null}
           </div>

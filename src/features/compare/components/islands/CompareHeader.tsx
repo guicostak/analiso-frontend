@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowRightLeft } from "lucide-react";
 import type {
   CompareEnrichedCompany,
   ComparePillar,
@@ -21,7 +20,6 @@ interface CompareHeaderProps {
   onSelectPillar: (p: ComparePillar) => void;
   onSetCategoria: (c: CompareCategorySlug) => void;
   onSetRange: (r: CompareRangeKey) => void;
-  onSwap: () => void;
   PILLAR_LABEL: Record<ComparePillar, string>;
   RANGES: CompareRangeOption[];
   PILLARS: ComparePillar[];
@@ -48,12 +46,19 @@ function CompanyBadge({
 
   return (
     <div className="flex items-center gap-3">
-      {/* Logo placeholder */}
-      <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${bgClass}`}
-      >
-        {company.ticker.charAt(0)}
-      </div>
+      {company.logo ? (
+        <img
+          src={company.logo}
+          alt={company.ticker}
+          className="h-8 w-8 rounded-full border border-border bg-muted object-cover"
+        />
+      ) : (
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${bgClass}`}
+        >
+          {company.ticker.charAt(0)}
+        </div>
+      )}
 
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
@@ -89,7 +94,6 @@ export function CompareHeader({
   onSelectPillar,
   onSetCategoria,
   onSetRange,
-  onSwap,
   PILLAR_LABEL,
   RANGES,
   PILLARS,
@@ -98,27 +102,16 @@ export function CompareHeader({
 }: CompareHeaderProps) {
   return (
     <header
-      className={`sticky top-14 z-10 border-b border-border bg-card/80 backdrop-blur-lg transition-all ${
-        compactSticky ? "py-2" : "py-4"
-      }`}
+      className="sticky top-14 z-10 mb-6 rounded-[28px] border border-border bg-card/80 py-8 backdrop-blur-lg"
     >
       <div className="mx-auto max-w-7xl px-4">
-        {/* ── Top row: A  [swap + periods]  B ── */}
+        {/* ── Top row: A  [periods]  B ── */}
         <div className="flex items-center justify-between gap-4">
           {/* Company A */}
           <CompanyBadge company={a} side="a" />
 
           {/* Center controls */}
           <div className="flex flex-col items-center gap-2">
-            {/* Swap button */}
-            <button
-              onClick={onSwap}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Trocar empresas"
-            >
-              <ArrowRightLeft className="h-4 w-4" />
-            </button>
-
             {/* Period selector pills */}
             <div className="flex flex-wrap items-center justify-center gap-1">
               {RANGES.filter((r) => r.key !== "custom").map((r) => (
@@ -143,9 +136,7 @@ export function CompareHeader({
 
         {/* ── Category navigation tabs ── */}
         <div
-          className={`flex items-center gap-1 overflow-x-auto scrollbar-hide ${
-            compactSticky ? "mt-2" : "mt-3"
-          }`}
+          className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide mt-6"
         >
           {CATEGORIES.map((c) => (
             <button

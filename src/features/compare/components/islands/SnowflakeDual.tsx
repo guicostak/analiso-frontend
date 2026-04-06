@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { Check } from "lucide-react";
 import { SnowflakeChart } from "@/src/components/shared/SnowflakeChart";
 import type {
   CompareEnrichedCompany,
@@ -48,62 +48,59 @@ function statusFromAvg(avg: number): "healthy" | "attention" | "risk" {
   return "risk";
 }
 
-/* ── Score Row ────────────────────────────────────────────────────────────── */
+/* ── Score Row (3 columns: A | Dimension | B) ────────────────────────────── */
 
 function ScoreRow({
   label,
   scoreA,
   scoreB,
-  color,
+  tickerA,
+  tickerB,
   isLast,
 }: {
   label: string;
   scoreA: number;
   scoreB: number;
-  color: string;
+  tickerA: string;
+  tickerB: string;
   isLast: boolean;
 }) {
-  const total = scoreA + scoreB || 1;
-  const pctA = (scoreA / total) * 100;
   const isABetter = scoreA > scoreB;
-  const isTie = scoreA === scoreB;
+  const isBBetter = scoreB > scoreA;
 
   return (
-    <div className={`grid grid-cols-[56px_1fr_56px] items-center gap-3 py-2.5 px-1 ${!isLast ? "border-b border-border" : ""}`}>
-      {/* Score A */}
-      <span className={`text-right text-[13px] font-semibold tabular-nums ${isABetter ? "text-brand-text" : "text-foreground"}`}>
-        {formatNumber(scoreA, 0)}
-      </span>
-
-      {/* Bar — proporção A vs B */}
-      <div className="relative flex flex-col items-center gap-1">
-        <span className="text-[10px] font-medium text-muted-foreground leading-none">
-          {label}
-        </span>
-        <div className="flex h-2 w-full overflow-hidden rounded-full">
-          <div
-            className="h-full rounded-l-full transition-all"
-            style={{
-              width: `${pctA}%`,
-              backgroundColor: isTie ? "var(--muted)" : isABetter ? "var(--brand)" : "var(--muted)",
-              opacity: isTie ? 1 : isABetter ? 0.7 : 0.35,
-            }}
-          />
-          <div
-            className="h-full rounded-r-full transition-all"
-            style={{
-              width: `${100 - pctA}%`,
-              backgroundColor: isTie ? "var(--muted)" : !isABetter ? "var(--compare-b)" : "var(--muted)",
-              opacity: isTie ? 1 : !isABetter ? 0.7 : 0.35,
-            }}
-          />
-        </div>
+    <div
+      className={`grid items-center ${
+        !isLast ? "border-b border-border/60" : ""
+      }`}
+      style={{ gridTemplateColumns: "1fr 80px 1fr" }}
+    >
+      {/* Cell A */}
+      <div
+        className="flex h-11 items-center justify-center gap-1.5 rounded-l-lg px-2"
+        style={isABetter ? { backgroundColor: "var(--brand-surface)" } : undefined}
+      >
+        {isABetter && (
+          <Check className="h-4 w-4 text-brand-text" />
+        )}
       </div>
 
-      {/* Score B */}
-      <span className={`text-left text-[13px] font-semibold tabular-nums ${!isABetter && !isTie ? "text-compare-b-text" : "text-foreground"}`}>
-        {formatNumber(scoreB, 0)}
-      </span>
+      {/* Dimension label (center) */}
+      <div className="flex h-11 items-center justify-center">
+        <span className="text-[12px] font-normal text-muted-foreground whitespace-nowrap">
+          {label}
+        </span>
+      </div>
+
+      {/* Cell B */}
+      <div
+        className="flex h-11 items-center justify-center rounded-r-lg px-2"
+        style={isBBetter ? { backgroundColor: "var(--compare-b-surface)" } : undefined}
+      >
+        {isBBetter && (
+          <Check className="h-4 w-4 text-compare-b-text" />
+        )}
+      </div>
     </div>
   );
 }
@@ -122,13 +119,23 @@ export function SnowflakeDual({ a, b, scoreboard }: SnowflakeDualProps) {
   const avgA = avgScore(a.snowflake);
   const avgB = avgScore(b.snowflake);
 
-  const dimensions: { key: string; label: string; color: string }[] = [
-    { key: "value", label: "Valor", color: DIMENSION_COLORS.value },
-    { key: "future", label: "Futuro", color: DIMENSION_COLORS.future },
-    { key: "past", label: "Passado", color: DIMENSION_COLORS.past },
-    { key: "health", label: "Saúde", color: DIMENSION_COLORS.health },
-    { key: "dividend", label: "Dividendo", color: DIMENSION_COLORS.dividend },
+  const dimensions: { key: string; label: string }[] = [
+    { key: "value", label: "Valor" },
+    { key: "future", label: "Futuro" },
+    { key: "past", label: "Passado" },
+    { key: "health", label: "Saúde" },
+    { key: "dividend", label: "Dividendo" },
   ];
+
+  // Count wins
+  let winsA = 0;
+  let winsB = 0;
+  for (const dim of dimensions) {
+    const sA = a.snowflake.find((s) => s.dimension === dim.key)?.normalized ?? 0;
+    const sB = b.snowflake.find((s) => s.dimension === dim.key)?.normalized ?? 0;
+    if (sA > sB) winsA++;
+    else if (sB > sA) winsB++;
+  }
 
   const winnerTicker = scoreboard.winner.ticker;
   const isAWinner = winnerTicker === a.ticker;
@@ -154,14 +161,17 @@ export function SnowflakeDual({ a, b, scoreboard }: SnowflakeDualProps) {
         {/* ── Tabela comparativa central ── */}
         <div className="w-full max-w-xs">
           {/* Cabeçalho */}
-          <div className="grid grid-cols-[56px_1fr_56px] gap-3 border-b border-border-strong pb-2 px-1">
-            <span className="text-right text-[10px] font-semibold uppercase tracking-wider text-brand-text">
+          <div
+            className="grid items-center border-b border-border-strong pb-2"
+            style={{ gridTemplateColumns: "1fr 80px 1fr" }}
+          >
+            <span className="text-center text-[10px] font-semibold uppercase tracking-wider text-brand-text">
               {a.ticker}
             </span>
             <span className="text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Diferença
+              Dimensão
             </span>
-            <span className="text-left text-[10px] font-semibold uppercase tracking-wider text-compare-b-text">
+            <span className="text-center text-[10px] font-semibold uppercase tracking-wider text-compare-b-text">
               {b.ticker}
             </span>
           </div>
@@ -179,31 +189,29 @@ export function SnowflakeDual({ a, b, scoreboard }: SnowflakeDualProps) {
                   label={dim.label}
                   scoreA={sA}
                   scoreB={sB}
-                  color={dim.color}
+                  tickerA={a.ticker}
+                  tickerB={b.ticker}
                   isLast={i === dimensions.length - 1}
                 />
               );
             })}
           </div>
 
-          {/* Destaque do vencedor */}
+          {/* Placar resumo */}
           <div className="mt-4 rounded-xl border border-border bg-muted/60 px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-brand" />
-                <span className="text-[13px] font-semibold text-foreground">
-                  {winnerTicker}
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  lidera no agregado
-                </span>
-              </div>
-              <span className="text-[13px] font-semibold tabular-nums text-foreground">
-                {formatNumber(isAWinner ? avgA : avgB, 0)} pts
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-[13px] font-semibold text-brand-text">
+                {a.ticker}
+              </span>
+              <span className="text-[18px] font-bold tabular-nums text-foreground">
+                {winsA} × {winsB}
+              </span>
+              <span className="text-[13px] font-semibold text-compare-b-text">
+                {b.ticker}
               </span>
             </div>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
-              Confiança dos dados: baseada na cobertura e atualização das fontes oficiais (CVM, B3, RI) para ambas as empresas.
+            <p className="mt-1 text-center text-[11px] text-muted-foreground">
+              {formatNumber(avgA, 0)} pts vs {formatNumber(avgB, 0)} pts
             </p>
           </div>
         </div>
