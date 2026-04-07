@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { CompareEnrichedCompany } from "../../interfaces";
+import type { CompareEnrichedCompany, CompareNarrative } from "../../interfaces";
 import { CompareReadingCard } from "../shared/CompareReadingCard";
 import { CompareDimensionCheckCard } from "../shared/CompareDimensionCheckCard";
+import { CompareNarrativeBlock } from "../shared/CompareNarrativeBlock";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -11,6 +12,7 @@ interface ValuationIslandProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   formatNumber: (value: number, digits?: number) => string;
+  narrative?: CompareNarrative | null;
 }
 
 type Side = "a" | "b";
@@ -1255,7 +1257,7 @@ function ValuationScenariosBars({
 
 /* ── Main Component ───────────────────────────────────────────────────────── */
 
-export function ValuationIsland({ a, b, formatNumber }: ValuationIslandProps) {
+export function ValuationIsland({ a, b, formatNumber, narrative }: ValuationIslandProps) {
   const [trendMetric, setTrendMetric] = useState<"P/L" | "P/VP">("P/L");
   const [trendPeriod, setTrendPeriod] = useState<"1A" | "3A" | "5A" | "Max">("5A");
 
@@ -1286,6 +1288,8 @@ export function ValuationIsland({ a, b, formatNumber }: ValuationIslandProps) {
   return (
     <div className="compare-island compare-surface p-6 scroll-mt-[160px] space-y-8">
       <h3 className="text-base font-semibold text-foreground">Valuation</h3>
+
+      <CompareNarrativeBlock narrative={narrative ?? null} variant="section" />
 
       {/* ── Leitura da dimensao ── */}
       <CompareReadingCard

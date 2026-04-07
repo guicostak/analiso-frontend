@@ -35,6 +35,10 @@ import type {
   CompareSectionCriteriaItem,
   CompareBalanceSheet,
   CompareDiagnosis,
+  CompareSummary,
+  CompareNarrative,
+  CompareNarrativeBullet,
+  CompareNarrativeTone,
 } from "../interfaces";
 
 // ─── Constantes de domínio ────────────────────────────────────────────────────
@@ -1757,21 +1761,310 @@ function mapAnalysisToEnriched(raw: any, ticker: string): CompareEnrichedCompany
 }
 
 /**
- * Fetches both companies in a single request via /api/v2/compare.
+ * Error class for compare endpoint failures. Carries the original status so
+ * callers can branch on 400 (bad params) vs 404 (ticker not found) vs other.
+ */
+export class CompareApiError extends Error {
+  status: number;
+  tickerA: string;
+  tickerB: string;
+  constructor(message: string, status: number, tickerA: string, tickerB: string) {
+    super(message);
+    this.name = "CompareApiError";
+    this.status = status;
+    this.tickerA = tickerA;
+    this.tickerB = tickerB;
+  }
+}
+
+function normalizeCompareNarrative(raw: any): CompareNarrative | null {
+  if (!raw || typeof raw !== "object") return null;
+  const headline = typeof raw.headline === "string" ? raw.headline : "";
+  const subtitle = typeof raw.subtitle === "string" ? raw.subtitle : "";
+  const paragraphs: string[] = Array.isArray(raw.paragraphs)
+    ? raw.paragraphs.filter((p: unknown): p is string => typeof p === "string" && p.length > 0)
+    : [];
+  const rawBullets: any[] = Array.isArray(raw.bullets) ? raw.bullets : [];
+  const bullets: CompareNarrativeBullet[] = rawBullets
+    .map((b) => {
+      const label = typeof b?.label === "string" ? b.label : "";
+      const text = typeof b?.text === "string" ? b.text : "";
+      const toneRaw = b?.tone;
+      const tone: CompareNarrativeTone =
+        toneRaw === "positive" || toneRaw === "negative" || toneRaw === "warning"
+          ? toneRaw
+          : "neutral";
+      return { label, text, tone };
+    })
+    .filter((b) => b.label.length > 0 && b.text.length > 0);
+  if (!headline && !subtitle && paragraphs.length === 0 && bullets.length === 0) return null;
+  return { headline, subtitle, paragraphs, bullets };
+}
+
+function normalizeCompareSummary(raw: any): CompareSummary | null {
+  if (!raw || typeof raw !== "object") return null;
+  const winner = raw.overallWinner === "A" || raw.overallWinner === "B" ? raw.overallWinner : "TIE";
+  const deltas: any[] = Array.isArray(raw.pillarDeltas) ? raw.pillarDeltas : [];
+  return {
+    tickerA: String(raw.tickerA ?? "").toUpperCase(),
+    tickerB: String(raw.tickerB ?? "").toUpperCase(),
+    pillarsWonByA: Number(raw.pillarsWonByA ?? 0),
+    pillarsWonByB: Number(raw.pillarsWonByB ?? 0),
+    pillarsTied: Number(raw.pillarsTied ?? 0),
+    overallWinner: winner,
+    pillarDeltas: deltas.map((d) => ({
+      dimension: String(d?.dimension ?? ""),
+      displayName: String(d?.displayName ?? d?.dimension ?? ""),
+      scoreA: d?.scoreA == null ? null : Number(d.scoreA),
+      scoreB: d?.scoreB == null ? null : Number(d.scoreB),
+      delta: d?.delta == null ? null : Number(d.delta),
+      winner:
+        d?.winner === "A" || d?.winner === "B" || d?.winner === "TIE" ? d.winner : null,
+    })),
+    narrative: normalizeCompareNarrative(raw.narrative),
+  };
+}
+
+/**
+ * Fetches both companies in a single request via `GET /api/v2/compare`.
+ *
+ * The backend response shape is:
+ *   { companyA: AnalysisResponse, companyB: AnalysisResponse, summary, generatedAt }
+ *
+ * Older deployments returned `{ a, b }` — we accept both shapes for safety.
  */
 export async function fetchCompareData(
   tickerA: string,
   tickerB: string,
-): Promise<{ a: CompareEnrichedCompany; b: CompareEnrichedCompany }> {
+): Promise<{
+  a: CompareEnrichedCompany;
+  b: CompareEnrichedCompany;
+  summary: CompareSummary | null;
+  narratives: {
+    summary: CompareNarrative | null;
+    value: CompareNarrative | null;
+    future: CompareNarrative | null;
+    past: CompareNarrative | null;
+    health: CompareNarrative | null;
+    dividend: CompareNarrative | null;
+  };
+  generatedAt: string | null;
+}> {
+  const a = tickerA.toUpperCase();
+  const b = tickerB.toUpperCase();
+  const res = await fetch(`${API_BASE_URL}/api/v2/compare?tickerA=${a}&tickerB=${b}`);
+  if (!res.ok) {
+    const message =
+      res.status === 404
+        ? "ticker-not-found"
+        : res.status === 400
+          ? "invalid-compare-params"
+          : `compare-failed-${res.status}`;
+    throw new CompareApiError(message, res.status, a, b);
+  }
+  const json: any = await res.json();
+  const rawA = json.companyA ?? json.a;
+  const rawB = json.companyB ?? json.b;
+  const summary = normalizeCompareSummary(json.summary);
+  return {
+    a: mapAnalysisToEnriched(rawA, tickerA),
+    b: mapAnalysisToEnriched(rawB, tickerB),
+    summary,
+    narratives: {
+      summary: summary?.narrative ?? null,
+      value: normalizeCompareNarrative(json.sectionNarratives?.value),
+      future: normalizeCompareNarrative(json.sectionNarratives?.future),
+      past: normalizeCompareNarrative(json.sectionNarratives?.past),
+      health: normalizeCompareNarrative(json.sectionNarratives?.health),
+      dividend: normalizeCompareNarrative(json.sectionNarratives?.dividend),
+    },
+    generatedAt: typeof json.generatedAt === "string" ? json.generatedAt : null,
+  };
+}
+
+/**
+ * Lazy-load a single comparison section. Each section is independently cached
+ * server-side (TTL 6h), so calling this on tab switch is cheap after the first hit.
+ *
+ * Response shape (for any section):
+ *   { tickerA, tickerB, companyA: AnalysisXxxResponse, companyB: AnalysisXxxResponse, generatedAt }
+ *
+ * The generic `T` is the per-section payload type the caller expects.
+ */
+export type CompareSectionKey = "value" | "future" | "past" | "health" | "dividend";
+
+export async function fetchCompareSection<T = unknown>(
+  section: CompareSectionKey,
+  tickerA: string,
+  tickerB: string,
+): Promise<{
+  tickerA: string;
+  tickerB: string;
+  companyA: T;
+  companyB: T;
+  narrative: CompareNarrative | null;
+  generatedAt: string | null;
+}> {
+  const a = tickerA.toUpperCase();
+  const b = tickerB.toUpperCase();
   const res = await fetch(
-    `${API_BASE_URL}/api/v2/compare?tickerA=${tickerA.toUpperCase()}&tickerB=${tickerB.toUpperCase()}`,
+    `${API_BASE_URL}/api/v2/compare/section/${section}?tickerA=${a}&tickerB=${b}`,
   );
-  if (!res.ok) throw new Error(`Failed to fetch comparison for ${tickerA} vs ${tickerB}`);
+  if (!res.ok) {
+    const message =
+      res.status === 404
+        ? "ticker-not-found"
+        : res.status === 400
+          ? "invalid-compare-params"
+          : `compare-section-failed-${res.status}`;
+    throw new CompareApiError(message, res.status, a, b);
+  }
   const json: any = await res.json();
   return {
-    a: mapAnalysisToEnriched(json.a, tickerA),
-    b: mapAnalysisToEnriched(json.b, tickerB),
+    tickerA: String(json.tickerA ?? a),
+    tickerB: String(json.tickerB ?? b),
+    companyA: json.companyA as T,
+    companyB: json.companyB as T,
+    narrative: normalizeCompareNarrative(json.narrative),
+    generatedAt: typeof json.generatedAt === "string" ? json.generatedAt : null,
   };
+}
+
+/**
+ * Builds a placeholder `CompareEnrichedCompany` populated only with safe defaults.
+ *
+ * Used as the initial scaffold during lazy loading: the hook starts with this
+ * stub for each company, then merges real section data on top as the user
+ * navigates between tabs (or as the full payload arrives).
+ */
+export function buildCompareEnrichedStub(
+  ticker: string,
+  meta?: { name?: string; sector?: string; logo?: string },
+): CompareEnrichedCompany {
+  const stub = mapAnalysisToEnriched({}, ticker);
+  if (meta?.name) stub.name = meta.name;
+  if (meta?.sector) stub.sector = meta.sector;
+  if (meta?.logo) stub.logo = meta.logo;
+  return stub;
+}
+
+/**
+ * Merges a section payload (already mapped via `mapAnalysisToEnriched`) into
+ * an existing enriched company, preserving all unrelated fields.
+ *
+ * The full mapper is called on the section raw because each section endpoint
+ * mirrors the same field names as the full `AnalysisResponse` for its slice
+ * (e.g. the `value` section returns `{ valuation, relativeValuation,
+ * priceScenarios, ratioTrends, dcfSensitivity, competitors, valueReading }`).
+ * Fields outside the section come back as defaults from `withCompareDefaults`,
+ * which we discard.
+ */
+function mergeSectionIntoEnriched(
+  base: CompareEnrichedCompany,
+  section: CompareSectionKey,
+  raw: any,
+  ticker: string,
+): CompareEnrichedCompany {
+  const partial = mapAnalysisToEnriched(raw ?? {}, ticker);
+  // Preserve company metadata if the section payload happens to include it.
+  const meta = {
+    name: raw?.company?.name ?? base.name,
+    sector: raw?.company?.sector ?? base.sector,
+    logo: raw?.company?.logo ?? base.logo,
+  };
+  switch (section) {
+    case "value":
+      return {
+        ...base,
+        ...meta,
+        valuation: partial.valuation,
+        priceScenarios: partial.priceScenarios,
+        ratioTrends: partial.ratioTrends,
+        dcfSensitivity: partial.dcfSensitivity,
+        competitors: partial.competitors,
+        readings: { ...base.readings, value: partial.readings.value },
+        dimensionChecks: { ...base.dimensionChecks, value: partial.dimensionChecks.value },
+      };
+    case "future":
+      return {
+        ...base,
+        ...meta,
+        growthData: partial.growthData,
+        readings: { ...base.readings, future: partial.readings.future },
+        dimensionChecks: { ...base.dimensionChecks, future: partial.dimensionChecks.future },
+      };
+    case "past":
+      return {
+        ...base,
+        ...meta,
+        pastData: partial.pastData,
+        readings: { ...base.readings, past: partial.readings.past },
+        dimensionChecks: { ...base.dimensionChecks, past: partial.dimensionChecks.past },
+      };
+    case "health":
+      return {
+        ...base,
+        ...meta,
+        healthData: partial.healthData,
+        readings: { ...base.readings, health: partial.readings.health },
+        dimensionChecks: { ...base.dimensionChecks, health: partial.dimensionChecks.health },
+      };
+    case "dividend":
+      return {
+        ...base,
+        ...meta,
+        dividendData: partial.dividendData,
+        readings: { ...base.readings, dividend: partial.readings.dividend },
+        dimensionChecks: { ...base.dimensionChecks, dividend: partial.dimensionChecks.dividend },
+      };
+  }
+}
+
+/**
+ * One-shot helper for the lazy-loading flow in `useCompare`: fetches a single
+ * section and returns merged copies of the existing enriched companies.
+ */
+export async function fetchAndMergeCompareSection(
+  section: CompareSectionKey,
+  tickerA: string,
+  tickerB: string,
+  baseA: CompareEnrichedCompany,
+  baseB: CompareEnrichedCompany,
+): Promise<{
+  a: CompareEnrichedCompany;
+  b: CompareEnrichedCompany;
+  narrative: CompareNarrative | null;
+}> {
+  const { companyA, companyB, narrative } = await fetchCompareSection<any>(section, tickerA, tickerB);
+  return {
+    a: mergeSectionIntoEnriched(baseA, section, companyA, tickerA),
+    b: mergeSectionIntoEnriched(baseB, section, companyB, tickerB),
+    narrative,
+  };
+}
+
+/**
+ * Invalidates the server-side cache for a specific compare pair (full + 5 sections).
+ * Useful for an admin/dev "refresh" button.
+ */
+export async function deleteCompareCache(
+  tickerA: string,
+  tickerB: string,
+): Promise<void> {
+  const a = tickerA.toUpperCase();
+  const b = tickerB.toUpperCase();
+  const res = await fetch(
+    `${API_BASE_URL}/api/v2/compare/cache?tickerA=${a}&tickerB=${b}`,
+    { method: "DELETE" },
+  );
+  if (!res.ok) {
+    throw new CompareApiError(
+      `compare-cache-delete-failed-${res.status}`,
+      res.status,
+      a,
+      b,
+    );
+  }
 }
 
 /**

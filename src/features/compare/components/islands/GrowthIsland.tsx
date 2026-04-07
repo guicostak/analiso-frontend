@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { CompareEnrichedCompany } from "../../interfaces";
+import type { CompareEnrichedCompany, CompareNarrative } from "../../interfaces";
 import { CompareReadingCard } from "../shared/CompareReadingCard";
 import { CompareDimensionCheckCard } from "../shared/CompareDimensionCheckCard";
 import { CompareSectionCriteria } from "../shared/CompareSectionCriteria";
+import { CompareNarrativeBlock } from "../shared/CompareNarrativeBlock";
 
 type GrowthSeriesKey = "revenue" | "earnings" | "fcl" | "fco";
 type GrowthSeriesVisibility = Record<GrowthSeriesKey, boolean>;
@@ -15,6 +16,7 @@ interface GrowthIslandProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   formatNumber: (value: number, digits?: number) => string;
+  narrative?: CompareNarrative | null;
 }
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
@@ -928,7 +930,7 @@ function ROEGauge({
 
 /* ── Main Component ───────────────────────────────────────────────────────── */
 
-export function GrowthIsland({ a, b, formatNumber }: GrowthIslandProps) {
+export function GrowthIsland({ a, b, formatNumber, narrative }: GrowthIslandProps) {
   const [growthVisible, setGrowthVisible] = useState<GrowthSeriesVisibility>({
     revenue: true,
     earnings: true,
@@ -947,6 +949,8 @@ export function GrowthIsland({ a, b, formatNumber }: GrowthIslandProps) {
   return (
     <div className="space-y-8">
       <h3 className="text-base font-semibold text-foreground">Crescimento Futuro</h3>
+
+      <CompareNarrativeBlock narrative={narrative ?? null} variant="section" />
 
       <CompareReadingCard
         a={a.readings.future}

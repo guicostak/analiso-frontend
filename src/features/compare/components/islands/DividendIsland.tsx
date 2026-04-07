@@ -1,8 +1,9 @@
 "use client";
 
-import type { CompareEnrichedCompany, CompareDiagnosis } from "../../interfaces";
+import type { CompareEnrichedCompany, CompareDiagnosis, CompareNarrative } from "../../interfaces";
 import { CompareReadingCard } from "../shared/CompareReadingCard";
 import { CompareDimensionCheckCard } from "../shared/CompareDimensionCheckCard";
+import { CompareNarrativeBlock } from "../shared/CompareNarrativeBlock";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -10,6 +11,7 @@ interface DividendIslandProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   formatNumber: (value: number, digits?: number) => string;
+  narrative?: CompareNarrative | null;
 }
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
@@ -964,10 +966,12 @@ function CoverageDiagnosisBlock({
   );
 }
 
-export function DividendIsland({ a, b, formatNumber }: DividendIslandProps) {
+export function DividendIsland({ a, b, formatNumber, narrative }: DividendIslandProps) {
   return (
     <div className="compare-island compare-surface p-6 scroll-mt-[160px] space-y-8">
       <h3 className="text-base font-semibold text-foreground">Proventos</h3>
+
+      <CompareNarrativeBlock narrative={narrative ?? null} variant="section" />
 
       <CompareReadingCard
         a={a.readings.dividend}

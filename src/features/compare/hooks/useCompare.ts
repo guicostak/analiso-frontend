@@ -40,6 +40,9 @@ import {
   parseDate,
   confidenceLabel,
   fetchCompareData,
+  fetchAndMergeCompareSection,
+  buildCompareEnrichedStub,
+  type CompareSectionKey,
 } from "../services";
 
 import type {
@@ -53,10 +56,21 @@ import type {
   CompareMetric,
   ComparePillarDiff,
   CompareScoreboard,
+  CompareSummary,
   CompareTableRow,
   CompareVerdict,
   CompareQualityTone,
+  CompareNarrativeBundle,
 } from "../interfaces";
+
+const EMPTY_NARRATIVES: CompareNarrativeBundle = {
+  summary: null,
+  value: null,
+  future: null,
+  past: null,
+  health: null,
+  dividend: null,
+};
 
 // ─── Tipo de retorno do hook ──────────────────────────────────────────────────
 
@@ -103,6 +117,9 @@ export interface UseCompareReturn {
   // Dados derivados de cálculo
   chartData: Array<{ year: number; a: number | null; b: number | null }>;
   scoreboard: CompareScoreboard | null;
+  summary: CompareSummary | null;
+  narratives: CompareNarrativeBundle;
+  compareError: "ticker-not-found" | "invalid-compare-params" | "compare-failed" | null;
   pillarDiffs: ComparePillarDiff[];
   topPillarDiffs: ComparePillarDiff[];
   otherPillarDiffs: ComparePillarDiff[];
@@ -227,31 +244,128 @@ export function useCompare(): UseCompareReturn {
   // Fetched enriched data from API
   const [enrichedA, setEnrichedA] = useState<CompareEnrichedCompany | undefined>(undefined);
   const [enrichedB, setEnrichedB] = useState<CompareEnrichedCompany | undefined>(undefined);
+  const [summary, setSummary] = useState<CompareSummary | null>(null);
+  const [narratives, setNarratives] = useState<CompareNarrativeBundle>(EMPTY_NARRATIVES);
+  const [compareError, setCompareError] = useState<
+    "ticker-not-found" | "invalid-compare-params" | "compare-failed" | null
+  >(null);
   const [loadingApi, setLoadingApi] = useState(false);
 
-  // Fetch both companies in a single request when both tickers are set
+  // Tracks which slices of the enriched object are already populated with REAL
+  // server data (vs. stub defaults). The literal "full" means the overview
+  // endpoint already hydrated everything (header, snowflake, summary, all 5
+  // sections). Otherwise individual section keys may be present.
+  type LoadedKey = "full" | CompareSectionKey;
+  const [loadedSections, setLoadedSections] = useState<Set<LoadedKey>>(() => new Set());
+
+  // Maps the user-facing categoria slug to the data slice required to render
+  // it. Categories that depend on globals (snowflake, scoreboard, metric tables,
+  // timeline) require the full payload because the section endpoints don't
+  // expose them. Section-only categories can be served by /section/{key}.
+  const SECTION_BY_CATEGORIA: Record<CompareCategorySlug, CompareSectionKey | "full"> = {
+    todas: "full",
+    "visao-geral": "full",
+    metricas: "full",
+    timeline: "full",
+    valuation: "value",
+    crescimento: "future",
+    passado: "past",
+    saude: "health",
+    dividendos: "dividend",
+  };
+
+  // Reset all loaded data when the ticker pair changes — loaded sections from
+  // a previous pair are not valid for the new one.
   useEffect(() => {
-    if (!tickerA || !tickerB) {
-      if (!tickerA) setEnrichedA(undefined);
-      if (!tickerB) setEnrichedB(undefined);
-      return;
-    }
+    setEnrichedA(undefined);
+    setEnrichedB(undefined);
+    setSummary(null);
+    setNarratives(EMPTY_NARRATIVES);
+    setLoadedSections(new Set());
+    setCompareError(null);
+  }, [tickerA, tickerB]);
+
+  // Lazy-load: fetch only the slice required by the current categoria. The
+  // first load on a section-only categoria pulls just `/section/{key}` (~30KB)
+  // instead of the full ~180KB compare payload. Switching tabs incurs another
+  // small section fetch only for slices not yet loaded. Once the user lands on
+  // (or starts on) an overview-style category we upgrade to the full payload,
+  // which marks every slice as loaded so subsequent tab switches are free.
+  useEffect(() => {
+    if (!tickerA || !tickerB) return;
+    const target = SECTION_BY_CATEGORIA[categoria] ?? "full";
+    // Full payload supersedes anything sectional — skip if already fetched.
+    if (loadedSections.has("full")) return;
+    if (target !== "full" && loadedSections.has(target)) return;
+
     let cancelled = false;
     setLoadingApi(true);
-    fetchCompareData(tickerA, tickerB)
-      .then(({ a: dataA, b: dataB }) => {
-        if (cancelled) return;
-        setEnrichedA(dataA);
-        setEnrichedB(dataB);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setEnrichedA(undefined);
-        setEnrichedB(undefined);
-      })
-      .finally(() => { if (!cancelled) setLoadingApi(false); });
+    setCompareError(null);
+
+    const handleError = (err: unknown) => {
+      if (cancelled) return;
+      const msg =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message: unknown }).message)
+          : "";
+      if (msg === "ticker-not-found") setCompareError("ticker-not-found");
+      else if (msg === "invalid-compare-params") setCompareError("invalid-compare-params");
+      else setCompareError("compare-failed");
+      setEnrichedA(undefined);
+      setEnrichedB(undefined);
+      setSummary(null);
+      setNarratives(EMPTY_NARRATIVES);
+    };
+
+    if (target === "full") {
+      fetchCompareData(tickerA, tickerB)
+        .then(({ a: dataA, b: dataB, summary: srvSummary, narratives: srvNarratives }) => {
+          if (cancelled) return;
+          setEnrichedA(dataA);
+          setEnrichedB(dataB);
+          setSummary(srvSummary);
+          setNarratives(srvNarratives);
+          setLoadedSections(
+            new Set<LoadedKey>(["full", "value", "future", "past", "health", "dividend"]),
+          );
+        })
+        .catch(handleError)
+        .finally(() => { if (!cancelled) setLoadingApi(false); });
+    } else {
+      // Bootstrap stubs on first load so the islands have something to render
+      // while only one section is hydrated. Stubs use safe defaults from
+      // `withCompareDefaults`, and only the visible island for `target` will
+      // expose real data — other islands aren't rendered for this categoria.
+      const baseA = enrichedA ?? buildCompareEnrichedStub(tickerA, {
+        name: companyNames[tickerA],
+        logo: companyLogos[tickerA],
+      });
+      const baseB = enrichedB ?? buildCompareEnrichedStub(tickerB, {
+        name: companyNames[tickerB],
+        logo: companyLogos[tickerB],
+      });
+      fetchAndMergeCompareSection(target, tickerA, tickerB, baseA, baseB)
+        .then(({ a: dataA, b: dataB, narrative }) => {
+          if (cancelled) return;
+          setEnrichedA(dataA);
+          setEnrichedB(dataB);
+          setNarratives((prev) => ({ ...prev, [target]: narrative }));
+          setLoadedSections((prev) => {
+            const next = new Set(prev);
+            next.add(target);
+            return next;
+          });
+        })
+        .catch(handleError)
+        .finally(() => { if (!cancelled) setLoadingApi(false); });
+    }
+
     return () => { cancelled = true; };
-  }, [tickerA, tickerB]);
+    // We intentionally include `loadedSections` so the effect re-runs after a
+    // section is added (it'll early-return when nothing new is needed). The
+    // SECTION_BY_CATEGORIA constant is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tickerA, tickerB, categoria, loadedSections]);
 
   // Derive CompareCompany from enriched (for backward compat with scoreboard/verdict)
   const a: CompareCompany | undefined = enrichedA;
@@ -611,6 +725,9 @@ export function useCompare(): UseCompareReturn {
     // Dados derivados de cálculo
     chartData,
     scoreboard,
+    summary,
+    narratives,
+    compareError,
     pillarDiffs,
     topPillarDiffs,
     otherPillarDiffs,

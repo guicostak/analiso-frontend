@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { CompareEnrichedCompany } from "../../interfaces";
+import type { CompareEnrichedCompany, CompareNarrative } from "../../interfaces";
 import { CompareReadingCard } from "../shared/CompareReadingCard";
 import { CompareDimensionCheckCard } from "../shared/CompareDimensionCheckCard";
 import { CompareSectionCriteria } from "../shared/CompareSectionCriteria";
 import { CompareBalanceSheetStructure } from "../shared/CompareBalanceSheetStructure";
+import { CompareNarrativeBlock } from "../shared/CompareNarrativeBlock";
 
 type PastSeriesKey = "revenue" | "earnings" | "fcl" | "fco" | "opex";
 type PastSeriesVisibility = Record<PastSeriesKey, boolean>;
@@ -16,6 +17,7 @@ interface PastIslandProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   formatNumber: (value: number, digits?: number) => string;
+  narrative?: CompareNarrative | null;
 }
 
 type Side = "a" | "b";
@@ -850,7 +852,7 @@ function ReturnGauges({
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════════════ */
 
-export function PastIsland({ a, b, formatNumber }: PastIslandProps) {
+export function PastIsland({ a, b, formatNumber, narrative }: PastIslandProps) {
   const [pastVisible, setPastVisible] = useState<PastSeriesVisibility>({
     revenue: true,
     earnings: true,
@@ -876,6 +878,8 @@ export function PastIsland({ a, b, formatNumber }: PastIslandProps) {
       <h3 className="text-base font-semibold text-foreground">
         Desempenho Passado
       </h3>
+
+      <CompareNarrativeBlock narrative={narrative ?? null} variant="section" />
 
       <CompareReadingCard
         a={a.readings.past}

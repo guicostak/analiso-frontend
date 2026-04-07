@@ -107,6 +107,56 @@ export type CompareScoreboard = {
   avgB: number;
 };
 
+/**
+ * Server-provided comparison summary, returned by `GET /api/v2/compare`.
+ * The backend already orders pillarDeltas by |delta| desc.
+ */
+export type CompareWinnerSide = "A" | "B" | "TIE";
+
+export type ComparePillarDelta = {
+  dimension: string;
+  displayName: string;
+  scoreA: number | null;
+  scoreB: number | null;
+  delta: number | null;
+  winner: CompareWinnerSide | null;
+};
+
+export type CompareNarrativeTone = "positive" | "negative" | "neutral" | "warning";
+
+export type CompareNarrativeBullet = {
+  label: string;
+  text: string;
+  tone: CompareNarrativeTone;
+};
+
+export type CompareNarrative = {
+  headline: string;
+  subtitle: string;
+  paragraphs: string[];
+  bullets: CompareNarrativeBullet[];
+};
+
+export type CompareNarrativeBundle = {
+  summary: CompareNarrative | null;
+  value: CompareNarrative | null;
+  future: CompareNarrative | null;
+  past: CompareNarrative | null;
+  health: CompareNarrative | null;
+  dividend: CompareNarrative | null;
+};
+
+export type CompareSummary = {
+  tickerA: string;
+  tickerB: string;
+  pillarDeltas: ComparePillarDelta[];
+  pillarsWonByA: number;
+  pillarsWonByB: number;
+  pillarsTied: number;
+  overallWinner: CompareWinnerSide;
+  narrative: CompareNarrative | null;
+};
+
 export type CompareVerdict = {
   winner: CompareCompany;
   loser: CompareCompany;

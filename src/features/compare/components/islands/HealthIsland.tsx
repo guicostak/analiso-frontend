@@ -1,11 +1,12 @@
 "use client";
 
 import { Check, X } from "lucide-react";
-import type { CompareEnrichedCompany } from "../../interfaces";
+import type { CompareEnrichedCompany, CompareNarrative } from "../../interfaces";
 import { CompareReadingCard } from "../shared/CompareReadingCard";
 import { CompareDimensionCheckCard } from "../shared/CompareDimensionCheckCard";
 import { CompareSectionCriteria } from "../shared/CompareSectionCriteria";
 import { CompareBalanceSheetStructure } from "../shared/CompareBalanceSheetStructure";
+import { CompareNarrativeBlock } from "../shared/CompareNarrativeBlock";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -13,6 +14,7 @@ interface HealthIslandProps {
   a: CompareEnrichedCompany;
   b: CompareEnrichedCompany;
   formatNumber: (value: number, digits?: number) => string;
+  narrative?: CompareNarrative | null;
 }
 
 type Side = "a" | "b";
@@ -723,10 +725,12 @@ function DebtSummaryKPIs({
 
 /* ── Main Component ───────────────────────────────────────────────────────── */
 
-export function HealthIsland({ a, b, formatNumber }: HealthIslandProps) {
+export function HealthIsland({ a, b, formatNumber, narrative }: HealthIslandProps) {
   return (
     <div className="compare-island compare-surface p-6 scroll-mt-[160px] space-y-8">
       <h3 className="text-base font-semibold text-foreground">Saúde Financeira</h3>
+
+      <CompareNarrativeBlock narrative={narrative ?? null} variant="section" />
 
       <CompareReadingCard
         a={a.readings.health}

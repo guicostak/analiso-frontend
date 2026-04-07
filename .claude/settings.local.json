@@ -255,7 +255,8 @@
       "Bash(find /c/Users/guilh/Desktop/analiso-frontend/src/features/compare -type f -name *.ts -o -name *.tsx)",
       "Bash(curl -s \"http://localhost:8080/api/v2/compare?tickerA=ABEV3&tickerB=BBAS3\")",
       "Bash(wc -l \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\features\\\\analysis\\\\components\"/*.tsx)",
-      "Bash(mvn -q -o compile)"
+      "Bash(mvn -q -o compile)",
+      "Bash(wc -l src/features/compare/components/islands/*.tsx src/features/analysis/components/*.tsx)"
     ]
   }
 }

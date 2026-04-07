@@ -1,7 +1,11 @@
 "use client";
 
 import { CheckCircle2, AlertTriangle, TrendingUp } from "lucide-react";
-import type { CompareVerdict, CompareScoreboard } from "../../interfaces";
+import type {
+  CompareVerdict,
+  CompareScoreboard,
+  CompareSummary,
+} from "../../interfaces";
 import { PILLAR_LABEL } from "../../services";
 
 /* ── Dumbbell Visual ─────────────────────────────────────────────────────── */
@@ -64,12 +68,14 @@ function PillarDumbbell({
 interface VerdictIslandProps {
   verdict: CompareVerdict;
   scoreboard: CompareScoreboard;
+  summary?: CompareSummary | null;
   formatNumber: (value: number, digits?: number) => string;
 }
 
 export function VerdictIsland({
   verdict,
   scoreboard,
+  summary,
   formatNumber,
 }: VerdictIslandProps) {
   const { winner, loser, biggestGap, keyRisk, reasons, consequence, confidence } =
@@ -127,6 +133,24 @@ export function VerdictIsland({
             <span className="text-[11px] text-muted-foreground">
               — {confExplanation}
             </span>
+            {summary ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium text-muted-foreground">
+                Pilares —
+                <span className="font-semibold text-brand-text">
+                  {summary.tickerA} {summary.pillarsWonByA}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span className="font-semibold" style={{ color: "var(--compare-b-text, var(--compare-b))" }}>
+                  {summary.tickerB} {summary.pillarsWonByB}
+                </span>
+                {summary.pillarsTied > 0 ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>Empates {summary.pillarsTied}</span>
+                  </>
+                ) : null}
+              </span>
+            ) : null}
           </div>
         </div>
 

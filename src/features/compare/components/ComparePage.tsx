@@ -19,6 +19,7 @@ import { useCompare } from "../hooks/useCompare";
 import { PILLARS } from "../services";
 import type { CompareCategorySlug } from "../interfaces";
 import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
+import { CompareNarrativeBlock } from "./shared/CompareNarrativeBlock";
 import {
   CompareHeader,
   SnowflakeDual,
@@ -96,6 +97,9 @@ export function ComparePage() {
     enrichedB,
     canCompare,
     scoreboard,
+    summary,
+    narratives,
+    compareError,
     topPillarDiffs,
     otherPillarDiffs,
     verdict,
@@ -308,6 +312,23 @@ export function ComparePage() {
                   Escolha duas empresas nos campos acima e compare lado a lado indicadores financeiros, valuation, rentabilidade e risco.
                 </p>
               </section>
+            ) : compareError ? (
+              <section className="compare-island compare-surface p-10 text-center">
+                <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+                  {compareError === "ticker-not-found"
+                    ? "Não encontramos uma das empresas"
+                    : compareError === "invalid-compare-params"
+                      ? "Selecione duas empresas diferentes"
+                      : "Não foi possível carregar a comparação"}
+                </h2>
+                <p className="mx-auto mt-3 max-w-[560px] text-[14px] leading-6 text-muted-foreground">
+                  {compareError === "ticker-not-found"
+                    ? `Verifique se os tickers ${selectedTickers.join(" e ")} estão corretos e tente novamente.`
+                    : compareError === "invalid-compare-params"
+                      ? "Os tickers A e B precisam ser distintos para comparação."
+                      : "Tente recarregar a página em alguns instantes."}
+                </p>
+              </section>
             ) : loadingApi || refreshing || !enrichedA || !enrichedB ? (
               <LoadingBlocks />
             ) : enrichedA && enrichedB && a && b ? (
@@ -315,6 +336,7 @@ export function ComparePage() {
                 {/* ── Visão geral: Snowflake + Veredito + Fatores ── */}
                 {showSection(categoria, "visao-geral") && (
                   <>
+                    <CompareNarrativeBlock narrative={narratives.summary} variant="hero" />
                     {scoreboard && (
                       <section id="snowflake" className="compare-island compare-stagger-1 scroll-mt-[160px]">
                         <SnowflakeDual a={enrichedA} b={enrichedB} scoreboard={scoreboard} />
@@ -322,7 +344,12 @@ export function ComparePage() {
                     )}
                     {verdict && scoreboard && (
                       <section id="veredito" ref={verdictRef} className="compare-island compare-stagger-2 scroll-mt-[160px]">
-                        <VerdictIsland verdict={verdict} scoreboard={scoreboard} formatNumber={formatNumber} />
+                        <VerdictIsland
+                          verdict={verdict}
+                          scoreboard={scoreboard}
+                          summary={summary}
+                          formatNumber={formatNumber}
+                        />
                       </section>
                     )}
                     <section id="fatores" className="compare-island compare-stagger-3 scroll-mt-[160px]">
@@ -344,35 +371,35 @@ export function ComparePage() {
                 {/* ── Valuation ── */}
                 {showSection(categoria, "valuation") && (
                   <section id="valuation" className="compare-island compare-stagger-4 compare-surface p-6 scroll-mt-[160px]">
-                    <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                    <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.value} />
                   </section>
                 )}
 
                 {/* ── Crescimento ── */}
                 {showSection(categoria, "crescimento") && (
                   <section id="crescimento" className="compare-island compare-stagger-5 compare-surface p-6 scroll-mt-[160px]">
-                    <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                    <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.future} />
                   </section>
                 )}
 
                 {/* ── Passado ── */}
                 {showSection(categoria, "passado") && (
                   <section id="passado" className="compare-island compare-stagger-6 compare-surface p-6 scroll-mt-[160px]">
-                    <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                    <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.past} />
                   </section>
                 )}
 
                 {/* ── Saúde ── */}
                 {showSection(categoria, "saude") && (
                   <section id="saude" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                    <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                    <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.health} />
                   </section>
                 )}
 
                 {/* ── Dividendos ── */}
                 {showSection(categoria, "dividendos") && (
                   <section id="dividendos" className="compare-island compare-surface p-6 scroll-mt-[160px]">
-                    <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} />
+                    <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.dividend} />
                   </section>
                 )}
 
