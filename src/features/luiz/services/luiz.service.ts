@@ -150,15 +150,11 @@ const MOCK_PATTERNS: ResponsePattern[] = [
       delay: 500,
     },
   },
-  {
-    regex: /\b(comparar?|versus|vs)\b.*\b([A-Z]{4}\d)\b.*\b([A-Z]{4}\d)\b/i,
-    response: {
-      content: "Abrindo a comparação entre as empresas!",
-      suggestions: ["Adicionar outra empresa", "Ver análise individual", "Voltar ao dashboard"],
-      command: { type: "navigate", href: "/comparar" },
-      delay: 600,
-    },
-  },
+  // Nota: a detecção de comparação por tickers é feita ANTES dos patterns
+  // (em detectCompareIntent), não como regex aqui. Qualquer mensagem que
+  // contenha 2+ tickers B3 distintos é interpretada como comparação,
+  // independente do verbo usado ("compara", "vs", "ou", "x", "contra",
+  // "diferença entre", ou apenas "VALE3 ITUB4").
   {
     regex: /\b(ver|abrir|analisar|mostra|quero ver)\b.*\b([A-Z]{4}\d{1,2})\b/i,
     response: {
@@ -299,7 +295,67 @@ const MOCK_FALLBACK: LuizServiceResponse = {
   delay: 700,
 };
 
+/**
+ * Extrai todos os tickers B3 únicos (formato XXXX9 ou XXXX99) de uma string.
+ * - Case-insensitive na entrada, normaliza para uppercase
+ * - Preserva a ordem de aparição
+ * - Limita ao máximo passado em maxCount (default 4)
+ */
+function extractB3Tickers(message: string, maxCount = 4): string[] {
+  const matches = message.match(/\b[A-Za-z]{4}\d{1,2}\b/g) ?? [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of matches) {
+    const t = raw.toUpperCase();
+    if (seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= maxCount) break;
+  }
+  return out;
+}
+
+/**
+ * Detecta se a mensagem expressa intenção de COMPARAÇÃO.
+ *
+ * Regra principal: se a mensagem contém 2+ tickers B3 distintos, considera
+ * comparação. Isso cobre todas as variações naturais ("compara X com Y",
+ * "X vs Y", "X ou Y?", "diferença entre X e Y", "X x Y", "X contra Y",
+ * "qual é melhor, X ou Y?", "põe X e Y lado a lado", ou apenas "X Y").
+ *
+ * Exceção: se a mensagem usa um verbo claramente individual ("ver", "abrir",
+ * "analisar") seguido de UM ticker, não é comparação — isso é capturado pelo
+ * pattern individual de análise mais adiante.
+ */
+function detectCompareIntent(message: string): LuizServiceResponse | null {
+  const tickers = extractB3Tickers(message, 4);
+  if (tickers.length < 2) return null;
+
+  // Edge case: "ver VALE3 e PETR4 separadamente" — se há "separad" na frase,
+  // não é comparação.
+  if (/\bsepara(d[oa]?|damente)\b/i.test(message)) return null;
+
+  const [a, b] = tickers;
+  return {
+    content: `Vou montar a comparação entre **${a}** e **${b}** para você...`,
+    suggestions: [
+      "Adicionar outra empresa",
+      "Ver análise individual",
+      "Voltar ao dashboard",
+    ],
+    command: {
+      type: "navigate",
+      href: `/comparar?tickers=${a},${b}&build=1`,
+    },
+    delay: 600,
+  };
+}
+
 function getMockResponse(message: string): LuizServiceResponse {
+  // 1) Short-circuit: comparação por presença de 2+ tickers (qualquer verbo)
+  const compare = detectCompareIntent(message);
+  if (compare) return compare;
+
   const normalized = message.toLowerCase().trim();
   const match = MOCK_PATTERNS.find((p) => p.regex.test(normalized));
   if (!match) return MOCK_FALLBACK;

@@ -145,7 +145,9 @@ function handleCompareCompanies(args: Record<string, unknown>): LuizServiceRespo
     ],
     command: {
       type: "navigate",
-      href: tickerParams ? `/comparar?tickers=${tickerParams}` : "/comparar",
+      // build=1 ativa o "Modo Lego": ComparePage monta as ilhas
+      // progressivamente com animação spring quando a navegação vem do Luiz.
+      href: tickerParams ? `/comparar?tickers=${tickerParams}&build=1` : "/comparar",
     },
   };
 }

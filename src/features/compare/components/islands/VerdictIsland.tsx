@@ -1,12 +1,12 @@
 "use client";
 
-import { CheckCircle2, AlertTriangle, TrendingUp } from "lucide-react";
+import { CheckCircle2, AlertTriangle, TrendingUp, Bookmark, Repeat, ArrowRight } from "lucide-react";
 import type {
   CompareVerdict,
   CompareScoreboard,
   CompareSummary,
 } from "../../interfaces";
-import { PILLAR_LABEL } from "../../services";
+import { PILLAR_LABEL, trackCompare } from "../../services";
 
 /* ── Dumbbell Visual ─────────────────────────────────────────────────────── */
 
@@ -70,6 +70,10 @@ interface VerdictIslandProps {
   scoreboard: CompareScoreboard;
   summary?: CompareSummary | null;
   formatNumber: (value: number, digits?: number) => string;
+  /** Próximas ações (Prompt Fogg). Quando ausentes, os chips não renderizam. */
+  onSeeFactors?: () => void;
+  onSave?: () => void;
+  onSwapAndPick?: (winnerTicker: string) => void;
 }
 
 export function VerdictIsland({
@@ -77,6 +81,9 @@ export function VerdictIsland({
   scoreboard,
   summary,
   formatNumber,
+  onSeeFactors,
+  onSave,
+  onSwapAndPick,
 }: VerdictIslandProps) {
   const { winner, loser, biggestGap, keyRisk, reasons, consequence, confidence } =
     verdict;
@@ -217,6 +224,51 @@ export function VerdictIsland({
         <p className="text-sm leading-relaxed text-muted-foreground">
           {consequence}
         </p>
+
+        {/* ── Próximas ações (Prompt do Modelo Fogg) ──
+            Sem essas, o usuário lê o veredito e fica órfão de próxima ação.
+            Cada chip é um caminho natural de continuação da leitura — a Analiso
+            NÃO recomenda compra/venda, só guia a próxima leitura. */}
+        {(onSeeFactors || onSave || onSwapAndPick) && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {onSeeFactors && (
+              <button
+                onClick={() => {
+                  trackCompare("compare_verdict_action", { action: "see-factors" });
+                  onSeeFactors();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-brand bg-brand/10 px-3.5 py-1.5 text-[12px] font-semibold text-brand-text transition hover:bg-brand/15"
+              >
+                Por que {winner.ticker} venceu?
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {onSave && (
+              <button
+                onClick={() => {
+                  trackCompare("compare_verdict_action", { action: "save" });
+                  onSave();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+              >
+                <Bookmark className="h-3.5 w-3.5" />
+                Salvar comparação
+              </button>
+            )}
+            {onSwapAndPick && (
+              <button
+                onClick={() => {
+                  trackCompare("compare_verdict_action", { action: "swap" });
+                  onSwapAndPick(winner.ticker);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+              >
+                <Repeat className="h-3.5 w-3.5" />
+                Comparar {winner.ticker} com outra
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -42,8 +42,56 @@ import {
   fetchCompareData,
   fetchAndMergeCompareSection,
   buildCompareEnrichedStub,
+  trackCompare,
+  COMPARE_HISTORY_STORAGE_KEY,
+  compareBuiltPairKey,
   type CompareSectionKey,
 } from "../services";
+
+// ─── Histórico persistente ────────────────────────────────────────────────────
+// Estrutura do item salvo em localStorage. Inclui nomes e logos para que o
+// histórico possa ser renderizado mesmo offline ou antes de a API responder.
+export interface ComparisonHistoryItem {
+  tickers: string[];
+  label: string;
+  savedAt: string;
+  companyNames?: Record<string, string>;
+  companyLogos?: Record<string, string>;
+}
+
+const HISTORY_LIMIT = 20;
+
+function loadComparisonHistory(): ComparisonHistoryItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(COMPARE_HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    // Validação defensiva — descarta entradas malformadas
+    return parsed.filter(
+      (item): item is ComparisonHistoryItem =>
+        typeof item === "object" &&
+        item !== null &&
+        Array.isArray((item as ComparisonHistoryItem).tickers) &&
+        typeof (item as ComparisonHistoryItem).label === "string",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveComparisonHistory(items: ComparisonHistoryItem[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      COMPARE_HISTORY_STORAGE_KEY,
+      JSON.stringify(items.slice(0, HISTORY_LIMIT)),
+    );
+  } catch {
+    // Quota cheia ou modo privado — falha silenciosa, histórico vira só in-memory.
+  }
+}
 
 import type {
   ComparePillar,
@@ -86,6 +134,27 @@ export interface UseCompareReturn {
 
   // Estado do painel principal
   categoria: CompareCategorySlug;
+  /**
+   * "Modo Lego": ativado quando (a) URL traz ?build=1, ou (b) o usuário entra
+   * num par inédito nesta sessão de browser. Reativo: muda quando o par muda.
+   */
+  buildModeRequested: boolean;
+  /** Remove silenciosamente o ?build=1 da URL após o término da animação. */
+  clearBuildFlag: () => void;
+  /**
+   * Marca o par atual como "já construído" nesta sessão (sessionStorage),
+   * desliga o flag de build mode e bloqueia novos disparos de animação no
+   * resto da sessão. Chamado pelo ComparePage no `onComplete` do build.
+   */
+  markBuildComplete: () => void;
+  /**
+   * Seleciona um par sugerido pelo empty state. Equivalente a setSelectedTickers
+   * mas com side-effects de telemetria + reset de companyNames/logos.
+   */
+  selectSuggestion: (
+    tickers: readonly string[],
+    suggestionLabel?: string,
+  ) => void;
   activePillar: ComparePillar;
   range: CompareRangeKey;
   eventsOpen: boolean;
@@ -100,7 +169,7 @@ export interface UseCompareReturn {
   setCustomFrom: (v: string) => void;
   customTo: string;
   setCustomTo: (v: string) => void;
-  comparisonHistory: Array<{ tickers: string[]; label: string; savedAt: string }>;
+  comparisonHistory: ComparisonHistoryItem[];
   historyOpen: boolean;
   setHistoryOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
 
@@ -199,6 +268,35 @@ export function useCompare(): UseCompareReturn {
     if (param && CATEGORIES.some((c) => c.slug === param)) return param as CompareCategorySlug;
     return "todas";
   });
+
+  // — "Modo Lego": ativado quando (a) o Luiz envia o usuário com ?build=1, ou
+  // (b) o usuário acessa um par inédito nesta sessão de browser.
+  //
+  // Por que reativo: o empty state com sugestões muda os tickers SEM remontar
+  // a página, então o flag precisa virar `true` em resposta à mudança de par.
+  // Por que limitamos a 1 animação por sessão (`animatedThisSessionRef`):
+  // depois que o usuário viu o "Modo Lego" uma vez, qualquer swap subsequente
+  // (verdict chip "comparar com outra empresa", troca via header) não dispara
+  // a animação de novo — seria repetitivo e atrasaria a leitura.
+  const animatedThisSessionRef = useRef(false);
+  const [buildModeRequested, setBuildModeRequested] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    if (searchParams.get("build") === "1") return true;
+    // Verifica se já vimos esse par nessa sessão (entrada direta via URL)
+    const initialPair = (searchParams.get("tickers") ?? "")
+      .split(",")
+      .map((t) => t.trim().toUpperCase())
+      .filter(Boolean)
+      .slice(0, 2);
+    if (initialPair.length < 2) return false;
+    const key = compareBuiltPairKey(initialPair);
+    if (!key) return false;
+    try {
+      return !window.sessionStorage.getItem(key);
+    } catch {
+      return true;
+    }
+  });
   const [activePillar, setActivePillar] = useState<ComparePillar>("Divida");
   const [range, setRange] = useState<CompareRangeKey>("1m");
   const [eventsOpen, setEventsOpen] = useState(false);
@@ -210,12 +308,41 @@ export function useCompare(): UseCompareReturn {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
-  const [comparisonHistory, setComparisonHistory] = useState<Array<{
-    tickers: string[];
-    label: string;
-    savedAt: string;
-  }>>([]);
+  const [comparisonHistory, setComparisonHistory] = useState<ComparisonHistoryItem[]>(
+    () => loadComparisonHistory(),
+  );
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  // — Reatividade do "Modo Lego" para pares trocados via empty state/swap —
+  // Sempre que `selectedTickers` muda para um par válido, verificamos se essa
+  // dupla já foi animada nesta sessão. Se nunca, ligamos o flag — mas só se
+  // ainda não rodamos a animação no mount atual (evita re-disparo após swap).
+  useEffect(() => {
+    if (animatedThisSessionRef.current) return;
+    if (buildModeRequested) return;
+    if (selectedTickers.length < 2) return;
+    if (typeof window === "undefined") return;
+    const key = compareBuiltPairKey(selectedTickers);
+    if (!key) return;
+    try {
+      const seen = window.sessionStorage.getItem(key);
+      if (!seen) {
+        setBuildModeRequested(true);
+      }
+    } catch {
+      // sessionStorage indisponível — fail-safe: liga build mode mesmo assim
+      setBuildModeRequested(true);
+    }
+  }, [selectedTickers, buildModeRequested]);
+
+  // Telemetria: dispara um evento quando o build mode liga
+  useEffect(() => {
+    if (!buildModeRequested) return;
+    if (selectedTickers.length < 2) return;
+    trackCompare("compare_build_mode_started", {
+      tickers: selectedTickers,
+    });
+  }, [buildModeRequested, selectedTickers]);
 
   // — Sincroniza tickers + categoria → URL —
   useEffect(() => {
@@ -588,9 +715,39 @@ export function useCompare(): UseCompareReturn {
 
   // — Callbacks —
 
+  // Mapeia categoria → ID da ilha-âncora correspondente. "todas" e "visao-geral"
+  // voltam ao topo (faz sentido para o usuário). As demais rolam direto até a
+  // seção pedida em vez de jogar a página pro topo (que era o comportamento
+  // antigo, contra-intuitivo: clicar em "Valuation" deslocava o usuário para
+  // longe da Valuation).
+  const CATEGORIA_ANCHOR: Record<CompareCategorySlug, string | null> = {
+    todas: null,
+    "visao-geral": null,
+    valuation: "valuation",
+    crescimento: "growth",
+    passado: "past",
+    saude: "health",
+    dividendos: "dividend",
+    metricas: "metrics",
+    timeline: "timeline",
+  };
+
   const setCategoria = useCallback((slug: CompareCategorySlug) => {
     setCategoriaState(slug);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window === "undefined") return;
+    const anchorId = CATEGORIA_ANCHOR[slug];
+    if (!anchorId) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    // Pequeno defer para esperar o React commitar mudanças condicionais antes
+    // de medir o offset do anchor (ilhas podem aparecer/desaparecer).
+    window.setTimeout(() => {
+      const el = document.getElementById(anchorId);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 160;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }, 60);
   }, []);
 
   const addTicker = useCallback(
@@ -669,18 +826,94 @@ export function useCompare(): UseCompareReturn {
   const saveComparison = useCallback(() => {
     if (!canCompare) return;
     const label = selectedTickers.join(" vs ");
-    const savedAt = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-    setComparisonHistory((prev) => [
-      { tickers: [...selectedTickers], label, savedAt },
-      ...prev.slice(0, 9),
-    ]);
-    setToast("Comparação salva no histórico!");
-  }, [canCompare, selectedTickers]);
+    const savedAt = new Date().toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    // Snapshot dos nomes/logos vigentes para que o histórico renderize sem
+    // depender da API quando o usuário voltar.
+    const namesSnapshot: Record<string, string> = {};
+    const logosSnapshot: Record<string, string> = {};
+    selectedTickers.forEach((t) => {
+      if (companyNames[t]) namesSnapshot[t] = companyNames[t];
+      if (companyLogos[t]) logosSnapshot[t] = companyLogos[t];
+    });
+    const newItem: ComparisonHistoryItem = {
+      tickers: [...selectedTickers],
+      label,
+      savedAt,
+      companyNames: namesSnapshot,
+      companyLogos: logosSnapshot,
+    };
+    setComparisonHistory((prev) => {
+      // Deduplica por par (mesmos tickers em qualquer ordem) — empurra o
+      // existente pro topo em vez de criar entrada duplicada.
+      const dedupKey = compareBuiltPairKey(selectedTickers);
+      const filtered = prev.filter(
+        (item) => compareBuiltPairKey(item.tickers) !== dedupKey,
+      );
+      const next = [newItem, ...filtered].slice(0, HISTORY_LIMIT);
+      saveComparisonHistory(next);
+      return next;
+    });
+    trackCompare("compare_save_clicked", { tickers: selectedTickers });
+    setToast(
+      `✨ Salva! Você tem ${Math.min(comparisonHistory.length + 1, HISTORY_LIMIT)} comparações no histórico`,
+    );
+  }, [canCompare, selectedTickers, companyNames, companyLogos, comparisonHistory.length]);
+
+  // Marca o par atual como "construído" nesta sessão. Chamado pelo ComparePage
+  // no `onComplete` do build mode. Bloqueia novas animações para o resto da
+  // sessão (animatedThisSessionRef) e grava o par no sessionStorage para que
+  // reloads não re-disparem a sequência.
+  const markBuildComplete = useCallback(() => {
+    animatedThisSessionRef.current = true;
+    setBuildModeRequested(false);
+    if (typeof window === "undefined") return;
+    const key = compareBuiltPairKey(selectedTickers);
+    if (!key) return;
+    try {
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      // Silencioso — modo privado / quota cheia
+    }
+    trackCompare("compare_build_mode_completed", { tickers: selectedTickers });
+  }, [selectedTickers]);
+
+  // Seleciona um par sugerido pelo empty state. Wraps `setSelectedTickers`
+  // adicionando telemetria e (no futuro) hidratação de nomes/logos.
+  const selectSuggestion = useCallback(
+    (tickers: readonly string[], suggestionLabel?: string) => {
+      const next = tickers.slice(0, 2).map((t) => t.toUpperCase());
+      trackCompare("compare_suggestion_clicked", {
+        tickers: next,
+        label: suggestionLabel ?? null,
+      });
+      setSelectedTickers(next);
+    },
+    [],
+  );
 
   const createAlert = useCallback(() => {
     setToast(`Alerta criado para ${PILLAR_LABEL[activePillar]}.`);
     setActionsOpen(false);
   }, [activePillar]);
+
+  // — Remove o flag ?build=1 da URL silenciosamente após o término da animação,
+  // para que reload/share não re-execute a montagem em Lego.
+  const clearBuildFlag = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("build")) return;
+    params.delete("build");
+    const qs = params.toString();
+    const newUrl = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    router.replace(newUrl, { scroll: false });
+  }, [router]);
 
   return {
     // Refs
@@ -694,6 +927,10 @@ export function useCompare(): UseCompareReturn {
 
     // Estado do painel
     categoria,
+    buildModeRequested,
+    clearBuildFlag,
+    markBuildComplete,
+    selectSuggestion,
     activePillar,
     range,
     eventsOpen,

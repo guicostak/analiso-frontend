@@ -1162,6 +1162,13 @@ html {
 .compare-stagger-5 { animation-delay: 400ms; }
 .compare-stagger-6 { animation-delay: 480ms; }
 
+/* ── "Modo Lego": desativa a animação CSS legada quando o Luiz está
+   montando a tela. A entrada de cada ilha é controlada pelo motion/react
+   (spring overshoot) orquestrado por useBuildMode. */
+.compare-build-mode .compare-island {
+  animation: none !important;
+}
+
 .compare-surface {
   border-radius: 28px;
   border: 1px solid var(--border);

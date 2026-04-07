@@ -11,6 +11,9 @@
  */
 
 import { API_BASE_URL } from "@/src/lib/api-base";
+
+export { trackCompare } from "./telemetry";
+export type { CompareTelemetryEvent } from "./telemetry";
 import type {
   ComparePillar,
   CompareTrend,
@@ -82,6 +85,50 @@ export const CATEGORIES: CompareCategoryDef[] = [
   { slug: "metricas",    label: "Métricas" },
   { slug: "timeline",    label: "Timeline" },
 ];
+
+// ─── Sugestões de comparação para o empty state ──────────────────────────────
+// Pares pré-definidos exibidos quando o usuário entra em /comparar sem
+// nenhum ticker selecionado. Reduzem TTV (Time to Value) ativando o
+// Default Effect e cortando a paralisia do Paradox of Choice.
+export type CompareSuggestion = {
+  tickers: [string, string];
+  label: string;
+  description: string;
+};
+
+export const COMPARE_SUGGESTIONS: readonly CompareSuggestion[] = [
+  {
+    tickers: ["PETR4", "VALE3"],
+    label: "As gigantes de commodities",
+    description: "Petróleo vs minério — qual dá mais retorno hoje?",
+  },
+  {
+    tickers: ["ITUB4", "BBDC4"],
+    label: "A briga dos bancões",
+    description: "Itaú e Bradesco lado a lado por todos os pilares.",
+  },
+  {
+    tickers: ["MGLU3", "LREN3"],
+    label: "O duelo do varejo",
+    description: "E-commerce vs varejo físico — quem está vencendo?",
+  },
+] as const;
+
+// ─── Chaves de armazenamento (browser) ───────────────────────────────────────
+// Convenção: prefixo `analiso:` para evitar colisão com outros apps no mesmo
+// domínio. Sufixos descritivos para facilitar limpeza/migração futura.
+export const COMPARE_HISTORY_STORAGE_KEY = "analiso:compare-history";
+export const COMPARE_BUILT_PAIR_PREFIX = "analiso:compare-built:";
+
+/**
+ * Constrói uma chave estável para identificar um par de tickers,
+ * independente da ordem em que foram selecionados (PETR4-VALE3 = VALE3-PETR4).
+ */
+export function compareBuiltPairKey(tickers: readonly string[]): string | null {
+  if (tickers.length < 2) return null;
+  const sorted = [...tickers].slice(0, 2).map((t) => t.toUpperCase()).sort();
+  return `${COMPARE_BUILT_PAIR_PREFIX}${sorted.join("-")}`;
+}
 
 export const pillarCopy: Record<
   ComparePillar,

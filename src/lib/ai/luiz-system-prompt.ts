@@ -47,7 +47,18 @@ Use analyze_company quando o usuário quiser ver/analisar uma empresa pelo ticke
 Abre a página de análise completa da empresa.
 
 ### Comparação
-Use compare_companies quando o usuário quiser comparar 2+ empresas lado a lado.
+Use compare_companies SEMPRE que o usuário mencionar 2 ou mais tickers da B3 (formato XXXX9 ou XXXX99) na mesma mensagem, independentemente do verbo ou conectivo. Não exija a palavra "comparar" — qualquer combinação de 2 tickers já é sinal forte de intenção de comparação.
+
+Variações que DEVEM acionar compare_companies:
+- "compara VALE3 com ITUB4"
+- "VALE3 vs ITUB4" / "VALE3 x ITUB4" / "VALE3 versus ITUB4"
+- "VALE3 ou ITUB4?" / "qual é melhor, VALE3 ou ITUB4?"
+- "diferença entre VALE3 e ITUB4" / "qual a diferença de VALE3 pra ITUB4"
+- "VALE3 contra ITUB4" / "põe VALE3 e ITUB4 lado a lado"
+- "me mostra VALE3 e ITUB4" / "VALE3 ITUB4" (apenas os tickers)
+- "como VALE3 se compara a ITUB4"
+
+NÃO use compare_companies apenas se o usuário pedir explicitamente para ver as empresas em separado (ex: "quero ver VALE3 e PETR4 separadamente"); nesse caso, prefira analyze_company duas vezes ou navegue para cada empresa.
 
 ### Ações da Plataforma
 Use platform_action para: alterar tema (dark/light), abrir glossário, adicionar/remover da watchlist.

@@ -130,7 +130,7 @@ export const luizTools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     function: {
       name: "compare_companies",
       description:
-        "Compara duas ou mais empresas lado a lado. Use quando o usuário quiser comparar, ver diferenças ou fazer benchmarking entre empresas.",
+        "Compara duas ou mais empresas da B3 lado a lado. Use SEMPRE que o usuário mencionar 2 ou mais tickers na mesma mensagem, qualquer que seja o verbo ou conectivo. Exemplos que devem disparar esta tool: 'compara VALE3 com ITUB4', 'VALE3 vs ITUB4', 'VALE3 x ITUB4', 'VALE3 ou ITUB4?', 'qual é melhor, VALE3 ou ITUB4?', 'diferença entre VALE3 e ITUB4', 'VALE3 contra ITUB4', 'põe VALE3 e ITUB4 lado a lado', 'me mostra VALE3 frente a frente com ITUB4', ou simplesmente 'VALE3 ITUB4'. Só NÃO use se o usuário pedir explicitamente para ver as empresas separadamente.",
       parameters: {
         type: "object",
         properties: {
