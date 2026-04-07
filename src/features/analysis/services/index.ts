@@ -1,6 +1,9 @@
 import type { AnalysisData, PriceScenario, SensitivityDriver, TimelineEvent } from '../interfaces';
 import { apiFetch } from '@/src/lib/api';
 
+export { trackAnalysis } from './telemetry';
+export type { AnalysisTelemetryEvent } from './telemetry';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = Record<string, any>;
 

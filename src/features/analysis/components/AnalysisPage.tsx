@@ -3,8 +3,8 @@
 import React, { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { AlertTriangle, Share2, GitCompareArrows, Bell, Bookmark } from 'lucide-react';
-import { fetchAnalysisCoreData } from '../services';
+import { AlertTriangle } from 'lucide-react';
+import { fetchAnalysisCoreData, trackAnalysis } from '../services';
 import type { SectionName } from '../services';
 import { TABS, DIMENSION_COLORS } from '../constants/colors';
 import { useAnalysis } from '../hooks/useAnalysis';
@@ -15,6 +15,7 @@ import { AppTopBar } from '@/src/components/layout/AppTopBar';
 import { MainContent } from '@/src/components/layout/MainContent';
 import { OverviewTab } from './OverviewTab';
 import { ScoreChecks, ScoreIndicator, getScoreColor } from './ScoreDots';
+import { AnalysisActionButtons } from './AnalysisActionButtons';
 
 // Lazy-load heavy tabs — only OverviewTab is eagerly loaded (first visible section)
 const ValueTab = dynamic(() => import('./ValueTab').then(m => ({ default: m.ValueTab })), { ssr: false });
@@ -85,6 +86,12 @@ export function AnalysisPage() {
 
   // ── Active section tracking + scroll navigation ───────────────────────
   const { activeSection, companyCardPassed, companyCardRef, navAlignRef, sectionRefs, scrollToSection } = useAnalysisNav(!!data);
+
+  // ── Telemetria: tab selecionada muda quando o user scrolla/clica ──────
+  useEffect(() => {
+    if (!data) return;
+    trackAnalysis('analysis_tab_selected', { ticker, tab: activeSection });
+  }, [activeSection, data, ticker]);
 
   // ── Trigger section fetches when sections come into view ──────────────
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -202,23 +209,8 @@ export function AnalysisPage() {
                 <div className="text-[11px] text-muted-foreground font-mono">{data.company.ticker}</div>
               </div>
             </div>
-            {/* Action buttons */}
-            <div className="flex items-center gap-0.5">
-              {[
-                { icon: Bookmark, title: 'Watchlist' },
-                { icon: Share2, title: 'Compartilhar' },
-                { icon: GitCompareArrows, title: 'Comparar' },
-                { icon: Bell, title: 'Alertas' },
-              ].map(({ icon: Icon, title }) => (
-                <button
-                  key={title}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  title={title}
-                >
-                  <Icon className="w-4 h-4" />
-                </button>
-              ))}
-            </div>
+            {/* Action buttons — toggle watchlist, share link, ir p/ compare, opt-in alerts */}
+            <AnalysisActionButtons ticker={ticker} variant="compact" />
           </div>
           )}
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { OverviewTabState } from '../hooks/useAnalysisPageState';
-import { ArrowLeft, Calendar, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, MoreHorizontal, Bookmark, Share2, GitCompareArrows, Bell } from 'lucide-react';
+import { ArrowLeft, Calendar, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, MoreHorizontal } from 'lucide-react';
 import {
   AreaChart as TremorArea,
   BarChart as TremorBar,
@@ -18,6 +18,8 @@ import type {
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo, formatDate } from '../utils/formatters';
 import { SectionCard, SWSDonut } from './AnalysisShared';
+import { AnalysisActionButtons } from './AnalysisActionButtons';
+import { AnalysisVerdictIsland } from './AnalysisVerdictIsland';
 import { MarketCycleSection } from './MarketCycleSection';
 import { ScoreChecks } from './ScoreDots';
 import { SnowflakeChart } from '@/src/components/shared/SnowflakeChart';
@@ -2613,29 +2615,17 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef, st
           </div>
         )}
 
-        {/* Actions */}
+        {/* Actions — agora funcionais: watchlist, share link, ir p/ compare, opt-in alerts */}
         <div className="flex items-center justify-between px-6 md:px-8 py-4 mt-2 border-t border-border">
-          <div className="flex items-center gap-1">
-            {[
-              { icon: Bookmark, title: 'Watchlist' },
-              { icon: Share2, title: 'Compartilhar' },
-              { icon: GitCompareArrows, title: 'Comparar' },
-              { icon: Bell, title: 'Alertas' },
-            ].map(({ icon: Icon, title }) => (
-              <button
-                key={title}
-                className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground opacity-60 hover:opacity-100 hover:text-foreground hover:bg-muted transition-all duration-150"
-                title={title}
-              >
-                <Icon className="w-[16px] h-[16px]" />
-              </button>
-            ))}
-          </div>
+          <AnalysisActionButtons ticker={data.company.ticker} variant="comfortable" />
           {data.generatedAt && (
             <span className="text-[10px] text-muted-foreground tabular-nums">{timeAgo(data.generatedAt)}</span>
           )}
         </div>
       </div>
+
+      {/* ── 1.5 Veredito (Richard — Primacy Effect + Prompt Fogg) ───────── */}
+      <AnalysisVerdictIsland data={data} onSelectTab={onSelectTab} />
 
       {/* ── 2. Luiz IA — Resumo + Chat ────────────────────────────────── */}
       <div className="relative">
