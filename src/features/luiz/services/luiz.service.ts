@@ -328,6 +328,20 @@ function extractB3Tickers(message: string, maxCount = 4): string[] {
  * "analisar") seguido de UM ticker, não é comparação — isso é capturado pelo
  * pattern individual de análise mais adiante.
  */
+/**
+ * Detecta foco semântico da comparação no texto (Fase 3 generative UI).
+ * Usado para injetar `&focus=<templateId>` na URL quando o usuário pede
+ * comparação + foco na mesma mensagem.
+ */
+function detectCompareFocus(message: string): string {
+  const t = message.toLowerCase();
+  if (/divid|renda passiva|yield|\bdy\b/.test(t)) return "dividendFocus";
+  if (/valuation|pre[çc]o|barat|car[oa]|p\/l|p\/vp|m[úu]ltipl/.test(t)) return "valuationFocus";
+  if (/r[áa]pid|essencial|resumo|breve|express|curt/.test(t)) return "quickCompare";
+  if (/profund|detalhad|aprofund|\btudo\b|completa/.test(t)) return "deepDive";
+  return "";
+}
+
 function detectCompareIntent(message: string): LuizServiceResponse | null {
   const tickers = extractB3Tickers(message, 4);
   if (tickers.length < 2) return null;
@@ -337,8 +351,21 @@ function detectCompareIntent(message: string): LuizServiceResponse | null {
   if (/\bsepara(d[oa]?|damente)\b/i.test(message)) return null;
 
   const [a, b] = tickers;
+  const focus = detectCompareFocus(message);
+  const focusSuffix = focus ? `&focus=${focus}` : "";
+  console.log("[MOCK detectCompareIntent]", { message, tickers, focus, focusSuffix });
+  const focusNote = focus
+    ? focus === "dividendFocus"
+      ? " focando em **dividendos**"
+      : focus === "valuationFocus"
+        ? " focando em **valuation**"
+        : focus === "quickCompare"
+          ? " no modo **rápido**"
+          : " no modo **profundo**"
+    : "";
+
   return {
-    content: `Vou montar a comparação entre **${a}** e **${b}** para você...`,
+    content: `Vou montar a comparação entre **${a}** e **${b}**${focusNote} para você...`,
     suggestions: [
       "Adicionar outra empresa",
       "Ver análise individual",
@@ -346,7 +373,7 @@ function detectCompareIntent(message: string): LuizServiceResponse | null {
     ],
     command: {
       type: "navigate",
-      href: `/comparar?tickers=${a},${b}&build=1`,
+      href: `/comparar?tickers=${a},${b}&build=1${focusSuffix}`,
     },
     delay: 600,
   };

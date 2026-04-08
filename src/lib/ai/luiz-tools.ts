@@ -130,7 +130,7 @@ export const luizTools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     function: {
       name: "compare_companies",
       description:
-        "Compara duas ou mais empresas da B3 lado a lado. Use SEMPRE que o usuário mencionar 2 ou mais tickers na mesma mensagem, qualquer que seja o verbo ou conectivo. Exemplos que devem disparar esta tool: 'compara VALE3 com ITUB4', 'VALE3 vs ITUB4', 'VALE3 x ITUB4', 'VALE3 ou ITUB4?', 'qual é melhor, VALE3 ou ITUB4?', 'diferença entre VALE3 e ITUB4', 'VALE3 contra ITUB4', 'põe VALE3 e ITUB4 lado a lado', 'me mostra VALE3 frente a frente com ITUB4', ou simplesmente 'VALE3 ITUB4'. Só NÃO use se o usuário pedir explicitamente para ver as empresas separadamente.",
+        "Compara duas ou mais empresas da B3 lado a lado. Use SEMPRE que o usuário mencionar 2 ou mais tickers na mesma mensagem, qualquer que seja o verbo ou conectivo. Exemplos que devem disparar esta tool: 'compara VALE3 com ITUB4', 'VALE3 vs ITUB4', 'VALE3 x ITUB4', 'VALE3 ou ITUB4?', 'qual é melhor, VALE3 ou ITUB4?', 'diferença entre VALE3 e ITUB4', 'VALE3 contra ITUB4', 'põe VALE3 e ITUB4 lado a lado', 'me mostra VALE3 frente a frente com ITUB4', ou simplesmente 'VALE3 ITUB4'. Só NÃO use se o usuário pedir explicitamente para ver as empresas separadamente. IMPORTANTÍSSIMO: se a mensagem do usuário contiver palavras de FOCO como 'dividendos', 'renda', 'valuation', 'preço', 'barato', 'rápido', 'essencial', 'profundo', 'detalhado', você DEVE preencher o parâmetro 'focus' correspondente nesta mesma chamada. Ex: 'compara VALE3 e ITUB4 focando em dividendos' → chame esta tool com focus='dividendFocus'. NÃO faça duas chamadas separadas.",
       parameters: {
         type: "object",
         properties: {
@@ -140,6 +140,18 @@ export const luizTools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
             minItems: 2,
             description:
               "Lista de tickers para comparar (ex: ['PETR4', 'VALE3']). Sempre em maiúsculas.",
+          },
+          focus: {
+            type: "string",
+            enum: [
+              "default",
+              "quickCompare",
+              "valuationFocus",
+              "dividendFocus",
+              "deepDive",
+            ],
+            description:
+              "Template de layout opcional a aplicar já na chegada na tela. Use quando o usuário pedir comparação COM um foco específico na mesma mensagem. Ex: 'compara VALE3 e ITUB4 focando em dividendos' → focus: 'dividendFocus'. Se não houver foco explícito, omita este parâmetro.",
           },
           message: {
             type: "string",
@@ -187,7 +199,86 @@ export const luizTools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     },
   },
 
-  // ─── 6. INSIGHTS / SUGESTÕES ───────────────────────────────────────────
+  // ─── 6. CUSTOMIZAR TELA DE COMPARAÇÃO ──────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "apply_compare_template",
+      description:
+        "Aplica um template pré-fabricado na tela de Comparação, reorganizando as ilhas de análise de acordo com um foco. Use APENAS quando o usuário já está na tela de comparação (ou acabou de chegar lá) e pede para focar/priorizar/destacar algo específico. Exemplos que devem disparar: 'foca em valuation', 'quero ver só dividendos', 'me mostra só o essencial', 'análise profunda', 'volta ao padrão'.",
+      parameters: {
+        type: "object",
+        properties: {
+          templateId: {
+            type: "string",
+            enum: [
+              "default",
+              "quickCompare",
+              "valuationFocus",
+              "dividendFocus",
+              "deepDive",
+            ],
+            description:
+              "ID do template: default (visão completa), quickCompare (só essencial), valuationFocus (foco em preço), dividendFocus (foco em renda), deepDive (análise profunda).",
+          },
+          message: {
+            type: "string",
+            description:
+              "Mensagem curta confirmando a mudança (ex: 'Focando em dividendos pra você!').",
+          },
+        },
+        required: ["templateId", "message"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
+      name: "customize_compare_view",
+      description:
+        "Monta um layout personalizado da tela de Comparação listando exatamente quais ilhas devem ficar visíveis, na ordem desejada. Use quando o pedido do usuário não bate em nenhum template fixo (ex: 'quero ver só valuation e crescimento', 'coloca dividendos lá em cima'). IDs válidos de ilhas: narrative, snowflake, verdict, top-factors, valuation, growth, past, health, dividend, metrics, timeline.",
+      parameters: {
+        type: "object",
+        properties: {
+          visibleOrder: {
+            type: "array",
+            items: { type: "string" },
+            minItems: 1,
+            description:
+              "IDs das ilhas visíveis, na ordem desejada de cima pra baixo. Ilhas fora da lista ficam ocultas automaticamente.",
+          },
+          message: {
+            type: "string",
+            description:
+              "Mensagem confirmando a customização (ex: 'Deixei só valuation e crescimento no topo').",
+          },
+        },
+        required: ["visibleOrder", "message"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
+      name: "reset_compare_view",
+      description:
+        "Restaura a tela de Comparação ao layout padrão de fábrica, mostrando todas as ilhas na ordem narrativa original. Use quando o usuário pedir para 'voltar ao normal', 'resetar', 'mostrar tudo de novo' ou similar.",
+      parameters: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            description: "Mensagem curta confirmando (ex: 'Prontinho, voltei ao padrão!').",
+          },
+        },
+        required: ["message"],
+      },
+    },
+  },
+
+  // ─── 7. INSIGHTS / SUGESTÕES ───────────────────────────────────────────
   {
     type: "function",
     function: {

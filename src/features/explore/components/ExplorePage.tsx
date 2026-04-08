@@ -12,6 +12,7 @@ import { ExploreHighlightsSection } from "./ExploreHighlightsSection";
 import { ExploreCompanyCatalog } from "./ExploreCompanyCatalog";
 import { ExploreMarketContext } from "./ExploreMarketContext";
 import { ExploreMovementsPanel } from "./ExploreMovementsPanel";
+import { ExploreNewsPanel } from "./ExploreNewsPanel";
 import { ExploreCompareBar } from "./ExploreCompareBar";
 import { ExploreDrawer } from "./ExploreDrawer";
 import type { CompanyCard } from "../interfaces";
@@ -406,17 +407,7 @@ export function ExplorePage() {
                 )}
 
                 {sectionTab === "noticias" && (
-                  <ExploreMovementsPanel
-                    selectedTab={selectedTab}
-                    movers={movers}
-                    movementInsights={movementInsights}
-                    showAllMovements={showAllMovements}
-                    movementSummary={movementSummary}
-                    movementDominant={movementDominant}
-                    getCompanyLogo={getCompanyLogo}
-                    setSelectedTab={setSelectedTab}
-                    setShowAllMovements={setShowAllMovements}
-                  />
+                  <ExploreNewsPanel />
                 )}
               </div>
             </div>

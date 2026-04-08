@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, ExternalLink, Globe, Newspaper, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
@@ -10,39 +10,37 @@ import { ExploreHighlightsSection } from "./ExploreHighlightsSection";
 import { ExploreMarketContext } from "./ExploreMarketContext";
 import { ExploreMovementsPanel } from "./ExploreMovementsPanel";
 import { ExploreDrawer } from "./ExploreDrawer";
+import { getMarketNews, type ExploreNewsItem } from "../services";
 
-const mockNews = [
-  {
-    id: "n1",
-    headline: "Copom mantem Selic em 10,75% e sinaliza cautela com fiscal",
-    source: "Valor Economico",
-    publishedAt: "Ha 2h",
-    category: "Macro",
-    url: "https://valor.globo.com",
-    image:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=60",
-  },
-  {
-    id: "n2",
-    headline: "Petrobras anuncia novo plano de investimentos de US$ 111 bilhoes",
-    source: "Reuters",
-    publishedAt: "Ha 4h",
-    category: "Empresas",
-    url: "https://www.reuters.com",
-    image:
-      "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1200&q=60",
-  },
-  {
-    id: "n3",
-    headline: "Vale acelera projetos de minerio verde para atender demanda asiatica",
-    source: "InfoMoney",
-    publishedAt: "Ha 6h",
-    category: "Commodities",
-    url: "https://www.infomoney.com.br",
-    image:
-      "https://images.unsplash.com/photo-1473042904451-00171c69419d?auto=format&fit=crop&w=1200&q=60",
-  },
-];
+function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
+  if (item.imageUrl) return { type: "photo", src: item.imageUrl };
+  if (item.logoUrl)  return { type: "logo",  src: item.logoUrl };
+  return null;
+}
+function newsSource(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (host.includes("infomoney"))   return "InfoMoney";
+    if (host.includes("reuters"))     return "Reuters";
+    if (host.includes("tradingview")) return "Reuters";
+    if (host.includes("valor"))       return "Valor Econômico";
+    if (host.includes("exame"))       return "Exame";
+    if (host.includes("globo"))       return "Globo";
+    if (host.includes("uol"))         return "UOL";
+    if (host.includes("estadao"))     return "Estadão";
+    if (host.includes("folha"))       return "Folha";
+    return host.split(".")[0].charAt(0).toUpperCase() + host.split(".")[0].slice(1);
+  } catch {
+    return "Notícia";
+  }
+}
+
+function formatNewsDate(iso: string | null): string {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  } catch { return iso; }
+}
 
 type MarketSectionId = "contexto" | "movimentos" | "noticias";
 
@@ -54,6 +52,20 @@ const marketSections: { id: MarketSectionId; label: string; icon: React.Componen
 
 export function MarketContextPage() {
   const [activeSection, setActiveSection] = useState<MarketSectionId>("contexto");
+  const [news, setNews]       = useState<ExploreNewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [newsFetched, setNewsFetched] = useState(false);
+
+  // Lazy-load: busca só quando a aba é aberta pela primeira vez
+  useEffect(() => {
+    if (activeSection !== "noticias" || newsFetched) return;
+    setNewsLoading(true);
+    setNewsFetched(true);
+    getMarketNews(20)
+      .then(setNews)
+      .catch(() => setNews([]))
+      .finally(() => setNewsLoading(false));
+  }, [activeSection, newsFetched]);
   const {
     summaryScope,
     summaryState,
@@ -217,44 +229,83 @@ export function MarketContextPage() {
                   </p>
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {mockNews.map((news) => (
-                    <article
-                      key={news.id}
-                      className="group flex flex-col overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(15,23,40,0.08)]"
-                    >
-                      <div className="relative h-44 w-full overflow-hidden">
-                        <img
-                          src={news.image}
-                          alt={news.headline}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                        />
-                        <span className="absolute left-4 top-4 inline-flex rounded-full bg-card/90 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300 backdrop-blur">
-                          {news.category}
-                        </span>
-                      </div>
-                      <div className="flex flex-1 flex-col gap-4 p-5">
-                        <div>
-                          <p className="text-[12px] font-medium uppercase text-muted-foreground">
-                            {news.source} · {news.publishedAt}
-                          </p>
-                          <h3 className="mt-2 text-[17px] font-semibold leading-6 tracking-[-0.01em] text-foreground">
-                            {news.headline}
-                          </h3>
-                        </div>
-                        <a
-                          href={news.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand transition group-hover:gap-2"
+                {/* Skeleton */}
+                {newsLoading && (
+                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-64 animate-pulse rounded-[24px] bg-muted" />
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty */}
+                {!newsLoading && news.length === 0 && (
+                  <div className="rounded-[24px] border border-border bg-card px-6 py-10 text-center text-[14px] text-muted-foreground">
+                    Nenhuma notícia disponível no momento.
+                  </div>
+                )}
+
+                {/* Cards */}
+                {!newsLoading && news.length > 0 && (
+                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {news.map((item, i) => {
+                      const cover = cardImage(item);
+                      return (
+                        <article
+                          key={i}
+                          className="group flex flex-col overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(15,23,40,0.08)]"
                         >
-                          Ler matéria
-                          <ArrowUpRight className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
+                          <div className="relative h-44 w-full overflow-hidden bg-muted">
+                            {cover?.type === "photo" && (
+                              <img
+                                src={cover.src}
+                                alt={item.title}
+                                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                              />
+                            )}
+                            {cover?.type === "logo" && (
+                              <div className="flex h-full w-full items-center justify-center">
+                                <img
+                                  src={cover.src}
+                                  alt={item.ticker ?? ""}
+                                  className="h-16 w-16 rounded-[18px] border border-border bg-card object-cover p-2 shadow"
+                                />
+                              </div>
+                            )}
+                            {item.ticker && (
+                              <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300 backdrop-blur">
+                                {item.logoUrl && (
+                                  <img src={item.logoUrl} alt={item.ticker} className="h-4 w-4 rounded object-cover" />
+                                )}
+                                {item.ticker}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-1 flex-col gap-4 p-5">
+                            <div>
+                              <p className="text-[12px] font-medium uppercase text-muted-foreground">
+                                {newsSource(item.url)}{item.date ? ` · ${formatNewsDate(item.date)}` : ""}
+                              </p>
+                              <h3 className="mt-2 text-[16px] font-semibold leading-6 tracking-[-0.01em] text-foreground line-clamp-3">
+                                {item.title}
+                              </h3>
+                            </div>
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand transition group-hover:gap-2"
+                            >
+                              Ler matéria
+                              <ArrowUpRight className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
               )}
             </div>

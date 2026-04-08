@@ -105,6 +105,7 @@ export function useLuizAssistant() {
         // Executar comando da plataforma se retornado
         if (response.command) {
           const cmd = response.command;
+          console.log("[Luiz CMD]", cmd);
 
           switch (cmd.type) {
             case "navigate":
@@ -140,6 +141,18 @@ export function useLuizAssistant() {
                   detail: { action: "remove", ticker: cmd.href },
                 }),
               );
+              break;
+
+            case "compare_layout":
+              // Fase 3 — generative UI: a ComparePage escuta esse evento e
+              // aplica o template/ordem/hidden via useCompareLayout.
+              if (cmd.layoutAction) {
+                window.dispatchEvent(
+                  new CustomEvent("luiz:compare-layout", {
+                    detail: cmd.layoutAction,
+                  }),
+                );
+              }
               break;
           }
         }

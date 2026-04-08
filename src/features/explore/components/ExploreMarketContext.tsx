@@ -65,22 +65,16 @@ export function ExploreMarketContext({
             <article className="relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none">
               <div className="relative flex h-full flex-col justify-between gap-6">
                 <div className="max-w-[820px]">
-                  <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300">
-                    Contexto macro
-                  </span>
-                  <h3 className="mt-4 text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
-                    {summary?.title || "Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado."}
+                  <h3 className="text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
+                    {summary?.body || "Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado."}
                   </h3>
-                  <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
-                    {summary?.body || "Use este ambiente como apoio visual para decidir onde aprofundar a leitura, sem deixar o pano de fundo competir com a curadoria principal."}
-                  </p>
                 </div>
 
                 <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_216px]">
                   <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)] dark:shadow-none">
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">Interpretacao principal</p>
                     <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-foreground">
-                      {detail?.description || "O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia."}
+                      {detail?.interpretation || "O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia."}
                     </p>
                   </div>
                   <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)] dark:shadow-none">
@@ -112,7 +106,7 @@ export function ExploreMarketContext({
                   {indexCards.map((card) => (
                     <div
                       key={card.symbol}
-                      className={`relative overflow-hidden rounded-[18px] border border-border bg-card p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none`}
+                      className={`relative rounded-[18px] border border-border bg-card p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none`}
                     >
                       <div className={`pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full ${indexCardGlow[card.trend]}`} />
                       <div className="flex items-start justify-between gap-3">
@@ -120,16 +114,14 @@ export function ExploreMarketContext({
                           <p className="text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">{card.name}</p>
                           <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.04em] text-muted-foreground">{card.symbol}</p>
                         </div>
-                        <div className="relative rounded-full border border-border bg-card px-2.5 py-1.5 shadow-[0_8px_18px_rgba(15,23,40,0.04)] dark:shadow-none">
-                          <MiniSparkline
-                            data={card.sparkline}
-                            status={getTrendStatus(card.trend)}
-                            width={72}
-                            height={28}
-                            strokeWidth={1.25}
-                            lineOpacity={0.9}
-                          />
-                        </div>
+                        <MiniSparkline
+                          data={card.sparkline}
+                          status={getTrendStatus(card.trend)}
+                          width={72}
+                          height={28}
+                          strokeWidth={1.25}
+                          lineOpacity={0.9}
+                        />
                       </div>
                       <p className="relative mt-3 text-[19px] font-semibold tracking-[-0.03em] text-foreground">{card.value}</p>
                       <p className={`relative mt-1 text-[12px] font-medium ${trendTone[card.trend]}`}>

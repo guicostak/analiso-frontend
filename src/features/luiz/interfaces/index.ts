@@ -9,7 +9,19 @@ export type LuizCommandType =
   | "theme"
   | "glossary"
   | "watchlist_add"
-  | "watchlist_remove";
+  | "watchlist_remove"
+  | "compare_layout";
+
+/**
+ * Ação de customização da tela de comparação (Fase 3 — generative UI).
+ * Despachada via CustomEvent "luiz:compare-layout" e consumida pela ComparePage.
+ */
+export type CompareLayoutAction =
+  | { action: "apply_template"; templateId: string }
+  | { action: "set_order"; order: string[]; name?: string; description?: string }
+  | { action: "hide"; ids: string[] }
+  | { action: "show"; ids: string[] }
+  | { action: "reset" };
 
 /**
  * Comando que o Luiz pode executar na plataforma.
@@ -24,8 +36,11 @@ export interface LuizCommand {
    * - theme: "dark" | "light"
    * - glossary: "" (sem valor)
    * - watchlist_add/remove: ticker (ex: "PETR4")
+   * - compare_layout: "" (o payload real vai em `layoutAction`)
    */
   href: string;
+  /** Payload do comando compare_layout (opcional, só preenchido quando type === "compare_layout"). */
+  layoutAction?: CompareLayoutAction;
 }
 
 /** Uma mensagem na conversa */

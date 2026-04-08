@@ -1,14 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { motion, LayoutGroup } from "motion/react";
 import {
   Bookmark,
   Coins,
   History,
   Link2,
   Plus,
+  Settings2,
   Share2,
   TrendingUp,
   Heart,
@@ -23,9 +24,13 @@ import { AddCompanyModal } from "@/src/features/watchlist/components/AddCompanyM
 import { getCompanyLogo } from "@/src/features/explore/services";
 import { useCompare } from "../hooks/useCompare";
 import { useBuildMode, type BuildStep } from "../hooks/useBuildMode";
+import { useCompareLayout } from "../hooks/useCompareLayout";
+import type { CompareIslandId } from "../layout/types";
+import { isKnownIslandId } from "../layout/islandRegistry";
 import { PILLARS, trackCompare } from "../services";
 import type { CompareCategorySlug } from "../interfaces";
 import { CompareEvidenceDrawer } from "./CompareEvidenceDrawer";
+import { CustomizeLayoutDrawer } from "./CustomizeLayoutDrawer";
 import { BuildModeOverlay } from "./BuildModeOverlay";
 import { BuildModeTypingIntro } from "./BuildModeTypingIntro";
 import { CompareEmptyState } from "./CompareEmptyState";
@@ -39,30 +44,49 @@ import {
   MetricsTableIsland,
 } from "./islands";
 
-/* ── "Modo Lego": sequência cinematográfica em 4 beats narrativos ────────── */
-// Delays foram calibrados para que cada scroll automático seja perceptível
-// (smooth scroll do navegador leva ~400-700ms em si).
-// Total: ~7.5s + 400ms initialDelay + 800ms finishHold ≈ 8.7s
-const BUILD_SEQUENCE: readonly BuildStep[] = [
-  // Beat 1 — "O palco" (entram a partir do topo, sem scroll)
-  { id: "narrative",   delay: 0,   scrollAnchor: true, beatLabel: "Preparando" },
-  { id: "snowflake",   delay: 600, beatLabel: "Visão geral" },
+/* ── "Modo Lego": metadata por ilha ──────────────────────────────────────────
+ * Delays foram calibrados para que cada scroll automático seja perceptível
+ * (smooth scroll do navegador leva ~400-700ms em si).
+ *
+ * A sequência real do build mode é DERIVADA dinamicamente da `layout.visibleOrder`
+ * do usuário (veja `buildSequence` dentro do componente) — assim o build mode
+ * respeita o layout customizado: se o usuário organizou a tela com Dividendos
+ * no topo, o build mode revela Dividendos primeiro.
+ */
+interface BuildMeta {
+  delay: number;
+  scrollAnchor: boolean;
+  beatLabel: string;
+}
 
-  // Beat 2 — "O vencedor" (pausa dramática + scroll para Verdict)
-  { id: "verdict",     delay: 950, scrollAnchor: true, beatLabel: "Veredito" },
-  { id: "top-factors", delay: 600, beatLabel: "Principais fatores" },
+const BUILD_META_BY_ID: Record<CompareIslandId, BuildMeta> = {
+  narrative:    { delay: 0,   scrollAnchor: true,  beatLabel: "Preparando" },
+  snowflake:    { delay: 600, scrollAnchor: false, beatLabel: "Visão geral" },
+  verdict:      { delay: 950, scrollAnchor: true,  beatLabel: "Veredito" },
+  "top-factors":{ delay: 600, scrollAnchor: false, beatLabel: "Principais fatores" },
+  valuation:    { delay: 850, scrollAnchor: true,  beatLabel: "Valuation" },
+  growth:       { delay: 500, scrollAnchor: true,  beatLabel: "Crescimento" },
+  past:         { delay: 500, scrollAnchor: true,  beatLabel: "Histórico" },
+  health:       { delay: 500, scrollAnchor: true,  beatLabel: "Saúde financeira" },
+  dividend:     { delay: 600, scrollAnchor: true,  beatLabel: "Dividendos" },
+  metrics:      { delay: 600, scrollAnchor: true,  beatLabel: "Métricas" },
+  timeline:     { delay: 500, scrollAnchor: true,  beatLabel: "Eventos recentes" },
+};
 
-  // Beat 3 — "Os pilares" (cascata)
-  { id: "valuation",   delay: 850, scrollAnchor: true, beatLabel: "Valuation" },
-  { id: "growth",      delay: 500, scrollAnchor: true, beatLabel: "Crescimento" },
-  { id: "past",        delay: 500, scrollAnchor: true, beatLabel: "Histórico" },
-  { id: "health",      delay: 500, scrollAnchor: true, beatLabel: "Saúde financeira" },
-
-  // Beat 4 — "Os detalhes" (finale)
-  { id: "dividend",    delay: 600, scrollAnchor: true, beatLabel: "Dividendos" },
-  { id: "metrics",     delay: 600, scrollAnchor: true, beatLabel: "Métricas" },
-  { id: "timeline",    delay: 500, scrollAnchor: true, beatLabel: "Eventos recentes" },
-];
+/** Mapeia cada ilha para a categoria de filtro a que ela pertence. */
+const ISLAND_CATEGORY: Record<CompareIslandId, CompareCategorySlug> = {
+  narrative:    "visao-geral",
+  snowflake:    "visao-geral",
+  verdict:      "visao-geral",
+  "top-factors":"visao-geral",
+  valuation:    "valuation",
+  growth:       "crescimento",
+  past:         "passado",
+  health:       "saude",
+  dividend:     "dividendos",
+  metrics:      "metricas",
+  timeline:     "timeline",
+};
 
 /* ── Animação spring "encaixe de Lego" para cada ilha em build mode ─────────
  * O delay (em segundos) segura o início visual do spring por um tempo
@@ -265,6 +289,105 @@ export function ComparePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [saveAnimating, setSaveAnimating] = useState(false);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+
+  // ── Layout customizável (Fase 1 manual + Fase 3 via Luiz) ──────────────────
+  // Esse hook controla ORDEM e VISIBILIDADE das ilhas. Persiste em localStorage
+  // e reage a comandos do Luiz via evento custom "luiz:compare-layout".
+  const layout = useCompareLayout();
+
+  // Escuta comandos do Luiz para customização de tela — despachados pelo
+  // `useLuizAssistant` quando o modelo aciona uma tool de layout.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    type LayoutEventDetail =
+      | { action: "apply_template"; templateId: string }
+      | { action: "reset" }
+      | { action: "set_order"; order: string[] }
+      | { action: "hide"; ids: string[] }
+      | { action: "show"; ids: string[] };
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<LayoutEventDetail>;
+      const detail = ce.detail;
+      if (!detail || typeof detail !== "object") return;
+
+      if (detail.action === "reset") {
+        layout.reset();
+        return;
+      }
+      if (detail.action === "apply_template") {
+        // O template é resolvido server-side e os ids vêm no próprio detail
+        // via "set_order" no mesmo evento quando for dinâmico. Aqui só
+        // respeita templates pré-fabricados identificados por id.
+        import("../layout/templates").then(({ getTemplate }) => {
+          const tpl = getTemplate(detail.templateId);
+          if (tpl) layout.applyTemplate(tpl);
+        });
+        return;
+      }
+      if (detail.action === "set_order") {
+        const valid = detail.order.filter(isKnownIslandId);
+        if (valid.length === 0) return;
+        // Qualquer ID válido fora da lista vira oculto; IDs listados ficam visíveis
+        const visibleSet = new Set(valid);
+        import("../layout/templates").then(({ buildDynamicTemplate }) => {
+          layout.applyTemplate(
+            buildDynamicTemplate(valid as CompareIslandId[], {
+              name: "Layout do Luiz",
+              description: "Configurado por conversa",
+            }),
+          );
+          // visibleSet usada implicitamente pelo applyTemplate acima
+          void visibleSet;
+        });
+        return;
+      }
+      if (detail.action === "hide") {
+        for (const id of detail.ids) {
+          if (isKnownIslandId(id)) layout.hideIsland(id);
+        }
+        return;
+      }
+      if (detail.action === "show") {
+        for (const id of detail.ids) {
+          if (isKnownIslandId(id)) layout.showIsland(id);
+        }
+        return;
+      }
+    };
+    window.addEventListener("luiz:compare-layout", handler as EventListener);
+    return () =>
+      window.removeEventListener(
+        "luiz:compare-layout",
+        handler as EventListener,
+      );
+  }, [layout]);
+
+  // ── Foco inicial via URL (?focus=templateId) ────────────────────────────────
+  // Quando o Luiz recebe "compara X com Y focando em dividendos", a tool
+  // `compare_companies` anexa `&focus=dividendFocus` ao href. Aqui lemos esse
+  // param UMA vez, aplicamos o template e limpamos o param da URL silenciosamente
+  // para que reload/share não re-disparem a aplicação.
+  const focusAppliedRef = useRef(false);
+  useEffect(() => {
+    if (focusAppliedRef.current) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const focus = params.get("focus");
+    console.log("[Compare] focus param on mount:", focus, "search:", window.location.search);
+    if (!focus) return;
+    focusAppliedRef.current = true;
+    import("../layout/templates").then(({ getTemplate }) => {
+      const tpl = getTemplate(focus);
+      console.log("[Compare] applying template:", focus, "→", tpl?.name);
+      if (tpl) layout.applyTemplate(tpl);
+      // Remove o param da URL sem re-render pesado
+      params.delete("focus");
+      const qs = params.toString();
+      const newUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`;
+      window.history.replaceState(null, "", newUrl);
+    });
+  }, [layout]);
 
   // Progressive Disclosure: ilhas secundárias colapsadas após o build mode.
   // Estado: Set dos IDs INDIVIDUALMENTE expandidos pelo usuário (override).
@@ -420,9 +543,19 @@ export function ComparePage() {
     };
   }, [buildModeRequested, typingIntroDone]);
 
+  // Sequência de build derivada do layout atual. Quando o usuário tem
+  // customização, o Modo Lego respeita: revela as ilhas dele, na ordem dele,
+  // e pula as que estão ocultas. Se nada foi customizado, segue o default.
+  const buildSequence: readonly BuildStep[] = useMemo(() => {
+    return layout.visibleOrder.map((id) => ({
+      id,
+      ...BUILD_META_BY_ID[id],
+    }));
+  }, [layout.visibleOrder]);
+
   const buildMode = useBuildMode({
     enabled: buildModeEnabled,
-    steps: BUILD_SEQUENCE,
+    steps: buildSequence,
     initialDelay: 400,
     finishHold: 800,
     onStepReveal: (step) => {
@@ -478,6 +611,9 @@ export function ComparePage() {
   const isCollapsedSlim = (id: string): boolean => {
     if (categoria !== "todas") return false;
     if (CORE_ISLAND_IDS.has(id)) return false;
+    // Layout customizado (manual ou via template do Luiz): o usuário/Luiz
+    // escolheu explicitamente o que ver — tudo visível entra expandido.
+    if (layout.isCustomized) return false;
     if (!collapsedAfterBuild) return false;
     if (buildModeRequested && !buildMode.isComplete) return false;
     return !expandedSecondary.has(id);
@@ -526,16 +662,23 @@ export function ComparePage() {
       }
     }
 
+    // Fora do build mode, ainda usamos motion.section com `layout` habilitado
+    // para que qualquer mudança em `layout.order` (drag no drawer, comando do
+    // Luiz) seja animada com spring automático pelo motion — sem escrever
+    // keyframes. O `layoutId` garante continuidade cross-render quando a
+    // ilha é reposicionada.
     if (!buildModeRequested) {
-      // Caminho legado — render direto, animação CSS dispara via classes
       return (
-        <section
+        <motion.section
+          layout
+          layoutId={`compare-island-${id}`}
           id={id}
           ref={extraRef as React.RefObject<HTMLElement | null> | undefined}
           className={baseClass}
+          transition={{ type: "spring", stiffness: 280, damping: 30 }}
         >
           {children}
-        </section>
+        </motion.section>
       );
     }
 
@@ -543,6 +686,8 @@ export function ComparePage() {
 
     return (
       <motion.section
+        layout
+        layoutId={`compare-island-${id}`}
         id={id}
         ref={extraRef as React.RefObject<HTMLElement | null> | undefined}
         className={baseClass}
@@ -728,6 +873,18 @@ export function ComparePage() {
                     <Bookmark className="h-3.5 w-3.5" fill="currentColor" />
                     {saveAnimating ? "Salva!" : "Salvar comparação"}
                   </motion.button>
+                  <button
+                    onClick={() => setCustomizeOpen(true)}
+                    className={`hidden h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition md:inline-flex ${
+                      layout.isCustomized
+                        ? "border-brand bg-brand/10 text-brand hover:bg-brand/15"
+                        : "border-border bg-card text-muted-foreground hover:border-brand hover:text-foreground"
+                    }`}
+                    title="Personalizar tela"
+                  >
+                    <Settings2 className="h-3.5 w-3.5" />
+                    Personalizar
+                  </button>
                   <div className="relative">
                     <button
                       onClick={() => {
@@ -792,118 +949,174 @@ export function ComparePage() {
             ) : loadingApi || refreshing || !enrichedA || !enrichedB ? (
               <LoadingBlocks />
             ) : enrichedA && enrichedB && a && b ? (
-              <div className="space-y-8">
-                {/* ── Visão geral: Snowflake + Veredito + Fatores ── */}
-                {showSection(categoria, "visao-geral") && (
-                  <>
-                    {/* CompareNarrativeBlock — envolto em wrapper condicional para
-                        participar do "Modo Lego" como primeira peça */}
-                    {isRevealed("narrative") && (
-                      buildModeRequested ? (
-                        <motion.div
-                          id="narrative"
-                          className="scroll-mt-[180px]"
-                          initial={LEGO_INITIAL}
-                          animate={LEGO_ANIMATE}
-                          transition={LEGO_TRANSITION}
-                        >
-                          <CompareNarrativeBlock narrative={narratives.summary} variant="hero" />
-                        </motion.div>
-                      ) : (
+              (() => {
+                // Map de renderers por ilha. Condicionais (ex: verdict precisa
+                // de scoreboard) continuam aqui — se retornam null, a ilha é
+                // pulada no iterador abaixo.
+                const islandNodes: Partial<Record<CompareIslandId, React.ReactNode>> = {
+                  narrative: isRevealed("narrative") ? (
+                    buildModeRequested ? (
+                      <motion.div
+                        layout
+                        layoutId="compare-island-narrative"
+                        id="narrative"
+                        className="scroll-mt-[180px]"
+                        initial={LEGO_INITIAL}
+                        animate={LEGO_ANIMATE}
+                        transition={LEGO_TRANSITION}
+                      >
                         <CompareNarrativeBlock narrative={narratives.summary} variant="hero" />
-                      )
-                    )}
-                    {scoreboard && renderIsland("snowflake", 1, false, (
-                      <SnowflakeDual a={enrichedA} b={enrichedB} scoreboard={scoreboard} />
-                    ))}
-                    {verdict && scoreboard && renderIsland("verdict", 2, false, (
-                      <VerdictIsland
-                        verdict={verdict}
-                        scoreboard={scoreboard}
-                        summary={summary}
-                        formatNumber={formatNumber}
-                        onSeeFactors={handleSeeFactors}
-                        onSave={saveComparison}
-                        onSwapAndPick={handleSwapAndPick}
-                      />
-                    ), verdictRef)}
-                    {renderIsland("top-factors", 3, false, (
-                      <TopFactorsIsland
-                        a={enrichedA}
-                        b={enrichedB}
-                        topPillarDiffs={topPillarDiffs}
-                        PILLAR_LABEL={PILLAR_LABEL}
-                        formatNumber={formatNumber}
-                        pillarInsight={pillarInsight}
-                        trendContext={trendContext}
-                        activePillar={activePillar}
-                        onSelectPillar={selectPillar}
-                      />
-                    ))}
-                  </>
-                )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        layout
+                        layoutId="compare-island-narrative"
+                        id="narrative"
+                        className="scroll-mt-[180px]"
+                        transition={{ type: "spring", stiffness: 280, damping: 30 }}
+                      >
+                        <CompareNarrativeBlock narrative={narratives.summary} variant="hero" />
+                      </motion.div>
+                    )
+                  ) : null,
 
-                {/* ── Valuation ── */}
-                {showSection(categoria, "valuation") && renderIsland("valuation", 4, true, (
-                  <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.value} />
-                ), undefined, narrativeSummaryFor("value"))}
+                  snowflake: scoreboard ? renderIsland("snowflake", 1, false, (
+                    <SnowflakeDual a={enrichedA} b={enrichedB} scoreboard={scoreboard} />
+                  )) : null,
 
-                {/* ── Crescimento ── */}
-                {showSection(categoria, "crescimento") && renderIsland("growth", 5, true, (
-                  <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.future} />
-                ), undefined, narrativeSummaryFor("future"))}
+                  verdict: verdict && scoreboard ? renderIsland("verdict", 2, false, (
+                    <VerdictIsland
+                      verdict={verdict}
+                      scoreboard={scoreboard}
+                      summary={summary}
+                      formatNumber={formatNumber}
+                      onSeeFactors={handleSeeFactors}
+                      onSave={saveComparison}
+                      onSwapAndPick={handleSwapAndPick}
+                    />
+                  ), verdictRef) : null,
 
-                {/* ── Passado ── */}
-                {showSection(categoria, "passado") && renderIsland("past", 6, true, (
-                  <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.past} />
-                ), undefined, narrativeSummaryFor("past"))}
+                  "top-factors": renderIsland("top-factors", 3, false, (
+                    <TopFactorsIsland
+                      a={enrichedA}
+                      b={enrichedB}
+                      topPillarDiffs={topPillarDiffs}
+                      PILLAR_LABEL={PILLAR_LABEL}
+                      formatNumber={formatNumber}
+                      pillarInsight={pillarInsight}
+                      trendContext={trendContext}
+                      activePillar={activePillar}
+                      onSelectPillar={selectPillar}
+                    />
+                  )),
 
-                {/* ── Saúde ── */}
-                {showSection(categoria, "saude") && renderIsland("health", null, true, (
-                  <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.health} />
-                ), undefined, narrativeSummaryFor("health"))}
+                  valuation: renderIsland("valuation", 4, true, (
+                    <ValuationIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.value} />
+                  ), undefined, narrativeSummaryFor("value")),
 
-                {/* ── Dividendos ── */}
-                {showSection(categoria, "dividendos") && renderIsland("dividend", null, true, (
-                  <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.dividend} />
-                ), undefined, narrativeSummaryFor("dividend"))}
+                  growth: renderIsland("growth", 5, true, (
+                    <GrowthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.future} />
+                  ), undefined, narrativeSummaryFor("future")),
 
-                {/* ── Métricas ── */}
-                {showSection(categoria, "metricas") && renderIsland("metrics", null, true, (
-                  <MetricsTableIsland
-                    a={enrichedA}
-                    b={enrichedB}
-                    tableRows={tableRows}
-                    activePillar={activePillar}
-                    PILLAR_LABEL={PILLAR_LABEL}
-                    formatMetric={formatMetric}
-                    formatNumber={formatNumber}
-                    metricWinner={metricWinner}
-                    metricDelta={metricDelta}
-                    evidenceReadLabel={evidenceReadLabel}
-                    openEvidence={openEvidence}
-                    activePillarWinnerSummary={activePillarWinnerSummary}
-                  />
-                ), detailRef, activePillarWinnerSummary ?? undefined)}
+                  past: renderIsland("past", 6, true, (
+                    <PastIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.past} />
+                  ), undefined, narrativeSummaryFor("past")),
 
-                {/* ── Timeline ── */}
-                {showSection(categoria, "timeline") && renderIsland("timeline", null, true, (
-                  <TimelineIsland
-                    a={enrichedA}
-                    b={enrichedB}
-                    events={recentEvents}
-                    PILLAR_LABEL={PILLAR_LABEL}
-                  />
-                ), undefined, recentEvents.length > 0 ? `${recentEvents.length} eventos relevantes nos últimos 90 dias.` : undefined)}
+                  health: renderIsland("health", null, true, (
+                    <HealthIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.health} />
+                  ), undefined, narrativeSummaryFor("health")),
 
+                  dividend: renderIsland("dividend", null, true, (
+                    <DividendIsland a={enrichedA} b={enrichedB} formatNumber={formatNumber} narrative={narratives.dividend} />
+                  ), undefined, narrativeSummaryFor("dividend")),
 
-              </div>
+                  metrics: renderIsland("metrics", null, true, (
+                    <MetricsTableIsland
+                      a={enrichedA}
+                      b={enrichedB}
+                      tableRows={tableRows}
+                      activePillar={activePillar}
+                      PILLAR_LABEL={PILLAR_LABEL}
+                      formatMetric={formatMetric}
+                      formatNumber={formatNumber}
+                      metricWinner={metricWinner}
+                      metricDelta={metricDelta}
+                      evidenceReadLabel={evidenceReadLabel}
+                      openEvidence={openEvidence}
+                      activePillarWinnerSummary={activePillarWinnerSummary}
+                    />
+                  ), detailRef, activePillarWinnerSummary ?? undefined),
+
+                  timeline: renderIsland("timeline", null, true, (
+                    <TimelineIsland
+                      a={enrichedA}
+                      b={enrichedB}
+                      events={recentEvents}
+                      PILLAR_LABEL={PILLAR_LABEL}
+                    />
+                  ), undefined, recentEvents.length > 0 ? `${recentEvents.length} eventos relevantes nos últimos 90 dias.` : undefined),
+                };
+
+                // Lista final: ordem do usuário, respeitando filtro de categoria,
+                // ocultação manual e condicionais (ex: verdict sem scoreboard).
+                const renderedIslands = layout.visibleOrder
+                  .filter((id) => showSection(categoria, ISLAND_CATEGORY[id]))
+                  .map((id) => {
+                    const node = islandNodes[id];
+                    if (!node) return null;
+                    return <React.Fragment key={id}>{node}</React.Fragment>;
+                  })
+                  .filter((n): n is React.ReactElement => n !== null);
+
+                if (renderedIslands.length === 0) {
+                  // Empty state: todas as ilhas ocultas (usuário fez questão
+                  // de esconder tudo). Explica como voltar atrás.
+                  return (
+                    <section className="compare-island compare-surface p-10 text-center">
+                      <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">
+                        Nenhuma seção visível
+                      </h2>
+                      <p className="mx-auto mt-3 max-w-[480px] text-[14px] leading-6 text-muted-foreground">
+                        Você ocultou todas as ilhas desta comparação. Abra o painel
+                        de personalização para mostrar de novo ou restaurar o padrão.
+                      </p>
+                      <div className="mt-5 flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setCustomizeOpen(true)}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-brand bg-brand/10 px-4 text-[13px] font-medium text-brand transition hover:bg-brand/20"
+                        >
+                          <Settings2 className="h-3.5 w-3.5" />
+                          Personalizar tela
+                        </button>
+                        <button
+                          onClick={() => layout.reset()}
+                          className="inline-flex h-9 items-center rounded-full border border-border bg-card px-4 text-[13px] font-medium text-muted-foreground transition hover:border-brand hover:text-foreground"
+                        >
+                          Restaurar padrão
+                        </button>
+                      </div>
+                    </section>
+                  );
+                }
+
+                return (
+                  <LayoutGroup>
+                    <div className="space-y-8">{renderedIslands}</div>
+                  </LayoutGroup>
+                );
+              })()
             ) : null}
           </div>
         </div>
       </MainContent>
 
       <CompareEvidenceDrawer data={evidence} onClose={() => setEvidence(null)} formatMetric={formatMetric} />
+
+      <CustomizeLayoutDrawer
+        isOpen={customizeOpen}
+        onClose={() => setCustomizeOpen(false)}
+        layout={layout}
+      />
 
       {/* "Modo Lego" — typing intro do Luiz (Beat 0)
           Aparece IMEDIATAMENTE na chegada na página, mesmo enquanto os dados

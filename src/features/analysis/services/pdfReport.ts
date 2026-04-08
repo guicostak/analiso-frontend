@@ -7,7 +7,7 @@
  * colors), independent of dark/light theme and lazy loading state.
  */
 
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { toJpeg } from 'html-to-image';
 import type { AnalysisData } from '../interfaces';
 

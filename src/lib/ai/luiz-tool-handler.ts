@@ -7,7 +7,10 @@
  * Segue architecture_skill.md: sem any, tipos explícitos, lógica isolada.
  */
 
-import type { LuizServiceResponse } from "@/src/features/luiz/interfaces";
+import type {
+  CompareLayoutAction,
+  LuizServiceResponse,
+} from "@/src/features/luiz/interfaces";
 
 // ─── Tipos internos ──────────────────────────────────────────────────────────
 
@@ -131,10 +134,49 @@ function handleAnalyzeCompany(args: Record<string, unknown>): LuizServiceRespons
   };
 }
 
+const VALID_COMPARE_FOCUSES = new Set([
+  "default",
+  "quickCompare",
+  "valuationFocus",
+  "dividendFocus",
+  "deepDive",
+]);
+
+function detectFocusFromText(text: string): string {
+  const t = text.toLowerCase();
+  if (/divid|renda passiva|yield|dy/.test(t)) return "dividendFocus";
+  if (/valuation|pre[çc]o|barat|car[oa]|p\/l|p\/vp|m[úu]ltiplo/.test(t)) return "valuationFocus";
+  if (/r[áa]pid|essencial|resumo|breve|express|curto/.test(t)) return "quickCompare";
+  if (/profund|detalhad|tudo|completa|aprofund/.test(t)) return "deepDive";
+  return "";
+}
+
 function handleCompareCompanies(args: Record<string, unknown>): LuizServiceResponse {
   const tickers = (args.tickers as string[]) ?? [];
   const message = String(args.message ?? "Abrindo comparação...");
   const tickerParams = tickers.map((t) => t.toUpperCase()).join(",");
+  const focusRaw = typeof args.focus === "string" ? args.focus : "";
+  // Fallback: se o modelo esqueceu de passar focus, tenta extrair da própria
+  // mensagem que ele gerou (costuma ecoar a intenção do usuário).
+  const focusFromMessage = focusRaw ? "" : detectFocusFromText(message);
+  const focus = VALID_COMPARE_FOCUSES.has(focusRaw)
+    ? focusRaw
+    : focusFromMessage;
+
+  console.log("[Luiz] compare_companies args:", {
+    tickers,
+    focusRaw,
+    focusFromMessage,
+    finalFocus: focus,
+    message,
+  });
+
+  // build=1 ativa o "Modo Lego"; focus=<templateId> aplica template já na chegada
+  // (ComparePage lê na montagem e limpa o param silenciosamente).
+  const params = new URLSearchParams();
+  if (tickerParams) params.set("tickers", tickerParams);
+  params.set("build", "1");
+  if (focus) params.set("focus", focus);
 
   return {
     content: message,
@@ -145,9 +187,7 @@ function handleCompareCompanies(args: Record<string, unknown>): LuizServiceRespo
     ],
     command: {
       type: "navigate",
-      // build=1 ativa o "Modo Lego": ComparePage monta as ilhas
-      // progressivamente com animação spring quando a navegação vem do Luiz.
-      href: tickerParams ? `/comparar?tickers=${tickerParams}&build=1` : "/comparar",
+      href: tickerParams ? `/comparar?${params.toString()}` : "/comparar",
     },
   };
 }
@@ -202,6 +242,77 @@ function handlePlatformAction(args: Record<string, unknown>): LuizServiceRespons
   }
 }
 
+// ─── Compare layout (Fase 3 — generative UI) ─────────────────────────────────
+
+const COMPARE_LAYOUT_SUGGESTIONS = [
+  "Voltar ao padrão",
+  "Focar em valuation",
+  "Focar em dividendos",
+];
+
+const KNOWN_COMPARE_ISLAND_IDS = new Set([
+  "narrative",
+  "snowflake",
+  "verdict",
+  "top-factors",
+  "valuation",
+  "growth",
+  "past",
+  "health",
+  "dividend",
+  "metrics",
+  "timeline",
+]);
+
+function buildLayoutResponse(
+  message: string,
+  layoutAction: CompareLayoutAction,
+): LuizServiceResponse {
+  return {
+    content: message,
+    suggestions: COMPARE_LAYOUT_SUGGESTIONS,
+    command: {
+      type: "compare_layout",
+      href: "",
+      layoutAction,
+    },
+  };
+}
+
+function handleApplyCompareTemplate(
+  args: Record<string, unknown>,
+): LuizServiceResponse {
+  const templateId = String(args.templateId ?? "default");
+  const message = String(args.message ?? "Reorganizando a tela pra você...");
+  return buildLayoutResponse(message, { action: "apply_template", templateId });
+}
+
+function handleCustomizeCompareView(
+  args: Record<string, unknown>,
+): LuizServiceResponse {
+  const rawOrder = Array.isArray(args.visibleOrder) ? args.visibleOrder : [];
+  const order = rawOrder
+    .map((v) => String(v))
+    .filter((id) => KNOWN_COMPARE_ISLAND_IDS.has(id));
+  const message = String(args.message ?? "Montando sua visão personalizada...");
+
+  if (order.length === 0) {
+    return {
+      content: "Não consegui montar esse layout — os IDs informados não batem com nenhuma ilha.",
+      suggestions: COMPARE_LAYOUT_SUGGESTIONS,
+    };
+  }
+
+  return buildLayoutResponse(message, { action: "set_order", order });
+}
+
+function handleResetCompareView(
+  args: Record<string, unknown>,
+): LuizServiceResponse {
+  const message = String(args.message ?? "Prontinho, voltei ao padrão!");
+  return buildLayoutResponse(message, { action: "reset" });
+}
+
 function handleGetInsights(args: Record<string, unknown>): LuizServiceResponse {
   const message = String(args.message ?? "");
 
@@ -236,6 +347,12 @@ export function handleToolCall(toolCall: ToolCallInput): LuizServiceResponse {
       return handleCompareCompanies(args);
     case "platform_action":
       return handlePlatformAction(args);
+    case "apply_compare_template":
+      return handleApplyCompareTemplate(args);
+    case "customize_compare_view":
+      return handleCustomizeCompareView(args);
+    case "reset_compare_view":
+      return handleResetCompareView(args);
     case "get_insights":
       return handleGetInsights(args);
     default:

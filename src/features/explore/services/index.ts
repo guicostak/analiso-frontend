@@ -432,6 +432,21 @@ export async function getExplore(_token?: string | null): Promise<ExploreRespons
   return apiFetch<ExploreResponse>('/api/explore', {});
 }
 
+export interface ExploreNewsItem {
+  ticker:      string | null;
+  companyName: string | null;
+  logoUrl:     string | null;
+  title:       string;
+  url:         string;
+  imageUrl:    string | null;
+  sentiment:   'good' | 'bad' | 'neutral';
+  date:        string | null;
+}
+
+export async function getMarketNews(limit = 20): Promise<ExploreNewsItem[]> {
+  return apiFetch<ExploreNewsItem[]>(`/api/explore/news?limit=${limit}`, {});
+}
+
 // ─── Dados mock ───────────────────────────────────────────────────────────────
 
 export const indexCards: IndexCard[] = [
