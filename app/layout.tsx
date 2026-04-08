@@ -53,16 +53,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body>
-        <JsonLd data={rootJsonLd} />
-        <Providers>{children}</Providers>
+      <head>
         <Script
           id="adsense"
           async
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3249317765900933"
           crossOrigin="anonymous"
         />
+      </head>
+      <body>
+        <JsonLd data={rootJsonLd} />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
