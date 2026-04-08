@@ -126,7 +126,7 @@ function handleAnalyzeCompany(args: Record<string, unknown>): LuizServiceRespons
     ],
     command: {
       type: "navigate",
-      href: `/empresa/${ticker}`,
+      href: `/analysis/${ticker}`,
     },
   };
 }

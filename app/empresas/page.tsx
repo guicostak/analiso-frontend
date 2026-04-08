@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { LandingNav } from "@/src/components/layout/LandingNav";
 import { JsonLd } from "@/src/components/seo/JsonLd";
-import { fetchAllIndexableCompanies } from "@/src/features/empresa/services/public";
+import { fetchAllIndexableCompanies } from "@/src/features/empresas/services/public";
 
 export const revalidate = 604800;
 
@@ -19,8 +19,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
-    { "@type": "ListItem", position: 2, name: "Empresas", item: "https://analiso.com.br/empresas" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.analiso.com.br" },
+    { "@type": "ListItem", position: 2, name: "Empresas", item: "https://www.analiso.com.br/empresas" },
   ],
 };
 

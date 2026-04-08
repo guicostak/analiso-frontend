@@ -226,7 +226,7 @@ export function useWatchlist(): UseWatchlistReturn {
   const navigateToCompany = useCallback(
     (ticker: string, pillar: Pillar) => {
       const pillarKey = pillar.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      router.push(`/empresa/${ticker}?pilar=${pillarKey}&expand=${pillarKey}&tab=pilares&foco=pilar`);
+      router.push(`/analysis/${ticker}?pilar=${pillarKey}&expand=${pillarKey}&tab=pilares&foco=pilar`);
     },
     [router],
   );

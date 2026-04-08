@@ -56,7 +56,7 @@ export function EmpresasRecentesIsland(_props: IslandProps) {
         {loaded && items.map((company) => (
           <li key={company.ticker}>
             <Link
-              href={`/empresa/${company.ticker}`}
+              href={`/analysis/${company.ticker}`}
               className="flex items-center justify-between rounded-[12px] bg-muted px-3 py-2 text-[13px] font-semibold text-foreground transition hover:bg-hover"
             >
               <span>{company.ticker}</span>

@@ -161,7 +161,7 @@ const MOCK_PATTERNS: ResponsePattern[] = [
     response: {
       content: "Abrindo a análise da empresa!",
       suggestions: ["Ver watchlist", "Comparar com outra empresa", "Voltar ao dashboard"],
-      command: { type: "navigate", href: "/empresa/TICKER" },
+      command: { type: "navigate", href: "/analysis/TICKER" },
       delay: 600,
     },
   },
@@ -364,11 +364,11 @@ function getMockResponse(message: string): LuizServiceResponse {
   const response = { ...match.response };
 
   // Extrair ticker da mensagem para comandos que precisam
-  if (response.command?.href === "/empresa/TICKER") {
+  if (response.command?.href === "/analysis/TICKER") {
     const tickerMatch = message.match(/\b([A-Z]{4}\d{1,2})\b/i);
     const ticker = tickerMatch?.[1]?.toUpperCase() ?? "";
     if (ticker) {
-      response.command = { ...response.command, href: `/empresa/${ticker}` };
+      response.command = { ...response.command, href: `/analysis/${ticker}` };
       response.content = `Abrindo a análise de **${ticker}**!`;
       response.suggestions = [
         `Comparar ${ticker} com outra empresa`,

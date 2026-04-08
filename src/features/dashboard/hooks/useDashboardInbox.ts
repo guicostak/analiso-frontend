@@ -508,7 +508,7 @@ export function useInbox({ apiInboxItems, router, markItemViewed }: UseInboxPara
       params.set("tab",  "mudancas");
       params.set("foco", "mudancas");
     }
-    router.push(`/empresa/${item.ticker}?${params.toString()}`);
+    router.push(`/analysis/${item.ticker}?${params.toString()}`);
   }, [markItemViewed, router]);
 
   const focusInboxRecentImpact = useCallback(() => {

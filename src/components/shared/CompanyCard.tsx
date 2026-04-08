@@ -79,7 +79,7 @@ export interface CompanyCardProps {
   metrics?: Record<string, number>;
   /** Data de atualização dos dados (ex: "2024-12-15" ou "há 3 dias") */
   updatedAt?: string;
-  /** Rota de destino ao clicar no card. Padrão: /empresa/:ticker */
+  /** Rota de destino ao clicar no card. Padrão: /analysis/:ticker */
   href?: string;
 
   // ─── Campos contextuais (do /api/explore) ────────────────────────────────
@@ -122,7 +122,7 @@ export function CompanyCard({
   onToggleFavorite,
   onAlert,
 }: CompanyCardProps) {
-  const destination = href ?? `/empresa/${ticker}`;
+  const destination = href ?? `/analysis/${ticker}`;
   const cardIsCompareTarget = compareIsFirstAction && onToggleCompare && !isComparing;
 
   const visibleMetrics = useMemo(() => {

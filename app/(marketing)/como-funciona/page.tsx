@@ -126,8 +126,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
-    { "@type": "ListItem", position: 2, name: "Como funciona", item: "https://analiso.com.br/como-funciona" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.analiso.com.br" },
+    { "@type": "ListItem", position: 2, name: "Como funciona", item: "https://www.analiso.com.br/como-funciona" },
   ],
 };
 

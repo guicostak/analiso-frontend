@@ -88,8 +88,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
-    { "@type": "ListItem", position: 2, name: "Para quem", item: "https://analiso.com.br/para-quem" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.analiso.com.br" },
+    { "@type": "ListItem", position: 2, name: "Para quem", item: "https://www.analiso.com.br/para-quem" },
   ],
 };
 

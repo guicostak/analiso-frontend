@@ -288,7 +288,27 @@
       "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/empresa/[ticker]/)",
       "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/\")",
       "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/como-funciona/\" \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/para-quem/\" \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/faq/\")",
-      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/blog/\")"
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/blog/\")",
+      "Bash(ls .env*)",
+      "Bash(curl -s -o /tmp/empresas.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/empresas)",
+      "Bash(curl -s -o /tmp/empresas2.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/empresas)",
+      "Bash(curl -s -o /tmp/empresas_ticker.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/empresas/ABEV3)",
+      "Bash(kill bbc9yp4vr:*)",
+      "Bash(taskkill //F //PID 55036)",
+      "Bash(curl -sS -o /tmp/sm.xml -w \"HTTP %{http_code}\\\\nSize: %{size_download}\\\\nTime: %{time_total}s\\\\nContent-Type: %{content_type}\\\\n\" https://analiso.com.br/sitemap.xml)",
+      "Bash(curl -sSI https://analiso.com.br/sitemap.xml)",
+      "Bash(curl -sSL -o /tmp/sm2.xml -w \"HTTP %{http_code}\\\\nFinal URL: %{url_effective}\\\\nContent-Type: %{content_type}\\\\nSize: %{size_download}\\\\n\" https://analiso.com.br/sitemap.xml)",
+      "Bash(ls app/analysis/[ticker]/)",
+      "Bash(curl -s \"http://localhost:8080/api/company-analysis/ABEV3\")",
+      "Bash(curl -s \"http://localhost:8080/api/\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:8080/v3/api-docs\")",
+      "Bash(curl -s \"http://localhost:8080/api/public/company-analysis/ABEV3\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:8080/api/explore/highlights\" -o /dev/null -w \"highlights:%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:8080/api/companies\" -o /dev/null -w \"companies:%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:8080/api/explore/market-context\" -o /dev/null -w \"market-ctx:%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:8080/api/companies/ABEV3/snowflake\" -o /dev/null -w \"snowflake:%{http_code}\\\\n\")",
+      "Bash(git mv:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

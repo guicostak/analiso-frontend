@@ -211,27 +211,27 @@ function ArticleJsonLd({ post }: { post: BlogPost }) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
-    image: ["https://analiso.com.br/logo.png"],
+    image: ["https://www.analiso.com.br/logo.png"],
     keywords: post.keywords.join(", "),
     datePublished: post.publishedAt,
     dateModified: post.updatedAt ?? post.publishedAt,
     author: {
       "@type": "Organization",
       name: "Analiso",
-      url: "https://analiso.com.br",
+      url: "https://www.analiso.com.br",
     },
     publisher: {
       "@type": "Organization",
       name: "Analiso",
-      url: "https://analiso.com.br",
+      url: "https://www.analiso.com.br",
       logo: {
         "@type": "ImageObject",
-        url: "https://analiso.com.br/logo.png",
+        url: "https://www.analiso.com.br/logo.png",
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://analiso.com.br/blog/${post.slug}`,
+      "@id": `https://www.analiso.com.br/blog/${post.slug}`,
     },
   };
 
@@ -243,9 +243,9 @@ function BreadcrumbJsonLd({ post }: { post: BlogPost }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
-      { "@type": "ListItem", position: 2, name: "Blog", item: "https://analiso.com.br/blog" },
-      { "@type": "ListItem", position: 3, name: post.title, item: `https://analiso.com.br/blog/${post.slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.analiso.com.br" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://www.analiso.com.br/blog" },
+      { "@type": "ListItem", position: 3, name: post.title, item: `https://www.analiso.com.br/blog/${post.slug}` },
     ],
   };
   return <JsonLd data={data} />;

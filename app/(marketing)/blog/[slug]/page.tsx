@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Artigo não encontrado | Analiso" };
   }
 
-  const url = `https://analiso.com.br/blog/${post.slug}`;
+  const url = `https://www.analiso.com.br/blog/${post.slug}`;
 
   return {
     title: `${post.title} | Analiso`,

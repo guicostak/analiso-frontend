@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { BLOG_POSTS } from "@/src/features/blog/data/posts";
-import { fetchAllIndexableCompanies } from "@/src/features/empresa/services/public";
+import { fetchAllIndexableCompanies } from "@/src/features/empresas/services/public";
 
-const SITE_URL = "https://analiso.com.br";
+const SITE_URL = "https://www.analiso.com.br";
 
 export const revalidate = 604800;
 

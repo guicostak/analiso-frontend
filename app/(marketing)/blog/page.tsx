@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     "B3",
   ],
   alternates: {
-    canonical: "https://analiso.com.br/blog",
+    canonical: "https://www.analiso.com.br/blog",
   },
   openGraph: {
     title: "Blog de Análise de Ações | Analiso",
     description:
       "Aprenda análise fundamentalista com artigos claros sobre P/L, P/VP, ROE, Dividend Yield e os principais indicadores da B3.",
-    url: "https://analiso.com.br/blog",
+    url: "https://www.analiso.com.br/blog",
     siteName: "Analiso",
     locale: "pt_BR",
     type: "website",

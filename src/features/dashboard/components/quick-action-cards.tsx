@@ -35,7 +35,7 @@ export function QuickActionCards() {
       description: 'Ver análise completa de exemplo',
       iconBg: 'bg-mint-50',
       iconColor: 'text-mint-600',
-      href: '/empresa/WEGE3',
+      href: '/analysis/WEGE3',
     },
   ];
 

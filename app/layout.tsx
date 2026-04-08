@@ -9,24 +9,24 @@ const rootJsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://analiso.com.br/#organization",
+      "@id": "https://www.analiso.com.br/#organization",
       name: "Analiso",
-      url: "https://analiso.com.br",
-      logo: "https://analiso.com.br/logo.png",
+      url: "https://www.analiso.com.br",
+      logo: "https://www.analiso.com.br/logo.png",
     },
     {
       "@type": "WebSite",
-      "@id": "https://analiso.com.br/#website",
-      url: "https://analiso.com.br",
+      "@id": "https://www.analiso.com.br/#website",
+      url: "https://www.analiso.com.br",
       name: "Analiso",
-      publisher: { "@id": "https://analiso.com.br/#organization" },
+      publisher: { "@id": "https://www.analiso.com.br/#organization" },
       inLanguage: "pt-BR",
     },
   ],
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://analiso.com.br"),
+  metadataBase: new URL("https://www.analiso.com.br"),
   title: {
     default: "Analiso — Análise fundamentalista de ações da B3",
     template: "%s | Analiso",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     siteName: "Analiso",
-    url: "https://analiso.com.br",
+    url: "https://www.analiso.com.br",
   },
   twitter: { card: "summary_large_image" },
 };
