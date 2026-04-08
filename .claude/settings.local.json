@@ -308,7 +308,9 @@
       "Bash(curl -s \"http://localhost:8080/api/explore/market-context\" -o /dev/null -w \"market-ctx:%{http_code}\\\\n\")",
       "Bash(curl -s \"http://localhost:8080/api/companies/ABEV3/snowflake\" -o /dev/null -w \"snowflake:%{http_code}\\\\n\")",
       "Bash(git mv:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/analysis/[ticker]/)",
+      "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/\\\\\\(marketing\\\\\\)/)"
     ]
   }
 }
