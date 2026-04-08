@@ -11,28 +11,28 @@ const severityTone: Record<
   Leve: {
     shell: "bg-card border-border",
     pill: "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/50",
-    accent: "bg-blue-50/50 dark:bg-blue-900/10",
-    glow: "bg-[radial-gradient(circle,rgba(91,141,239,0.07)_0%,rgba(91,141,239,0)_72%)]",
-    topBand: "bg-[linear-gradient(180deg,rgba(238,246,255,0.58),rgba(238,246,255,0.10))] dark:bg-none",
-    topShape: "rounded-[22px_32px_18px_26px/20px_24px_18px_22px] bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(255,255,255,0.16))] dark:hidden",
+    accent: "bg-transparent",
+    glow: "bg-transparent",
+    topBand: "bg-transparent",
+    topShape: "hidden",
     cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)] dark:shadow-none",
   },
   Moderada: {
     shell: "bg-card border-warning-border",
     pill: "bg-warning-surface text-warning-text border-warning-border",
     accent: "bg-transparent",
-    glow: "bg-[rgba(243,183,70,0.08)] blur-2xl",
-    topBand: "bg-warning-surface",
+    glow: "bg-transparent",
+    topBand: "bg-transparent",
     topShape: "hidden",
     cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)] dark:shadow-none",
   },
   Forte: {
-    shell: "bg-danger-surface dark:bg-danger-surface border-danger-border",
+    shell: "bg-card border-danger-border",
     pill: "bg-danger-surface text-danger-text border-danger-border",
-    accent: "bg-danger-surface",
-    glow: "bg-[radial-gradient(circle,rgba(181,71,104,0.14)_0%,rgba(181,71,104,0)_72%)]",
-    topBand: "bg-[linear-gradient(180deg,rgba(248,220,229,0.82),rgba(248,220,229,0.14))] dark:bg-none",
-    topShape: "rounded-[26px_28px_18px_30px/24px_18px_26px_20px] bg-[linear-gradient(135deg,rgba(255,255,255,0.56),rgba(255,240,245,0.14))] dark:hidden",
+    accent: "bg-transparent",
+    glow: "bg-transparent",
+    topBand: "bg-transparent",
+    topShape: "hidden",
     cardShadow: "shadow-[0_14px_30px_rgba(15,23,40,0.05)] dark:shadow-none",
   },
 };
@@ -190,16 +190,7 @@ export function ExploreHighlightsSection({
       {summaryState === "ready" && featuredHighlight && (
         <>
           <div className={`grid gap-5 ${hideSummaryCard ? "" : "xl:grid-cols-12"}`}>
-            <article className={`relative overflow-hidden rounded-[26px] border border-border bg-[linear-gradient(140deg,#EAF4FF_0%,#EDF6FF_24%,#F4F9FF_54%,#FBFDFF_78%,#FFFFFF_100%)] dark:bg-none dark:bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none ${hideSummaryCard ? "" : "xl:col-span-8 xl:min-h-[312px]"}`}>
-              <div className="pointer-events-none absolute inset-0 dark:hidden">
-                <div className="absolute -left-12 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.24)_0%,rgba(91,141,239,0.10)_28%,rgba(91,141,239,0)_72%)] blur-3xl" />
-                <div className="absolute left-10 top-8 h-32 w-52 rounded-[55%_45%_58%_42%/48%_35%_65%_52%] bg-[linear-gradient(135deg,rgba(255,255,255,0.58),rgba(255,255,255,0.08))]" />
-                <div className="absolute left-[16%] top-3 h-24 w-24 rounded-[38%_62%_58%_42%/52%_35%_65%_48%] border border-white/65 bg-[linear-gradient(180deg,rgba(255,255,255,0.28),rgba(255,255,255,0.12))]" />
-                <div className="absolute right-10 top-10 h-28 w-28 rounded-full border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.18))]" />
-                <div className="absolute left-7 top-[118px] h-44 w-[54%] rounded-[34px] bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.10))] shadow-[0_20px_50px_rgba(15,23,40,0.05)]" />
-                <div className="absolute inset-x-0 top-0 h-[120px] bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0))]" />
-              </div>
-
+            <article className={`relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none ${hideSummaryCard ? "" : "xl:col-span-8 xl:min-h-[312px]"}`}>
               <div className="relative grid h-full gap-6 lg:grid-cols-[minmax(0,1.2fr)_260px]">
                 <div className="flex flex-col justify-between">
                   <div>
@@ -211,9 +202,7 @@ export function ExploreHighlightsSection({
                     </h2>
                     <p className="mt-3 max-w-[620px] text-[14px] leading-6 text-muted-foreground">{featuredHighlight.whyItMatters}</p>
 
-                    <div className="relative mt-6 rounded-[22px] border border-white/75 dark:border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.72))] dark:bg-none dark:bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-14 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0))] dark:hidden" />
-                      <div className="pointer-events-none absolute inset-y-3 left-0 w-px bg-[linear-gradient(180deg,rgba(91,141,239,0),rgba(91,141,239,0.18),rgba(91,141,239,0))]" />
+                    <div className="relative mt-6 rounded-[22px] border border-border bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none">
                       <div className="flex items-start gap-4">
                         {(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker)) && (
                           <img
@@ -259,8 +248,7 @@ export function ExploreHighlightsSection({
                   </div>
                 </div>
 
-                <aside className="relative flex flex-col justify-between rounded-[22px] border border-[rgba(221,233,245,0.92)] dark:border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,251,253,0.96))] dark:bg-none dark:bg-card p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-none">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(234,244,255,0.72),rgba(234,244,255,0))] dark:hidden" />
+                <aside className="relative flex flex-col justify-between rounded-[22px] border border-border bg-card p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-none">
                   <div>
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">Por que abrir agora</p>
                     <p className="mt-3 text-[15px] leading-7 text-foreground">{featuredHighlight.whyItMatters}</p>
@@ -298,8 +286,6 @@ export function ExploreHighlightsSection({
             </article>
 
             {!hideSummaryCard && <aside className="relative overflow-hidden rounded-[28px] border border-border bg-card p-7 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none xl:col-span-4 xl:min-h-[340px]">
-              <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(18,165,148,0.10)_0%,rgba(18,165,148,0)_68%)]" />
-              <div className="absolute inset-x-0 top-0 h-20 bg-[linear-gradient(180deg,rgba(239,250,246,0.72),rgba(239,250,246,0))] dark:hidden" />
 
               <div className="relative flex h-full flex-col justify-between">
                 <div>
@@ -377,23 +363,6 @@ export function ExploreHighlightsSection({
             </div>
           )}
 
-          <div className="flex flex-col gap-4 rounded-[24px] border border-border bg-card px-6 py-5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground">
-              <span>Ultima atualizacao: 05/02</span>
-              <span className="hidden h-1 w-1 rounded-full bg-border lg:block" />
-              <span>Fontes: CVM, B3, RI</span>
-              <span className="hidden h-1 w-1 rounded-full bg-border lg:block" />
-              <span>Resumo educacional, sem recomendacao de compra ou venda.</span>
-            </div>
-            {highlights.length > 4 && (
-              <button
-                onClick={() => setShowAllHighlights((prev) => !prev)}
-                className="inline-flex w-fit rounded-full bg-muted px-4 py-2 text-[12px] font-semibold text-foreground transition hover:bg-muted"
-              >
-                {showAllHighlights ? "Ver menos prioridades" : "Ver mais prioridades"}
-              </button>
-            )}
-          </div>
         </>
       )}
     </section>

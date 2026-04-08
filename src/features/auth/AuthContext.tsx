@@ -70,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Remove stale token if backend didn't return one
         localStorage.removeItem(TOKEN_KEY);
       }
+      // Default theme on login is dark — only set if user hasn't chosen yet
+      if (!localStorage.getItem("analiso-theme")) {
+        localStorage.setItem("analiso-theme", "dark");
+      }
     } catch {
       // ignore storage errors
     }

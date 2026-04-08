@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PastTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
@@ -10,7 +11,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, formatDate } from '../utils/formatters';
-import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GaugeCard, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GaugeCard, ChartInfoButton, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
 import { DimensionCheckCard } from './ScoreDots';
 import { SankeySection } from './SankeySection';
 
@@ -65,9 +66,16 @@ function HistoricoGanhosSection({ data, activeKeys, setActiveKeys }: {
 
   return (
     <section>
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Histórico de ganhos e receitas
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Histórico de ganhos e receitas
+        </h3>
+        <ChartInfoButton>
+          Cada linha é uma série anual: <b>Receita</b>, <b>Lucro</b> e <b>Fluxo de Caixa</b>.
+          Linhas que sobem juntas mostram crescimento saudável; lucro descolando da receita pode indicar
+          mudança de margem ou efeitos contábeis pontuais.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-5">
         <div className="h-[360px] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:fill-neutral-400">
           <TremorLine
@@ -237,9 +245,15 @@ function FreeCashFlowSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-cy-id="report-sub-section-free-cash-flow-vs-earnings-analysis" data-section="past">
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Análise de Fluxo de Caixa Livre vs. Lucros
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Análise de Fluxo de Caixa Livre vs. Lucros
+        </h3>
+        <ChartInfoButton>
+          Compara o <b>lucro contábil</b> com o <b>caixa que efetivamente entrou</b>. Quando o FCL acompanha
+          o lucro de perto, a qualidade dos ganhos é alta; descolamentos persistentes merecem atenção.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-5">
         <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
           {/* Tooltip */}
@@ -403,9 +417,15 @@ function PastEarningsGrowthSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-section="past">
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Análise do crescimento dos lucros passados
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Análise do crescimento dos lucros passados
+        </h3>
+        <ChartInfoButton>
+          Cada barra é a <b>taxa anual média</b> de crescimento em diferentes janelas (1, 3, 5 anos).
+          Janelas longas suavizam variações pontuais; janelas curtas mostram a tendência mais recente.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-6">
         <div className="flex gap-6">
           <GrowthBarChart title="Crescimento Anual de Lucros (Histórico)" bars={earningsBars} />
@@ -450,9 +470,15 @@ function PastROESection({ data }: { data: AnalysisData }) {
   return (
     <section className="analysis-card overflow-hidden">
       <div className="px-6 pt-5 pb-4">
-        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
-          Retorno sobre o Patrimônio Líquido
-        </h3>
+        <div className="flex items-start gap-2">
+          <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+            Retorno sobre o Patrimônio Líquido
+          </h3>
+          <ChartInfoButton>
+            O ROE mede <b>quanto a empresa gera de lucro para cada real de patrimônio</b>. O ponteiro
+            menor é a média do setor — quanto mais o ponteiro principal estiver à direita, melhor.
+          </ChartInfoButton>
+        </div>
       </div>
 
       <div className="px-6 pb-6">
@@ -915,7 +941,7 @@ export function PastTab({ data, state }: { data: AnalysisData; state: PastTabSta
       </div>
 
       {/* ── Drawer lateral de atualizações ── */}
-      {drawerOpen && (
+      {drawerOpen && typeof document !== 'undefined' && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/30 z-40"
@@ -962,7 +988,8 @@ export function PastTab({ data, state }: { data: AnalysisData; state: PastTabSta
               </ul>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Detalhamento de Receitas e Despesas — Sankey */}

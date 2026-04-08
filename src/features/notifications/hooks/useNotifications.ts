@@ -9,7 +9,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/src/features/auth";
+import { normalizeApiError } from "@/src/lib/errors";
 import { notificationsService } from "../services/notifications.service";
 import type { Notification } from "../interfaces";
 
@@ -51,7 +53,12 @@ export function useNotifications(): UseNotificationsReturn {
         setItems(res.items);
         setUnreadCount(res.unreadCount);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar notificações");
+        const { message } = normalizeApiError(err);
+        setError(message);
+        // Avoid spamming toasts on background polling — only on the visible fetch.
+        if (showLoading) {
+          toast.error(`Não foi possível carregar suas notificações. ${message}`);
+        }
       } finally {
         if (showLoading) setIsLoading(false);
       }
@@ -82,12 +89,13 @@ export function useNotifications(): UseNotificationsReturn {
 
       try {
         await notificationsService.markAsRead(token, id);
-      } catch {
+      } catch (err) {
         // Reverte em caso de falha
         setItems((prev) =>
           prev.map((n) => (n.id === id ? { ...n, read: false } : n)),
         );
         setUnreadCount((prev) => prev + 1);
+        toast.error(`Não foi possível marcar como lida. ${normalizeApiError(err).message}`);
       }
     },
     [token],
@@ -101,7 +109,7 @@ export function useNotifications(): UseNotificationsReturn {
 
     try {
       await notificationsService.markAllAsRead(token);
-    } catch {
+    } catch (err) {
       // Reverte apenas se havia não-lidas antes
       if (hadUnread) {
         setItems((prev) =>
@@ -112,6 +120,7 @@ export function useNotifications(): UseNotificationsReturn {
           ),
         );
         setUnreadCount(items.filter((n) => !n.read).length);
+        toast.error(`Não foi possível marcar todas como lidas. ${normalizeApiError(err).message}`);
       }
     }
   }, [token, items]);

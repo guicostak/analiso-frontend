@@ -17,12 +17,6 @@ const trendTone: Record<IndexCard["trend"], string> = {
   neutral: "text-warning-text",
 };
 
-const indexCardSurface: Record<IndexCard["trend"], string> = {
-  up: "bg-card",
-  down: "bg-card",
-  neutral: "bg-card",
-};
-
 const indexCardGlow: Record<IndexCard["trend"], string> = {
   up: "bg-[radial-gradient(circle,rgba(31,169,113,0.10)_0%,rgba(31,169,113,0)_72%)]",
   down: "bg-[radial-gradient(circle,rgba(230,114,140,0.10)_0%,rgba(230,114,140,0)_72%)]",
@@ -38,6 +32,10 @@ interface ExploreMarketContextProps {
   marketContextDto?: ExploreMarketContextDto | null;
   setShowVolatilityInfo: (fn: ((prev: boolean) => boolean) | boolean) => void;
   setShowVolatilityDetails: (v: boolean) => void;
+  /** Oculta o cabeçalho interno (usado quando a página já tem seu próprio header). */
+  hideHeader?: boolean;
+  /** Oculta o bloco de resumo (hero "Contexto macro" + cards de índices). */
+  hideContextSummary?: boolean;
 }
 
 export function ExploreMarketContext({
@@ -49,28 +47,24 @@ export function ExploreMarketContext({
   marketContextDto,
   setShowVolatilityInfo,
   setShowVolatilityDetails,
+  hideHeader = false,
 }: ExploreMarketContextProps) {
   const summary = marketContextDto?.summary;
   const detail = marketContextDto?.detail;
   return (
     <section className="space-y-4">
-      <div>
-        <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
-        <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado hoje</h2>
-      </div>
+      {!hideHeader && (
+        <div>
+          <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
+          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado hoje</h2>
+        </div>
+      )}
 
       <>
-          <div className="grid gap-5 xl:grid-cols-12">
-            <article className="relative overflow-hidden rounded-[26px] border border-border bg-[linear-gradient(135deg,#EEF6FF_0%,#F2F8FF_28%,#F7FBFF_62%,#FFFFFF_100%)] dark:bg-[linear-gradient(135deg,var(--color-card)_0%,var(--color-card)_100%)] p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none xl:col-span-8 xl:min-h-[228px]">
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -left-10 -top-12 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(91,141,239,0.20)_0%,rgba(91,141,239,0.06)_36%,rgba(91,141,239,0)_72%)] blur-2xl" />
-                <div className="absolute left-[10%] top-5 h-24 w-40 rounded-[48%_52%_40%_60%/58%_38%_62%_42%] bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(255,255,255,0.12))]" />
-                <div className="absolute right-14 top-10 h-24 w-24 rounded-full border border-white/65 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.16))]" />
-                <div className="absolute inset-x-0 bottom-0 h-[112px] bg-[linear-gradient(180deg,rgba(238,246,255,0),rgba(238,246,255,0.34))]" />
-              </div>
-
+          <div className="space-y-5">
+            <article className="relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none">
               <div className="relative flex h-full flex-col justify-between gap-6">
-                <div className="max-w-[72%]">
+                <div className="max-w-[820px]">
                   <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300">
                     Contexto macro
                   </span>
@@ -83,16 +77,13 @@ export function ExploreMarketContext({
                 </div>
 
                 <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_216px]">
-                  <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[linear-gradient(90deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
-                  <div className="relative rounded-[22px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.66))] p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)] dark:shadow-none">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-12 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.44),rgba(255,255,255,0))]" />
+                  <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)] dark:shadow-none">
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">Interpretacao principal</p>
                     <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-foreground">
                       {detail?.description || "O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia."}
                     </p>
                   </div>
-                  <div className="relative rounded-[22px] border border-white/72 bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.56))] p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)]">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]" />
+                  <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)] dark:shadow-none">
                     <p className="text-[12px] font-medium uppercase text-muted-foreground">O que observar</p>
                     <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
                       {detail?.subtitle || "Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala."}
@@ -102,33 +93,34 @@ export function ExploreMarketContext({
               </div>
             </article>
 
-            <aside className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none xl:col-span-4">
-              <div className="mb-4">
-                <p className="text-[12px] font-medium uppercase text-muted-foreground">Resumo dos indices</p>
-                <p className="mt-2 text-[14px] leading-6 text-muted-foreground">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
+            <aside className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none">
+              <div className="mb-4 flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+                <div>
+                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Resumo dos indices</p>
+                  <p className="mt-2 text-[14px] leading-6 text-muted-foreground">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
+                </div>
               </div>
 
               {isLoading ? (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {[1, 2, 3, 4].map((item) => (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+                  {[1, 2, 3, 4, 5].map((item) => (
                     <div key={item} className="min-h-[108px] rounded-[20px] bg-muted" />
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
                   {indexCards.map((card) => (
                     <div
                       key={card.symbol}
-                      className={`relative overflow-hidden rounded-[18px] border border-border p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none ${indexCardSurface[card.trend]}`}
+                      className={`relative overflow-hidden rounded-[18px] border border-border bg-card p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none`}
                     >
-                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0))]`} />
                       <div className={`pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full ${indexCardGlow[card.trend]}`} />
                       <div className="flex items-start justify-between gap-3">
                         <div className="relative">
                           <p className="text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">{card.name}</p>
                           <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.04em] text-muted-foreground">{card.symbol}</p>
                         </div>
-                        <div className="relative rounded-full border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.72))] px-2.5 py-1.5 shadow-[0_8px_18px_rgba(15,23,40,0.04)] dark:shadow-none">
+                        <div className="relative rounded-full border border-border bg-card px-2.5 py-1.5 shadow-[0_8px_18px_rgba(15,23,40,0.04)] dark:shadow-none">
                           <MiniSparkline
                             data={card.sparkline}
                             status={getTrendStatus(card.trend)}
@@ -150,7 +142,7 @@ export function ExploreMarketContext({
             </aside>
           </div>
 
-          <div className="rounded-[26px] border border-border bg-[linear-gradient(135deg,#FFF5E8_0%,#FFFFFF_78%)] dark:bg-[linear-gradient(135deg,var(--color-card)_0%,var(--color-card)_100%)] p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
+          <div className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-[760px]">
                 <div className="flex items-center gap-3">

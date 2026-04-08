@@ -9,6 +9,7 @@ import { ChatbotPanelProvider } from "../src/components/layout/ChatbotContext";
 import { SidebarProvider } from "../src/components/layout/SidebarContext";
 import { LuizProvider } from "../src/components/layout/LuizContext";
 import { SubscriptionProvider } from "../src/features/assinatura/hooks";
+import { Toaster } from "../src/components/ui/sonner";
 
 // Lazy-load chat panels — they are heavy and not needed on initial render
 const ChatbotPanel = dynamic(
@@ -28,7 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
+      defaultTheme="dark"
       enableSystem
       storageKey="analiso-theme"
     >
@@ -44,6 +45,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <ChatbotPanel />
                     {/* Luiz — assistente principal, sempre montado */}
                     <LuizChatPanel />
+                    <Toaster position="bottom-right" richColors />
                   </LuizProvider>
                 </ChatbotPanelProvider>
               </SidebarProvider>

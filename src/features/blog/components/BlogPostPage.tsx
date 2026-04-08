@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/src/components/seo/JsonLd";
 import { LandingNav } from "@/src/components/layout/LandingNav";
 import {
   getPostBySlug,
@@ -210,6 +211,7 @@ function ArticleJsonLd({ post }: { post: BlogPost }) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
+    image: ["https://analiso.com.br/logo.png"],
     keywords: post.keywords.join(", "),
     datePublished: post.publishedAt,
     dateModified: post.updatedAt ?? post.publishedAt,
@@ -224,7 +226,7 @@ function ArticleJsonLd({ post }: { post: BlogPost }) {
       url: "https://analiso.com.br",
       logo: {
         "@type": "ImageObject",
-        url: "https://analiso.com.br/favicon-32.png",
+        url: "https://analiso.com.br/logo.png",
       },
     },
     mainEntityOfPage: {
@@ -233,12 +235,7 @@ function ArticleJsonLd({ post }: { post: BlogPost }) {
     },
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  );
+  return <JsonLd data={data} />;
 }
 
 function BreadcrumbJsonLd({ post }: { post: BlogPost }) {
@@ -251,12 +248,7 @@ function BreadcrumbJsonLd({ post }: { post: BlogPost }) {
       { "@type": "ListItem", position: 3, name: post.title, item: `https://analiso.com.br/blog/${post.slug}` },
     ],
   };
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  );
+  return <JsonLd data={data} />;
 }
 
 /* ── Page component ───────────────────────────────────────────────────── */

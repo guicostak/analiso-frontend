@@ -91,13 +91,23 @@ export function SearchAutocomplete({ query, onSelect, onClose }: Props) {
       `/api/search/suggest?q=${encodeURIComponent(debouncedQuery)}&limit=8`,
       { signal: abortRef.current.signal },
     )
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("suggest_failed");
+        return r.json();
+      })
       .then((data: { results?: SuggestResult[] }) => {
         setResults(data.results ?? []);
         setLoading(false);
       })
       .catch((err) => {
-        if ((err as Error).name !== "AbortError") setLoading(false);
+        // Aborts are expected when the user keeps typing — silently ignore.
+        if ((err as Error).name === "AbortError") return;
+        // Other failures: keep the dropdown empty so it gracefully closes,
+        // and stop the spinner. Don't toast — autocomplete failures are too
+        // frequent and not actionable for the user.
+        console.error("[SearchAutocomplete] suggest failed", err);
+        setResults([]);
+        setLoading(false);
       });
 
     return () => abortRef.current?.abort();

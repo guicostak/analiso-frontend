@@ -1,4 +1,4 @@
-import { Bell, CreditCard, Lock, LogOut, Settings2, User, UserCircle2 } from "lucide-react";
+import { Bell, CreditCard, Lock, LogOut, User, UserCircle2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/features/auth/AuthContext";
@@ -17,7 +17,6 @@ export function UserNavMenu() {
 
   const menuItems: { id: string; label: string; href: string; icon: ComponentType<{ className?: string }>; badge?: string }[] = [
     { id: "conta",        label: "Minha conta",   href: "/perfil",                  icon: User },
-    { id: "preferencias", label: "Preferências",   href: "/perfil?tab=preferencias", icon: Settings2 },
     { id: "seguranca",    label: "Segurança",      href: "/perfil?tab=seguranca",    icon: Lock },
     { id: "assinatura",   label: "Assinatura",     href: "/perfil?tab=assinatura",   icon: CreditCard, badge: "PRO" },
     { id: "alertas",      label: "Alertas",        href: "/perfil?tab=alertas",      icon: Bell },

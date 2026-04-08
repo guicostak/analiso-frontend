@@ -15,7 +15,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { normalizeApiError } from "@/src/lib/errors";
 import { useAuth } from "../../auth/AuthContext";
 
 import {
@@ -168,7 +170,9 @@ export function useExplore(): UseExploreReturn {
       })
       .catch((err) => {
         console.error("[useExplore] Falha ao carregar /api/explore:", err);
+        const { message } = normalizeApiError(err);
         setSummaryState("error");
+        toast.error(message);
       })
       .finally(() => {
         setIsLoading(false);

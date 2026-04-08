@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, FileDown, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { fetchAnalysisCoreData, trackAnalysis } from '../services';
+import { downloadAnalysisReport } from '../services/pdfReport';
 import type { SectionName } from '../services';
 import { TABS, DIMENSION_COLORS } from '../constants/colors';
 import { useAnalysis } from '../hooks/useAnalysis';
@@ -16,6 +18,7 @@ import { MainContent } from '@/src/components/layout/MainContent';
 import { OverviewTab } from './OverviewTab';
 import { ScoreChecks, ScoreIndicator, getScoreColor } from './ScoreDots';
 import { AnalysisActionButtons } from './AnalysisActionButtons';
+import { LoadingState } from '@/src/components/feedback';
 
 // Lazy-load heavy tabs — only OverviewTab is eagerly loaded (first visible section)
 const ValueTab = dynamic(() => import('./ValueTab').then(m => ({ default: m.ValueTab })), { ssr: false });
@@ -79,13 +82,92 @@ export function AnalysisPage() {
   const ticker = (params?.ticker as string ?? '').toUpperCase();
 
   // ── Data fetching with loading / error states ──────────────────────────
-  const { data, loading, error, sectionsLoaded, fetchSection, setData, setLoading, setError } = useAnalysis(ticker);
+  const { data, loading, error, sectionsLoaded, fetchSection, ensureAllSectionsLoaded, setData, setLoading, setError } = useAnalysis(ticker);
 
   // ── Centralized UI state for all tabs ────────────────────────────────
   const pageState = useAnalysisPageState();
 
   // ── Active section tracking + scroll navigation ───────────────────────
   const { activeSection, companyCardPassed, companyCardRef, navAlignRef, sectionRefs, scrollToSection } = useAnalysisNav(!!data);
+
+  // ── PDF report download ───────────────────────────────────────────────
+  // Captures the rendered DOM section by section and assembles a PDF that
+  // mirrors what the user is seeing. Forces light mode + waits for lazy
+  // sections to mount and chart animations to settle before capturing.
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const waitFrames = (n = 2) =>
+    new Promise<void>(resolve => {
+      const tick = (i: number) => {
+        if (i <= 0) return resolve();
+        requestAnimationFrame(() => tick(i - 1));
+      };
+      tick(n);
+    });
+
+  const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
+  const waitForSectionsRendered = async (ids: string[], timeoutMs = 6000) => {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const allReady = ids.every(id => {
+        const el = sectionRefs.current[id];
+        // 240px ~ taller than the loading skeleton placeholder (~200px)
+        return el && el.offsetHeight > 240;
+      });
+      if (allReady) return true;
+      await sleep(120);
+    }
+    return false;
+  };
+
+  const handleDownloadPdf = async () => {
+    if (pdfLoading || !data) return;
+    setPdfLoading(true);
+    trackAnalysis('analysis_pdf_clicked', { ticker });
+    const toastId = toast.loading('Gerando relatório em PDF…');
+
+    const html = document.documentElement;
+    const wasDark = html.classList.contains('dark');
+
+    try {
+      // 1. Ensure all sections have data
+      const fullData = (await ensureAllSectionsLoaded()) ?? data;
+
+      // 2. Force light mode for capture so colors are correct on white paper
+      if (wasDark) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        await waitFrames(3);
+      }
+
+      // 3. Wait for lazy-loaded tab components to mount and render
+      await waitForSectionsRendered(['value', 'future', 'past', 'health', 'dividend']);
+
+      // 4. Extra delay so Recharts/Tremor finish their entrance animations
+      await sleep(1600);
+      await waitFrames(2);
+
+      // 5. Capture and build the PDF
+      const sections = ['overview', 'value', 'future', 'past', 'health', 'dividend', 'sources']
+        .map(id => ({ id, el: sectionRefs.current[id] ?? null }));
+
+      await downloadAnalysisReport({ data: fullData, sections });
+      toast.success('Relatório baixado', { id: toastId });
+      trackAnalysis('analysis_pdf_success', { ticker });
+    } catch (err) {
+      console.error('[AnalysisPage] PDF generation failed', err);
+      toast.error('Não foi possível gerar o relatório', { id: toastId });
+      trackAnalysis('analysis_pdf_failed', { ticker, error: String(err) });
+    } finally {
+      // Restore dark mode if it was active
+      if (wasDark) {
+        html.classList.add('dark');
+        html.classList.remove('light');
+      }
+      setPdfLoading(false);
+    }
+  };
 
   // ── Telemetria: tab selecionada muda quando o user scrolla/clica ──────
   useEffect(() => {
@@ -142,28 +224,7 @@ export function AnalysisPage() {
             </button>
           </div>
         ) : (
-          // DESIGN CHANGE — Chart skeleton loading animation
-          <div className="text-center space-y-8 analysis-enter" style={{ width: 320 }}>
-            {/* Skeleton chart bars */}
-            <div className="relative flex items-end justify-center gap-2.5" style={{ height: 120 }}>
-              {[65, 85, 45, 100, 55, 75, 90].map((h, i) => (
-                <div
-                  key={i}
-                  className="analysis-skeleton-bar"
-                  style={{ width: 24, height: `${h}%`, transformOrigin: 'bottom' }}
-                />
-              ))}
-              <div className="analysis-skeleton-line" />
-            </div>
-
-            {/* Skeleton text lines */}
-            <div className="space-y-3 px-4">
-              <div className="analysis-skeleton-shimmer mx-auto" style={{ height: 14, width: '70%' }} />
-              <div className="analysis-skeleton-shimmer mx-auto" style={{ height: 10, width: '50%' }} />
-            </div>
-
-            <p className="text-sm text-muted-foreground font-medium">Carregando análise de {ticker}…</p>
-          </div>
+          <LoadingState label={`Carregando análise de ${ticker}…`} inline />
         )}
       </div>
     );
@@ -248,6 +309,29 @@ export function AnalysisPage() {
               })}
             </nav>
           </div>
+
+          {/* DESIGN CHANGE — Prominent brand-colored CTA below the section progress.
+              Intentionally NOT grouped with the compact action buttons so it gets
+              clear visual weight as a primary action. */}
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={pdfLoading}
+            className="mt-4 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-brand text-white text-[13px] font-semibold shadow-sm hover:bg-brand-hover hover:shadow-md transition-all disabled:opacity-70 disabled:cursor-wait"
+            aria-label="Baixar relatório em PDF"
+          >
+            {pdfLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Gerando…</span>
+              </>
+            ) : (
+              <>
+                <FileDown className="w-4 h-4" />
+                <span>Baixar relatório (PDF)</span>
+              </>
+            )}
+          </button>
         </aside>
 
         {/* DESIGN CHANGE — Main content with increased section gap for visual breathing room */}

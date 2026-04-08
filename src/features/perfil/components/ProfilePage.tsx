@@ -4,21 +4,16 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Bell,
-  ChevronDown,
-  Chrome,
   CreditCard,
   FileText,
-  Laptop,
-  Lock,
+  KeyRound,
   Mail,
-  Settings2,
-  Shield,
-  Trash2,
   User,
   Wallet,
 } from "lucide-react";
 import { useAuth } from "@/src/features/auth/AuthContext";
 import { AccountShell } from "./AccountShell";
+import { ChangePasswordSection } from "./ChangePasswordSection";
 import { fetchPlans, fetchSubscription, cancelSubscription, updateAutoRenew } from "@/src/features/assinatura/services";
 import type { SubscriptionData } from "@/src/features/assinatura/services";
 import { SubscriptionPlanCard } from "@/src/features/assinatura/components/SubscriptionPlanCard";
@@ -32,12 +27,11 @@ type AccountField = {
   value: string;
 };
 
-type SectionId = "conta" | "preferencias" | "seguranca" | "pagamento" | "assinatura" | "alertas";
+type SectionId = "conta" | "seguranca" | "pagamento" | "assinatura" | "alertas";
 
 const sections: { id: SectionId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "conta", label: "Minha conta", icon: User },
-  { id: "preferencias", label: "Preferências", icon: Settings2 },
-  { id: "seguranca", label: "Segurança", icon: Lock },
+  { id: "seguranca", label: "Senha", icon: KeyRound },
   { id: "pagamento", label: "Pagamento", icon: Wallet },
   { id: "assinatura", label: "Assinatura", icon: CreditCard },
   { id: "alertas", label: "Alertas", icon: Bell },
@@ -119,18 +113,6 @@ function Toggle({ checked = true }: { checked?: boolean }) {
   );
 }
 
-function SelectField({ value, icon }: { value: string; icon?: React.ReactNode }) {
-  return (
-    <button className="flex h-[52px] w-full max-w-[390px] items-center justify-between rounded-[16px] border border-border bg-card px-4 text-left text-[14px] text-foreground shadow-[0_6px_14px_rgba(15,23,40,0.04)]">
-      <span className="flex items-center gap-3">
-        {icon}
-        <span>{value}</span>
-      </span>
-      <ChevronDown className="h-5 w-5 text-foreground" />
-    </button>
-  );
-}
-
 function PreferenceRow({
   title,
   subtitle,
@@ -151,29 +133,6 @@ function PreferenceRow({
   );
 }
 
-function SecurityActionRow({
-  title,
-  subtitle,
-  actionLabel,
-}: {
-  title: string;
-  subtitle: string;
-  actionLabel: string;
-}) {
-  return (
-    <div className="grid items-center gap-6 py-4 xl:grid-cols-[1fr_auto]">
-      <div>
-        <p className="text-[15px] font-semibold text-foreground">{title}</p>
-        <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>
-      </div>
-      <div className="xl:justify-self-end">
-        <button className="inline-flex h-10 items-center justify-center rounded-[15px] border border-border bg-card px-4.5 text-[14px] font-semibold text-foreground shadow-[0_8px_18px_rgba(15,23,40,0.05)]">
-          {actionLabel}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Página principal ─── */
 
@@ -191,18 +150,19 @@ export function ProfilePage() {
 
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const initialTab: SectionId = (tabParam === "preferencias" || tabParam === "seguranca" || tabParam === "pagamento" || tabParam === "assinatura" || tabParam === "alertas") ? tabParam : "conta";
+  const initialTab: SectionId = (tabParam === "seguranca" || tabParam === "pagamento" || tabParam === "assinatura" || tabParam === "alertas") ? tabParam : "conta";
   const [activeSection, setActiveSection] = useState<SectionId>(initialTab);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    const section: SectionId = (tab === "preferencias" || tab === "seguranca" || tab === "pagamento" || tab === "assinatura" || tab === "alertas") ? tab : "conta";
+    const section: SectionId = (tab === "seguranca" || tab === "pagamento" || tab === "assinatura" || tab === "alertas") ? tab : "conta";
     setActiveSection(section);
   }, [searchParams]);
   const [cycle, setCycle] = useState<BillingCycle>("Anual");
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
     fetchPlans().then(setPlans).catch(() => {});
@@ -260,7 +220,7 @@ export function ProfilePage() {
               <button
                 key={sec.id}
                 onClick={() => setActiveSection(sec.id)}
-                className={`relative inline-flex items-center gap-1.5 px-3 py-3.5 text-[12px] transition ${
+                className={`relative inline-flex items-center gap-1.5 px-3 py-3.5 text-[14px] transition ${
                   isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -323,111 +283,40 @@ export function ProfilePage() {
           </>
         )}
 
-        {/* ━━━ PREFERÊNCIAS ━━━ */}
-        {activeSection === "preferencias" && (
-          <>
-            <div className="border-b border-border py-8">
-              <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
-                <SectionHeading title="Preferências do sistema" subtitle="Ajuste as preferências do sistema da Analiso" />
-                <div />
-              </div>
-            </div>
-
-            {/* Geral */}
-            <div className="border-b border-border py-8 last:border-b-0">
-              <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
-                <div>
-                  <span className="inline-flex rounded-[12px] bg-muted px-3 py-2 text-[14px] font-semibold text-foreground">
-                    Geral
-                  </span>
-                </div>
-                <div>
-                  <PreferenceRow title="Resumo diário" subtitle="Receba um e-mail diário com sua agenda e atividades." control={<Toggle checked />} />
-                  <PreferenceRow
-                    title="Idioma"
-                    subtitle="Defina o idioma da plataforma."
-                    control={<SelectField value="Português (Brasil)" icon={<span className="text-[18px]">🇧🇷</span>} />}
-                  />
-                  <PreferenceRow title="Fuso horário" subtitle="Defina o fuso horário da sua conta." control={<SelectField value="UTC - 03:00 - Brasília" />} />
-                </div>
-              </div>
-            </div>
-
-            {/* Notificações */}
-            <div className="border-b border-border py-8 last:border-b-0">
-              <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
-                <div>
-                  <span className="inline-flex rounded-[12px] bg-muted px-3 py-2 text-[14px] font-semibold text-foreground">
-                    Notificações
-                  </span>
-                </div>
-                <div>
-                  <PreferenceRow title="Notificações por Push" subtitle="Receba avisos diretamente no desktop ou smartphone." control={<Toggle checked />} />
-                  <PreferenceRow title="Notificações por SMS" subtitle="Receba avisos importantes por mensagem de texto (SMS)." control={<Toggle checked />} />
-                  <PreferenceRow title="Notificações por WhatsApp" subtitle="Receba notificações diretamente no WhatsApp para maior agilidade." control={<Toggle checked />} />
-                  <PreferenceRow title="Notificações por E-mail" subtitle="Receba notificações no seu e-mail cadastrado." control={<Toggle checked />} />
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
         {/* ━━━ SEGURANÇA ━━━ */}
         {activeSection === "seguranca" && (
           <>
             <div className="border-b border-border py-8">
               <div className="grid gap-7 xl:grid-cols-[0.9fr_1.2fr]">
-                <SectionHeading title="Acesso à Analiso" subtitle="Gerencie formas de acessar a Analiso" />
-                <div className="space-y-3">
-                  <SecurityActionRow title="Senha de acesso" subtitle="Atualize a senha usada para acessar sua conta." actionLabel="Alterar senha" />
-                  <SecurityActionRow title="E-mail de acesso" subtitle="Atualize o e-mail utilizado para acessar sua conta." actionLabel="Alterar E-mail" />
-                  <SecurityActionRow title="Autenticação de dois fatores" subtitle="Proteja sua conta com uma verificação adicional ao fazer login." actionLabel="Habilitar" />
-                </div>
-              </div>
-            </div>
+                <SectionHeading title="Alterar senha" subtitle="Atualize a senha usada para acessar sua conta." />
+                <div className="space-y-5">
+                  <div>
+                    <label htmlFor="current-password-locked" className="mb-1.5 block text-[13px] font-semibold text-foreground">
+                      Senha atual
+                    </label>
+                    <input
+                      id="current-password-locked"
+                      type="password"
+                      value="••••••••••"
+                      readOnly
+                      disabled
+                      className="h-11 w-full rounded-[12px] border border-border bg-muted px-4 text-[14px] text-muted-foreground outline-none disabled:cursor-not-allowed"
+                    />
+                  </div>
 
-            <div className="py-8">
-              <h2 className="text-[17px] font-semibold text-foreground">Dispositivos conectados</h2>
-
-              <div className="mt-8 overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_8px_20px_rgba(15,23,40,0.04)]">
-                <div className="grid grid-cols-[1.4fr_0.36fr_0.36fr_56px] border-b border-border bg-background">
-                  <div className="flex items-center gap-3 px-5 py-4 text-[14px] font-semibold text-foreground">
-                    <User className="h-4 w-4 text-muted-foreground/60" />
-                    <span>Navegador</span>
-                  </div>
-                  <div className="flex items-center gap-3 border-l border-border px-5 py-4 text-[14px] font-semibold text-foreground">
-                    <Laptop className="h-4 w-4 text-muted-foreground/60" />
-                    <span>Dispositivo</span>
-                  </div>
-                  <div className="flex items-center gap-3 border-l border-border px-5 py-4 text-[14px] font-semibold text-foreground">
-                    <Shield className="h-4 w-4 text-muted-foreground/60" />
-                    <span>Status</span>
-                  </div>
-                  <div className="border-l border-border" />
-                </div>
-
-                <div className="grid grid-cols-[1.4fr_0.36fr_0.36fr_56px] items-center">
-                  <div className="flex items-center gap-4 px-5 py-5">
-                    <div className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card shadow-[0_4px_10px_rgba(15,23,40,0.06)]">
-                      <Chrome className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <span className="text-[14px] text-foreground">Chrome OS X</span>
-                  </div>
-                  <div className="border-l border-border px-5 py-5">
-                    <span className="rounded-full bg-muted px-3 py-1.5 text-[12px] font-semibold text-foreground">
-                      Desktop
-                    </span>
-                  </div>
-                  <div className="border-l border-border px-5 py-5">
-                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-500 dark:bg-blue-900/20">
-                      Dispositivo atual
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center border-l border-border px-3 py-5">
-                    <button className="text-muted-foreground transition hover:text-foreground">
-                      <Trash2 className="h-5 w-5" />
+                  {!showChangePassword ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowChangePassword(true)}
+                      className="inline-flex h-10 items-center justify-center rounded-[12px] border border-border bg-card px-4 text-[13px] font-semibold text-foreground transition hover:bg-hover"
+                    >
+                      Esqueci minha senha
                     </button>
-                  </div>
+                  ) : (
+                    <div className="rounded-[16px] border border-border bg-muted/40 p-5">
+                      <ChangePasswordSection />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -692,10 +581,9 @@ export function ProfilePage() {
                 <div className="space-y-3">
                   <p className="text-[13px] font-semibold text-foreground">Categorias de alerta</p>
                   {[
-                    { label: "Risco", desc: "Alertas quando uma ação entrar em zona de risco" },
-                    { label: "Atenção", desc: "Mudanças relevantes que pedem acompanhamento" },
-                    { label: "Oportunidade", desc: "Ações que entraram em uma faixa de oportunidade" },
-                    { label: "Dividendo", desc: "Datas de ex-dividendo e pagamentos próximos" },
+                    { label: "Contexto de Mercado", desc: "Movimentos macro, juros, câmbio e fatos que afetam o mercado como um todo" },
+                    { label: "Movimentações do Mercado", desc: "Variações relevantes de preços, volumes e fluxos das ações" },
+                    { label: "Notícias", desc: "Notícias relevantes sobre empresas, setores e o mercado" },
                   ].map((cat) => (
                     <label key={cat.label} className="flex items-start gap-3 rounded-[14px] border border-border p-4 transition hover:bg-muted">
                       <input type="checkbox" defaultChecked className="mt-0.5 h-4 w-4 rounded border-border accent-brand" />
@@ -707,16 +595,28 @@ export function ProfilePage() {
                   ))}
                 </div>
 
+                {/* Resumo diário */}
+                <div className="space-y-3">
+                  <p className="text-[13px] font-semibold text-foreground">Resumo diário</p>
+                  <label className="flex items-start gap-3 rounded-[14px] border border-border p-4 transition hover:bg-muted">
+                    <input type="checkbox" defaultChecked className="mt-0.5 h-4 w-4 rounded border-border accent-brand" />
+                    <div>
+                      <p className="text-[13px] font-medium text-foreground">Resumo diário</p>
+                      <p className="text-[12px] text-muted-foreground">Receba um e-mail diário com sua agenda e atividades.</p>
+                    </div>
+                  </label>
+                </div>
+
                 {/* Canal de entrega */}
                 <div className="space-y-3">
                   <p className="text-[13px] font-semibold text-foreground">Canal de entrega</p>
                   {[
-                    { label: "Push no navegador", desc: "Receba notificações em tempo real" },
-                    { label: "E-mail diário", desc: "Resumo diário com todos os alertas do dia" },
-                    { label: "E-mail em tempo real", desc: "Um e-mail para cada alerta importante" },
+                    { label: "Notificações por Push", desc: "Receba avisos diretamente no desktop ou smartphone." },
+                    { label: "Notificações por WhatsApp", desc: "Receba notificações diretamente no WhatsApp para maior agilidade." },
+                    { label: "Notificações por E-mail", desc: "Receba notificações no seu e-mail cadastrado." },
                   ].map((ch) => (
                     <label key={ch.label} className="flex items-start gap-3 rounded-[14px] border border-border p-4 transition hover:bg-muted">
-                      <input type="checkbox" defaultChecked={ch.label === "Push no navegador"} className="mt-0.5 h-4 w-4 rounded border-border accent-brand" />
+                      <input type="checkbox" defaultChecked className="mt-0.5 h-4 w-4 rounded border-border accent-brand" />
                       <div>
                         <p className="text-[13px] font-medium text-foreground">{ch.label}</p>
                         <p className="text-[12px] text-muted-foreground">{ch.desc}</p>

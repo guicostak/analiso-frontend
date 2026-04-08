@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/src/components/layout";
 import { EmbeddedCheckout } from "@/src/features/assinatura/components/EmbeddedCheckout";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { MainContent } from "@/src/components/layout/MainContent";
+import { LoadingState } from "@/src/components/feedback";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -51,7 +52,7 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <ProtectedRoute>
-      <Suspense fallback={<div className="grid min-h-screen place-items-center text-muted-foreground">Carregando checkout...</div>}>
+      <Suspense fallback={<LoadingState label="Carregando checkout…" />}>
         <CheckoutContent />
       </Suspense>
     </ProtectedRoute>

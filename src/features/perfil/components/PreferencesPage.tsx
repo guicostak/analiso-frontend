@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { AccountShell } from "./AccountShell";
 
 function Toggle({ checked = true }: { checked?: boolean }) {
@@ -15,18 +14,6 @@ function Toggle({ checked = true }: { checked?: boolean }) {
           checked ? "translate-x-[13px]" : "translate-x-0"
         }`}
       />
-    </button>
-  );
-}
-
-function SelectField({ value, icon }: { value: string; icon?: React.ReactNode }) {
-  return (
-    <button className="flex h-[52px] w-[390px] items-center justify-between rounded-[16px] border border-border bg-card px-4 text-left text-[14px] text-foreground shadow-[0_6px_14px_rgba(15,23,40,0.04)]">
-      <span className="flex items-center gap-3">
-        {icon}
-        <span>{value}</span>
-      </span>
-      <ChevronDown className="h-5 w-5 text-foreground" />
     </button>
   );
 }
@@ -90,21 +77,6 @@ export function PreferencesPage() {
           title="Resumo diário"
           subtitle="Receba um e-mail diário com sua agenda e atividades."
           control={<Toggle checked />}
-        />
-        <PreferenceRow
-          title="Idioma"
-          subtitle="Defina o idioma da plataforma."
-          control={
-            <SelectField
-              value="Português (Brasil)"
-              icon={<span className="text-[18px]">🇧🇷</span>}
-            />
-          }
-        />
-        <PreferenceRow
-          title="Fuso horário"
-          subtitle="Defina o fuso horário da sua conta."
-          control={<SelectField value="UTC - 03:00 - Brasília" />}
         />
       </PreferenceGroup>
 

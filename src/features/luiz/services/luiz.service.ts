@@ -25,8 +25,9 @@ async function callAPI(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error ?? `HTTP ${res.status}`);
+    // Don't surface raw HTTP status to the caller — luizService catches this
+    // and silently falls back to mock responses, which is the desired UX.
+    throw new Error("luiz_api_unavailable");
   }
 
   return res.json();

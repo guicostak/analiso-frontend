@@ -293,9 +293,9 @@ function MockDashboardMain() {
             <div className="relative flex h-full flex-col justify-between p-4.5">
               <div className="pt-[64px]">
                 <div className="space-y-3">
-                  <h1 className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-foreground">
+                  <div className="max-w-[18ch] text-[24px] font-semibold leading-[1.06] tracking-[-0.04em] text-foreground">
                     {MOCK.headline}
-                  </h1>
+                  </div>
                   <p className="max-w-[34ch] text-[14px] leading-6 text-[#526070]">{MOCK.body}</p>
                 </div>
               </div>

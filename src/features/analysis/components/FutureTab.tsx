@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { FutureTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
@@ -10,7 +11,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, formatDate } from '../utils/formatters';
-import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, GrowthBarChart, ChartInfoButton, GAUGE_SEGMENT_PATHS, gaugeSegmentColor, gaugePolar, gaugeSectorPath, GAUGE_AXIS_TICKS } from './AnalysisShared';
 import { DimensionCheckCard } from './ScoreDots';
 
 const EARNINGS_CHART_SERIES: { key: string; color: string; hex: string }[] = [
@@ -218,12 +219,18 @@ function AnalystFutureGrowthSection({ data }: { data: AnalysisData }) {
   return (
     <section data-cy-id="report-sub-section-analyst-future-growth-forecasts" data-section="future">
       <div>
-        <h3
-          data-cy-id="report-sub-section-title-analyst-future-growth-forecasts"
-          className="text-[15px] font-semibold text-foreground tracking-tight mb-4"
-        >
-          Previsões de Crescimento Futuro dos Analistas
-        </h3>
+        <div className="flex items-start gap-2 mb-4">
+          <h3
+            data-cy-id="report-sub-section-title-analyst-future-growth-forecasts"
+            className="text-[15px] font-semibold text-foreground tracking-tight"
+          >
+            Previsões de Crescimento Futuro dos Analistas
+          </h3>
+          <ChartInfoButton>
+            Cada barra mostra a <b>taxa anual esperada</b> para os próximos anos, segundo o consenso dos analistas.
+            Compare lucros e receita lado a lado: lucro crescendo mais rápido que receita indica ganho de margem.
+          </ChartInfoButton>
+        </div>
       </div>
       <span data-cy-id="analyst-future-growth-forecasts-description" />
 
@@ -367,12 +374,18 @@ function EPSGrowthSection({ data, lpaActive, setLpaActive }: {
   return (
     <section data-cy-id="report-sub-section-earnings-per-share-growth-forecasts" data-section="future">
       <div>
-        <h3
-          data-cy-id="report-sub-section-title-earnings-per-share-growth-forecasts"
-          className="text-[15px] font-semibold text-foreground tracking-tight mb-4"
-        >
-          Previsões de Crescimento do Lucro Por Ação (LPA)
-        </h3>
+        <div className="flex items-start gap-2 mb-4">
+          <h3
+            data-cy-id="report-sub-section-title-earnings-per-share-growth-forecasts"
+            className="text-[15px] font-semibold text-foreground tracking-tight"
+          >
+            Previsões de Crescimento do Lucro Por Ação (LPA)
+          </h3>
+          <ChartInfoButton>
+            A linha sólida é o <b>LPA realizado</b> e a linha tracejada é a <b>projeção dos analistas</b>.
+            O ponto onde as duas se encontram marca o último resultado conhecido — depois dele tudo é estimativa.
+          </ChartInfoButton>
+        </div>
       </div>
       <span data-cy-id="earnings-per-share-growth-forecasts-description" />
 
@@ -490,9 +503,15 @@ function FutureROESection({ data }: { data: AnalysisData }) {
   return (
     <section className="analysis-card overflow-hidden">
       <div className="px-6 pt-5 pb-4">
-        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
-          Retorno Futuro sobre o Patrimônio
-        </h3>
+        <div className="flex items-start gap-2">
+          <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+            Retorno Futuro sobre o Patrimônio
+          </h3>
+          <ChartInfoButton>
+            O ponteiro mostra o <b>ROE projetado</b> da empresa contra a média do setor.
+            Quanto mais à direita, maior o retorno esperado para cada real investido pelos acionistas.
+          </ChartInfoButton>
+        </div>
       </div>
 
       <div className="px-6 pb-6">
@@ -978,7 +997,7 @@ export function FutureTab({ data, state }: { data: AnalysisData; state: FutureTa
       </div>
 
       {/* ── Drawer lateral de atualizações ── */}
-      {drawerOpen && (
+      {drawerOpen && typeof document !== 'undefined' && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/30 z-40"
@@ -1025,7 +1044,8 @@ export function FutureTab({ data, state }: { data: AnalysisData; state: FutureTa
               </ul>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* ── Chart sections ── */}

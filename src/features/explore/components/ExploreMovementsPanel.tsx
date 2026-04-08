@@ -53,7 +53,7 @@ function MovementCard({
   return (
     <article
       className={`rounded-[22px] border border-border ${
-        featured ? "bg-blue-50 dark:bg-blue-900/30 p-5 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none" : "bg-card p-4.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none"
+        featured ? "bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none" : "bg-card p-4.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -219,7 +219,7 @@ export function ExploreMovementsPanel({
         </div>
 
         <aside className="space-y-4 xl:col-span-4 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-[22px] border border-border bg-blue-50 dark:bg-blue-900/30 p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
+          <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
             <p className="text-[12px] font-medium uppercase text-blue-700 dark:text-blue-300">Leitura do mercado</p>
             <p className="mt-3 text-[16px] font-semibold leading-6 text-foreground">
               {movementSummary?.title || `Como ler ${tabLabelMap[selectedTab].toLowerCase()} hoje`}
@@ -229,7 +229,7 @@ export function ExploreMovementsPanel({
             </p>
           </div>
 
-          <div className="rounded-[22px] border border-border bg-success-surface p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
+          <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
             <p className="text-[12px] font-medium uppercase text-brand">Pilar mais afetado</p>
             <p className="mt-3 text-[16px] font-semibold leading-6 text-foreground">
               {movementDominant?.title || "Observe o impacto antes do ruido"}
@@ -239,11 +239,7 @@ export function ExploreMovementsPanel({
             </p>
           </div>
 
-          <div className="relative overflow-hidden rounded-[22px] border border-warning-border bg-warning-surface dark:bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-[linear-gradient(180deg,rgba(255,232,196,0.78),rgba(255,232,196,0.10))] dark:hidden" />
-            <div className="pointer-events-none absolute left-5 top-3 h-9 w-20 rounded-[24px_16px_22px_14px/18px_22px_16px_20px] bg-[linear-gradient(135deg,rgba(255,255,255,0.56),rgba(255,255,255,0.14))] dark:hidden" />
-            <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-[radial-gradient(circle,rgba(243,183,70,0.18)_0%,rgba(243,183,70,0)_72%)]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-[linear-gradient(180deg,rgba(255,247,232,0),rgba(255,247,232,0.36))] dark:hidden" />
+          <div className="relative overflow-hidden rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
             <p className="relative text-[12px] font-medium uppercase text-warning-text">Proximo passo</p>
             <p className="relative mt-2 text-[17px] font-semibold leading-6 text-foreground">Abra a leitura principal e confirme com fonte</p>
             <p className="relative mt-2.5 max-w-[92%] text-[13px] leading-5 text-muted-foreground">

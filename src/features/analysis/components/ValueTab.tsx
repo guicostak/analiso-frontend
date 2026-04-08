@@ -1652,27 +1652,71 @@ export function ValueTab({ data, state }: { data: AnalysisData; state: ValueTabS
       <ValuationReadingCard data={data} />
       <DimensionCheckCard dimension="value" data={data} />
 
-      <SectionCard title="O preço atual está caro ou barato?" subtitle="Comparação entre o preço de mercado e o valor estimado da empresa">
+      <SectionCard
+        title="O preço atual está caro ou barato?"
+        subtitle="Comparação entre o preço de mercado e o valor estimado da empresa"
+        info={
+          <>
+            A barra mostra duas marcas: o <b>preço de mercado</b> e o <b>valor justo</b> estimado pelo modelo de fluxo de caixa descontado.
+            Quanto mais o preço estiver à esquerda do valor justo, mais descontada a ação tende a estar.
+          </>
+        }
+      >
         <SharePriceVsFairValue currentPrice={v.currentPrice} fairValue={v.fairValue} />
       </SectionCard>
 
-      <SectionCard id="val-scenarios" title="Quanto a ação poderia valer?" subtitle="Três cenários possíveis: otimista, base e conservador. Cada um usa premissas diferentes de crescimento.">
+      <SectionCard
+        id="val-scenarios"
+        title="Quanto a ação poderia valer?"
+        subtitle="Três cenários possíveis: otimista, base e conservador. Cada um usa premissas diferentes de crescimento."
+        info={
+          <>
+            Cada barra é um <b>cenário</b> do mesmo modelo, variando premissas de crescimento e margem.
+            O <b>base</b> reflete a expectativa central; <b>otimista</b> e <b>conservador</b> mostram a faixa de incerteza.
+          </>
+        }
+      >
         <ValuationScenariosChart data={data} />
       </SectionCard>
 
-      <SectionCard id="val-pe" title="Qual indicador usar para avaliar o preço?" subtitle="P/L, P/Receita e P/Patrimônio: cada um serve para um tipo de empresa. Veja qual faz mais sentido aqui.">
+      <SectionCard
+        id="val-pe"
+        title="Qual indicador usar para avaliar o preço?"
+        subtitle="P/L, P/Receita e P/Patrimônio: cada um serve para um tipo de empresa. Veja qual faz mais sentido aqui."
+        info={
+          <>
+            Cada aba traz um múltiplo diferente. <b>P/L</b> serve para empresas lucrativas, <b>P/Receita</b> para as que ainda não dão lucro
+            e <b>P/VP</b> para bancos e seguradoras. A barra mostra como a empresa se posiciona contra a média.
+          </>
+        }
+      >
         <KeyValuationMetric data={data} activeTab={activeTab} setActiveTab={setActiveTab} />
       </SectionCard>
 
       <SectionCard
         title="O preço está alto comparado a empresas parecidas?"
         subtitle={`Como o P/L (Preço sobre Lucro) da ${data.company.ticker} se compara com concorrentes diretas`}
+        info={
+          <>
+            Cada ponto é uma concorrente direta. A linha de referência marca a mediana do grupo —
+            pontos acima dela indicam ações negociadas a múltiplos mais altos do que os pares.
+          </>
+        }
       >
         <PEVsPeersChart data={data} />
       </SectionCard>
 
       {data.ratioTrends && data.ratioTrends.length > 0 && (
-        <SectionCard title="Como o múltiplo evoluiu ao longo do tempo?" subtitle="Evolução histórica mensal do P/L e P/VP com dados reais da B3.">
+        <SectionCard
+          title="Como o múltiplo evoluiu ao longo do tempo?"
+          subtitle="Evolução histórica mensal do P/L e P/VP com dados reais da B3."
+          info={
+            <>
+              A linha mostra o múltiplo mês a mês. Use para entender se o nível atual está
+              <b> acima ou abaixo</b> da própria média histórica da empresa — útil para identificar reprecificações.
+            </>
+          }
+        >
           <HistoricalRatioChartExact data={data} activeRatio={activeRatio} setActiveRatio={setActiveRatio} activePeriod={activePeriod} setActivePeriod={setActivePeriod} />
         </SectionCard>
       )}
@@ -1680,6 +1724,12 @@ export function ValueTab({ data, state }: { data: AnalysisData; state: ValueTabS
       <SectionCard
         title="Como o preço se compara ao setor inteiro?"
         subtitle={`Distribuição do P/L entre todas as empresas do setor ${data.company.industry}. Mostra onde a ${data.company.ticker} se posiciona.`}
+        info={
+          <>
+            O histograma agrupa todas as empresas do setor por faixa de P/L. A barra destacada é onde
+            a {data.company.ticker} se encaixa — barras à esquerda são mais baratas, à direita mais caras.
+          </>
+        }
       >
         <PEVsIndustryChart data={data} />
       </SectionCard>
@@ -1687,6 +1737,12 @@ export function ValueTab({ data, state }: { data: AnalysisData; state: ValueTabS
       <SectionCard
         title="O P/L atual é justo para essa empresa?"
         subtitle={`Compara o P/L real da ${data.company.ticker} com o P/L esperado, considerando o crescimento projetado e o risco do negócio.`}
+        info={
+          <>
+            O ponteiro indica o P/L atual; a faixa colorida mostra o intervalo "justo" calculado a partir
+            do crescimento esperado e do risco. Ponteiro <b>à esquerda</b> da faixa = barato; <b>à direita</b> = caro.
+          </>
+        }
       >
         <FairPEGauge data={data} />
       </SectionCard>

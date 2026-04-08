@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/features/auth/AuthContext";
+import { LoadingState } from "@/src/components/feedback";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -27,19 +28,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0E9384] border-t-transparent" />
-      </div>
-    );
+    return <LoadingState label="Carregando sua sessão…" />;
   }
 
   if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0E9384] border-t-transparent" />
-      </div>
-    );
+    return <LoadingState label="Redirecionando…" />;
   }
 
   return <>{children}</>;

@@ -269,7 +269,26 @@
       "Bash(curl -s http://localhost:8080/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"test@test.com\"\",\"\"password\"\":\"\"Test1234!\"\"}' -w \"\\\\n%{http_code}\\\\n\")",
       "Bash(grep -n \"reactStrictMode\\\\|strictMode\" next.config.*)",
       "Bash(ls next.config.*)",
-      "Bash(grep -rn \"Strict\" next.config.* app/layout.tsx)"
+      "Bash(grep -rn \"Strict\" next.config.* app/layout.tsx)",
+      "Bash(find /c/Users/guilh/Desktop/analiso-backend/src -name *Constant* -o -name *Enum* -o -name *Type*)",
+      "Bash(find C:UsersguilhDesktop -name *pipeline* -o -name *ingest*)",
+      "Bash(grep -l \"MainContent\" C:/Users/guilh/Desktop/analiso-frontend/src/components/layout/*.tsx)",
+      "Bash(cp \"C:\\\\Users\\\\guilh\\\\Downloads\\\\Logo estilizado _A_ em verde teal.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\assets\\\\logos\\\\logo.png\")",
+      "Bash(cp \"C:\\\\Users\\\\guilh\\\\Downloads\\\\Logo estilizado _A_ em verde teal.png\" \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\public\\\\logo.png\")",
+      "Bash(grep -l \"index_price_snapshot\\\\|sparkline\" C:/Users/guilh/Desktop/analiso-backend/src/main/resources/db/migration/*.sql)",
+      "Bash(node -e \"const a = require\\(''jspdf-autotable''\\); const j = require\\(''jspdf''\\); const d = new j.jsPDF\\(\\); a.default\\(d, { head:[[''a'',''b'']], body:[[''1'',''2'']] }\\); console.log\\(''ok'', d.getNumberOfPages\\(\\)\\);\")",
+      "Bash(node -e \"const fs=require\\(''fs''\\);const c=fs.readFileSync\\(''src/features/analysis/components/PastTab.tsx'',''utf8''\\);const idx=c.indexOf\\(''Drawer lateral''\\);console.log\\(idx\\);\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/blog\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/faq\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/como-funciona\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/para-quem\")",
+      "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/sitemap*)",
+      "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/robots*)",
+      "Bash(ls C:/Users/guilh/Desktop/analiso-frontend/app/empresa/[ticker]/)",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/como-funciona/\" \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/para-quem/\" \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/faq/\")",
+      "Bash(ls \"C:/Users/guilh/Desktop/analiso-frontend/app/\\(marketing\\)/blog/\")"
     ]
   }
 }

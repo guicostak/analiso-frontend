@@ -96,7 +96,7 @@ function AlertsCard() {
 
       {/* Ver todos */}
       <Link
-        href="/alertas"
+        href="/notifications"
         className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-brand hover:bg-brand-surface transition-colors mb-2"
       >
         <span>Ver todos os alertas</span>

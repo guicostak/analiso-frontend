@@ -243,6 +243,7 @@ export function AppTopBar(_props: AppTopBarProps) {
             <NotificationsBell
               open={notifOpen}
               onToggle={() => { setNotifOpen((p) => !p); setFilterOpen(false); setDropdown(false); }}
+              active={pathname === "/notifications"}
             />
             <NotificationsDropdown open={notifOpen} onClose={closeNotif} />
           </div>

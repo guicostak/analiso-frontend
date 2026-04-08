@@ -17,7 +17,7 @@ import type {
 } from '../interfaces';
 import { COLORS, DIMENSION_COLORS, TABS, SECTION_IDS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, timeAgo, formatDate } from '../utils/formatters';
-import { SectionCard, SWSDonut } from './AnalysisShared';
+import { SectionCard, SWSDonut, ChartInfoButton } from './AnalysisShared';
 import { AnalysisActionButtons } from './AnalysisActionButtons';
 import { AnalysisVerdictIsland } from './AnalysisVerdictIsland';
 import { MarketCycleSection } from './MarketCycleSection';
@@ -2616,7 +2616,7 @@ export function OverviewTab({ data, onSelectTab, companyCardRef, navAlignRef, st
         )}
 
         {/* Actions — agora funcionais: watchlist, share link, ir p/ compare, opt-in alerts */}
-        <div className="flex items-center justify-between px-6 md:px-8 py-4 mt-2 border-t border-border">
+        <div data-pdf-hide="true" className="flex items-center justify-between px-6 md:px-8 py-4 mt-2 border-t border-border">
           <AnalysisActionButtons ticker={data.company.ticker} variant="comfortable" />
           {data.generatedAt && (
             <span className="text-[10px] text-muted-foreground tabular-nums">{timeAgo(data.generatedAt)}</span>
@@ -3009,7 +3009,14 @@ function PriceContextSection({
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div>
-            <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Preço em contexto</h2>
+            <div className="flex items-start gap-2">
+              <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Preço em contexto</h2>
+              <ChartInfoButton>
+                A linha mostra o <b>preço da ação no período</b> selecionado. A faixa horizontal marca o
+                <b> valor justo estimado</b> — quando o preço atravessa essa faixa, é um ponto de atenção
+                para reavaliar a tese.
+              </ChartInfoButton>
+            </div>
             <p className="text-[12px] text-muted-foreground mt-0.5">
               Movimento da ação no período e relação com o valor justo estimado
             </p>

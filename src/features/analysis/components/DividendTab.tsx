@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import type { DividendTabState } from '../hooks/useAnalysisPageState';
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
@@ -74,6 +75,13 @@ function DividendHistorySection({ data, hovered, setHovered }: {
     <SectionCard
       title="A empresa paga dividendos de forma consistente?"
       subtitle="Valor pago por ação ao longo dos anos. A linha mostra qual percentual do lucro foi distribuído (payout)."
+      info={
+        <>
+          As barras são o <b>dividendo por ação</b> em cada ano e a linha é o <b>payout</b>
+          (percentual do lucro distribuído). Barras crescentes e payout estável indicam consistência;
+          payout acima de 100% sugere que a empresa está distribuindo mais do que lucra.
+        </>
+      }
     >
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 pb-5 border-b border-border">
@@ -328,6 +336,13 @@ function DividendYieldVsMarketSection({ data }: { data: AnalysisData }) {
     <SectionCard
       title="O rendimento dos dividendos é bom?"
       subtitle="Comparação do rendimento (dividend yield) da empresa com a mediana do setor e do mercado"
+      info={
+        <>
+          O marcador é o <b>yield atual</b> da empresa. As linhas atrás representam a faixa em que
+          a maioria das ações do mercado se encontra (do <b>25º ao 75º percentil</b>) — quanto mais
+          à direita o marcador, melhor é o rendimento relativo.
+        </>
+      }
     >
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 pb-5 border-b border-border">
@@ -955,7 +970,7 @@ export function DividendTab({ data, state }: { data: AnalysisData; state: Divide
       </div>
 
       {/* ── Drawer lateral de atualizações ── */}
-      {drawerOpen && (
+      {drawerOpen && typeof document !== 'undefined' && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/30 z-40"
@@ -1002,7 +1017,8 @@ export function DividendTab({ data, state }: { data: AnalysisData; state: Divide
               </ul>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Histórico e qualidade dos dividendos */}

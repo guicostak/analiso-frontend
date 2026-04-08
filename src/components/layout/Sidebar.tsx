@@ -8,7 +8,6 @@ import {
   Globe,
   Home,
   LayoutGrid,
-  Newspaper,
   Radar,
   Search,
 } from "lucide-react";
@@ -37,9 +36,8 @@ const GROUPS: NavGroup[] = [
   {
     items: [
       { id: "dashboard",  label: "Meu Painel",           href: "/painel",     icon: LayoutGrid },
-      { id: "mercado",   label: "Contexto de mercado", href: "/mercado",    icon: Globe },
+      { id: "mercado",   label: "Mercado",              href: "/mercado",    icon: Globe },
       { id: "buscar",    label: "Buscar ações",        href: "/buscar",     icon: Search },
-      { id: "noticias",  label: "Notícias",            href: "/noticias",   icon: Newspaper },
       { id: "watchlist",  label: "Watchlist",             href: "/watchlist",  icon: Radar },
       { id: "comparar",  label: "Comparar empresas",   href: "/comparar",   icon: GitCompare },
     ],
@@ -81,7 +79,7 @@ function NavItemRow({
         <Icon className="h-[15px] w-[15px] shrink-0" />
       </span>
       {!isCollapsed && (
-        <span className={`text-[12px] transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
+        <span className={`text-[14px] transition-colors duration-150 ease-[var(--ease-out)] ${isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground group-hover:text-foreground"}`}>
           {item.label}
         </span>
       )}

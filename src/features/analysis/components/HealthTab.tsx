@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import type { HealthTabState } from '../hooks/useAnalysisPageState';
 import {
   AreaChart as TremorArea,
@@ -10,7 +11,7 @@ import {
 import type { AnalysisData } from '../interfaces';
 import { COLORS } from '../constants/colors';
 import { safeN, safeNbr, formatNumber, fmtBRL, formatDate } from '../utils/formatters';
-import { SectionCard, CheckList, CriteriaIcon, AGFC_H, AGFC_MAX_BAR, AGFC_TOP_PAD } from './AnalysisShared';
+import { SectionCard, CheckList, CriteriaIcon, ChartInfoButton, AGFC_H, AGFC_MAX_BAR, AGFC_TOP_PAD } from './AnalysisShared';
 import { DimensionCheckCard } from './ScoreDots';
 
 function BalanceBarChart({ title, bars }: {
@@ -127,9 +128,15 @@ function FinancialPositionSection({ data }: { data: AnalysisData }) {
 
   return (
     <section data-section="health" id="health-balance">
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Análise da Posição Financeira
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Análise da Posição Financeira
+        </h3>
+        <ChartInfoButton>
+          As barras comparam <b>ativos vs. passivos</b> em duas janelas: <b>curto prazo</b> (próximos 12 meses)
+          e <b>longo prazo</b>. Ativos maiores que passivos indica capacidade de honrar compromissos.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-6">
         <div className="flex gap-6">
           <BalanceBarChart title="Curto prazo" bars={shortTermBars} />
@@ -189,9 +196,15 @@ function DebtHistorySection({ data, activeKeys, setActiveKeys }: {
 
   return (
     <section>
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Histórico e análise da relação dívida/patrimônio líquido
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Histórico e análise da relação dívida/patrimônio líquido
+        </h3>
+        <ChartInfoButton>
+          A área mostra a <b>evolução da dívida</b> em relação ao patrimônio ao longo dos anos.
+          Tendência de queda é positiva; subidas rápidas indicam alavancagem crescente.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-5">
         <div className="h-[360px] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:fill-neutral-400">
           <TremorArea
@@ -396,9 +409,15 @@ function BalanceSheetSection({ data }: { data: AnalysisData }) {
 
   return (
     <section>
-      <h3 className="text-[15px] font-semibold text-foreground tracking-tight mb-4">
-        Balanço Patrimonial
-      </h3>
+      <div className="flex items-start gap-2 mb-4">
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          Balanço Patrimonial
+        </h3>
+        <ChartInfoButton>
+          As barras horizontais comparam <b>ativos</b> (à esquerda, do menos para o mais líquido) com
+          <b> passivos e patrimônio</b> (à direita). A largura é proporcional ao valor financeiro de cada item.
+        </ChartInfoButton>
+      </div>
       <div className="analysis-card p-6">
 
         {/* Headers */}
@@ -777,7 +796,7 @@ export function HealthTab({ data, state }: { data: AnalysisData; state: HealthTa
       </div>
 
       {/* ── Drawer lateral de atualizações ── */}
-      {drawerOpen && (
+      {drawerOpen && typeof document !== 'undefined' && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/30 z-40"
@@ -824,7 +843,8 @@ export function HealthTab({ data, state }: { data: AnalysisData; state: HealthTa
               </ul>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Análise da Posição Financeira */}

@@ -17,59 +17,16 @@
  * Company Card (variant="comfortable") para garantir comportamento idêntico.
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, Share2, GitCompareArrows, Bell, Check, X } from "lucide-react";
+import { Radar, Share2, GitCompareArrows, Bell, X } from "lucide-react";
+import { toast } from "sonner";
 import { trackAnalysis } from "../services";
+import { useFavorites } from "@/src/features/favoritas";
 
 interface AnalysisActionButtonsProps {
   ticker: string;
   variant?: "compact" | "comfortable";
-}
-
-const FAV_KEY = (ticker: string) => `fav:${ticker}`;
-
-/* ── Watchlist helpers (compartilhados com FavoriteButton de AnalysisShared) ── */
-
-function readFav(ticker: string): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(FAV_KEY(ticker)) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writeFav(ticker: string, value: boolean): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (value) window.localStorage.setItem(FAV_KEY(ticker), "1");
-    else window.localStorage.removeItem(FAV_KEY(ticker));
-  } catch {
-    /* noop */
-  }
-}
-
-/* ── Toast mínimo inline ──────────────────────────────────────────────────────
-   Evita trazer toda uma lib de toast só pra 1 mensagem. Posicionado fixed
-   bottom-right, auto-dismiss em 2.2s. */
-
-function FloatingToast({ message, onDone }: { message: string; onDone: () => void }) {
-  useEffect(() => {
-    const id = window.setTimeout(onDone, 2200);
-    return () => window.clearTimeout(id);
-  }, [onDone]);
-
-  return (
-    <div
-      className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-[13px] font-medium text-foreground shadow-lg"
-      style={{ animation: "fade-in 180ms ease both" }}
-      role="status"
-    >
-      <Check className="h-4 w-4 text-success-text" />
-      {message}
-    </div>
-  );
 }
 
 /* ── Modal "Em breve" do Alert ────────────────────────────────────────────────
@@ -202,21 +159,13 @@ export function AnalysisActionButtons({
   variant = "comfortable",
 }: AnalysisActionButtonsProps) {
   const router = useRouter();
-  const [faved, setFaved] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const favorites = useFavorites();
+  const faved = favorites.isFavorite(ticker);
   const [showAlertModal, setShowAlertModal] = useState(false);
 
-  // Hydrate do localStorage no client (evita mismatch SSR)
-  useEffect(() => {
-    setFaved(readFav(ticker));
-  }, [ticker]);
-
   const toggleFav = () => {
-    const next = !faved;
-    setFaved(next);
-    writeFav(ticker, next);
-    trackAnalysis("analysis_watchlist_toggled", { ticker, added: next });
-    setToast(next ? "Adicionado à watchlist" : "Removido da watchlist");
+    trackAnalysis("analysis_watchlist_toggled", { ticker, added: !faved });
+    favorites.toggle(ticker);
   };
 
   const share = async () => {
@@ -228,7 +177,7 @@ export function AnalysisActionButtons({
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url);
-        setToast("Link copiado");
+        toast.success("Link copiado");
         return;
       }
     } catch {
@@ -262,7 +211,7 @@ export function AnalysisActionButtons({
               : "text-muted-foreground hover:text-foreground hover:bg-muted"
           }`}
         >
-          <Bookmark className={iconSize} fill={faved ? "currentColor" : "none"} />
+          <Radar className={iconSize} />
         </button>
 
         <button
@@ -290,7 +239,6 @@ export function AnalysisActionButtons({
         </button>
       </div>
 
-      {toast && <FloatingToast message={toast} onDone={() => setToast(null)} />}
       {showAlertModal && (
         <AlertInterestModal
           ticker={ticker}

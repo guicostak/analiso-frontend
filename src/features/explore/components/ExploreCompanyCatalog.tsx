@@ -185,6 +185,13 @@ export function ExploreCompanyCatalog({
     updateFilters({ [key]: undefined });
   }
 
+  function triggerSearch() {
+    setAutocomplete(false);
+    setShowHistory(false);
+    updateFilters({ query: localQuery || undefined });
+    if (localQuery) searchHistory.recordSearch(localQuery);
+  }
+
   return (
     <section className="space-y-5">
       {/* ── Chips de preset ativo ── */}
@@ -218,8 +225,8 @@ export function ExploreCompanyCatalog({
       )}
 
       {/* ── Painel de filtros ── */}
-      <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
-        <div className="flex flex-col gap-3">
+      <div className="rounded-[22px] border border-border bg-card p-6 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
+        <div className="flex flex-col gap-4">
 
           {/* Linha 1: input de busca full-width */}
           <div className="relative">
@@ -229,6 +236,7 @@ export function ExploreCompanyCatalog({
               placeholder={animatedPlaceholder ? `Procurar por ${animatedPlaceholder}` : "Procurar por"}
               value={localQuery}
               onChange={(e) => handleQueryChange(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); triggerSearch(); } }}
               onFocus={() => { setFocused(true); if (localQuery) setAutocomplete(true); else setShowHistory(true); }}
               onBlur={() => { setFocused(false); setTimeout(() => setShowHistory(false), 150); }}
               autoComplete="off"
@@ -273,13 +281,12 @@ export function ExploreCompanyCatalog({
             )}
           </div>
 
-          {/* Linha 2: Filtros avançados + Ordenar por */}
-          <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
-
+          {/* Linha 2: Filtros avançados + Ordenar por (esquerda) | Buscar (direita) */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Botão Filtros avançados */}
             <button
               onClick={() => setMetricFilters((p) => !p)}
-              className={`inline-flex h-10 items-center gap-2 rounded-[14px] border px-4 text-[12px] font-medium shadow-[0_2px_6px_rgba(15,23,40,0.04)] transition hover:shadow-[0_4px_12px_rgba(15,23,40,0.08)] dark:shadow-none ${
+              className={`inline-flex h-11 items-center gap-2 rounded-[14px] border px-4 text-[12px] font-medium shadow-[0_2px_6px_rgba(15,23,40,0.04)] transition hover:shadow-[0_4px_12px_rgba(15,23,40,0.08)] dark:shadow-none ${
                 showMetricFilters || hasActiveMetrics || hasLocalFilters
                   ? "border-brand/30 bg-brand/8 text-brand"
                   : "border-border bg-card text-muted-foreground hover:border-brand/30 hover:text-foreground"
@@ -300,7 +307,7 @@ export function ExploreCompanyCatalog({
               <select
                 value={filters.sort}
                 onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
-                className="h-10 appearance-none rounded-[14px] border border-border bg-card pl-11 pr-9 text-[12px] font-medium text-foreground shadow-[0_2px_6px_rgba(15,23,40,0.04)] outline-none transition hover:border-brand/30 focus:border-brand/50 dark:shadow-none"
+                className="h-11 appearance-none rounded-[14px] border border-border bg-card pl-11 pr-9 text-[12px] font-medium text-foreground shadow-[0_2px_6px_rgba(15,23,40,0.04)] outline-none transition hover:border-brand/30 focus:border-brand/50 dark:shadow-none"
               >
                 {[
                   "Nome (A-Z)",
@@ -314,6 +321,16 @@ export function ExploreCompanyCatalog({
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             </div>
+
+            {/* Botão Buscar */}
+            <button
+              type="button"
+              onClick={triggerSearch}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[12px] border border-brand bg-brand px-14 text-[13px] font-semibold text-white shadow-[0_2px_6px_rgba(15,23,40,0.08)] transition hover:bg-brand/90 sm:ml-auto"
+            >
+              <Search className="h-4 w-4" />
+              Buscar
+            </button>
           </div>
 
           {/* Painel de filtros avançados */}

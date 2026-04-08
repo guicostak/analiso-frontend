@@ -8,17 +8,18 @@
  */
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import {
-  AlertTriangle,
+  ArrowRight,
   Bell,
-  Calendar,
   CheckCheck,
-  Database,
-  Info,
+  Globe,
   Loader2,
+  Newspaper,
+  TrendingUp,
 } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
-import type { Notification, NotificationType } from "../interfaces";
+import type { Notification, NotificationCategory } from "../interfaces";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -30,15 +31,27 @@ function relativeTime(iso: string): string {
   return `${Math.floor(diff / 86400)}d`;
 }
 
-const TYPE_CONFIG: Record<
-  NotificationType,
-  { Icon: React.ElementType; iconClass: string; bgClass: string }
-> = {
-  alerta:     { Icon: AlertTriangle, iconClass: "text-danger-text",   bgClass: "bg-danger-surface" },
-  atualizacao:{ Icon: Database,      iconClass: "text-brand",          bgClass: "bg-brand-surface"  },
-  agenda:     { Icon: Calendar,      iconClass: "text-warning-text",   bgClass: "bg-warning-surface"},
-  sistema:    { Icon: Info,          iconClass: "text-muted-foreground",bgClass: "bg-muted"         },
+type CategoryVisual = {
+  Icon: React.ElementType;
+  iconClass: string;
+  bgClass: string;
 };
+
+const CATEGORY_CONFIG: Record<NotificationCategory, CategoryVisual> = {
+  noticias:              { Icon: Newspaper,  iconClass: "text-brand",        bgClass: "bg-brand-surface"   },
+  contexto_mercado:      { Icon: Globe,      iconClass: "text-warning-text", bgClass: "bg-warning-surface" },
+  movimentacoes_mercado: { Icon: TrendingUp, iconClass: "text-danger-text",  bgClass: "bg-danger-surface"  },
+};
+
+const FALLBACK_VISUAL: CategoryVisual = {
+  Icon:      Bell,
+  iconClass: "text-muted-foreground",
+  bgClass:   "bg-muted",
+};
+
+function getVisual(category: NotificationCategory | null): CategoryVisual {
+  return category ? CATEGORY_CONFIG[category] : FALLBACK_VISUAL;
+}
 
 // ─── Item ────────────────────────────────────────────────────────────────────
 
@@ -49,7 +62,7 @@ function NotificationItem({
   item:   Notification;
   onRead: (id: number) => void;
 }) {
-  const { Icon, iconClass, bgClass } = TYPE_CONFIG[item.type];
+  const { Icon, iconClass, bgClass } = getVisual(item.category);
 
   return (
     <button
@@ -59,7 +72,7 @@ function NotificationItem({
         item.read ? "opacity-60" : ""
       }`}
     >
-      {/* Ícone do tipo */}
+      {/* Ícone da categoria */}
       <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${bgClass}`}>
         <Icon className={`h-3.5 w-3.5 ${iconClass}`} />
       </div>
@@ -170,6 +183,18 @@ export function NotificationsDropdown({ open, onClose }: NotificationsDropdownPr
           </div>
         )}
       </div>
+
+      {/* Rodapé: link para a tela completa */}
+      <div className="border-t border-border bg-muted/40">
+        <Link
+          href="/notifications"
+          onClick={onClose}
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-[12px] font-semibold text-brand transition-colors hover:bg-brand-surface"
+        >
+          Ver todas as notificações
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -179,27 +204,36 @@ export function NotificationsDropdown({ open, onClose }: NotificationsDropdownPr
 interface NotificationsBellProps {
   open:     boolean;
   onToggle: () => void;
+  /** Marca o sino como ativo (usuário está na rota /notifications). */
+  active?:  boolean;
 }
 
-export function NotificationsBell({ open, onToggle }: NotificationsBellProps) {
+export function NotificationsBell({ open, onToggle, active = false }: NotificationsBellProps) {
   const { unreadCount } = useNotifications();
 
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-hover ${
-        open ? "bg-hover" : ""
-      }`}
-      aria-label="Notificações"
-      aria-expanded={open}
-    >
-      <Bell className="h-[18px] w-[18px] text-muted-foreground" />
-      {unreadCount > 0 && (
-        <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-0.5 text-[9px] font-bold leading-none text-white">
-          {unreadCount > 9 ? "9+" : unreadCount}
-        </span>
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-hover ${
+          open ? "bg-hover" : ""
+        }`}
+        aria-label="Notificações"
+        aria-expanded={open}
+        aria-current={active ? "page" : undefined}
+      >
+        <Bell className={`h-[18px] w-[18px] ${active ? "text-brand" : "text-muted-foreground"}`} />
+        {unreadCount > 0 && (
+          <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-0.5 text-[9px] font-bold leading-none text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+      {/* Indicador de aba ativa — borda embaixo do ícone (mesmo padrão do UserNavMenu) */}
+      {active && (
+        <span className="pointer-events-none absolute -bottom-2.5 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-brand" />
       )}
-    </button>
+    </span>
   );
 }

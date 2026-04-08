@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { JsonLd } from "@/src/components/seo/JsonLd";
 import { LandingNav } from "@/src/components/layout/LandingNav";
 import {
   BarChart3,
@@ -120,9 +122,27 @@ const features = [
   },
 ];
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
+    { "@type": "ListItem", position: 2, name: "Como funciona", item: "https://analiso.com.br/como-funciona" },
+  ],
+};
+
+export const metadata: Metadata = {
+  title: "Como funciona — Pilares, painel, watchlist e IA",
+  description:
+    "Entenda como a Analiso organiza demonstrações financeiras em 5 pilares, com painel, watchlist, alertas, comparação e o assistente Luiz.",
+  alternates: { canonical: "/como-funciona" },
+  openGraph: { url: "/como-funciona", type: "website" },
+};
+
 export default function ComoFuncionaPage() {
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={breadcrumbJsonLd} />
       <LandingNav />
 
       {/* Hero */}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authService } from "../services/auth.service";
+import { normalizeApiError } from "@/src/lib/errors";
 import type { AuthMode, EmailAuthUser } from "../interfaces/auth.interfaces";
 
 interface UseEmailAuthOptions {
@@ -94,8 +95,7 @@ export function useEmailAuth({ onSuccess, onError }: UseEmailAuthOptions) {
         return;
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Ocorreu um erro. Tente novamente.";
+      const { message } = normalizeApiError(err);
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       onError?.(message);
     }
@@ -116,8 +116,7 @@ export function useEmailAuth({ onSuccess, onError }: UseEmailAuthOptions) {
 
       onSuccess(state.pendingUser);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Código inválido. Tente novamente.";
+      const { message } = normalizeApiError(err);
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       onError?.(message);
     }
@@ -134,8 +133,7 @@ export function useEmailAuth({ onSuccess, onError }: UseEmailAuthOptions) {
       );
       setState((prev) => ({ ...prev, isLoading: false }));
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao reenviar. Tente novamente.";
+      const { message } = normalizeApiError(err);
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
     }
   };

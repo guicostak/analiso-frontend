@@ -1,26 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Bookmark, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { Radar, ChevronRight, Info } from 'lucide-react';
 import type { DimensionScore, AnalysisData, AnalysisTab } from '../interfaces';
 import { DIMENSION_INTRO } from '../constants/colors';
 import { safeN, safeNbr } from '../utils/formatters';
+import { useFavorites } from '@/src/features/favoritas';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/src/components/ui/tooltip';
 
 // ─── WatchlistButton ──────────────────────────────────────────────────────────
 
 export function FavoriteButton({ ticker }: { ticker: string }) {
-  const key = `fav:${ticker}`;
-  const [faved, setFaved] = useState(() => {
-    try { return localStorage.getItem(key) === '1'; } catch { return false; }
-  });
-  const toggle = () => {
-    const next = !faved;
-    setFaved(next);
-    try { next ? localStorage.setItem(key, '1') : localStorage.removeItem(key); } catch { /* noop */ }
-  };
+  const favorites = useFavorites();
+  const faved = favorites.isFavorite(ticker);
   return (
     <button
-      onClick={toggle}
+      onClick={() => favorites.toggle(ticker)}
       title={faved ? 'Remover da watchlist' : 'Adicionar à watchlist'}
       className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
         faved
@@ -28,7 +23,7 @@ export function FavoriteButton({ ticker }: { ticker: string }) {
           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
       }`}
     >
-      <Bookmark className="w-4 h-4" fill={faved ? 'currentColor' : 'none'} />
+      <Radar className="w-4 h-4" />
     </button>
   );
 }
@@ -53,15 +48,47 @@ export function ScoreBar({ score, max = 6, color }: { score: number; max?: numbe
 // ─── SectionCard ──────────────────────────────────────────────────────────────
 
 // DESIGN CHANGE — SectionCard with refined elevation, border, and subtle hover lift
-export function SectionCard({ id, title, subtitle, children, className = '' }: { id?: string; title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
+export function SectionCard({ id, title, subtitle, info, children, className = '' }: { id?: string; title: string; subtitle?: string; info?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
     <div id={id} className={`analysis-card p-6 scroll-mt-24 ${className}`}>
       <div className="mb-5">
-        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h3>
+        <div className="flex items-start gap-2">
+          <h3 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h3>
+          {info && <ChartInfoButton label={`Como ler: ${title}`}>{info}</ChartInfoButton>}
+        </div>
         {subtitle && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{subtitle}</p>}
       </div>
       {children}
     </div>
+  );
+}
+
+// ─── ChartInfoButton ──────────────────────────────────────────────────────────
+
+// Subtle info icon used next to chart titles. Hover/focus reveals a short
+// explanation of how to read the chart. Kept tiny and muted on purpose so it
+// never competes with the chart itself.
+export function ChartInfoButton({ children, label = 'Como ler este gráfico' }: { children: React.ReactNode; label?: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+        >
+          <Info className="w-3.5 h-3.5" strokeWidth={2} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        sideOffset={6}
+        className="max-w-[280px] text-[12px] leading-relaxed px-3 py-2 whitespace-normal text-left"
+      >
+        {children}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

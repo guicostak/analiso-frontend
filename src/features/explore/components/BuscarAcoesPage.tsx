@@ -8,7 +8,6 @@ import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
 import { useExplore } from "../hooks/useExplore";
 import { useCompanySearch } from "../hooks/useCompanySearch";
-import { ExploreHighlightsSection } from "./ExploreHighlightsSection";
 import { ExploreCompanyCatalog } from "./ExploreCompanyCatalog";
 import { ExploreCompareBar } from "./ExploreCompareBar";
 import { ExploreDrawer } from "./ExploreDrawer";
@@ -128,31 +127,18 @@ export function BuscarAcoesPage() {
   const [apiTriggered, setApiTriggered] = useState(false);
 
   const {
-    summaryScope,
-    summaryState,
-    hasSectorSelected,
-    hasWatchlist,
-    sortedHighlights,
-    highlights,
-    showAllHighlights,
     getCompanyLogo,
-    setSummaryScope,
-    setSummaryState,
     setSelectedSource,
-    setShowAllHighlights,
-    applyHighlightPreset,
     selectedSource,
     selectedEntryPoints,
     compareTickers,
     searchQuery,
-    activePreset,
     appliedChips,
     showAdvancedFilters,
     filters,
     isLoading,
     allCompanies,
     filteredCompanies,
-    showStaleBanner,
     staleCount,
     thesisCollections,
     setSearchQuery,
@@ -262,32 +248,16 @@ export function BuscarAcoesPage() {
             </header>
 
             <div className="space-y-4">
-              <ExploreHighlightsSection
-                summaryScope={summaryScope}
-                summaryState={summaryState}
-                hasSectorSelected={hasSectorSelected}
-                hasWatchlist={hasWatchlist}
-                sortedHighlights={sortedHighlights}
-                highlights={highlights}
-                showAllHighlights={showAllHighlights}
-                getCompanyLogo={getCompanyLogo}
-                setSummaryScope={setSummaryScope}
-                setSummaryState={setSummaryState}
-                setSelectedSource={setSelectedSource}
-                setShowAllHighlights={setShowAllHighlights}
-                applyHighlightPreset={applyHighlightPreset}
-              />
-
-              <div className="pt-6">
+              <div>
                 <ExploreCompanyCatalog
                   isLoading={isLoading || companySearch.isLoading}
                   filteredCompanies={catalogCompanies}
                   filters={filters}
                   searchQuery={searchQuery}
                   showAdvancedFilters={showAdvancedFilters}
-                  activePreset={activePreset}
+                  activePreset={null}
                   appliedChips={appliedChips}
-                  showStaleBanner={showStaleBanner}
+                  showStaleBanner={false}
                   staleCount={staleCount}
                   selectedEntryPoints={selectedEntryPoints}
                   thesisCollections={thesisCollections}

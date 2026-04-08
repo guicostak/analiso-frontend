@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/src/features/auth/AuthContext';
+import { normalizeApiError } from '@/src/lib/errors';
 import { getAgenda } from '../services/agenda.service';
 import { mapAgendaFromGroups } from '../mappers/agenda.mapper';
 import type { AgendaEvent } from '../interfaces/agenda.interfaces';
@@ -45,8 +47,9 @@ export function useAgenda(): UseAgendaReturn {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          const msg = err instanceof Error ? err.message : 'Erro ao carregar agenda';
-          setError(msg);
+          const { message } = normalizeApiError(err);
+          setError(message);
+          toast.error(`Não foi possível carregar a agenda. ${message}`);
         }
       })
       .finally(() => {

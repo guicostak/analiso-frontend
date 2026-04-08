@@ -10,18 +10,13 @@ import { useFavorites } from "@/src/features/favoritas";
 import { useFavoriteCompanies } from "../hooks/useFavoriteCompanies";
 import { getCompanyLogo } from "@/src/features/explore/services";
 import { WatchlistHeader } from "./WatchlistHeader";
-import { WatchlistSidebar } from "./WatchlistSidebar";
 import { AddCompanyModal } from "./AddCompanyModal";
 import { CompanyCard } from "@/src/components/shared/CompanyCard";
 
 export function WatchlistPage() {
   const {
-    showAlertActionOnly, setShowAlertActionOnly,
     uiState,
-    alerts,
     pageHeader,
-    quickOverview,
-    alertsPanelHeader,
   } = useWatchlist();
 
   const favorites = useFavorites();
@@ -44,8 +39,6 @@ export function WatchlistPage() {
     uiState === "empty" && favorites.isLoading ? "loading" :
     uiState === "empty" && hasFavorites ? "ready" :
     uiState;
-
-  const alertsToShow = showAlertActionOnly ? alerts.filter((a) => a.severity !== "Saudável") : alerts;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -74,8 +67,8 @@ export function WatchlistPage() {
               footerText={`${favorites.tickers.size} ${favorites.tickers.size === 1 ? "ação na watchlist" : "ações na watchlist"}`}
             />
 
-            <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
-              <section className="space-y-5 lg:col-span-8">
+            <div className="mt-5">
+              <section className="space-y-5">
                 {effectiveUiState === "empty" ? (
                   favoritesAuthError ? (
                     <div className="flex flex-col items-center rounded-[24px] border border-border bg-card px-7 py-12 text-center shadow-[0_14px_30px_rgba(15,23,40,0.04)] dark:shadow-none">
@@ -165,7 +158,7 @@ export function WatchlistPage() {
                               key={company.ticker}
                               ticker={company.ticker}
                               companyName={company.companyName}
-                              logoUrl={getCompanyLogo(company.ticker)}
+                              logoUrl={company.logoUrl || getCompanyLogo(company.ticker)}
                               price={m.price}
                               sector={typeof m.sector === "string" ? m.sector : undefined}
                               metrics={m}
@@ -183,17 +176,6 @@ export function WatchlistPage() {
                   </div>
                 ) : null}
               </section>
-
-              <WatchlistSidebar
-                quickOverview={quickOverview}
-                alertsPanelHeader={alertsPanelHeader}
-                alertsToShow={alertsToShow}
-                showAlertActionOnly={showAlertActionOnly}
-                applySummaryAttentionFilter={() => {}}
-                applySummaryRiskFilter={() => {}}
-                applySummaryChangesWindow={() => {}}
-                setShowAlertActionOnly={setShowAlertActionOnly}
-              />
             </div>
           </div>
         </div>

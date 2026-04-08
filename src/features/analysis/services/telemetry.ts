@@ -15,7 +15,10 @@ export type AnalysisTelemetryEvent =
   | "analysis_compare_clicked"
   | "analysis_alert_interest"
   | "analysis_verdict_action"
-  | "analysis_tab_selected";
+  | "analysis_tab_selected"
+  | "analysis_pdf_clicked"
+  | "analysis_pdf_success"
+  | "analysis_pdf_failed";
 
 export function trackAnalysis(
   event: AnalysisTelemetryEvent,

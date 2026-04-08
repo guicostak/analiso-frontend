@@ -8,7 +8,6 @@ export const ROUTES = {
   DASHBOARD: "/painel",
   MERCADO: "/mercado",
   BUSCAR: "/buscar",
-  NOTICIAS: "/noticias",
   WATCHLIST: "/watchlist",
   COMPARAR: "/comparar",
   ASSINATURA: "/assinatura",

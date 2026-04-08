@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { JsonLd } from "@/src/components/seo/JsonLd";
 import { LandingNav } from "@/src/components/layout/LandingNav";
 import {
   ArrowRight,
@@ -82,9 +84,27 @@ const notForYou = [
   "Quem busca recomendações de buy/sell/hold",
 ];
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://analiso.com.br" },
+    { "@type": "ListItem", position: 2, name: "Para quem", item: "https://analiso.com.br/para-quem" },
+  ],
+};
+
+export const metadata: Metadata = {
+  title: "Para quem é a Analiso — Iniciantes, intermediários e avançados",
+  description:
+    "A Analiso atende quem está aprendendo, quem já investe e quem quer aprofundar análise. Veja qual perfil combina com você.",
+  alternates: { canonical: "/para-quem" },
+  openGraph: { url: "/para-quem", type: "website" },
+};
+
 export default function ParaQuemPage() {
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={breadcrumbJsonLd} />
       <LandingNav />
 
       {/* Hero */}

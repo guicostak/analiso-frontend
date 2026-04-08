@@ -57,6 +57,7 @@ export interface CompanySearchResponse {
 // ─── API Base URL ────────────────────────────────────────────────────────────
 
 import { API_BASE_URL as API_BASE } from "@/src/lib/api-base";
+import { ApiError } from "@/src/lib/api";
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 
@@ -89,10 +90,16 @@ export const searchService = {
     }
 
     const url = `${API_BASE}/api/search?${params.toString()}`;
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("[search] network failure", error);
+      throw new ApiError(0, "network_error", "network_error");
+    }
 
     if (!res.ok) {
       // Erro de validação — retorna vazio em vez de estourar
@@ -100,8 +107,8 @@ export const searchService = {
         console.warn("[search] Validation error, returning empty results");
         return { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 };
       }
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.message ?? `HTTP ${res.status}`);
+      const body = (await res.json().catch(() => ({}))) as { code?: string };
+      throw new ApiError(res.status, body.code ?? "unknown_error", "search_failed");
     }
 
     return res.json();

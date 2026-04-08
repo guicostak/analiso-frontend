@@ -41,10 +41,12 @@ export async function apiFetch<T>(
   try {
     response = await fetch(url, { ...options, headers });
   } catch (error) {
-    const reason = error instanceof Error ? error.message : "Network error";
-    throw new Error(
-      `Nao foi possivel conectar ao backend em ${url}. Verifique se o frontend esta em http://localhost:3000, se o backend esta acessivel em http://localhost:8080 e se nao ha bloqueio de mixed content/CORS. Motivo original: ${reason}`,
-    );
+    // Log technical details for developers, but never expose URL/CORS hints
+    // to end users — `normalizeApiError` will turn this into a friendly message.
+    if (typeof console !== "undefined") {
+      console.error("[apiFetch] network failure", { url, error });
+    }
+    throw new ApiError(0, "network_error", "network_error");
   }
 
   if (!response.ok) {

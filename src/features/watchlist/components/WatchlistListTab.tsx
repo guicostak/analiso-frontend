@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bookmark, ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
+import { Radar, ChevronDown, CheckCircle2, MoreHorizontal, Search } from "lucide-react";
 import type { Pillar, WatchlistCompany, WatchlistSortBy, WatchlistStatus, FeedSource } from "../interfaces";
 import { getStatusFromScores } from "../services";
 
@@ -422,7 +422,7 @@ export function WatchlistListTab({
                           favoriteTickers.has(company.ticker) ? "text-brand" : "text-muted-foreground"
                         }`}
                       >
-                        <Bookmark className={`h-3.5 w-3.5 ${favoriteTickers.has(company.ticker) ? "fill-brand" : ""}`} />
+                        <Radar className={`h-3.5 w-3.5 ${favoriteTickers.has(company.ticker) ? "text-brand" : ""}`} />
                         {favoriteTickers.has(company.ticker) ? "Remover da watchlist" : "Adicionar à watchlist"}
                       </button>
                       <button

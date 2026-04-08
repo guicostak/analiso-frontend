@@ -1,22 +1,53 @@
 "use client";
 
-import { Loader2 } from 'lucide-react';
-import { motion } from 'motion/react';
+/**
+ * LoadingState — full-screen page loader padronizado.
+ *
+ * Visual baseado no carregamento da tela de Análise: barras de skeleton
+ * animadas + linha de varredura na cor brand + duas linhas shimmer + label.
+ * Use este componente em qualquer tela que precise de um loading entre rotas.
+ *
+ * As classes utilitárias (analysis-skeleton-bar/-line/-shimmer e analysis-enter)
+ * são definidas em src/styles/globals.css.
+ */
 
-export function LoadingState() {
+interface LoadingStateProps {
+  /** Texto sob o skeleton. Default: "Carregando…" */
+  label?: string;
+  /** Quando true, ocupa apenas o espaço do pai (sem min-h-screen). */
+  inline?: boolean;
+}
+
+export function LoadingState({ label = "Carregando…", inline = false }: LoadingStateProps) {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center"
-      >
-        <div className="w-16 h-16 rounded-2xl bg-mint-100 mx-auto mb-4 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-mint-600 animate-spin" />
+    <div
+      className={
+        inline
+          ? "flex w-full items-center justify-center py-16"
+          : "min-h-screen bg-background flex items-center justify-center"
+      }
+    >
+      <div className="text-center space-y-8 analysis-enter" style={{ width: 320 }}>
+        {/* Skeleton chart bars */}
+        <div className="relative flex items-end justify-center gap-2.5" style={{ height: 120 }}>
+          {[65, 85, 45, 100, 55, 75, 90].map((h, i) => (
+            <div
+              key={i}
+              className="analysis-skeleton-bar"
+              style={{ width: 24, height: `${h}%`, transformOrigin: 'bottom' }}
+            />
+          ))}
+          <div className="analysis-skeleton-line" />
         </div>
-        <h3 className="text-neutral-900 mb-2">Carregando Análise</h3>
-        <p className="text-neutral-500">Reunindo os dados mais recentes...</p>
-      </motion.div>
+
+        {/* Skeleton text lines */}
+        <div className="space-y-3 px-4">
+          <div className="analysis-skeleton-shimmer mx-auto" style={{ height: 14, width: '70%' }} />
+          <div className="analysis-skeleton-shimmer mx-auto" style={{ height: 10, width: '50%' }} />
+        </div>
+
+        <p className="text-sm text-muted-foreground font-medium">{label}</p>
+      </div>
     </div>
   );
 }

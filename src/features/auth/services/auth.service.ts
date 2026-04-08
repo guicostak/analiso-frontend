@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/src/lib/api-base";
+import { ApiError } from "@/src/lib/api";
 import type {
   EmailAuthResponse,
   EmailLoginRequest,
@@ -38,15 +39,28 @@ export interface GoogleAuthUser {
 // ── Helper interno ─────────────────────────────────────────────────────────────
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    console.error("[auth] network failure", { path, error });
+    throw new ApiError(0, "network_error", "network_error");
+  }
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error((data as { message?: string }).message ?? `HTTP ${response.status}`);
+    const data = (await response.json().catch(() => ({}))) as {
+      message?: string;
+      code?: string;
+    };
+    throw new ApiError(
+      response.status,
+      data.code ?? "unknown_error",
+      data.message ?? `auth_${response.status}`,
+    );
   }
 
   return response.json() as Promise<T>;
@@ -70,15 +84,28 @@ export const authService = {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const response = await fetch("/api/auth/verification/send", {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/auth/verification/send", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.error("[auth] sendVerification network failure", error);
+      throw new ApiError(0, "network_error", "network_error");
+    }
 
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error((data as { message?: string }).message ?? `HTTP ${response.status}`);
+      const data = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        code?: string;
+      };
+      throw new ApiError(
+        response.status,
+        data.code ?? "unknown_error",
+        data.message ?? `auth_${response.status}`,
+      );
     }
   },
 

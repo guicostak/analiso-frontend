@@ -11,7 +11,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Bell, Bookmark, GitCompare } from "lucide-react";
+import { Bell, GitCompare, Radar } from "lucide-react";
 
 // ─── Mapeamento de chaves conhecidas para display ────────────────────────────
 
@@ -138,30 +138,12 @@ export function CompanyCard({
 
   const hasActions = onToggleCompare || onToggleFavorite || onAlert;
 
-  const cardClassName = `group flex cursor-pointer flex-col gap-4 rounded-[18px] border bg-card p-5 shadow-[0_2px_8px_rgba(15,23,40,0.04)] transition-[transform,box-shadow,border-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,40,0.08)] dark:shadow-none ${
-    status ? `border-l-[3px] ${statusBorderLeft[status]}` : "border-border"
-  } ${cardIsCompareTarget ? "ring-1 ring-brand/20 hover:ring-brand/40" : ""}`;
+  const cardClassName = `group flex cursor-pointer flex-col gap-4 rounded-[18px] border border-border bg-card p-5 shadow-[0_2px_8px_rgba(15,23,40,0.04)] dark:shadow-none ${
+    cardIsCompareTarget ? "ring-1 ring-brand/20 hover:ring-brand/40" : ""
+  }`;
 
-  const Wrapper = cardIsCompareTarget
-    ? ({ children }: { children: React.ReactNode }) => (
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => onToggleCompare!()}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleCompare!(); } }}
-          className={cardClassName}
-        >
-          {children}
-        </div>
-      )
-    : ({ children }: { children: React.ReactNode }) => (
-        <Link href={destination} className={cardClassName}>
-          {children}
-        </Link>
-      );
-
-  return (
-    <Wrapper>
+  const cardContent = (
+    <>
       {/* ── Header: logo + info + badges ── */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3.5">
@@ -271,16 +253,17 @@ export function CompanyCard({
             <button
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 onToggleCompare();
               }}
-              className={`group/btn inline-flex items-center gap-0 rounded-[10px] border p-2 text-[12px] font-medium transition-[color,background-color,border-color,transform,box-shadow] duration-150 ease-[var(--ease-out)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+              className={`group/btn inline-flex items-center gap-0 rounded-[10px] border p-2 text-[12px] font-medium transition-[color,background-color,border-color,box-shadow] duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
                 isComparing
                   ? "border-brand bg-brand text-white"
                   : "border-border bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,40,0.05)] hover:border-brand hover:bg-brand/5 hover:text-brand dark:shadow-none"
               }`}
             >
               <GitCompare className="h-3.5 w-3.5 shrink-0" />
-              <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/btn:ml-1.5 group-hover/btn:max-w-[80px] group-hover/btn:opacity-100">
+              <span className="pointer-events-none max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/btn:ml-1.5 group-hover/btn:max-w-[80px] group-hover/btn:opacity-100">
                 {isComparing ? "Comparando" : "Comparar"}
               </span>
             </button>
@@ -289,18 +272,17 @@ export function CompanyCard({
             <button
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 onToggleFavorite();
               }}
-              className={`group/fav inline-flex items-center gap-0 rounded-[10px] border p-2 text-[12px] font-medium transition-[color,background-color,border-color,transform,box-shadow] duration-150 ease-[var(--ease-out)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+              className={`group/fav inline-flex items-center gap-0 rounded-[10px] border p-2 text-[12px] font-medium transition-[color,background-color,border-color,box-shadow] duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
                 isFavorite
                   ? "border-brand bg-brand text-white hover:border-danger-border hover:bg-danger-surface hover:text-danger-text"
                   : "border-border bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,40,0.05)] hover:border-brand hover:bg-brand/5 hover:text-brand dark:shadow-none"
               }`}
             >
-              <Bookmark
-                className={`h-3.5 w-3.5 shrink-0 ${isFavorite ? "fill-white group-hover/fav:fill-danger-text" : ""}`}
-              />
-              <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/fav:ml-1.5 group-hover/fav:max-w-[80px] group-hover/fav:opacity-100">
+              <Radar className="h-3.5 w-3.5 shrink-0" />
+              <span className="pointer-events-none max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/fav:ml-1.5 group-hover/fav:max-w-[80px] group-hover/fav:opacity-100">
                 {isFavorite ? "Remover" : "Watchlist"}
               </span>
             </button>
@@ -309,12 +291,13 @@ export function CompanyCard({
             <button
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 onAlert();
               }}
-              className="group/bell inline-flex items-center gap-0 rounded-[10px] border border-border bg-card p-2 text-[12px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,40,0.05)] transition-[color,background-color,border-color,transform,box-shadow] duration-150 ease-[var(--ease-out)] active:scale-[0.97] hover:border-brand hover:bg-brand/5 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 dark:shadow-none"
+              className="group/bell inline-flex items-center gap-0 rounded-[10px] border border-border bg-card p-2 text-[12px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,40,0.05)] transition-[color,background-color,border-color,box-shadow] duration-150 ease-[var(--ease-out)] hover:border-brand hover:bg-brand/5 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 dark:shadow-none"
             >
               <Bell className="h-3.5 w-3.5 shrink-0" />
-              <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/bell:ml-1.5 group-hover/bell:max-w-[80px] group-hover/bell:opacity-100">
+              <span className="pointer-events-none max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-[var(--ease-out)] group-hover/bell:ml-1.5 group-hover/bell:max-w-[80px] group-hover/bell:opacity-100">
                 Notificar
               </span>
             </button>
@@ -322,13 +305,26 @@ export function CompanyCard({
         </div>
       )}
 
-      {/* Hint visual: card inteiro é o botão de comparar */}
-      {cardIsCompareTarget && (
-        <div className="flex items-center gap-2 text-[12px] font-medium text-brand">
-          <GitCompare className="h-3.5 w-3.5" />
-          Clique para adicionar à comparação
-        </div>
-      )}
-    </Wrapper>
+    </>
+  );
+
+  if (cardIsCompareTarget) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => onToggleCompare!()}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleCompare!(); } }}
+        className={cardClassName}
+      >
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={destination} className={cardClassName}>
+      {cardContent}
+    </Link>
   );
 }

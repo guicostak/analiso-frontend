@@ -17,7 +17,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
+import { normalizeApiError } from "@/src/lib/errors";
 import { useAuth } from "../../auth/AuthContext";
 import {
   getWatchlist,
@@ -202,7 +204,9 @@ export function useWatchlist(): UseWatchlistReturn {
       })
       .catch((err) => {
         console.error("[watchlist] erro ao buscar dados:", err);
+        const { message } = normalizeApiError(err);
         setUiState("empty");
+        toast.error(`Não foi possível carregar sua watchlist. ${message}`);
       });
   }, [token]);
 

@@ -15,8 +15,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast as sonnerToast } from "sonner";
 
 import { track as trackDashboardCompare } from "@/src/features/dashboard-canvas/services/compare-history.service";
+import { normalizeApiError } from "@/src/lib/errors";
 
 import {
   PILLARS,
@@ -437,9 +439,16 @@ export function useCompare(): UseCompareReturn {
         err && typeof err === "object" && "message" in err
           ? String((err as { message: unknown }).message)
           : "";
-      if (msg === "ticker-not-found") setCompareError("ticker-not-found");
-      else if (msg === "invalid-compare-params") setCompareError("invalid-compare-params");
-      else setCompareError("compare-failed");
+      if (msg === "ticker-not-found") {
+        setCompareError("ticker-not-found");
+        sonnerToast.error("Não encontramos um dos ativos. Verifique os códigos e tente novamente.");
+      } else if (msg === "invalid-compare-params") {
+        setCompareError("invalid-compare-params");
+        sonnerToast.error("Parâmetros de comparação inválidos. Selecione dois ativos e tente novamente.");
+      } else {
+        setCompareError("compare-failed");
+        sonnerToast.error(normalizeApiError(err).message);
+      }
       setEnrichedA(undefined);
       setEnrichedB(undefined);
       setSummary(null);

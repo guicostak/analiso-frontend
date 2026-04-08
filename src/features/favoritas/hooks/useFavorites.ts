@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { favoritesService } from "../services";
 
 export function useFavorites() {
@@ -52,8 +53,10 @@ export function useFavorites() {
       try {
         if (was) {
           await favoritesService.remove(ticker);
+          toast.success(`${ticker} removido da watchlist`);
         } else {
           await favoritesService.add(ticker);
+          toast.success(`${ticker} adicionado à watchlist`);
         }
       } catch {
         // Rollback em caso de erro
@@ -63,6 +66,11 @@ export function useFavorites() {
           else next.delete(ticker);
           return next;
         });
+        toast.error(
+          was
+            ? `Não foi possível remover ${ticker} da watchlist`
+            : `Não foi possível adicionar ${ticker} à watchlist`,
+        );
       }
     },
     [tickers],
