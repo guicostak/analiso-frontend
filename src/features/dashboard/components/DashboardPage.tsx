@@ -20,6 +20,7 @@ import { cn } from "@/src/components/ui/utils";
 import { useDashboardInbox, allPillars, allSources, allStatuses } from "../hooks/useDashboardInbox";
 import type { InboxItem, Pillar, Status, WindowRange } from "../interfaces";
 import { statusBadgeClasses, SURFACE_BASE, SURFACE_MEDIUM } from "../mappers/dashboard.mapper";
+import { DashboardCanvas } from "@/src/features/dashboard-canvas/components/DashboardCanvas";
 
 import logoItau from "@/src/assets/logos/itau.png";
 import logoMrv from "@/src/assets/logos/mrv.jpg";
@@ -124,6 +125,7 @@ const summaryToneStyles: Record<
 
 export function Dashboard() {
   const router = useRouter();
+  const inbox = useDashboardInbox();
   const {
     dashboardData,
     dashboardLoading,
@@ -175,7 +177,7 @@ export function Dashboard() {
     setRealTimeMode,
     clearInboxFilters,
     inboxRef,
-  } = useDashboardInbox();
+  } = inbox;
 
   // ─── Animação de pipeline ────────────────────────────────────────────────────
   const [animStep,     setAnimStep]     = useState(0);
@@ -300,6 +302,7 @@ export function Dashboard() {
 
       <MainContent className="px-5 pb-8 pt-20 xl:px-7 xl:pt-20">
 <div className="mx-auto max-w-[1480px] space-y-5">
+          {(isProcessing || isEmpty) && (
           <section>
             <article
               className={cn(
@@ -464,6 +467,9 @@ export function Dashboard() {
               </div>
             </article>
           </section>
+          )}
+
+          {!isProcessing && !isEmpty && <DashboardCanvas inbox={inbox} />}
 
           {isEmpty ? (
             /* ── Empty state — 4 action cards ───────────────────────────── */
@@ -549,8 +555,9 @@ export function Dashboard() {
                 </div>
               </div>
             </section>
-          ) : (
-          <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+          ) : null}
+          {false && (
+          <section className="hidden grid grid-cols-1 gap-5 xl:grid-cols-12">
             <div className="col-span-1 grid gap-5 xl:col-span-5">
               <button
                 onClick={() => (topRiskItem ? openInboxItem(topRiskItem) : focusInboxRecentImpact())}
@@ -701,7 +708,8 @@ export function Dashboard() {
                 <div className="h-8 w-28 animate-pulse rounded-full bg-border" />
               </div>
             </div>
-          ) : !isEmpty ? (
+          ) : null}
+          {false && (
           <section className="rounded-[20px] border border-border bg-muted dark:bg-muted/50 px-5 py-4 shadow-[0_10px_20px_rgba(91,141,239,0.05)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -717,9 +725,9 @@ export function Dashboard() {
               </button>
             </div>
           </section>
-          ) : null}
+          )}
 
-          {!isEmpty && (<><section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+          {false && (<><section ref={inboxRef} className="grid grid-cols-1 gap-5 xl:grid-cols-12">
             <article className={cn(surfaceBase, "col-span-1 min-h-[540px] overflow-hidden xl:col-span-7")}>
               <div className="border-b border-border px-6 py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">

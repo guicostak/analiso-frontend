@@ -256,7 +256,20 @@
       "Bash(curl -s \"http://localhost:8080/api/v2/compare?tickerA=ABEV3&tickerB=BBAS3\")",
       "Bash(wc -l \"C:\\\\Users\\\\guilh\\\\Desktop\\\\analiso-frontend\\\\src\\\\features\\\\analysis\\\\components\"/*.tsx)",
       "Bash(mvn -q -o compile)",
-      "Bash(wc -l src/features/compare/components/islands/*.tsx src/features/analysis/components/*.tsx)"
+      "Bash(wc -l src/features/compare/components/islands/*.tsx src/features/analysis/components/*.tsx)",
+      "Bash(wc -l C:/Users/guilh/Desktop/analiso-frontend/src/features/dashboard/components/DashboardPage.tsx C:/Users/guilh/Desktop/analiso-frontend/src/features/dashboard/components/*.tsx)",
+      "Bash(grep -n \"noticias\\\\|news\\\\|Noticia\" src/features/analysis/services/index.ts src/features/analysis/interfaces/*.ts)",
+      "Bash(cat src/features/dashboard-canvas/services/*.ts src/features/dashboard-canvas/mappers/*.ts)",
+      "Bash(grep -n \"interface.*Notification\\\\|type.*Notification\" src/features/notifications/interfaces/*.ts)",
+      "Bash(grep -l \"isPaid\\\\|usePlan\\\\|premium\" C:/Users/guilh/Desktop/analiso-frontend/src/features/auth/*.ts*)",
+      "Bash(grep -rn ProtectedRoute src/components/layout/ProtectedRoute*)",
+      "Bash(curl -s http://localhost:8080/api/dashboard -H \"Authorization: Bearer test\" -o /tmp/resp.json -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:8080/api/auth/dev-login -X POST -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:8080/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"test@test.com\"\",\"\"password\"\":\"\"Test1234!\"\"}' -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(grep -n \"reactStrictMode\\\\|strictMode\" next.config.*)",
+      "Bash(ls next.config.*)",
+      "Bash(grep -rn \"Strict\" next.config.* app/layout.tsx)"
     ]
   }
 }

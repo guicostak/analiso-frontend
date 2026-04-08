@@ -35,6 +35,7 @@ import { Sidebar } from '@/src/components/layout/Sidebar';
 import { API_BASE_URL } from '@/src/lib/api-base';
 import type { CompanyQueueItem } from '../interfaces';
 import { formatDate } from '@/src/features/analysis/utils/formatters';
+import { trackVisit as trackRecentCompanyVisit } from '@/src/features/dashboard-canvas/services/recent-companies.service';
 
 type Status = 'Risco' | 'Atencao' | 'Saudavel';
 type MainTab = 'Resumo' | 'Pilares' | 'Mudancas' | 'Eventos' | 'Preço' | 'Fontes';
@@ -2318,6 +2319,13 @@ export function CompanyAnalysis() {
  const timer = window.setTimeout(() => setContentVisible(true), 150);
  return () => window.clearTimeout(timer);
  }, [activeTab, companyContext.companyId]);
+
+ // Tracking de visita: alimenta a ilha "Empresas recentes" do dashboard
+ // canvas. Fire-and-forget — nunca bloqueia a renderização nem mostra erro.
+ useEffect(() => {
+ if (!companyContext.ticker) return;
+ void trackRecentCompanyVisit(companyContext.ticker).catch(() => {});
+ }, [companyContext.ticker]);
 
  useEffect(() => {
  const nextContext = companyContextFromTicker(ticker);

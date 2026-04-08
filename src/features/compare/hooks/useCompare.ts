@@ -16,6 +16,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
+import { track as trackDashboardCompare } from "@/src/features/dashboard-canvas/services/compare-history.service";
+
 import {
   PILLARS,
   PILLAR_LABEL,
@@ -455,6 +457,9 @@ export function useCompare(): UseCompareReturn {
           setLoadedSections(
             new Set<LoadedKey>(["full", "value", "future", "past", "health", "dividend"]),
           );
+          // Tracking fire-and-forget para a ilha "Comparações recentes" do
+          // dashboard canvas. Nunca bloqueia ou propaga erro.
+          void trackDashboardCompare({ tickers: [tickerA, tickerB] }).catch(() => {});
         })
         .catch(handleError)
         .finally(() => { if (!cancelled) setLoadingApi(false); });
