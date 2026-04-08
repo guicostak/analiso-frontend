@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     url: "https://www.analiso.com.br",
   },
   twitter: { card: "summary_large_image" },
+  other: {
+    "google-adsense-account": "ca-pub-3249317765900933",
+  },
 };
 
 export default function RootLayout({
