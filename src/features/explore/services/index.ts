@@ -116,6 +116,8 @@ export interface ExploreMarketContextDetailDto {
   subtitle:            string;
   value:               string;
   statusLabel:         string;
+  /** Texto interpretativo adicional (V29 backend). Opcional p/ compat. */
+  interpretation?:     string | null;
   description:         string;
   metaLine:            string;
   ctaLabel:            string;
@@ -187,6 +189,133 @@ export interface ExploreCurationItemDto {
   catalogState?:       string | null;
 }
 
+// ─── Market extras DTOs (Fase 2 backend) ────────────────────────────────────
+
+export interface BreadthDto {
+  up:        number;
+  down:      number;
+  unchanged: number;
+  total:     number;
+  ratioUp:   number;
+}
+
+export interface VolatilityMiniDto {
+  score:       number | null;
+  statusKey:   string | null;
+  statusLabel: string | null;
+  metaLine:    string | null;
+  indexLabel:  string | null;
+}
+
+export interface FearGreedDto {
+  score:     number;
+  label:     string;
+  source:    string;
+  sourceUrl: string | null;
+  asOfDate:  string | null;
+}
+
+export interface VixMiniDto {
+  value:     string | null;
+  changePct: string | null;
+  trend:     string | null;
+}
+
+export interface DxyMiniDto {
+  value:     string | null;
+  changePct: string | null;
+  trend:     string | null;
+}
+
+export interface ExploreRiskPanelDto {
+  volatility:          VolatilityMiniDto | null;
+  breadth:             BreadthDto        | null;
+  fearGreed:           FearGreedDto      | null;
+  vix:                 VixMiniDto        | null;
+  dxy:                 DxyMiniDto        | null;
+  diCurvePlaceholder?: string            | null;
+}
+
+export interface MarketRibbonDto {
+  tickers:       ExploreIndexCardDto[];
+  marketStatus:  string | null;    // 'OPEN' | 'CLOSED' | 'PRE_MARKET'
+  lastUpdatedAt: string | null;
+}
+
+export interface MarketToneDto {
+  tone:       string;       // 'BULLISH' | 'NEUTRAL' | 'BEARISH'
+  label:      string;
+  highlights: string[];
+}
+
+export interface MacroIndicatorDto {
+  indicatorKey: string;
+  label:        string;
+  value:        string | null;
+  changeLabel:  string | null;
+  trend:        string;
+  asOfDate:     string | null;
+  sparkline:    number[];
+  subtitle:     string | null;
+}
+
+export interface EconomicCycleDto {
+  phaseKey:        string;
+  phaseLabel:      string;
+  growthStatus:    string;
+  inflationStatus: string;
+  confidence:      string;
+  description:     string | null;
+  metaLine:        string | null;
+}
+
+export interface MacroIndicatorsBundleDto {
+  selic:         MacroIndicatorDto | null;
+  ipca:          MacroIndicatorDto | null;
+  ibcBr:         MacroIndicatorDto | null;
+  economicCycle: EconomicCycleDto  | null;
+}
+
+export interface SectorHeatmapItemDto {
+  sector:         string;
+  avgChangePct:   number | null;
+  companiesCount: number | null;
+  topTickers:     string[];
+}
+
+export interface SectorHeatmapDto {
+  sectors:   SectorHeatmapItemDto[];
+  asOfLabel: string | null;
+}
+
+export interface ComparisonDto {
+  key:         string;
+  label:       string;
+  value:       string | null;
+  changePct:   string | null;
+  trend:       string;
+  sparkline:   number[] | null;
+  description: string | null;
+}
+
+export interface GlobalMacroBundleDto {
+  brent:   ExploreIndexCardDto | null;
+  wti:     ExploreIndexCardDto | null;
+  gold:    ExploreIndexCardDto | null;
+  ironOre: ExploreIndexCardDto | null;
+  bitcoin: ExploreIndexCardDto | null;
+}
+
+export interface ExploreMarketExtrasDto {
+  ribbon:        MarketRibbonDto          | null;
+  marketTone:    MarketToneDto            | null;
+  riskPanel:     ExploreRiskPanelDto      | null;
+  sectorHeatmap: SectorHeatmapDto         | null;
+  macroBr:       MacroIndicatorsBundleDto | null;
+  macroGlobal:   GlobalMacroBundleDto     | null;
+  comparisons:   ComparisonDto[]          | null;
+}
+
 // Resposta completa
 export interface ExploreResponse {
   manifestVersion:  string;
@@ -198,6 +327,16 @@ export interface ExploreResponse {
   movementInsights: ExploreMovementInsightsDto  | null;
   catalogItems:     ExploreCatalogItemDto[]     | null;
   heroCuration:     { items: ExploreCurationItemDto[] } | null;
+  /** Novos blocos da aba Contexto da tela /mercado (Fase 2). Opcional. */
+  marketExtras?:    ExploreMarketExtrasDto      | null;
+}
+
+/** Chaves de range aceitas pelo backend (mirrors ExploreController). */
+export type ExploreTimeRange = '1D' | '1W' | '1M' | 'YTD' | '1Y';
+
+export interface GetExploreParams {
+  date?:  string;            // ISO yyyy-MM-dd
+  range?: ExploreTimeRange;  // default '1D' no backend
 }
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────
@@ -426,10 +565,17 @@ export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): Highlig
 
 // ─── Chamadas HTTP ────────────────────────────────────────────────────────────
 
-export async function getExplore(_token?: string | null): Promise<ExploreResponse> {
+export async function getExplore(
+  _token?: string | null,
+  params?: GetExploreParams,
+): Promise<ExploreResponse> {
   // /api/explore é público (permitAll no backend) — não envia token para evitar
   // rejeição por JWT expirado/inválido interferindo na resposta.
-  return apiFetch<ExploreResponse>('/api/explore', {});
+  const qs = new URLSearchParams();
+  if (params?.date)  qs.set('date',  params.date);
+  if (params?.range) qs.set('range', params.range);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<ExploreResponse>(`/api/explore${suffix}`, {});
 }
 
 export interface ExploreNewsItem {

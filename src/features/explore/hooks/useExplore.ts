@@ -51,6 +51,9 @@ import type {
   Volatility,
 } from "../interfaces";
 
+import type { MarketExtras, MarketTimeRange } from "../interfaces/market.interfaces";
+import { mapMarketExtras } from "../mappers/market.mappers";
+
 // ─── Tipo de retorno do hook ──────────────────────────────────────────────────
 
 export interface UseExploreReturn {
@@ -98,6 +101,10 @@ export interface UseExploreReturn {
   highlights:         HighlightItem[];
   referenceDate:      string | null;
 
+  // Market extras (Fase 2) — novos blocos da aba Contexto
+  timeRange:     MarketTimeRange;
+  marketExtras:  MarketExtras | null;
+
   // Helpers expostos
   getCompanyLogo: (ticker: string) => string | undefined;
 
@@ -120,6 +127,9 @@ export interface UseExploreReturn {
   clearPreset:            () => void;
   toggleCompare:          (ticker: string) => void;
   resetFilters:           () => void;
+
+  // Market extras
+  setTimeRange:           (range: MarketTimeRange) => void;
 }
 
 // ─── Valores iniciais ─────────────────────────────────────────────────────────
@@ -156,6 +166,7 @@ export function useExplore(): UseExploreReturn {
   const [filters,               setFilters]               = useState<Filters>(DEFAULT_FILTERS);
   const [isLoading,             setIsLoading]             = useState(true);
   const [exploreData,           setExploreData]           = useState<ExploreResponse | null>(null);
+  const [timeRange,             setTimeRange]             = useState<MarketTimeRange>("1D");
 
   useEffect(() => {
     // Aguarda o AuthContext terminar de restaurar a sessão antes de chamar a API
@@ -163,7 +174,7 @@ export function useExplore(): UseExploreReturn {
 
     setIsLoading(true);
     setSummaryState("loading");
-    getExplore(token)
+    getExplore(token, { range: timeRange })
       .then((data) => {
         setExploreData(data);
         setSummaryState("ready");
@@ -177,7 +188,7 @@ export function useExplore(): UseExploreReturn {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [token, authLoading]);
+  }, [token, authLoading, timeRange]);
 
   // ─── Dados derivados ───────────────────────────────────────────────────────
 
@@ -282,6 +293,10 @@ export function useExplore(): UseExploreReturn {
     const detail = exploreData?.marketContext?.detail;
     if (detail) return mapMarketContextDetailToVolatility(detail);
     return { value: 0, label: "Moderada", updatedAt: "", source: "" };
+  }, [exploreData]);
+
+  const resolvedMarketExtras = useMemo<MarketExtras | null>(() => {
+    return mapMarketExtras(exploreData?.marketExtras);
   }, [exploreData]);
 
   const staleCount        = filteredCompanies.filter((c) => c.freshnessStatus === "Antigo").length;
@@ -393,6 +408,10 @@ export function useExplore(): UseExploreReturn {
     highlights:          resolvedHighlights,
     referenceDate:       exploreData?.referenceDate ?? null,
 
+    // Market extras (Fase 2)
+    timeRange,
+    marketExtras:        resolvedMarketExtras,
+
     // Helpers
     getCompanyLogo,
 
@@ -415,5 +434,8 @@ export function useExplore(): UseExploreReturn {
     clearPreset,
     toggleCompare,
     resetFilters,
+
+    // Market extras
+    setTimeRange,
   };
 }
