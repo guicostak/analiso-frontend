@@ -11,6 +11,15 @@ import { ExploreMarketContext } from "./ExploreMarketContext";
 import { ExploreMovementsPanel } from "./ExploreMovementsPanel";
 import { ExploreDrawer } from "./ExploreDrawer";
 import { getMarketNews, type ExploreNewsItem } from "../services";
+// ── Market extras (Fase 2) ──
+import { ExploreMarketRibbon } from "./market/ExploreMarketRibbon";
+import { ExploreTimeRangeToggle } from "./market/ExploreTimeRangeToggle";
+import { ExploreMarketTonePill } from "./market/ExploreMarketTonePill";
+import { ExploreRiskPanel } from "./market/ExploreRiskPanel";
+import { ExploreSectorHeatmap } from "./market/ExploreSectorHeatmap";
+import { ExploreMacroBrGrid } from "./market/ExploreMacroBrGrid";
+import { ExploreGlobalMacroGrid } from "./market/ExploreGlobalMacroGrid";
+import { ExploreComparisonsGrid } from "./market/ExploreComparisonsGrid";
 
 function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
   if (item.imageUrl) return { type: "photo", src: item.imageUrl };
@@ -98,6 +107,10 @@ export function MarketContextPage() {
     movementDominant,
     setSelectedTab,
     setShowAllMovements,
+    // Market extras (Fase 2)
+    timeRange,
+    setTimeRange,
+    marketExtras,
   } = useExplore();
 
   return (
@@ -114,14 +127,25 @@ export function MarketContextPage() {
 
         <div className="relative px-6 pb-20 pt-5">
           <div className="mx-auto max-w-[1380px]">
-            <header className="mb-4 space-y-2">
-              <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
+            {/* === Ribbon global (Fase 2) === */}
+            <div className="mb-4">
+              <ExploreMarketRibbon ribbon={marketExtras?.ribbon ?? null} isLoading={isLoading} />
+            </div>
+
+            <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="max-w-[680px] space-y-2">
-                <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-foreground">Mercado</h1>
-                <p className="text-[13px] leading-6 text-muted-foreground">
-                  Acompanhe o panorama macro, os movimentos das empresas e as principais notícias do dia em um só lugar.
-                </p>
+                <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-foreground">Mercado</h1>
+                    <ExploreMarketTonePill tone={marketExtras?.marketTone ?? null} />
+                  </div>
+                  <p className="text-[13px] leading-6 text-muted-foreground">
+                    Acompanhe o panorama macro, os movimentos das empresas e as principais notícias do dia em um só lugar.
+                  </p>
+                </div>
               </div>
+              <ExploreTimeRangeToggle value={timeRange} onChange={setTimeRange} disabled={isLoading} />
             </header>
 
             {/* === Navegação por seção === */}
@@ -172,6 +196,17 @@ export function MarketContextPage() {
                   setShowVolatilityDetails={setShowVolatilityDetails}
                   hideHeader
                 />
+
+                {/* === Novos blocos da aba Contexto (Fase 2) === */}
+                {marketExtras && (
+                  <div className="mt-8 space-y-10">
+                    <ExploreRiskPanel      riskPanel={marketExtras.riskPanel} />
+                    <ExploreSectorHeatmap  heatmap={marketExtras.sectorHeatmap} />
+                    <ExploreMacroBrGrid    bundle={marketExtras.macroBr} />
+                    <ExploreGlobalMacroGrid bundle={marketExtras.macroGlobal} />
+                    <ExploreComparisonsGrid comparisons={marketExtras.comparisons} />
+                  </div>
+                )}
               </section>
               )}
 
