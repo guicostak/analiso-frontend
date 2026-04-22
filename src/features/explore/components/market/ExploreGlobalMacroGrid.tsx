@@ -55,44 +55,49 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
         transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
       "
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            {label}
-          </p>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-lg font-semibold tabular-nums text-foreground">
-              {unit?.prefix && (
-                <span className="mr-1 text-[12px] font-medium text-muted-foreground">{unit.prefix}</span>
-              )}
-              {card.value || "—"}
-              {unit?.suffix && (
-                <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{unit.suffix}</span>
-              )}
-            </span>
-            <span className={`text-xs font-medium tabular-nums ${toneClass}`}>
-              {card.changePct || "—"}
-            </span>
-          </div>
-        </div>
+      {/* Header: label + badge (sparkline fica na base, com mais respiro) */}
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
         {card.sparkline?.length > 1 && (
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            <SparklineRangeBadge range={range} />
-            <MiniSparkline
-              data={card.sparkline}
-              labels={resolveSparklineLabels({
-                dates: card.sparklineDates,
-                range,
-                count: card.sparkline.length,
-              })}
-              valueFormatter={sparklineValueFormatter(card.symbol)}
-              status={sparklineStatus}
-              width={64}
-              height={28}
-            />
-          </div>
+          <SparklineRangeBadge range={range} />
         )}
       </div>
+
+      {/* Valor + variação empilhados (dá espaço p/ "US$ 75.872,52") */}
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-lg font-semibold tabular-nums text-foreground truncate">
+          {unit?.prefix && (
+            <span className="mr-1 text-[12px] font-medium text-muted-foreground">{unit.prefix}</span>
+          )}
+          {card.value || "—"}
+          {unit?.suffix && (
+            <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{unit.suffix}</span>
+          )}
+        </span>
+        <span className={`text-xs font-medium tabular-nums ${toneClass}`}>
+          {card.changePct || "—"}
+        </span>
+      </div>
+
+      {/* Sparkline full-width na base */}
+      {card.sparkline?.length > 1 && (
+        <div className="mt-auto flex justify-end">
+          <MiniSparkline
+            data={card.sparkline}
+            labels={resolveSparklineLabels({
+              dates: card.sparklineDates,
+              range,
+              count: card.sparkline.length,
+            })}
+            valueFormatter={sparklineValueFormatter(card.symbol)}
+            status={sparklineStatus}
+            width={96}
+            height={28}
+          />
+        </div>
+      )}
     </article>
   );
 }
