@@ -156,6 +156,10 @@ export interface Comparison {
   sparklineDates?: string[];
   /** Fórmula/métrica ("IBOV ÷ USDBRL") — exibida próximo ao valor. */
   formula?:        string;
+  /** Prefixo de unidade antes do valor ("US$", "R$"). */
+  valuePrefix?:    string;
+  /** Sufixo de unidade depois do valor ("pts", "×", "/oz"). */
+  valueSuffix?:    string;
   description:     string | null;
 }
 

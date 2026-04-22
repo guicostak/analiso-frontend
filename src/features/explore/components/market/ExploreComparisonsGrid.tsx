@@ -41,7 +41,13 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
           </p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-semibold tabular-nums text-foreground">
+              {comp.valuePrefix && (
+                <span className="mr-1 text-[14px] font-medium text-muted-foreground">{comp.valuePrefix}</span>
+              )}
               {comp.value ?? "—"}
+              {comp.valueSuffix && (
+                <span className="ml-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{comp.valueSuffix}</span>
+              )}
             </span>
             {comp.changePct && (
               <span className={`text-xs font-medium tabular-nums ${toneClass}`}>
@@ -71,9 +77,11 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
               })}
               valueFormatter={(v) => {
                 const n = v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                if (comp.key === "ibov_usd") return `US$ ${n}`;
-                if (comp.key === "ibov_vs_spx_ytd") return `${n}%`;
-                return n;
+                const pref = comp.valuePrefix ? `${comp.valuePrefix} ` : "";
+                const suf  = comp.valueSuffix ? ` ${comp.valueSuffix}` : "";
+                // Fallbacks para chaves específicas sem prefix/suffix explícitos.
+                if (!pref && !suf && comp.key === "ibov_vs_spx_ytd") return `${n}%`;
+                return `${pref}${n}${suf}`;
               }}
               status={sparklineStatus}
               width={80}

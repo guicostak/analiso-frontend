@@ -248,7 +248,9 @@ export const mapComparison = (d: ComparisonDto): Comparison => ({
   trend:           safeTrend(d.trend),
   sparkline:       d.sparkline ?? null,
   sparklineDates:  Array.isArray(d.sparklineDates) ? d.sparklineDates : undefined,
-  formula:         d.formula ?? undefined,
+  formula:         d.formula     ?? undefined,
+  valuePrefix:     d.valuePrefix ?? undefined,
+  valueSuffix:     d.valueSuffix ?? undefined,
   description:     d.description ?? null,
 });
 
