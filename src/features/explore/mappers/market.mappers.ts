@@ -14,6 +14,8 @@ import type {
   VolatilityMiniDto,
   VixMiniDto,
   DxyMiniDto,
+  DiCurveDto,
+  DiCurvePointDto,
   MacroIndicatorDto,
   EconomicCycleDto,
   MacroIndicatorsBundleDto,
@@ -34,6 +36,8 @@ import type {
   FearGreedIndicator,
   VolatilityMini,
   IndexMini,
+  DiCurve,
+  DiCurvePoint,
   MacroIndicator,
   EconomicCycle,
   MacroIndicatorsBundle,
@@ -136,17 +140,40 @@ const mapIndexMini = (d: VixMiniDto | DxyMiniDto | null | undefined): IndexMini 
   };
 };
 
+const mapDiCurvePoint = (d: DiCurvePointDto): DiCurvePoint => ({
+  tenorDays:      d.tenorDays,
+  tenorLabel:     d.tenorLabel,
+  yieldPct:       d.yieldPct,
+  yieldFormatted: d.yieldFormatted,
+  changeBps:      d.changeBps ?? null,
+  changeLabel:    d.changeLabel ?? null,
+  trend:          safeTrend(d.trend),
+});
+
+const mapDiCurve = (dto: DiCurveDto | null | undefined): DiCurve | null => {
+  if (!dto) return null;
+  return {
+    curveType: dto.curveType,
+    label:     dto.label,
+    asOfDate:  dto.asOfDate ?? null,
+    points:    Array.isArray(dto.points) ? dto.points.map(mapDiCurvePoint) : [],
+    source:    dto.source ?? null,
+    sourceUrl: dto.sourceUrl ?? null,
+    summary:   dto.summary ?? null,
+  };
+};
+
 export const mapRiskPanel = (
   dto: ExploreRiskPanelDto | null | undefined,
 ): RiskPanel | null => {
   if (!dto) return null;
   return {
-    volatility:         mapVolatilityMini(dto.volatility),
-    breadth:            mapBreadth(dto.breadth),
-    fearGreed:          mapFearGreed(dto.fearGreed),
-    vix:                mapIndexMini(dto.vix),
-    dxy:                mapIndexMini(dto.dxy),
-    diCurvePlaceholder: dto.diCurvePlaceholder ?? null,
+    volatility: mapVolatilityMini(dto.volatility),
+    breadth:    mapBreadth(dto.breadth),
+    fearGreed:  mapFearGreed(dto.fearGreed),
+    vix:        mapIndexMini(dto.vix),
+    dxy:        mapIndexMini(dto.dxy),
+    diCurve:    mapDiCurve(dto.diCurve),
   };
 };
 

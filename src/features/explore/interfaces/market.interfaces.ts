@@ -59,13 +59,33 @@ export interface IndexMini {
   trend:     IndexCardTrend;
 }
 
+export interface DiCurvePoint {
+  tenorDays:       number;
+  tenorLabel:      string;
+  yieldPct:        number;
+  yieldFormatted:  string;
+  changeBps:       number | null;
+  changeLabel:     string | null;
+  trend:           IndexCardTrend;
+}
+
+export interface DiCurve {
+  curveType: string;
+  label:     string;
+  asOfDate:  string | null;
+  points:    DiCurvePoint[];
+  source:    string | null;
+  sourceUrl: string | null;
+  summary:   string | null;
+}
+
 export interface RiskPanel {
-  volatility:         VolatilityMini     | null;
-  breadth:            BreadthIndicator   | null;
-  fearGreed:          FearGreedIndicator | null;
-  vix:                IndexMini          | null;
-  dxy:                IndexMini          | null;
-  diCurvePlaceholder: string             | null;
+  volatility: VolatilityMini     | null;
+  breadth:    BreadthIndicator   | null;
+  fearGreed:  FearGreedIndicator | null;
+  vix:        IndexMini          | null;
+  dxy:        IndexMini          | null;
+  diCurve:    DiCurve            | null;
 }
 
 export interface MarketToneHighlights {

@@ -229,13 +229,37 @@ export interface DxyMiniDto {
   trend:     string | null;
 }
 
+export interface DiCurvePointDto {
+  tenorDays:      number;
+  tenorLabel:     string;
+  yieldPct:       number;
+  yieldFormatted: string;
+  changeBps:      number | null;
+  changeLabel:    string | null;
+  trend:          string;
+}
+
+export interface DiCurveDto {
+  curveType: string;
+  label:     string;
+  asOfDate:  string | null;
+  points:    DiCurvePointDto[];
+  source:    string | null;
+  sourceUrl: string | null;
+  summary:   string | null;
+}
+
 export interface ExploreRiskPanelDto {
-  volatility:          VolatilityMiniDto | null;
-  breadth:             BreadthDto        | null;
-  fearGreed:           FearGreedDto      | null;
-  vix:                 VixMiniDto        | null;
-  dxy:                 DxyMiniDto        | null;
-  diCurvePlaceholder?: string            | null;
+  volatility:  VolatilityMiniDto | null;
+  breadth:     BreadthDto        | null;
+  fearGreed:   FearGreedDto      | null;
+  vix:         VixMiniDto        | null;
+  dxy:         DxyMiniDto        | null;
+  /**
+   * Curva DI PRE (ETTJ Anbima). Null quando pipeline ainda não rodou
+   * — frontend renderiza estado "em breve".
+   */
+  diCurve?:    DiCurveDto        | null;
 }
 
 export interface MarketRibbonDto {
