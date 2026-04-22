@@ -127,11 +127,6 @@ export function MarketContextPage() {
 
         <div className="relative px-6 pb-20 pt-5">
           <div className="mx-auto max-w-[1380px]">
-            {/* === Ribbon global (Fase 2) === */}
-            <div className="mb-4">
-              <ExploreMarketRibbon ribbon={marketExtras?.ribbon ?? null} isLoading={isLoading} />
-            </div>
-
             <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="max-w-[680px] space-y-2">
                 <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
@@ -184,6 +179,9 @@ export function MarketContextPage() {
                     Panorama macro, índices globais e volatilidade para entender o ambiente antes de olhar empresa a empresa.
                   </p>
                 </div>
+
+                {/* === Ribbon global: ticker tape dentro da seção Contexto === */}
+                <ExploreMarketRibbon ribbon={marketExtras?.ribbon ?? null} isLoading={isLoading} />
 
                 <ExploreMarketContext
                   isLoading={isLoading}
