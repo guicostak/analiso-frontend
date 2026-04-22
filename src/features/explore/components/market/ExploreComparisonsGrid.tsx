@@ -64,6 +64,12 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
                 count: comp.sparkline.length,
                 flavor: "daily",
               })}
+              valueFormatter={(v) => {
+                const n = v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (comp.key === "ibov_usd") return `US$ ${n}`;
+                if (comp.key === "ibov_vs_spx_ytd") return `${n}%`;
+                return n;
+              }}
               status={sparklineStatus}
               width={80}
               height={32}

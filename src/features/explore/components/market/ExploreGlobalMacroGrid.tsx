@@ -10,6 +10,7 @@ import type { IndexCard } from "../../interfaces";
 import type { GlobalMacroBundle, MarketTimeRange } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
+import { unitFor, sparklineValueFormatter } from "../../utils/tickerUnits";
 
 interface ExploreGlobalMacroGridProps {
   bundle: GlobalMacroBundle | null;
@@ -44,6 +45,8 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
   const sparklineStatus =
     card.trend === "up" ? "healthy" : card.trend === "down" ? "risk" : "attention";
 
+  const unit = unitFor(card.symbol);
+
   return (
     <article
       className="
@@ -59,7 +62,13 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
           </p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-lg font-semibold tabular-nums text-foreground">
+              {unit?.prefix && (
+                <span className="mr-1 text-[12px] font-medium text-muted-foreground">{unit.prefix}</span>
+              )}
               {card.value || "—"}
+              {unit?.suffix && (
+                <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{unit.suffix}</span>
+              )}
             </span>
             <span className={`text-xs font-medium tabular-nums ${toneClass}`}>
               {card.changePct || "—"}
@@ -76,6 +85,7 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
                 range,
                 count: card.sparkline.length,
               })}
+              valueFormatter={sparklineValueFormatter(card.symbol)}
               status={sparklineStatus}
               width={64}
               height={28}

@@ -60,6 +60,9 @@ export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: Explor
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-semibold tabular-nums text-foreground">
               {indicator.value ?? "—"}
+              {indicator.key === "IBC_BR" && (
+                <span className="ml-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">pts</span>
+              )}
             </span>
             {indicator.changeLabel && (
               <span className={`text-xs font-medium tabular-nums ${toneClass}`}>
@@ -79,6 +82,12 @@ export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: Explor
                 count: indicator.sparkline.length,
                 flavor: "monthly",
               })}
+              valueFormatter={(v) => {
+                const n = v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (indicator.key === "SELIC" || indicator.key === "IPCA") return `${n}%`;
+                if (indicator.key === "IBC_BR") return `${n} pts`;
+                return n;
+              }}
               status={sparklineStatus}
               width={80}
               height={32}

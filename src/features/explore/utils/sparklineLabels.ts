@@ -61,6 +61,30 @@ export function makeSparklineLabels(
     return out;
   }
 
+  if (flavor === "intraday") {
+    return makeIntradayLabels(count);
+  }
+
+  return out;
+}
+
+/**
+ * Labels aproximadas "hh:mm" para sparkline intradiária da B3 (10:00–17:00 BRT).
+ * Aproximação: distribui uniformemente os pontos na janela de pregão.
+ */
+export function makeIntradayLabels(count: number): string[] {
+  if (count < 1) return [];
+  if (count === 1) return ["agora"];
+  const startMin = 10 * 60;      // 10:00
+  const endMin   = 17 * 60;      // 17:00
+  const step     = (endMin - startMin) / (count - 1);
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const m = Math.round(startMin + i * step);
+    const hh = Math.floor(m / 60);
+    const mm = m % 60;
+    out.push(`${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`);
+  }
   return out;
 }
 

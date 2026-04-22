@@ -7,6 +7,7 @@ import type { MarketTimeRange } from "../interfaces/market.interfaces";
 import type { ExploreMarketContextDto } from "../services";
 import { SparklineRangeBadge } from "./market/SparklineRangeBadge";
 import { resolveSparklineLabels } from "../utils/sparklineLabels";
+import { unitFor, sparklineValueFormatter } from "../utils/tickerUnits";
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
   if (trend === "up") return "healthy";
@@ -109,7 +110,9 @@ export function ExploreMarketContext({
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-                  {indexCards.map((card) => (
+                  {indexCards.map((card) => {
+                    const unit = unitFor(card.symbol);
+                    return (
                     <div
                       key={card.symbol}
                       className={`relative rounded-[18px] border border-border bg-card p-3.5 shadow-[0_10px_24px_rgba(15,23,40,0.03)] dark:shadow-none`}
@@ -129,6 +132,7 @@ export function ExploreMarketContext({
                               range: timeRange,
                               count: card.sparkline.length,
                             })}
+                            valueFormatter={sparklineValueFormatter(card.symbol)}
                             status={getTrendStatus(card.trend)}
                             width={72}
                             height={28}
@@ -137,12 +141,21 @@ export function ExploreMarketContext({
                           />
                         </div>
                       </div>
-                      <p className="relative mt-3 text-[19px] font-semibold tracking-[-0.03em] text-foreground">{card.value}</p>
+                      <p className="relative mt-3 text-[19px] font-semibold tracking-[-0.03em] text-foreground tabular-nums">
+                        {unit?.prefix && (
+                          <span className="mr-1 text-[13px] font-medium text-muted-foreground">{unit.prefix}</span>
+                        )}
+                        {card.value}
+                        {unit?.suffix && (
+                          <span className="ml-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{unit.suffix}</span>
+                        )}
+                      </p>
                       <p className={`relative mt-1 text-[12px] font-medium ${trendTone[card.trend]}`}>
                         {card.changeAbs} ({card.changePct})
                       </p>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </aside>
