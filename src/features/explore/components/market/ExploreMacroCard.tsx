@@ -8,6 +8,7 @@
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { MacroIndicator } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
+import { makeSparklineLabels } from "../../utils/sparklineLabels";
 
 interface ExploreMacroCardProps {
   indicator: MacroIndicator | null;
@@ -72,6 +73,7 @@ export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: Explor
             <SparklineRangeBadge fixed={rangeLabel} />
             <MiniSparkline
               data={indicator.sparkline}
+              labels={makeSparklineLabels("monthly", indicator.sparkline.length)}
               status={sparklineStatus}
               width={80}
               height={32}

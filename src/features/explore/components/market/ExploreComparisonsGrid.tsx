@@ -8,6 +8,7 @@
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { Comparison, MarketTimeRange } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
+import { labelsFromRange, makeSparklineLabels } from "../../utils/sparklineLabels";
 
 interface ExploreComparisonsGridProps {
   comparisons: Comparison[];
@@ -57,6 +58,11 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
               : <SparklineRangeBadge range={range} />}
             <MiniSparkline
               data={comp.sparkline}
+              labels={
+                comp.key === "ibov_vs_spx_ytd"
+                  ? makeSparklineLabels("daily", comp.sparkline.length)
+                  : labelsFromRange(range, comp.sparkline.length)
+              }
               status={sparklineStatus}
               width={80}
               height={32}
