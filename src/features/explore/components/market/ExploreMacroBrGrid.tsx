@@ -1,20 +1,15 @@
 "use client";
 
 /**
- * Grid "Macro Brasil" — Ciclo Econômico + Selic / IPCA / IBC-Br.
+ * Grid "Macro Brasil".
  *
- * Composição assimétrica (refactoring-ui §7):
- *  - Ciclo (clock SVG) = âncora visual à esquerda em lg+
- *  - 3 indicadores = coluna direita, empilhados 1×3 no lg e 3×1 no xl
+ * Layout em 2 faixas verticais:
+ *  1. 3 indicadores escalares (Selic / IPCA / IBC-Br) lado a lado.
+ *  2. Ciclo Econômico full-width (clock SVG + contexto em 2-col interno).
  *
- * Breakpoints:
- *  - mobile (< sm): tudo em 1 coluna — ciclo primeiro, depois indicadores
- *  - sm ... md    : ciclo full-width; indicadores em grid-cols-3 abaixo
- *  - lg+          : split 2 colunas — ciclo ancorado à esquerda, os 3
- *                   indicadores à direita em grid-cols-3 (horizontal)
- *
- * Motivo: o relógio precisa de largura mínima (labels dos eixos); os
- * 3 indicadores escalares escalam bem tanto verticais quanto horizontais.
+ * Motivo: o relógio é infográfico e se beneficia de espaço horizontal
+ * generoso (labels dos eixos + tooltip contextual). Os 3 indicadores
+ * são escalares densos, ficam bem em cards quadrados no topo.
  */
 
 import type { MacroIndicatorsBundle } from "../../interfaces/market.interfaces";
@@ -39,24 +34,15 @@ export function ExploreMacroBrGrid({ bundle }: ExploreMacroBrGridProps) {
         </h3>
       </header>
 
-      <div
-        className="
-          grid gap-4
-          grid-cols-1
-          lg:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]
-        "
-      >
-        {/* Coluna 1 (lg+): ciclo econômico — âncora visual */}
-        <ExploreEconomicCycleCard cycle={bundle.economicCycle} />
-
-        {/* Coluna 2 (lg+): 3 indicadores escalares sempre horizontais em sm+.
-            Dimensões quadradas ficam melhores do que retangulares alongadas. */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          <ExploreMacroCard indicator={bundle.selic} />
-          <ExploreMacroCard indicator={bundle.ipca}  />
-          <ExploreMacroCard indicator={bundle.ibcBr} />
-        </div>
+      {/* 3 indicadores no topo */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <ExploreMacroCard indicator={bundle.selic} />
+        <ExploreMacroCard indicator={bundle.ipca}  />
+        <ExploreMacroCard indicator={bundle.ibcBr} />
       </div>
+
+      {/* Ciclo econômico full-width — clock SVG + contexto lado a lado internamente */}
+      <ExploreEconomicCycleCard cycle={bundle.economicCycle} />
     </section>
   );
 }

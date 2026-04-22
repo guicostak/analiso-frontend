@@ -57,11 +57,14 @@ interface Props {
 export function MarketCycleClock({ currentPhase, maxWidth = 380 }: Props) {
   const [hovered, setHovered] = useState<MarketCyclePhase | null>(null);
 
-  const width = 340;
-  const height = 280;
+  // Viewport ampliado para acomodar labels fora do círculo com respiro.
+  const width = 380;
+  const height = 320;
   const cx = width / 2;
   const cy = height / 2;
-  const r = 95;
+  const r = 110;
+  const axisPad = 22;   // quanto os eixos estendem além do círculo
+  const chipPad = 38;   // distância do chip de label ao círculo
 
   // SVG: 0° à direita, sentido horário.
   const quadrants: Record<MarketCyclePhase, {
@@ -70,10 +73,10 @@ export function MarketCycleClock({ currentPhase, maxWidth = 380 }: Props) {
     tipX: string; tipY: string;
     tipAlign: "left" | "right";
   }> = {
-    RECOVERY:    { startDeg: 180, endDeg: 270, lx: cx - 47, ly: cy - 38, tipX: "2%",  tipY: "2%",  tipAlign: "left" },
-    OVERHEAT:    { startDeg: 270, endDeg: 360, lx: cx + 47, ly: cy - 38, tipX: "52%", tipY: "2%",  tipAlign: "right" },
-    STAGFLATION: { startDeg: 0,   endDeg: 90,  lx: cx + 47, ly: cy + 45, tipX: "52%", tipY: "55%", tipAlign: "right" },
-    REFLATION:   { startDeg: 90,  endDeg: 180, lx: cx - 47, ly: cy + 45, tipX: "2%",  tipY: "55%", tipAlign: "left" },
+    RECOVERY:    { startDeg: 180, endDeg: 270, lx: cx - 55, ly: cy - 42, tipX: "2%",  tipY: "2%",  tipAlign: "left" },
+    OVERHEAT:    { startDeg: 270, endDeg: 360, lx: cx + 55, ly: cy - 42, tipX: "52%", tipY: "2%",  tipAlign: "right" },
+    STAGFLATION: { startDeg: 0,   endDeg: 90,  lx: cx + 55, ly: cy + 50, tipX: "52%", tipY: "55%", tipAlign: "right" },
+    REFLATION:   { startDeg: 90,  endDeg: 180, lx: cx - 55, ly: cy + 50, tipX: "2%",  tipY: "55%", tipAlign: "left" },
   };
 
   const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -143,16 +146,63 @@ export function MarketCycleClock({ currentPhase, maxWidth = 380 }: Props) {
           );
         })}
 
-        {/* Eixos */}
-        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="#D1D5DB" strokeWidth="1.25" className="pointer-events-none" />
-        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#D1D5DB" strokeWidth="1.25" className="pointer-events-none" />
+        {/* Eixos cruzados — estendem ALÉM do círculo com traço tracejado
+            para reforçar visualmente os parâmetros (crescimento × inflação).
+            Segmento dentro do círculo é sólido, fora é dashed. */}
+        {/* Eixo vertical (crescimento) */}
+        <line x1={cx} y1={cy - r}           x2={cx} y2={cy + r}
+              stroke="#9CA3AF" strokeWidth="1.5"
+              className="pointer-events-none" />
+        <line x1={cx} y1={cy - r - axisPad} x2={cx} y2={cy - r}
+              stroke="#9CA3AF" strokeWidth="1.5" strokeDasharray="3 3"
+              className="pointer-events-none" />
+        <line x1={cx} y1={cy + r}           x2={cx} y2={cy + r + axisPad}
+              stroke="#9CA3AF" strokeWidth="1.5" strokeDasharray="3 3"
+              className="pointer-events-none" />
+
+        {/* Eixo horizontal (inflação) */}
+        <line x1={cx - r}           y1={cy} x2={cx + r}           y2={cy}
+              stroke="#9CA3AF" strokeWidth="1.5"
+              className="pointer-events-none" />
+        <line x1={cx - r - axisPad} y1={cy} x2={cx - r}           y2={cy}
+              stroke="#9CA3AF" strokeWidth="1.5" strokeDasharray="3 3"
+              className="pointer-events-none" />
+        <line x1={cx + r}           y1={cy} x2={cx + r + axisPad} y2={cy}
+              stroke="#9CA3AF" strokeWidth="1.5" strokeDasharray="3 3"
+              className="pointer-events-none" />
+
+        {/* Círculo externo */}
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#D1D5DB" strokeWidth="1.75" className="pointer-events-none" />
 
-        {/* Labels dos eixos */}
-        <text x={cx} y={18}         textAnchor="middle" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: "#6B7280" }}>Crescimento ↑</text>
-        <text x={cx} y={height - 6} textAnchor="middle" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: "#6B7280" }}>Crescimento ↓</text>
-        <text x={width - 8} y={cy + 4} textAnchor="end"    className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: "#6B7280" }}>Inflação ↑</text>
-        <text x={8}         y={cy + 4} textAnchor="start"  className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: "#6B7280" }}>Inflação ↓</text>
+        {/* Ponto central reforçando a origem dos eixos */}
+        <circle cx={cx} cy={cy} r={2.25} fill="#6B7280" className="pointer-events-none" />
+
+        {/* Axis labels em "chip" com fundo — maior presença visual.
+            Usa foreignObject pra aproveitar tokens CSS do tema. */}
+        {/* Crescimento ↑ (topo) */}
+        <foreignObject x={cx - 64} y={0} width="128" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            Crescimento ↑
+          </div>
+        </foreignObject>
+        {/* Crescimento ↓ (base) */}
+        <foreignObject x={cx - 64} y={height - 22} width="128" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            Crescimento ↓
+          </div>
+        </foreignObject>
+        {/* Inflação ↓ (esquerda) */}
+        <foreignObject x={0} y={cy - 11} width="78" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            Inflação ↓
+          </div>
+        </foreignObject>
+        {/* Inflação ↑ (direita) */}
+        <foreignObject x={width - 78} y={cy - 11} width="78" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+            Inflação ↑
+          </div>
+        </foreignObject>
       </svg>
 
       {hovered && (() => {
