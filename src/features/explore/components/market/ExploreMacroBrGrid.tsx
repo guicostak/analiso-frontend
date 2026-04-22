@@ -27,8 +27,7 @@ export function ExploreMacroBrGrid({ bundle }: ExploreMacroBrGridProps) {
 
   return (
     <section className="space-y-4" aria-label="Macro Brasil">
-      <header className="space-y-1.5">
-        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+      <header>
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Contexto macroeconômico
         </p>

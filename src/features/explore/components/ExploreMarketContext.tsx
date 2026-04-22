@@ -83,13 +83,19 @@ export function ExploreMarketContext({
 
                 <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_216px]">
                   <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_32px_rgba(15,23,40,0.05)] dark:shadow-none">
-                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Interpretacao principal</p>
+                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase text-muted-foreground">
+                      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+                      Interpretacao principal
+                    </p>
                     <p className="mt-2.5 max-w-[95%] text-[14px] leading-6 text-foreground">
                       {detail?.interpretation || "O dia favorece leitura seletiva: fluxo e reacao ainda importam, mas o contexto pede confirmacao por tese antes de concluir tendencia."}
                     </p>
                   </div>
                   <div className="relative rounded-[22px] border border-border bg-card p-4 shadow-[0_10px_24px_rgba(15,23,40,0.04)] dark:shadow-none">
-                    <p className="text-[12px] font-medium uppercase text-muted-foreground">O que observar</p>
+                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase text-muted-foreground">
+                      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+                      O que observar
+                    </p>
                     <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
                       {detail?.subtitle || "Small caps com reacao melhor e volatilidade moderada sugerem priorizar contexto antes de escala."}
                     </p>
@@ -126,6 +132,7 @@ export function ExploreMarketContext({
                       <div className="flex items-start justify-between gap-3">
                         <div className="relative">
                           <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">
+                            <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
                             {card.name}
                             {TICKER_INFO[card.symbol] && (
                               <InfoTooltip label={card.name} content={TICKER_INFO[card.symbol]} />

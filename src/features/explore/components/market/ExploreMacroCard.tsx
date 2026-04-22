@@ -5,9 +5,11 @@
  * Reusado pelos 3 indicadores — SRP: apenas apresentação.
  */
 
+import { Globe } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { MacroIndicator } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { MACRO_BR_INFO } from "../../utils/marketInfoCopy";
@@ -57,6 +59,7 @@ export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: Explor
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
             {indicator.label}
             {MACRO_BR_INFO[indicator.key] && (
               <InfoTooltip label={indicator.label} content={MACRO_BR_INFO[indicator.key]} />

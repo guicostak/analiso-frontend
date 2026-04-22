@@ -46,6 +46,7 @@ function MiniCard({ icon, label, children, hint, info }: MiniCardProps) {
     >
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           {label}
           {info && <InfoTooltip label={label} content={info} />}
         </span>
@@ -365,8 +366,7 @@ export function ExploreRiskPanel({ riskPanel }: ExploreRiskPanelProps) {
 
   return (
     <section className="space-y-4" aria-label="Painel de risco e humor">
-      <header className="space-y-1.5">
-        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+      <header>
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Risco e humor
         </p>

@@ -33,6 +33,7 @@ function GlobalCard({ label, card, range, info }: GlobalCardProps) {
     return (
       <article className="flex min-h-[120px] flex-col justify-between rounded-2xl border border-dashed border-border bg-card p-4">
         <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           {label}
           {info && <InfoTooltip label={label} content={info} />}
         </p>
@@ -64,6 +65,7 @@ function GlobalCard({ label, card, range, info }: GlobalCardProps) {
       {/* Header: label + badge (sparkline fica na base, com mais respiro) */}
       <div className="flex items-start justify-between gap-2">
         <p className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           <span className="truncate">{label}</span>
           {info && <InfoTooltip label={label} content={info} />}
         </p>
@@ -113,8 +115,7 @@ export function ExploreGlobalMacroGrid({ bundle, range }: ExploreGlobalMacroGrid
   if (!bundle) return null;
   return (
     <section className="space-y-4" aria-label="Macro global">
-      <header className="space-y-1.5">
-        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+      <header>
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Commodities e cripto
         </p>

@@ -10,10 +10,12 @@
  * Mobile (< lg): empilhado — título, clock, descrição, meta.
  */
 
+import { Globe } from "lucide-react";
 import { MarketCycleClock, type MarketCyclePhase } from "@/src/components/shared/MarketCycleClock";
 import type { EconomicCycle } from "../../interfaces/market.interfaces";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { ECONOMIC_CYCLE_INFO } from "../../utils/marketInfoCopy";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreEconomicCycleCardProps {
   cycle: EconomicCycle | null;
@@ -73,6 +75,7 @@ export function ExploreEconomicCycleCard({ cycle }: ExploreEconomicCycleCardProp
         <div className="flex flex-col gap-4 lg:max-w-md">
           <header className="space-y-1">
             <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
               Ciclo econômico
               <InfoTooltip label="Ciclo econômico" content={ECONOMIC_CYCLE_INFO} />
             </p>

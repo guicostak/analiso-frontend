@@ -41,6 +41,7 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
             {comp.label}
             {COMPARISON_INFO[comp.key] && (
               <InfoTooltip label={comp.label} content={COMPARISON_INFO[comp.key]} />
@@ -110,8 +111,7 @@ export function ExploreComparisonsGrid({ comparisons, range }: ExploreComparison
   if (!comparisons.length) return null;
   return (
     <section className="space-y-4" aria-label="Comparações derivadas">
-      <header className="space-y-1.5">
-        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+      <header>
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Visões comparativas
         </p>

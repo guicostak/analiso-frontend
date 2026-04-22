@@ -128,13 +128,11 @@ export function ExploreMarketRibbon({ ribbon, isLoading }: ExploreMarketRibbonPr
   return (
     <div className="rounded-[20px] border border-border bg-card shadow-sm dark:shadow-none overflow-hidden">
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Panorama global
-            <InfoTooltip label="Panorama global" content={RIBBON_INFO.panorama} />
-          </span>
-        </div>
+          Panorama global
+          <InfoTooltip label="Panorama global" content={RIBBON_INFO.panorama} />
+        </span>
         <div className="flex items-center gap-1.5">
           <StatusPill status={ribbon?.marketStatus ?? null} />
           <InfoTooltip label="Status do mercado" content={RIBBON_INFO.marketStatus} />

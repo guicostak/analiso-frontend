@@ -71,9 +71,12 @@ function SectorCell({ item }: { item: SectorHeatmapItem }) {
       aria-label={`Setor ${item.sector}: variação média ${pctLabel}, ${item.companiesCount ?? 0} empresas`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h4 className="text-[12px] font-semibold leading-tight text-foreground">
-          {item.sector}
-        </h4>
+        <div className="flex min-w-0 items-start gap-1.5">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" className="mt-0.5" />
+          <h4 className="text-[12px] font-semibold leading-tight text-foreground">
+            {item.sector}
+          </h4>
+        </div>
         <span className={`text-sm font-semibold tabular-nums ${cls.text}`}>
           {pctLabel}
         </span>
@@ -96,8 +99,7 @@ export function ExploreSectorHeatmap({ heatmap }: ExploreSectorHeatmapProps) {
   return (
     <section className="space-y-4" aria-label="Heatmap setorial">
       <header className="flex items-end justify-between">
-        <div className="space-y-1.5">
-          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+        <div>
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Performance por setor
             <InfoTooltip label="Heatmap setorial" content={SECTOR_HEATMAP_INFO} />
