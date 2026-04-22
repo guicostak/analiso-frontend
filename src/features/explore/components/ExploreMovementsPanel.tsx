@@ -1,6 +1,6 @@
 "use client";
 
-import { Dot, ExternalLink } from "lucide-react";
+import { Dot } from "lucide-react";
 import Link from "next/link";
 import type { MoverRow, MovementInsight, MoverType } from "../interfaces";
 
@@ -87,10 +87,6 @@ function MovementCard({
         >
           Abrir analise
         </Link>
-        <button className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition hover:text-foreground">
-          <ExternalLink className="h-3.5 w-3.5" />
-          Ver contexto
-        </button>
       </div>
 
       <div className="mt-4 text-[12px] text-muted-foreground">
@@ -200,7 +196,6 @@ export function ExploreMovementsPanel({
                       >
                         Abrir analise
                       </Link>
-                      <button className="text-[13px] font-medium text-muted-foreground transition hover:text-foreground">Ver contexto</button>
                     </div>
                   </div>
                 </article>
