@@ -1,11 +1,12 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Globe, Info } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard, Volatility } from "../interfaces";
 import type { MarketTimeRange } from "../interfaces/market.interfaces";
 import type { ExploreMarketContextDto } from "../services";
 import { SparklineRangeBadge } from "./market/SparklineRangeBadge";
+import { SectionCategoryTag } from "./market/SectionCategoryTag";
 import { resolveSparklineLabels } from "../utils/sparklineLabels";
 import { unitFor, sparklineValueFormatter } from "../utils/tickerUnits";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
@@ -73,7 +74,8 @@ export function ExploreMarketContext({
           <div className="space-y-5">
             <article className="relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none">
               <div className="relative flex h-full flex-col justify-between gap-6">
-                <div className="max-w-[820px]">
+                <div className="max-w-[820px] space-y-2.5">
+                  <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
                   <h3 className="text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
                     {summary?.body || "Mercado em tom misto, com small caps reagindo melhor e volatilidade em nivel moderado."}
                   </h3>
@@ -98,7 +100,8 @@ export function ExploreMarketContext({
 
             <aside className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none">
               <div className="mb-4 flex flex-col gap-1 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
-                <div>
+                <div className="space-y-1.5">
+                  <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
                   <p className="text-[12px] font-medium uppercase text-muted-foreground">Resumo dos indices</p>
                   <p className="mt-2 text-[14px] leading-6 text-muted-foreground">Mini cards para sentir direcao, ritmo e dispersao sem cara de terminal.</p>
                 </div>
@@ -170,7 +173,8 @@ export function ExploreMarketContext({
 
           <div className="rounded-[26px] border border-border bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-[760px]">
+              <div className="max-w-[760px] space-y-2.5">
+                <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
                 <div className="flex items-center gap-3">
                   <span className="inline-flex rounded-full border border-warning-border bg-warning-surface px-3 py-1 text-[11px] font-semibold text-warning-text">
                     Volatilidade {volatility.label.toLowerCase()}

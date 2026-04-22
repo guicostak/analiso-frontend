@@ -5,12 +5,14 @@
  * Cada comparação recebida é renderizada como card uniforme.
  */
 
+import { Globe } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { Comparison, MarketTimeRange } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { COMPARISON_INFO } from "../../utils/marketInfoCopy";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreComparisonsGridProps {
   comparisons: Comparison[];
@@ -108,7 +110,8 @@ export function ExploreComparisonsGrid({ comparisons, range }: ExploreComparison
   if (!comparisons.length) return null;
   return (
     <section className="space-y-4" aria-label="Comparações derivadas">
-      <header>
+      <header className="space-y-1.5">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Visões comparativas
         </p>

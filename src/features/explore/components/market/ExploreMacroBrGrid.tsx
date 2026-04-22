@@ -12,9 +12,11 @@
  * são escalares densos, ficam bem em cards quadrados no topo.
  */
 
+import { Globe } from "lucide-react";
 import type { MacroIndicatorsBundle } from "../../interfaces/market.interfaces";
 import { ExploreMacroCard } from "./ExploreMacroCard";
 import { ExploreEconomicCycleCard } from "./ExploreEconomicCycleCard";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreMacroBrGridProps {
   bundle: MacroIndicatorsBundle | null;
@@ -25,7 +27,8 @@ export function ExploreMacroBrGrid({ bundle }: ExploreMacroBrGridProps) {
 
   return (
     <section className="space-y-4" aria-label="Macro Brasil">
-      <header>
+      <header className="space-y-1.5">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Contexto macroeconômico
         </p>

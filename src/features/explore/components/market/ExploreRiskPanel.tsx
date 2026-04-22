@@ -8,7 +8,7 @@
  * Cada mini-card trata ausência (null) com estado informativo.
  */
 
-import { Activity, Gauge, Scale, TrendingUp, DollarSign, LineChart as LineIcon } from "lucide-react";
+import { Activity, Gauge, Scale, TrendingUp, DollarSign, Globe, LineChart as LineIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import type {
   RiskPanel,
@@ -20,6 +20,7 @@ import type {
 } from "../../interfaces/market.interfaces";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { RISK_PANEL_INFO } from "../../utils/marketInfoCopy";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreRiskPanelProps {
   riskPanel: RiskPanel | null;
@@ -364,7 +365,8 @@ export function ExploreRiskPanel({ riskPanel }: ExploreRiskPanelProps) {
 
   return (
     <section className="space-y-4" aria-label="Painel de risco e humor">
-      <header>
+      <header className="space-y-1.5">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Risco e humor
         </p>

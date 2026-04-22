@@ -5,6 +5,7 @@
  * Reusa o shape de IndexCard com uma apresentação compacta.
  */
 
+import { Globe } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard } from "../../interfaces";
 import type { GlobalMacroBundle, MarketTimeRange } from "../../interfaces/market.interfaces";
@@ -13,6 +14,7 @@ import { resolveSparklineLabels } from "../../utils/sparklineLabels";
 import { unitFor, sparklineValueFormatter } from "../../utils/tickerUnits";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { GLOBAL_MACRO_INFO } from "../../utils/marketInfoCopy";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreGlobalMacroGridProps {
   bundle: GlobalMacroBundle | null;
@@ -111,7 +113,8 @@ export function ExploreGlobalMacroGrid({ bundle, range }: ExploreGlobalMacroGrid
   if (!bundle) return null;
   return (
     <section className="space-y-4" aria-label="Macro global">
-      <header>
+      <header className="space-y-1.5">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Commodities e cripto
         </p>

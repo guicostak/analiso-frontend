@@ -8,9 +8,11 @@
  * módulo da variação (mais forte = mais saturado).
  */
 
+import { Globe } from "lucide-react";
 import type { SectorHeatmap, SectorHeatmapItem } from "../../interfaces/market.interfaces";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { SECTOR_HEATMAP_INFO } from "../../utils/marketInfoCopy";
+import { SectionCategoryTag } from "./SectionCategoryTag";
 
 interface ExploreSectorHeatmapProps {
   heatmap: SectorHeatmap | null;
@@ -94,7 +96,8 @@ export function ExploreSectorHeatmap({ heatmap }: ExploreSectorHeatmapProps) {
   return (
     <section className="space-y-4" aria-label="Heatmap setorial">
       <header className="flex items-end justify-between">
-        <div>
+        <div className="space-y-1.5">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Performance por setor
             <InfoTooltip label="Heatmap setorial" content={SECTOR_HEATMAP_INFO} />
