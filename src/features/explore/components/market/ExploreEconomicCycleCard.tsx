@@ -2,28 +2,32 @@
 
 /**
  * Card do Ciclo Econômico (Merrill Lynch Investment Clock).
- * Exibe a fase atual em formato de quadrante visual 2x2 (crescimento × inflação),
- * com a célula ativa destacada.
+ *
+ * Reutiliza o relógio SVG compartilhado em components/shared/MarketCycleClock
+ * (mesmo visual usado em analysis/MarketCycleSection). Consistência cross-feature
+ * sem duplicação de código.
  */
 
+import { MarketCycleClock, type MarketCyclePhase } from "@/src/components/shared/MarketCycleClock";
 import type { EconomicCycle } from "../../interfaces/market.interfaces";
 
 interface ExploreEconomicCycleCardProps {
   cycle: EconomicCycle | null;
 }
 
-// Matrix quadrante (ordem visual): topo-esq topo-dir / base-esq base-dir
-// Crescimento (eixo Y): ABOVE_TREND em cima, BELOW_TREND embaixo
-// Inflação (eixo X):   FALLING à esq,     RISING à dir
-const QUADRANTS: Array<{ phase: string; label: string; growth: "ABOVE_TREND" | "BELOW_TREND"; inflation: "FALLING" | "RISING" }> = [
-  { phase: "RECOVERY",    label: "Recuperação",       growth: "ABOVE_TREND", inflation: "FALLING" },
-  { phase: "OVERHEAT",    label: "Superaquecimento",  growth: "ABOVE_TREND", inflation: "RISING"  },
-  { phase: "REFLATION",   label: "Reflação",          growth: "BELOW_TREND", inflation: "FALLING" },
-  { phase: "STAGFLATION", label: "Estagflação",       growth: "BELOW_TREND", inflation: "RISING"  },
-];
+const VALID_PHASES: readonly MarketCyclePhase[] = [
+  "RECOVERY",
+  "OVERHEAT",
+  "STAGFLATION",
+  "REFLATION",
+] as const;
+
+function isValidPhase(key: string | null | undefined): key is MarketCyclePhase {
+  return !!key && (VALID_PHASES as readonly string[]).includes(key);
+}
 
 export function ExploreEconomicCycleCard({ cycle }: ExploreEconomicCycleCardProps) {
-  if (!cycle) {
+  if (!cycle || !isValidPhase(cycle.phaseKey)) {
     return (
       <article className="flex min-h-[160px] flex-col justify-center rounded-2xl border border-dashed border-border bg-card p-5 text-center">
         <p className="text-sm text-muted-foreground">
@@ -33,12 +37,10 @@ export function ExploreEconomicCycleCard({ cycle }: ExploreEconomicCycleCardProp
     );
   }
 
-  const activeKey = cycle.phaseKey;
-
   return (
     <article
       className="
-        flex min-h-[160px] flex-col gap-3 rounded-2xl border border-border bg-card p-5
+        flex flex-col gap-3 rounded-2xl border border-border bg-card p-5
         shadow-sm dark:shadow-none
       "
       aria-label={`Ciclo econômico: ${cycle.phaseLabel}`}
@@ -55,24 +57,8 @@ export function ExploreEconomicCycleCard({ cycle }: ExploreEconomicCycleCardProp
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-1 rounded-lg border border-border p-1">
-        {QUADRANTS.map((q) => {
-          const isActive = q.phase === activeKey;
-          return (
-            <div
-              key={q.phase}
-              className={`
-                rounded-md px-2 py-2 text-center text-[10px] font-medium transition-colors
-                ${isActive
-                  ? "bg-brand text-primary-foreground shadow-sm"
-                  : "bg-muted text-muted-foreground"}
-              `}
-              aria-current={isActive ? "true" : undefined}
-            >
-              {q.label}
-            </div>
-          );
-        })}
+      <div className="-mx-2">
+        <MarketCycleClock currentPhase={cycle.phaseKey} />
       </div>
 
       {cycle.description && (
