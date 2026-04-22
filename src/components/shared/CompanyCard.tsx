@@ -184,26 +184,13 @@ export function CompanyCard({
         )}
       </div>
 
-      {/* ── Contexto: headline, diagnóstico e motivo para abrir ── */}
-      {(headline || shortDiagnosis || whyOpen) && (
-        <div className="space-y-1.5 border-t border-border pt-3">
-          {headline && (
-            <p className="text-[13px] font-semibold leading-5 text-foreground">
-              {headline}
-            </p>
-          )}
-          {shortDiagnosis && (
-            <p className="text-[12px] leading-[1.4] text-muted-foreground">
-              {shortDiagnosis}
-            </p>
-          )}
-          {whyOpen && (
-            <p className="text-[12px] leading-[1.4] text-brand">
-              {whyOpen}
-            </p>
-          )}
-        </div>
-      )}
+      {/*
+       * Bloco contextual (headline/shortDiagnosis/whyOpen) removido da renderização
+       * pra padronizar todos os cards — antes só aparecia em alguns tickers curados
+       * pelo catalog, criando aparência inconsistente no grid. Props mantidos na
+       * interface por retrocompat; ficam inertes até decidirmos um novo formato
+       * unificado (ou movê-los pra tela de detalhes).
+       */}
 
       {/* ── Métricas financeiras + setor ── */}
       {(visibleMetrics.length > 0 || sector != null) && (
