@@ -178,28 +178,30 @@ export function MarketCycleClock({ currentPhase, maxWidth = 380 }: Props) {
         <circle cx={cx} cy={cy} r={2.25} fill="#6B7280" className="pointer-events-none" />
 
         {/* Axis labels em "chip" com fundo — maior presença visual.
-            Usa foreignObject pra aproveitar tokens CSS do tema. */}
+            Usa foreignObject pra aproveitar tokens CSS do tema.
+            whitespace-nowrap garante que o label fique em linha única
+            mesmo quando a tipografia do locale o faça caber por pouco. */}
         {/* Crescimento ↑ (topo) */}
-        <foreignObject x={cx - 64} y={0} width="128" height="22" className="pointer-events-none">
-          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        <foreignObject x={cx - 72} y={0} width="144" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center whitespace-nowrap rounded-full border border-border bg-muted px-3 text-[10px] font-semibold uppercase tracking-wider text-foreground">
             Crescimento ↑
           </div>
         </foreignObject>
         {/* Crescimento ↓ (base) */}
-        <foreignObject x={cx - 64} y={height - 22} width="128" height="22" className="pointer-events-none">
-          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        <foreignObject x={cx - 72} y={height - 22} width="144" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center whitespace-nowrap rounded-full border border-border bg-muted px-3 text-[10px] font-semibold uppercase tracking-wider text-foreground">
             Crescimento ↓
           </div>
         </foreignObject>
         {/* Inflação ↓ (esquerda) */}
-        <foreignObject x={0} y={cy - 11} width="78" height="22" className="pointer-events-none">
-          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        <foreignObject x={0} y={cy - 11} width="96" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center whitespace-nowrap rounded-full border border-border bg-muted px-3 text-[10px] font-semibold uppercase tracking-wider text-foreground">
             Inflação ↓
           </div>
         </foreignObject>
         {/* Inflação ↑ (direita) */}
-        <foreignObject x={width - 78} y={cy - 11} width="78" height="22" className="pointer-events-none">
-          <div className="flex h-full items-center justify-center rounded-full border border-border bg-muted px-2.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+        <foreignObject x={width - 96} y={cy - 11} width="96" height="22" className="pointer-events-none">
+          <div className="flex h-full items-center justify-center whitespace-nowrap rounded-full border border-border bg-muted px-3 text-[10px] font-semibold uppercase tracking-wider text-foreground">
             Inflação ↑
           </div>
         </foreignObject>

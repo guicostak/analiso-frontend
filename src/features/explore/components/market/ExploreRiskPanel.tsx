@@ -208,9 +208,57 @@ function IndexMiniCard({
 }
 
 function DiPlaceholderCard({ text }: { text: string | null }) {
+  // Sparkline decorativa com linha tracejada sugerindo "dado em breve"
+  // sem fingir ser um valor real. Gera uma curva suave levemente ondulada.
+  const decorativePath = "M 0 22 C 12 18, 22 14, 34 16 S 56 20, 68 14 S 90 8, 104 12 S 126 16, 138 10";
+
   return (
-    <MiniCard icon={<LineIcon size={14} />} label="Curva DI">
-      <span className="text-sm text-muted-foreground">{text ?? "Em breve"}</span>
+    <MiniCard
+      icon={<LineIcon size={14} />}
+      label="Curva DI"
+      hint="Estrutura a termo dos juros (DI1F B3)"
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="
+              inline-flex items-center gap-1 rounded-full border
+              border-border bg-muted px-2 py-0.5
+              text-[10px] font-semibold uppercase tracking-wider text-muted-foreground
+            "
+          >
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
+            Em breve
+          </span>
+        </div>
+        <svg
+          viewBox="0 0 140 32"
+          className="w-full text-muted-foreground/40"
+          aria-hidden="true"
+        >
+          <path
+            d={decorativePath}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeDasharray="3 3"
+            strokeLinecap="round"
+          />
+          {/* 4 pontos discretos sinalizando vértices (curto/médio/longo) */}
+          {[
+            [10, 20], [50, 16], [90, 11], [130, 11],
+          ].map(([x, y], i) => (
+            <circle
+              key={i}
+              cx={x}
+              cy={y}
+              r={1.75}
+              fill="currentColor"
+              opacity={0.55}
+            />
+          ))}
+        </svg>
+      </div>
     </MiniCard>
   );
 }
