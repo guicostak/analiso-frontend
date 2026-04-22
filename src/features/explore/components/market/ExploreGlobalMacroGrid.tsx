@@ -7,18 +7,21 @@
 
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard } from "../../interfaces";
-import type { GlobalMacroBundle } from "../../interfaces/market.interfaces";
+import type { GlobalMacroBundle, MarketTimeRange } from "../../interfaces/market.interfaces";
+import { SparklineRangeBadge } from "./SparklineRangeBadge";
 
 interface ExploreGlobalMacroGridProps {
   bundle: GlobalMacroBundle | null;
+  range?: MarketTimeRange;
 }
 
 interface GlobalCardProps {
   label: string;
   card:  IndexCard | null;
+  range?: MarketTimeRange;
 }
 
-function GlobalCard({ label, card }: GlobalCardProps) {
+function GlobalCard({ label, card, range }: GlobalCardProps) {
   if (!card) {
     return (
       <article className="flex min-h-[120px] flex-col justify-between rounded-2xl border border-dashed border-border bg-card p-4">
@@ -63,19 +66,22 @@ function GlobalCard({ label, card }: GlobalCardProps) {
           </div>
         </div>
         {card.sparkline?.length > 1 && (
-          <MiniSparkline
-            data={card.sparkline}
-            status={sparklineStatus}
-            width={64}
-            height={28}
-          />
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <SparklineRangeBadge range={range} />
+            <MiniSparkline
+              data={card.sparkline}
+              status={sparklineStatus}
+              width={64}
+              height={28}
+            />
+          </div>
         )}
       </div>
     </article>
   );
 }
 
-export function ExploreGlobalMacroGrid({ bundle }: ExploreGlobalMacroGridProps) {
+export function ExploreGlobalMacroGrid({ bundle, range }: ExploreGlobalMacroGridProps) {
   if (!bundle) return null;
   return (
     <section className="space-y-4" aria-label="Macro global">
@@ -88,11 +94,11 @@ export function ExploreGlobalMacroGrid({ bundle }: ExploreGlobalMacroGridProps) 
         </h3>
       </header>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <GlobalCard label="Brent"   card={bundle.brent}   />
-        <GlobalCard label="WTI"     card={bundle.wti}     />
-        <GlobalCard label="Ouro"    card={bundle.gold}    />
-        <GlobalCard label="Minério" card={bundle.ironOre} />
-        <GlobalCard label="Bitcoin" card={bundle.bitcoin} />
+        <GlobalCard label="Brent"   card={bundle.brent}   range={range} />
+        <GlobalCard label="WTI"     card={bundle.wti}     range={range} />
+        <GlobalCard label="Ouro"    card={bundle.gold}    range={range} />
+        <GlobalCard label="Minério" card={bundle.ironOre} range={range} />
+        <GlobalCard label="Bitcoin" card={bundle.bitcoin} range={range} />
       </div>
     </section>
   );

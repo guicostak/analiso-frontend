@@ -195,16 +195,17 @@ export function MarketContextPage() {
                   setShowVolatilityInfo={setShowVolatilityInfo}
                   setShowVolatilityDetails={setShowVolatilityDetails}
                   hideHeader
+                  timeRange={timeRange}
                 />
 
                 {/* === Novos blocos da aba Contexto (Fase 2) === */}
                 {marketExtras && (
                   <div className="mt-8 space-y-10">
-                    <ExploreRiskPanel      riskPanel={marketExtras.riskPanel} />
-                    <ExploreSectorHeatmap  heatmap={marketExtras.sectorHeatmap} />
-                    <ExploreMacroBrGrid    bundle={marketExtras.macroBr} />
-                    <ExploreGlobalMacroGrid bundle={marketExtras.macroGlobal} />
-                    <ExploreComparisonsGrid comparisons={marketExtras.comparisons} />
+                    <ExploreRiskPanel       riskPanel={marketExtras.riskPanel} />
+                    <ExploreSectorHeatmap   heatmap={marketExtras.sectorHeatmap} />
+                    <ExploreMacroBrGrid     bundle={marketExtras.macroBr} />
+                    <ExploreGlobalMacroGrid bundle={marketExtras.macroGlobal} range={timeRange} />
+                    <ExploreComparisonsGrid comparisons={marketExtras.comparisons} range={timeRange} />
                   </div>
                 )}
               </section>

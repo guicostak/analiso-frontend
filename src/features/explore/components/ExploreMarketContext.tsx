@@ -3,7 +3,9 @@
 import { Info } from "lucide-react";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard, Volatility } from "../interfaces";
+import type { MarketTimeRange } from "../interfaces/market.interfaces";
 import type { ExploreMarketContextDto } from "../services";
+import { SparklineRangeBadge } from "./market/SparklineRangeBadge";
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
   if (trend === "up") return "healthy";
@@ -36,6 +38,8 @@ interface ExploreMarketContextProps {
   hideHeader?: boolean;
   /** Oculta o bloco de resumo (hero "Contexto macro" + cards de índices). */
   hideContextSummary?: boolean;
+  /** Range ativo do toggle — exibido como badge nas sparklines dos B3 cards. */
+  timeRange?: MarketTimeRange;
 }
 
 export function ExploreMarketContext({
@@ -48,6 +52,7 @@ export function ExploreMarketContext({
   setShowVolatilityInfo,
   setShowVolatilityDetails,
   hideHeader = false,
+  timeRange,
 }: ExploreMarketContextProps) {
   const summary = marketContextDto?.summary;
   const detail = marketContextDto?.detail;
@@ -114,14 +119,17 @@ export function ExploreMarketContext({
                           <p className="text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">{card.name}</p>
                           <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.04em] text-muted-foreground">{card.symbol}</p>
                         </div>
-                        <MiniSparkline
-                          data={card.sparkline}
-                          status={getTrendStatus(card.trend)}
-                          width={72}
-                          height={28}
-                          strokeWidth={1.25}
-                          lineOpacity={0.9}
-                        />
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <SparklineRangeBadge range={timeRange} />
+                          <MiniSparkline
+                            data={card.sparkline}
+                            status={getTrendStatus(card.trend)}
+                            width={72}
+                            height={28}
+                            strokeWidth={1.25}
+                            lineOpacity={0.9}
+                          />
+                        </div>
                       </div>
                       <p className="relative mt-3 text-[19px] font-semibold tracking-[-0.03em] text-foreground">{card.value}</p>
                       <p className={`relative mt-1 text-[12px] font-medium ${trendTone[card.trend]}`}>

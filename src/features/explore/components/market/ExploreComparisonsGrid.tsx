@@ -6,13 +6,15 @@
  */
 
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
-import type { Comparison } from "../../interfaces/market.interfaces";
+import type { Comparison, MarketTimeRange } from "../../interfaces/market.interfaces";
+import { SparklineRangeBadge } from "./SparklineRangeBadge";
 
 interface ExploreComparisonsGridProps {
   comparisons: Comparison[];
+  range?: MarketTimeRange;
 }
 
-function ComparisonCard({ comp }: { comp: Comparison }) {
+function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeRange }) {
   const toneClass =
     comp.trend === "up"
       ? "text-success-text"
@@ -48,12 +50,18 @@ function ComparisonCard({ comp }: { comp: Comparison }) {
           </div>
         </div>
         {comp.sparkline && comp.sparkline.length > 1 && (
-          <MiniSparkline
-            data={comp.sparkline}
-            status={sparklineStatus}
-            width={80}
-            height={32}
-          />
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            {/* IBOV vs S&P YTD tem janela fixa "YTD" independente do toggle — usa fixed */}
+            {comp.key === "ibov_vs_spx_ytd"
+              ? <SparklineRangeBadge fixed="YTD" />
+              : <SparklineRangeBadge range={range} />}
+            <MiniSparkline
+              data={comp.sparkline}
+              status={sparklineStatus}
+              width={80}
+              height={32}
+            />
+          </div>
         )}
       </header>
       {comp.description && (
@@ -65,7 +73,7 @@ function ComparisonCard({ comp }: { comp: Comparison }) {
   );
 }
 
-export function ExploreComparisonsGrid({ comparisons }: ExploreComparisonsGridProps) {
+export function ExploreComparisonsGrid({ comparisons, range }: ExploreComparisonsGridProps) {
   if (!comparisons.length) return null;
   return (
     <section className="space-y-4" aria-label="Comparações derivadas">
@@ -79,7 +87,7 @@ export function ExploreComparisonsGrid({ comparisons }: ExploreComparisonsGridPr
       </header>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {comparisons.map((c) => (
-          <ComparisonCard key={c.key} comp={c} />
+          <ComparisonCard key={c.key} comp={c} range={range} />
         ))}
       </div>
     </section>

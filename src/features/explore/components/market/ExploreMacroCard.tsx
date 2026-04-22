@@ -7,12 +7,18 @@
 
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { MacroIndicator } from "../../interfaces/market.interfaces";
+import { SparklineRangeBadge } from "./SparklineRangeBadge";
 
 interface ExploreMacroCardProps {
   indicator: MacroIndicator | null;
+  /**
+   * Label do range temporal da sparkline. Macro BR é mensal com janela fixa —
+   * default "Últ. 24m". Passe outro valor só se a janela mudar.
+   */
+  rangeLabel?: string;
 }
 
-export function ExploreMacroCard({ indicator }: ExploreMacroCardProps) {
+export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: ExploreMacroCardProps) {
   if (!indicator) {
     return (
       <article className="flex min-h-[140px] flex-col justify-center rounded-2xl border border-dashed border-border bg-card p-5 text-center">
@@ -62,7 +68,8 @@ export function ExploreMacroCard({ indicator }: ExploreMacroCardProps) {
           </div>
         </div>
         {indicator.sparkline.length > 1 && (
-          <div className="shrink-0">
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <SparklineRangeBadge fixed={rangeLabel} />
             <MiniSparkline
               data={indicator.sparkline}
               status={sparklineStatus}
