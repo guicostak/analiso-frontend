@@ -73,3 +73,55 @@ export function labelsFromRange(
 ): string[] {
   return makeSparklineLabels(flavorForRange(range), count);
 }
+
+/**
+ * Formata datas ISO (yyyy-MM-dd) como labels de sparkline.
+ * - daily   → "DD/MM"
+ * - monthly → "mmm/yy"
+ */
+export function formatSparklineDates(
+  isoDates: string[] | null | undefined,
+  flavor: SparklineLabelFlavor,
+): string[] {
+  if (!Array.isArray(isoDates) || !isoDates.length) return [];
+  if (flavor === "intraday" || flavor === "none") return [];
+
+  return isoDates.map((iso) => {
+    const parsed = parseIsoDateLocal(iso);
+    if (!parsed) return iso;
+    if (flavor === "monthly") {
+      return parsed.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
+    }
+    return parsed.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  });
+}
+
+/**
+ * Escolhe a melhor fonte de labels para a sparkline:
+ *  1. Se o backend mandou sparklineDates alinhado com os valores, usa.
+ *  2. Caso contrário, cai na aproximação por range + count.
+ *
+ * Para 1D sem datas reais, retorna [] (tooltip mostra só valor).
+ */
+export function resolveSparklineLabels(args: {
+  dates?: string[] | null;
+  range: MarketTimeRange | null | undefined;
+  count: number;
+  flavor?: SparklineLabelFlavor;
+}): string[] {
+  const flavor = args.flavor ?? flavorForRange(args.range);
+  if (Array.isArray(args.dates) && args.dates.length === args.count) {
+    return formatSparklineDates(args.dates, flavor);
+  }
+  return makeSparklineLabels(flavor, args.count);
+}
+
+/** Parse "yyyy-MM-dd" em Date local (sem desloc. timezone). */
+function parseIsoDateLocal(iso: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}

@@ -9,7 +9,7 @@ import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { IndexCard } from "../../interfaces";
 import type { GlobalMacroBundle, MarketTimeRange } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
-import { labelsFromRange } from "../../utils/sparklineLabels";
+import { resolveSparklineLabels } from "../../utils/sparklineLabels";
 
 interface ExploreGlobalMacroGridProps {
   bundle: GlobalMacroBundle | null;
@@ -71,7 +71,11 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
             <SparklineRangeBadge range={range} />
             <MiniSparkline
               data={card.sparkline}
-              labels={labelsFromRange(range, card.sparkline.length)}
+              labels={resolveSparklineLabels({
+                dates: card.sparklineDates,
+                range,
+                count: card.sparkline.length,
+              })}
               status={sparklineStatus}
               width={64}
               height={28}

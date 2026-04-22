@@ -155,14 +155,15 @@ export const mapRiskPanel = (
 const mapMacroIndicator = (d: MacroIndicatorDto | null | undefined): MacroIndicator | null => {
   if (!d) return null;
   return {
-    key:         d.indicatorKey,
-    label:       d.label,
-    value:       d.value ?? null,
-    changeLabel: d.changeLabel ?? null,
-    trend:       safeTrend(d.trend),
-    asOfDate:    d.asOfDate ?? null,
-    sparkline:   Array.isArray(d.sparkline) ? d.sparkline : [],
-    subtitle:    d.subtitle ?? null,
+    key:            d.indicatorKey,
+    label:          d.label,
+    value:          d.value ?? null,
+    changeLabel:    d.changeLabel ?? null,
+    trend:          safeTrend(d.trend),
+    asOfDate:       d.asOfDate ?? null,
+    sparkline:      Array.isArray(d.sparkline) ? d.sparkline : [],
+    sparklineDates: Array.isArray(d.sparklineDates) ? d.sparklineDates : undefined,
+    subtitle:       d.subtitle ?? null,
   };
 };
 
@@ -213,13 +214,14 @@ export const mapSectorHeatmap = (
 // ─── Comparisons ──────────────────────────────────────────────────────────────
 
 export const mapComparison = (d: ComparisonDto): Comparison => ({
-  key:         d.key,
-  label:       d.label,
-  value:       d.value ?? null,
-  changePct:   d.changePct ?? null,
-  trend:       safeTrend(d.trend),
-  sparkline:   d.sparkline ?? null,
-  description: d.description ?? null,
+  key:             d.key,
+  label:           d.label,
+  value:           d.value ?? null,
+  changePct:       d.changePct ?? null,
+  trend:           safeTrend(d.trend),
+  sparkline:       d.sparkline ?? null,
+  sparklineDates:  Array.isArray(d.sparklineDates) ? d.sparklineDates : undefined,
+  description:     d.description ?? null,
 });
 
 // ─── Macro global ─────────────────────────────────────────────────────────────

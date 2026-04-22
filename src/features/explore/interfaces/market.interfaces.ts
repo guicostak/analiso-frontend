@@ -82,14 +82,16 @@ export interface MarketRibbon {
 
 /** Card único de indicador macro (Selic, IPCA, IBC-Br). */
 export interface MacroIndicator {
-  key:         string;
-  label:       string;
-  value:       string | null;
-  changeLabel: string | null;
-  trend:       IndexCardTrend;
-  asOfDate:    string | null;
-  sparkline:   number[];
-  subtitle:    string | null;
+  key:            string;
+  label:          string;
+  value:          string | null;
+  changeLabel:    string | null;
+  trend:          IndexCardTrend;
+  asOfDate:       string | null;
+  sparkline:      number[];
+  /** Datas ISO paralelas à sparkline (do backend, quando disponíveis). */
+  sparklineDates?: string[];
+  subtitle:       string | null;
 }
 
 /** Fase do ciclo econômico (Merrill Lynch Clock). */
@@ -125,13 +127,14 @@ export interface SectorHeatmap {
 }
 
 export interface Comparison {
-  key:         string;
-  label:       string;
-  value:       string | null;
-  changePct:   string | null;
-  trend:       IndexCardTrend;
-  sparkline:   number[] | null;
-  description: string | null;
+  key:             string;
+  label:           string;
+  value:           string | null;
+  changePct:       string | null;
+  trend:           IndexCardTrend;
+  sparkline:       number[] | null;
+  sparklineDates?: string[];
+  description:     string | null;
 }
 
 /** Macro global — commodities + cripto (shape = IndexCard). */

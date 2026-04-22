@@ -6,7 +6,7 @@ import type { IndexCard, Volatility } from "../interfaces";
 import type { MarketTimeRange } from "../interfaces/market.interfaces";
 import type { ExploreMarketContextDto } from "../services";
 import { SparklineRangeBadge } from "./market/SparklineRangeBadge";
-import { labelsFromRange } from "../utils/sparklineLabels";
+import { resolveSparklineLabels } from "../utils/sparklineLabels";
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
   if (trend === "up") return "healthy";
@@ -124,7 +124,11 @@ export function ExploreMarketContext({
                           <SparklineRangeBadge range={timeRange} />
                           <MiniSparkline
                             data={card.sparkline}
-                            labels={labelsFromRange(timeRange, card.sparkline.length)}
+                            labels={resolveSparklineLabels({
+                              dates: card.sparklineDates,
+                              range: timeRange,
+                              count: card.sparkline.length,
+                            })}
                             status={getTrendStatus(card.trend)}
                             width={72}
                             height={28}

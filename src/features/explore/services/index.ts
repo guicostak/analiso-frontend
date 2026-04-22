@@ -94,13 +94,15 @@ export interface ExploreMovementInsightsDto {
 
 // Index cards
 export interface ExploreIndexCardDto {
-  indexTicker: string;
-  indexLabel:  string;
-  lastPrice:   string;
-  changePct:   string;
-  changeAbs:   string;
-  trend:       string;
-  sparkline:   number[];
+  indexTicker:     string;
+  indexLabel:      string;
+  lastPrice:       string;
+  changePct:       string;
+  changeAbs:       string;
+  trend:           string;
+  sparkline:       number[];
+  /** Datas ISO yyyy-MM-dd paralelas a `sparkline` quando a série tem datas reais. */
+  sparklineDates?: string[] | null;
 }
 
 // Market context
@@ -249,14 +251,16 @@ export interface MarketToneDto {
 }
 
 export interface MacroIndicatorDto {
-  indicatorKey: string;
-  label:        string;
-  value:        string | null;
-  changeLabel:  string | null;
-  trend:        string;
-  asOfDate:     string | null;
-  sparkline:    number[];
-  subtitle:     string | null;
+  indicatorKey:    string;
+  label:           string;
+  value:           string | null;
+  changeLabel:     string | null;
+  trend:           string;
+  asOfDate:        string | null;
+  sparkline:       number[];
+  /** Datas ISO paralelas a `sparkline`. Pode vir vazio. */
+  sparklineDates?: string[] | null;
+  subtitle:        string | null;
 }
 
 export interface EconomicCycleDto {
@@ -289,13 +293,14 @@ export interface SectorHeatmapDto {
 }
 
 export interface ComparisonDto {
-  key:         string;
-  label:       string;
-  value:       string | null;
-  changePct:   string | null;
-  trend:       string;
-  sparkline:   number[] | null;
-  description: string | null;
+  key:             string;
+  label:           string;
+  value:           string | null;
+  changePct:       string | null;
+  trend:           string;
+  sparkline:       number[] | null;
+  sparklineDates?: string[] | null;
+  description:     string | null;
 }
 
 export interface GlobalMacroBundleDto {
@@ -467,6 +472,7 @@ export function mapIndexCardDto(dto: ExploreIndexCardDto): IndexCard {
     changePct: dto.changePct,
     trend:     (dto.trend?.toLowerCase() as IndexCardTrend) ?? 'neutral',
     sparkline: dto.sparkline ?? [],
+    sparklineDates: Array.isArray(dto.sparklineDates) ? dto.sparklineDates : undefined,
   };
 }
 

@@ -47,6 +47,8 @@ export interface IndexCard {
   changePct: string;
   trend: IndexCardTrend;
   sparkline: number[];
+  /** Datas ISO yyyy-MM-dd paralelas à sparkline (vem do backend quando disponível). */
+  sparklineDates?: string[];
 }
 
 export interface MoverRow {
