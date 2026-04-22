@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, ExternalLink, Globe, Newspaper, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
@@ -59,8 +60,52 @@ const marketSections: { id: MarketSectionId; label: string; icon: React.Componen
   { id: "noticias", label: "Notícias", icon: Newspaper },
 ];
 
+const MARKET_SECTION_IDS = new Set<MarketSectionId>(["contexto", "movimentos", "noticias"]);
+const MARKET_SECTION_QUERY = "sec";
+const DEFAULT_MARKET_SECTION: MarketSectionId = "contexto";
+
+function isMarketSectionId(raw: string | null): raw is MarketSectionId {
+  return raw != null && MARKET_SECTION_IDS.has(raw as MarketSectionId);
+}
+
 export function MarketContextPage() {
-  const [activeSection, setActiveSection] = useState<MarketSectionId>("contexto");
+  /**
+   * Seção ativa é sincronizada com a query string (?sec=contexto|movimentos|noticias).
+   * Assim:
+   *   - URL compartilhada abre direto na aba certa.
+   *   - Botão "voltar" do navegador volta pra seção anterior.
+   *   - Deep link funciona (ex: /mercado?sec=noticias).
+   *
+   * Usamos router.replace pra não empilhar histórico a cada clique (UX de tabs),
+   * mas a URL é totalmente compartilhável.
+   */
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const sectionFromUrl = useMemo<MarketSectionId>(() => {
+    const raw = searchParams?.get(MARKET_SECTION_QUERY) ?? null;
+    return isMarketSectionId(raw) ? raw : DEFAULT_MARKET_SECTION;
+  }, [searchParams]);
+
+  const [activeSection, setActiveSectionState] = useState<MarketSectionId>(sectionFromUrl);
+
+  // Sincroniza estado local com URL quando a query muda externamente (back/forward, link).
+  useEffect(() => {
+    setActiveSectionState((current) => (current === sectionFromUrl ? current : sectionFromUrl));
+  }, [sectionFromUrl]);
+
+  function setActiveSection(next: MarketSectionId) {
+    setActiveSectionState(next);
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (next === DEFAULT_MARKET_SECTION) {
+      params.delete(MARKET_SECTION_QUERY); // URL mais limpa pra seção padrão
+    } else {
+      params.set(MARKET_SECTION_QUERY, next);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
   const [news, setNews]       = useState<ExploreNewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsFetched, setNewsFetched] = useState(false);
@@ -140,7 +185,6 @@ export function MarketContextPage() {
                   </p>
                 </div>
               </div>
-              <ExploreTimeRangeToggle value={timeRange} onChange={setTimeRange} disabled={isLoading} />
             </header>
 
             {/* === Navegação por seção === */}
@@ -172,12 +216,15 @@ export function MarketContextPage() {
               {/* === Contexto de mercado === */}
               {activeSection === "contexto" && (
               <section className="space-y-4">
-                <div className="max-w-[720px] space-y-2">
-                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Visão geral</p>
-                  <h2 className="text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado</h2>
-                  <p className="text-[13px] leading-6 text-muted-foreground">
-                    Panorama macro, índices globais e volatilidade para entender o ambiente antes de olhar empresa a empresa.
-                  </p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="max-w-[720px] space-y-2">
+                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Visão geral</p>
+                    <h2 className="text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado</h2>
+                    <p className="text-[13px] leading-6 text-muted-foreground">
+                      Panorama macro, índices globais e volatilidade para entender o ambiente antes de olhar empresa a empresa.
+                    </p>
+                  </div>
+                  <ExploreTimeRangeToggle value={timeRange} onChange={setTimeRange} disabled={isLoading} />
                 </div>
 
                 {/* === Ribbon global: ticker tape dentro da seção Contexto === */}
