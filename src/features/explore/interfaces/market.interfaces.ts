@@ -154,6 +154,8 @@ export interface Comparison {
   trend:           IndexCardTrend;
   sparkline:       number[] | null;
   sparklineDates?: string[];
+  /** Fórmula/métrica ("IBOV ÷ USDBRL") — exibida próximo ao valor. */
+  formula?:        string;
   description:     string | null;
 }
 

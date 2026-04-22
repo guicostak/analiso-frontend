@@ -35,7 +35,7 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
       "
     >
       <header className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             {comp.label}
           </p>
@@ -49,6 +49,11 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
               </span>
             )}
           </div>
+          {comp.formula && (
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80">
+              {comp.formula}
+            </p>
+          )}
         </div>
         {comp.sparkline && comp.sparkline.length > 1 && (
           <div className="flex shrink-0 flex-col items-end gap-1">

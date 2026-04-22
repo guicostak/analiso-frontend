@@ -324,6 +324,8 @@ export interface ComparisonDto {
   trend:           string;
   sparkline:       number[] | null;
   sparklineDates?: string[] | null;
+  /** Fórmula/métrica usada — exibida próximo ao valor (ex.: "IBOV ÷ USDBRL"). */
+  formula?:        string | null;
   description:     string | null;
 }
 
