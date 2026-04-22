@@ -12,6 +12,8 @@
 
 import { MarketCycleClock, type MarketCyclePhase } from "@/src/components/shared/MarketCycleClock";
 import type { EconomicCycle } from "../../interfaces/market.interfaces";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { ECONOMIC_CYCLE_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreEconomicCycleCardProps {
   cycle: EconomicCycle | null;
@@ -70,8 +72,9 @@ export function ExploreEconomicCycleCard({ cycle }: ExploreEconomicCycleCardProp
         {/* ── Coluna direita: título + confiança + descrição ─────── */}
         <div className="flex flex-col gap-4 lg:max-w-md">
           <header className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Ciclo econômico
+              <InfoTooltip label="Ciclo econômico" content={ECONOMIC_CYCLE_INFO} />
             </p>
             <h4 className="text-2xl font-semibold tracking-tight text-foreground">
               {cycle.phaseLabel}

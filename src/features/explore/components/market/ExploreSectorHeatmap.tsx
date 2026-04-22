@@ -9,6 +9,8 @@
  */
 
 import type { SectorHeatmap, SectorHeatmapItem } from "../../interfaces/market.interfaces";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { SECTOR_HEATMAP_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreSectorHeatmapProps {
   heatmap: SectorHeatmap | null;
@@ -93,8 +95,9 @@ export function ExploreSectorHeatmap({ heatmap }: ExploreSectorHeatmapProps) {
     <section className="space-y-4" aria-label="Heatmap setorial">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Performance por setor
+            <InfoTooltip label="Heatmap setorial" content={SECTOR_HEATMAP_INFO} />
           </p>
           <h3 className="text-lg font-semibold tracking-tight text-foreground">
             Heatmap setorial

@@ -9,6 +9,8 @@ import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { Comparison, MarketTimeRange } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { COMPARISON_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreComparisonsGridProps {
   comparisons: Comparison[];
@@ -36,8 +38,11 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             {comp.label}
+            {COMPARISON_INFO[comp.key] && (
+              <InfoTooltip label={comp.label} content={COMPARISON_INFO[comp.key]} />
+            )}
           </p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-semibold tabular-nums text-foreground">

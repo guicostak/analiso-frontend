@@ -7,6 +7,8 @@
  */
 
 import type { MarketTimeRange } from "../../interfaces/market.interfaces";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { TIME_RANGE_INFO } from "../../utils/marketInfoCopy";
 
 interface Option {
   value: MarketTimeRange;
@@ -29,6 +31,7 @@ interface ExploreTimeRangeToggleProps {
 
 export function ExploreTimeRangeToggle({ value, onChange, disabled }: ExploreTimeRangeToggleProps) {
   return (
+    <div className="inline-flex items-center gap-2">
     <div
       role="radiogroup"
       aria-label="Selecionar período"
@@ -58,6 +61,8 @@ export function ExploreTimeRangeToggle({ value, onChange, disabled }: ExploreTim
           </button>
         );
       })}
+    </div>
+      <InfoTooltip label="Período dos gráficos" content={TIME_RANGE_INFO} />
     </div>
   );
 }

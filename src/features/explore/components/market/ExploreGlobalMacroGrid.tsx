@@ -11,6 +11,8 @@ import type { GlobalMacroBundle, MarketTimeRange } from "../../interfaces/market
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
 import { unitFor, sparklineValueFormatter } from "../../utils/tickerUnits";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { GLOBAL_MACRO_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreGlobalMacroGridProps {
   bundle: GlobalMacroBundle | null;
@@ -21,14 +23,16 @@ interface GlobalCardProps {
   label: string;
   card:  IndexCard | null;
   range?: MarketTimeRange;
+  info?: string;
 }
 
-function GlobalCard({ label, card, range }: GlobalCardProps) {
+function GlobalCard({ label, card, range, info }: GlobalCardProps) {
   if (!card) {
     return (
       <article className="flex min-h-[120px] flex-col justify-between rounded-2xl border border-dashed border-border bg-card p-4">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
+          {info && <InfoTooltip label={label} content={info} />}
         </p>
         <p className="text-sm text-muted-foreground">Indisponível</p>
       </article>
@@ -57,8 +61,9 @@ function GlobalCard({ label, card, range }: GlobalCardProps) {
     >
       {/* Header: label + badge (sparkline fica na base, com mais respiro) */}
       <div className="flex items-start justify-between gap-2">
-        <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
+        <p className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <span className="truncate">{label}</span>
+          {info && <InfoTooltip label={label} content={info} />}
         </p>
         {card.sparkline?.length > 1 && (
           <SparklineRangeBadge range={range} />
@@ -115,11 +120,11 @@ export function ExploreGlobalMacroGrid({ bundle, range }: ExploreGlobalMacroGrid
         </h3>
       </header>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <GlobalCard label="Brent"   card={bundle.brent}   range={range} />
-        <GlobalCard label="WTI"     card={bundle.wti}     range={range} />
-        <GlobalCard label="Ouro"    card={bundle.gold}    range={range} />
-        <GlobalCard label="Minério" card={bundle.ironOre} range={range} />
-        <GlobalCard label="Bitcoin" card={bundle.bitcoin} range={range} />
+        <GlobalCard label="Brent"   card={bundle.brent}   range={range} info={GLOBAL_MACRO_INFO.brent}   />
+        <GlobalCard label="WTI"     card={bundle.wti}     range={range} info={GLOBAL_MACRO_INFO.wti}     />
+        <GlobalCard label="Ouro"    card={bundle.gold}    range={range} info={GLOBAL_MACRO_INFO.gold}    />
+        <GlobalCard label="Minério" card={bundle.ironOre} range={range} info={GLOBAL_MACRO_INFO.ironOre} />
+        <GlobalCard label="Bitcoin" card={bundle.bitcoin} range={range} info={GLOBAL_MACRO_INFO.bitcoin} />
       </div>
     </section>
   );

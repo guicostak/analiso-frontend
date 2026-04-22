@@ -6,6 +6,8 @@
  */
 
 import type { MarketToneHighlights } from "../../interfaces/market.interfaces";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { TONE_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreMarketTonePillProps {
   tone: MarketToneHighlights | null;
@@ -30,12 +32,15 @@ export function ExploreMarketTonePill({ tone }: ExploreMarketTonePillProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <span
-        className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${toneClass}`}
-      >
-        <span className={`h-1.5 w-1.5 rounded-full ${dotClass} animate-pulse`} />
-        {tone.label}
-      </span>
+      <div className="flex items-center gap-1.5">
+        <span
+          className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${toneClass}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${dotClass} animate-pulse`} />
+          {tone.label}
+        </span>
+        <InfoTooltip label="Tom de mercado" content={TONE_INFO} />
+      </div>
       {tone.highlights.length > 0 && (
         <ul className="flex flex-col gap-0.5 text-[11px] text-muted-foreground">
           {tone.highlights.slice(0, 3).map((h, i) => (

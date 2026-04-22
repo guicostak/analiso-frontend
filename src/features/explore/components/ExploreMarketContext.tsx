@@ -8,6 +8,8 @@ import type { ExploreMarketContextDto } from "../services";
 import { SparklineRangeBadge } from "./market/SparklineRangeBadge";
 import { resolveSparklineLabels } from "../utils/sparklineLabels";
 import { unitFor, sparklineValueFormatter } from "../utils/tickerUnits";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { TICKER_INFO } from "../utils/marketInfoCopy";
 
 const getTrendStatus = (trend: IndexCard["trend"]) => {
   if (trend === "up") return "healthy";
@@ -120,7 +122,12 @@ export function ExploreMarketContext({
                       <div className={`pointer-events-none absolute -right-5 -top-6 h-16 w-16 rounded-full ${indexCardGlow[card.trend]}`} />
                       <div className="flex items-start justify-between gap-3">
                         <div className="relative">
-                          <p className="text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">{card.name}</p>
+                          <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-[-0.01em] text-muted-foreground">
+                            {card.name}
+                            {TICKER_INFO[card.symbol] && (
+                              <InfoTooltip label={card.name} content={TICKER_INFO[card.symbol]} />
+                            )}
+                          </p>
                           <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.04em] text-muted-foreground">{card.symbol}</p>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">

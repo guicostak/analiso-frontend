@@ -9,6 +9,8 @@ import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import type { MacroIndicator } from "../../interfaces/market.interfaces";
 import { SparklineRangeBadge } from "./SparklineRangeBadge";
 import { resolveSparklineLabels } from "../../utils/sparklineLabels";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { MACRO_BR_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreMacroCardProps {
   indicator: MacroIndicator | null;
@@ -54,8 +56,11 @@ export function ExploreMacroCard({ indicator, rangeLabel = "Últ. 24m" }: Explor
     >
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             {indicator.label}
+            {MACRO_BR_INFO[indicator.key] && (
+              <InfoTooltip label={indicator.label} content={MACRO_BR_INFO[indicator.key]} />
+            )}
           </p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-semibold tabular-nums text-foreground">

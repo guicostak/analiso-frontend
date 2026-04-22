@@ -18,6 +18,8 @@ import type {
   IndexMini,
   DiCurve,
 } from "../../interfaces/market.interfaces";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+import { RISK_PANEL_INFO } from "../../utils/marketInfoCopy";
 
 interface ExploreRiskPanelProps {
   riskPanel: RiskPanel | null;
@@ -28,9 +30,11 @@ interface MiniCardProps {
   label:    string;
   children: ReactNode;
   hint?:    string;
+  /** Explicação exibida no ícone "i" ao lado do label. */
+  info?:    string;
 }
 
-function MiniCard({ icon, label, children, hint }: MiniCardProps) {
+function MiniCard({ icon, label, children, hint, info }: MiniCardProps) {
   return (
     <article
       className="
@@ -40,8 +44,9 @@ function MiniCard({ icon, label, children, hint }: MiniCardProps) {
       "
     >
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
+          {info && <InfoTooltip label={label} content={info} />}
         </span>
         <span className="text-muted-foreground/60">{icon}</span>
       </div>
@@ -64,7 +69,7 @@ function EmptyValue({ text }: { text?: string }) {
 function VolatilityCard({ vol }: { vol: VolatilityMini | null }) {
   if (!vol || vol.score == null) {
     return (
-      <MiniCard icon={<Activity size={14} />} label="Volatilidade">
+      <MiniCard icon={<Activity size={14} />} label="Volatilidade" info={RISK_PANEL_INFO.volatility}>
         <EmptyValue />
       </MiniCard>
     );
@@ -81,6 +86,7 @@ function VolatilityCard({ vol }: { vol: VolatilityMini | null }) {
       icon={<Activity size={14} />}
       label="Volatilidade"
       hint={vol.metaLine ?? undefined}
+      info={RISK_PANEL_INFO.volatility}
     >
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-semibold tabular-nums text-foreground">
@@ -102,7 +108,7 @@ function VolatilityCard({ vol }: { vol: VolatilityMini | null }) {
 function BreadthCard({ breadth }: { breadth: BreadthIndicator | null }) {
   if (!breadth || breadth.total === 0) {
     return (
-      <MiniCard icon={<Scale size={14} />} label="Breadth">
+      <MiniCard icon={<Scale size={14} />} label="Breadth" info={RISK_PANEL_INFO.breadth}>
         <EmptyValue />
       </MiniCard>
     );
@@ -114,6 +120,7 @@ function BreadthCard({ breadth }: { breadth: BreadthIndicator | null }) {
       icon={<Scale size={14} />}
       label="Breadth"
       hint={`${breadth.up} em alta · ${breadth.down} em baixa`}
+      info={RISK_PANEL_INFO.breadth}
     >
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-semibold tabular-nums text-foreground">
@@ -139,7 +146,7 @@ function BreadthCard({ breadth }: { breadth: BreadthIndicator | null }) {
 function FearGreedCard({ fng }: { fng: FearGreedIndicator | null }) {
   if (!fng) {
     return (
-      <MiniCard icon={<Gauge size={14} />} label="Fear & Greed">
+      <MiniCard icon={<Gauge size={14} />} label="Fear & Greed" info={RISK_PANEL_INFO.fearGreed}>
         <EmptyValue />
       </MiniCard>
     );
@@ -155,6 +162,7 @@ function FearGreedCard({ fng }: { fng: FearGreedIndicator | null }) {
       icon={<Gauge size={14} />}
       label="Fear & Greed"
       hint={`Fonte: ${fng.source}`}
+      info={RISK_PANEL_INFO.fearGreed}
     >
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-semibold tabular-nums text-foreground">
@@ -177,13 +185,13 @@ function FearGreedCard({ fng }: { fng: FearGreedIndicator | null }) {
 }
 
 function IndexMiniCard({
-  icon, label, hint, data,
+  icon, label, hint, data, info,
 }: {
-  icon: ReactNode; label: string; hint?: string; data: IndexMini | null;
+  icon: ReactNode; label: string; hint?: string; data: IndexMini | null; info?: string;
 }) {
   if (!data || !data.value) {
     return (
-      <MiniCard icon={icon} label={label}>
+      <MiniCard icon={icon} label={label} info={info}>
         <EmptyValue />
       </MiniCard>
     );
@@ -193,7 +201,7 @@ function IndexMiniCard({
     : data.trend === "down" ? "text-danger-text"
     : "text-muted-foreground";
   return (
-    <MiniCard icon={icon} label={label} hint={hint}>
+    <MiniCard icon={icon} label={label} hint={hint} info={info}>
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-semibold tabular-nums text-foreground">
           {data.value}
@@ -218,6 +226,7 @@ function DiCurveCard({ curve }: { curve: DiCurve | null }) {
         icon={<LineIcon size={14} />}
         label="Curva DI"
         hint="Estrutura a termo dos juros (ETTJ Anbima)"
+        info={RISK_PANEL_INFO.diCurve}
       >
         <div className="flex flex-col gap-2">
           <span className="inline-flex w-fit items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -274,6 +283,7 @@ function DiCurveCard({ curve }: { curve: DiCurve | null }) {
       icon={<LineIcon size={14} />}
       label="Curva DI · PRE"
       hint={`ETTJ Anbima · ${curve.asOfDate ?? ""}`}
+      info={RISK_PANEL_INFO.diCurve}
     >
       <div className="flex flex-col gap-2">
         {/* Chip de forma da curva */}
@@ -376,12 +386,14 @@ export function ExploreRiskPanel({ riskPanel }: ExploreRiskPanelProps) {
           label="VIX"
           hint="Volatilidade implícita — CBOE"
           data={riskPanel.vix}
+          info={RISK_PANEL_INFO.vix}
         />
         <IndexMiniCard
           icon={<DollarSign size={14} />}
           label="DXY"
           hint="Índice do dólar"
           data={riskPanel.dxy}
+          info={RISK_PANEL_INFO.dxy}
         />
         <DiCurveCard curve={riskPanel.diCurve} />
       </div>
