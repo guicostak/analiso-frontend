@@ -172,6 +172,55 @@ export interface GlobalMacroBundle {
   bitcoin: IndexCard | null;
 }
 
+/**
+ * Ilha "Ex-dividendos" da aba Movimentos.
+ * Contextualiza quedas técnicas (ex-date de hoje) e oferece agenda curta (próximos 30d).
+ */
+export interface ExDividendItem {
+  ticker:        string;
+  companyName:   string | null;
+  sector:        string | null;
+  /** Data ex-dividendo — ISO yyyy-MM-dd. */
+  exDate:        string;
+  /** 0 = hoje; positivo = dias à frente. */
+  daysUntilEx:   number;
+  /** Dividendo por ação TTM (R$/ação), quando disponível. */
+  dpsTtm:        number | null;
+  /** Dividend yield anual (%), quando disponível. */
+  dividendYield: number | null;
+  logoUrl:       string | null;
+}
+
+export interface ExDividendBundle {
+  today:    ExDividendItem[];
+  upcoming: ExDividendItem[];
+  asOfDate: string | null;
+}
+
+/**
+ * Ilha "Alfa setorial" da aba Movimentos.
+ * Destaca ações que destoaram (pra mais ou pra menos) do comportamento médio do seu setor.
+ */
+export interface SectorAlphaItem {
+  ticker:         string;
+  companyName:    string | null;
+  sector:         string | null;
+  /** Variação % da ação no pregão. */
+  stockChangePct: number;
+  /** Variação média % do setor no mesmo pregão. */
+  sectorAvgPct:   number;
+  /** stockChangePct - sectorAvgPct, em pp. Positivo = destaque positivo. */
+  alphaPct:       number;
+  direction:      "positive" | "negative";
+  logoUrl:        string | null;
+}
+
+export interface SectorAlphaBundle {
+  positive: SectorAlphaItem[];
+  negative: SectorAlphaItem[];
+  asOfDate: string | null;
+}
+
 /** Bundle UI-side dos extras do contexto. */
 export interface MarketExtras {
   ribbon:        MarketRibbon          | null;
@@ -181,4 +230,7 @@ export interface MarketExtras {
   macroBr:       MacroIndicatorsBundle | null;
   macroGlobal:   GlobalMacroBundle     | null;
   comparisons:   Comparison[];
+  /** Ilhas da aba Movimentos (Fase 2 — rollout incremental). */
+  exDividends:   ExDividendBundle      | null;
+  sectorAlpha:   SectorAlphaBundle     | null;
 }

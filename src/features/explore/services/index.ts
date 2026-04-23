@@ -341,6 +341,42 @@ export interface GlobalMacroBundleDto {
   bitcoin: ExploreIndexCardDto | null;
 }
 
+// ─── Aba Movimentos — novas ilhas (Sprint 1) ────────────────────────────────
+
+export interface ExDividendItemDto {
+  ticker:        string;
+  companyName:   string | null;
+  sector:        string | null;
+  exDate:        string;          // ISO yyyy-MM-dd (serializado pelo Jackson)
+  daysUntilEx:   number;
+  dpsTtm:        number | null;
+  dividendYield: number | null;
+  logoUrl:       string | null;
+}
+
+export interface ExDividendBundleDto {
+  today:    ExDividendItemDto[];
+  upcoming: ExDividendItemDto[];
+  asOfDate: string | null;
+}
+
+export interface SectorAlphaItemDto {
+  ticker:         string;
+  companyName:    string | null;
+  sector:         string | null;
+  stockChangePct: number;
+  sectorAvgPct:   number;
+  alphaPct:       number;
+  direction:      "positive" | "negative";
+  logoUrl:        string | null;
+}
+
+export interface SectorAlphaBundleDto {
+  positive: SectorAlphaItemDto[];
+  negative: SectorAlphaItemDto[];
+  asOfDate: string | null;
+}
+
 export interface ExploreMarketExtrasDto {
   ribbon:        MarketRibbonDto          | null;
   marketTone:    MarketToneDto            | null;
@@ -349,6 +385,8 @@ export interface ExploreMarketExtrasDto {
   macroBr:       MacroIndicatorsBundleDto | null;
   macroGlobal:   GlobalMacroBundleDto     | null;
   comparisons:   ComparisonDto[]          | null;
+  exDividends:   ExDividendBundleDto      | null;
+  sectorAlpha:   SectorAlphaBundleDto     | null;
 }
 
 // Resposta completa

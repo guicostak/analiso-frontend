@@ -21,6 +21,8 @@ import { ExploreSectorHeatmap } from "./market/ExploreSectorHeatmap";
 import { ExploreMacroBrGrid } from "./market/ExploreMacroBrGrid";
 import { ExploreGlobalMacroGrid } from "./market/ExploreGlobalMacroGrid";
 import { ExploreComparisonsGrid } from "./market/ExploreComparisonsGrid";
+import { ExploreExDividendsPanel } from "./market/ExploreExDividendsPanel";
+import { ExploreSectorAlphaPanel } from "./market/ExploreSectorAlphaPanel";
 
 function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
   if (item.imageUrl) return { type: "photo", src: item.imageUrl };
@@ -296,6 +298,26 @@ export function MarketContextPage() {
                     setShowAllMovements={setShowAllMovements}
                   />
                 </div>
+
+                {/*
+                 * Ilhas Sprint 1 — rollout incremental. Cada componente esconde
+                 * a si mesmo quando não há dado (no-op), então a integração é
+                 * segura mesmo em backends antigos sem esses bundles.
+                 *
+                 * Ordem escolhida: alfa setorial antes (leitura ativa do dia),
+                 * ex-dividendos depois (contextualização de quedas técnicas).
+                 */}
+                {marketExtras?.sectorAlpha && (
+                  <div className="pt-2">
+                    <ExploreSectorAlphaPanel bundle={marketExtras.sectorAlpha} />
+                  </div>
+                )}
+
+                {marketExtras?.exDividends && (
+                  <div className="pt-2">
+                    <ExploreExDividendsPanel bundle={marketExtras.exDividends} />
+                  </div>
+                )}
               </section>
               )}
 

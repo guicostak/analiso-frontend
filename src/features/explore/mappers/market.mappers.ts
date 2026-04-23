@@ -23,6 +23,10 @@ import type {
   SectorHeatmapItemDto,
   ComparisonDto,
   GlobalMacroBundleDto,
+  ExDividendBundleDto,
+  ExDividendItemDto,
+  SectorAlphaBundleDto,
+  SectorAlphaItemDto,
 } from "../services";
 
 import { mapIndexCardDto } from "../services";
@@ -47,6 +51,10 @@ import type {
   GlobalMacroBundle,
   MarketStatus,
   MarketTone,
+  ExDividendBundle,
+  ExDividendItem,
+  SectorAlphaBundle,
+  SectorAlphaItem,
 } from "../interfaces/market.interfaces";
 import type { IndexCard, IndexCardTrend } from "../interfaces";
 
@@ -270,6 +278,54 @@ export const mapGlobalMacro = (
   };
 };
 
+// ─── Aba Movimentos — Ex-dividendos ────────────────────────────────────────────
+
+const mapExDividendItem = (dto: ExDividendItemDto): ExDividendItem => ({
+  ticker:        dto.ticker,
+  companyName:   dto.companyName ?? null,
+  sector:        dto.sector ?? null,
+  exDate:        dto.exDate,
+  daysUntilEx:   dto.daysUntilEx,
+  dpsTtm:        typeof dto.dpsTtm === "number" ? dto.dpsTtm : null,
+  dividendYield: typeof dto.dividendYield === "number" ? dto.dividendYield : null,
+  logoUrl:       dto.logoUrl ?? null,
+});
+
+const mapExDividends = (
+  dto: ExDividendBundleDto | null | undefined,
+): ExDividendBundle | null => {
+  if (!dto) return null;
+  return {
+    today:    Array.isArray(dto.today) ? dto.today.map(mapExDividendItem) : [],
+    upcoming: Array.isArray(dto.upcoming) ? dto.upcoming.map(mapExDividendItem) : [],
+    asOfDate: dto.asOfDate ?? null,
+  };
+};
+
+// ─── Aba Movimentos — Alfa setorial ────────────────────────────────────────────
+
+const mapSectorAlphaItem = (dto: SectorAlphaItemDto): SectorAlphaItem => ({
+  ticker:         dto.ticker,
+  companyName:    dto.companyName ?? null,
+  sector:         dto.sector ?? null,
+  stockChangePct: dto.stockChangePct,
+  sectorAvgPct:   dto.sectorAvgPct,
+  alphaPct:       dto.alphaPct,
+  direction:      dto.direction === "negative" ? "negative" : "positive",
+  logoUrl:        dto.logoUrl ?? null,
+});
+
+const mapSectorAlpha = (
+  dto: SectorAlphaBundleDto | null | undefined,
+): SectorAlphaBundle | null => {
+  if (!dto) return null;
+  return {
+    positive: Array.isArray(dto.positive) ? dto.positive.map(mapSectorAlphaItem) : [],
+    negative: Array.isArray(dto.negative) ? dto.negative.map(mapSectorAlphaItem) : [],
+    asOfDate: dto.asOfDate ?? null,
+  };
+};
+
 // ─── Top-level bundle ─────────────────────────────────────────────────────────
 
 export const mapMarketExtras = (
@@ -284,5 +340,7 @@ export const mapMarketExtras = (
     macroBr:       mapMacroBr(dto.macroBr),
     macroGlobal:   mapGlobalMacro(dto.macroGlobal),
     comparisons:   Array.isArray(dto.comparisons) ? dto.comparisons.map(mapComparison) : [],
+    exDividends:   mapExDividends(dto.exDividends),
+    sectorAlpha:   mapSectorAlpha(dto.sectorAlpha),
   };
 };
