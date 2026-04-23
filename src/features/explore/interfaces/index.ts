@@ -61,6 +61,8 @@ export interface MoverRow {
   source: string;
   type: MoverType;
   logoUrl?: string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
+  sparkline?: number[] | null;
 }
 
 export interface MovementInsight {
@@ -112,6 +114,8 @@ export interface HighlightItem {
     url?: string;
   };
   filterPreset: HighlightPreset;
+  /** Sparkline PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
+  sparkline?: number[] | null;
 }
 
 export interface CompanyFinancials {

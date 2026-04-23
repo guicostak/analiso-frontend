@@ -1,8 +1,24 @@
 "use client";
 
-import { Dot } from "lucide-react";
+import { Dot, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { MoverRow, MovementInsight, MoverType } from "../interfaces";
+import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
+import { SectionCategoryTag } from "./market/SectionCategoryTag";
+
+const MOVIMENTOS_CATEGORY_ID = "movimentos";
+
+/** Trend→status do MiniSparkline a partir do delta extremos-fim vs início. */
+function sparklineStatus(points: number[] | null | undefined): "healthy" | "attention" | "risk" {
+  if (!points || points.length < 2) return "attention";
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (!Number.isFinite(first) || !Number.isFinite(last) || first === 0) return "attention";
+  const delta = (last - first) / Math.abs(first);
+  if (delta > 0.005) return "healthy";
+  if (delta < -0.005) return "risk";
+  return "attention";
+}
 
 interface MovementInsightBlock {
   template: string;
@@ -67,9 +83,12 @@ function MovementCard({
               />
             )}
             <div className="min-w-0">
-              <p className={`${featured ? "text-[18px] leading-6" : "text-[15px] leading-6"} truncate font-semibold text-foreground`}>
-                {row.name} <span className="text-muted-foreground">{row.ticker}</span>
-              </p>
+              <div className="flex items-center gap-1.5">
+                <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
+                <p className={`${featured ? "text-[18px] leading-6" : "text-[15px] leading-6"} truncate font-semibold text-foreground`}>
+                  {row.name} <span className="text-muted-foreground">{row.ticker}</span>
+                </p>
+              </div>
               <p className="text-[12px] font-medium text-muted-foreground">Preco {row.price} . {row.changePct}</p>
             </div>
           </div>
@@ -78,6 +97,18 @@ function MovementCard({
           <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">Por que merece leitura: {whyOpenNow}</p>
           <p className="mt-2 text-[12px] font-medium text-muted-foreground">Pilares afetados: {impactPillars}</p>
         </div>
+
+        {row.sparkline && row.sparkline.length >= 2 && (
+          <div className="shrink-0" aria-hidden="true">
+            <MiniSparkline
+              data={row.sparkline}
+              status={sparklineStatus(row.sparkline)}
+              width={featured ? 96 : 80}
+              height={featured ? 36 : 30}
+              strokeWidth={featured ? 1.5 : 1.25}
+            />
+          </div>
+        )}
       </div>
 
       <div className={featured ? "mt-5 flex flex-wrap items-center gap-3" : "mt-4 flex flex-wrap items-center gap-3"}>
@@ -181,15 +212,29 @@ export function ExploreMovementsPanel({
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold leading-6 text-foreground">
-                        {row.name} <span className="text-muted-foreground">{row.ticker}</span>
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
+                        <p className="text-[15px] font-semibold leading-6 text-foreground">
+                          {row.name} <span className="text-muted-foreground">{row.ticker}</span>
+                        </p>
+                      </div>
                       <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{row.note}</p>
                       <p className="mt-2 text-[12px] font-medium text-muted-foreground">
                         {movementInsights[row.ticker]?.impactPillars ?? "Caixa e Margens"} . {row.price} . {row.changePct}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
+                      {row.sparkline && row.sparkline.length >= 2 && (
+                        <div aria-hidden="true">
+                          <MiniSparkline
+                            data={row.sparkline}
+                            status={sparklineStatus(row.sparkline)}
+                            width={72}
+                            height={26}
+                            strokeWidth={1.25}
+                          />
+                        </div>
+                      )}
                       <Link
                         href={`/analysis/${row.ticker}`}
                         className="inline-flex h-9 items-center rounded-[13px] bg-brand px-4 text-[12px] font-semibold text-white"

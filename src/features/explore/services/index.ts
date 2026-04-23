@@ -58,6 +58,8 @@ export interface ExploreMovementItemDto {
   ctaLabel:     string;
   price:        string | null;
   changePct:    string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE em ordem cronológica ASC. Null quando não há histórico. */
+  sparkline?:   number[] | null;
 }
 
 export interface ExploreMovementGroupDto {
@@ -189,6 +191,8 @@ export interface ExploreCurationItemDto {
   periodLabel?:        string | null;
   sourceRecencyDays?:  number | null;
   catalogState?:       string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE. Null quando não há histórico. */
+  sparkline?:          number[] | null;
 }
 
 // ─── Market extras DTOs (Fase 2 backend) ────────────────────────────────────
@@ -512,6 +516,7 @@ export function mapMovementItemToMoverRow(item: ExploreMovementItemDto): MoverRo
     source:    'B3',
     type:      'altas',
     logoUrl:   item.logoUrl ?? null,
+    sparkline: Array.isArray(item.sparkline) ? item.sparkline : null,
   };
 }
 
@@ -634,6 +639,7 @@ export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): Highlig
       timeframe: '30d',
       scope:     'mercado',
     },
+    sparkline: Array.isArray(dto.sparkline) ? dto.sparkline : null,
   };
 }
 

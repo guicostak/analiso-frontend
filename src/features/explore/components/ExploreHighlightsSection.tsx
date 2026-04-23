@@ -1,8 +1,24 @@
 "use client";
 
-import { ExternalLink, FileText } from "lucide-react";
+import { ExternalLink, FileText, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { HighlightItem, HighlightPreset } from "../interfaces";
+import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
+import { SectionCategoryTag } from "./market/SectionCategoryTag";
+
+const MOVIMENTOS_CATEGORY_ID = "movimentos";
+
+/** Heurística trend→status do MiniSparkline baseada no delta entre extremos da sparkline. */
+function sparklineStatus(points: number[] | null | undefined): "healthy" | "attention" | "risk" {
+  if (!points || points.length < 2) return "attention";
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (!Number.isFinite(first) || !Number.isFinite(last) || first === 0) return "attention";
+  const delta = (last - first) / Math.abs(first);
+  if (delta > 0.005) return "healthy";  // +0,5% fim vs início
+  if (delta < -0.005) return "risk";
+  return "attention";
+}
 
 const severityTone: Record<
   HighlightItem["severity"],
@@ -92,22 +108,30 @@ function HighlightPriorityCard({
             />
           )}
           <div className="min-w-0">
-            <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${tone.pill}`}>
-              {priorityLabelMap[item.severity]}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
+              <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${tone.pill}`}>
+                {priorityLabelMap[item.severity]}
+              </span>
+            </div>
             <p className="mt-2.5 text-[16px] font-semibold leading-6 text-foreground">
               {item.companyName} <span className="text-muted-foreground">{item.ticker}</span>
             </p>
             <p className="mt-1.5 text-[13px] leading-5 text-muted-foreground">{item.changeTitle}</p>
           </div>
         </div>
-        <button
-          onClick={() => setSelectedSource(item)}
-          className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition hover:text-foreground"
-          aria-label={`Ver fonte de ${item.companyName}`}
-        >
-          <FileText className="h-4 w-4" />
-        </button>
+
+        {item.sparkline && item.sparkline.length >= 2 && (
+          <div className="shrink-0 pt-1" aria-hidden="true">
+            <MiniSparkline
+              data={item.sparkline}
+              status={sparklineStatus(item.sparkline)}
+              width={72}
+              height={28}
+              strokeWidth={1.25}
+            />
+          </div>
+        )}
       </div>
 
       <div className="relative mt-4 flex items-end justify-between gap-4">
