@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, ExternalLink, Globe, Newspaper, TrendingUp } from "lucide-react";
+import { ExternalLink, Globe, Newspaper, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
 import { AppTopBar } from "@/src/components/layout/AppTopBar";
 import { MainContent } from "@/src/components/layout/MainContent";
@@ -23,38 +23,9 @@ import { ExploreGlobalMacroGrid } from "./market/ExploreGlobalMacroGrid";
 import { ExploreComparisonsGrid } from "./market/ExploreComparisonsGrid";
 import { ExploreExDividendsPanel } from "./market/ExploreExDividendsPanel";
 import { ExploreSectorAlphaPanel } from "./market/ExploreSectorAlphaPanel";
+import { ExploreMarketNewsSection } from "./market/ExploreMarketNewsSection";
 import { ExploreAllMoversList } from "./ExploreAllMoversList";
 import { ExploreSectorFilter, type SectorFilterItem } from "./ExploreSectorFilter";
-
-function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
-  if (item.imageUrl) return { type: "photo", src: item.imageUrl };
-  if (item.logoUrl)  return { type: "logo",  src: item.logoUrl };
-  return null;
-}
-function newsSource(url: string): string {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    if (host.includes("infomoney"))   return "InfoMoney";
-    if (host.includes("reuters"))     return "Reuters";
-    if (host.includes("tradingview")) return "Reuters";
-    if (host.includes("valor"))       return "Valor Econômico";
-    if (host.includes("exame"))       return "Exame";
-    if (host.includes("globo"))       return "Globo";
-    if (host.includes("uol"))         return "UOL";
-    if (host.includes("estadao"))     return "Estadão";
-    if (host.includes("folha"))       return "Folha";
-    return host.split(".")[0].charAt(0).toUpperCase() + host.split(".")[0].slice(1);
-  } catch {
-    return "Notícia";
-  }
-}
-
-function formatNewsDate(iso: string | null): string {
-  if (!iso) return "";
-  try {
-    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-  } catch { return iso; }
-}
 
 type MarketSectionId = "contexto" | "movimentos" | "noticias";
 
@@ -352,7 +323,6 @@ export function MarketContextPage() {
                   getCompanyLogo={getCompanyLogo}
                   setSummaryScope={setSummaryScope}
                   setSummaryState={setSummaryState}
-                  setSelectedSource={setSelectedSource}
                   setShowAllHighlights={setShowAllHighlights}
                   applyHighlightPreset={applyHighlightPreset}
                 />
@@ -399,93 +369,7 @@ export function MarketContextPage() {
 
               {/* === Notícias === */}
               {activeSection === "noticias" && (
-              <section className="space-y-5">
-                <div className="max-w-[720px] space-y-2">
-                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Cobertura do dia</p>
-                  <h2 className="text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Notícias</h2>
-                  <p className="text-[13px] leading-6 text-muted-foreground">
-                    Manchetes selecionadas para complementar a leitura de contexto e movimentos.
-                  </p>
-                </div>
-
-                {/* Skeleton */}
-                {newsLoading && (
-                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="h-64 animate-pulse rounded-[24px] bg-muted" />
-                    ))}
-                  </div>
-                )}
-
-                {/* Empty */}
-                {!newsLoading && news.length === 0 && (
-                  <div className="rounded-[24px] border border-border bg-card px-6 py-10 text-center text-[14px] text-muted-foreground">
-                    Nenhuma notícia disponível no momento.
-                  </div>
-                )}
-
-                {/* Cards */}
-                {!newsLoading && news.length > 0 && (
-                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {news.map((item, i) => {
-                      const cover = cardImage(item);
-                      return (
-                        <article
-                          key={i}
-                          className="group flex flex-col overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(15,23,40,0.08)]"
-                        >
-                          <div className="relative h-44 w-full overflow-hidden bg-muted">
-                            {cover?.type === "photo" && (
-                              <img
-                                src={cover.src}
-                                alt={item.title}
-                                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                              />
-                            )}
-                            {cover?.type === "logo" && (
-                              <div className="flex h-full w-full items-center justify-center">
-                                <img
-                                  src={cover.src}
-                                  alt={item.ticker ?? ""}
-                                  className="h-16 w-16 rounded-[18px] border border-border bg-card object-cover p-2 shadow"
-                                />
-                              </div>
-                            )}
-                            {item.ticker && (
-                              <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300 backdrop-blur">
-                                {item.logoUrl && (
-                                  <img src={item.logoUrl} alt={item.ticker} className="h-4 w-4 rounded object-cover" />
-                                )}
-                                {item.ticker}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-1 flex-col gap-4 p-5">
-                            <div>
-                              <p className="text-[12px] font-medium uppercase text-muted-foreground">
-                                {newsSource(item.url)}{item.date ? ` · ${formatNewsDate(item.date)}` : ""}
-                              </p>
-                              <h3 className="mt-2 text-[16px] font-semibold leading-6 tracking-[-0.01em] text-foreground line-clamp-3">
-                                {item.title}
-                              </h3>
-                            </div>
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand transition group-hover:gap-2"
-                            >
-                              Ler matéria
-                              <ArrowUpRight className="h-4 w-4" />
-                            </a>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
+                <ExploreMarketNewsSection news={news} loading={newsLoading} />
               )}
             </div>
           </div>

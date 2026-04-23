@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, FileText, TrendingUp } from "lucide-react";
+import { ExternalLink, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { HighlightItem, HighlightPreset } from "../interfaces";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
@@ -74,7 +74,6 @@ interface ExploreHighlightsSectionProps {
   getCompanyLogo: (ticker: string) => string | undefined;
   setSummaryScope: (scope: SummaryScope) => void;
   setSummaryState: (state: SummaryState) => void;
-  setSelectedSource: (item: HighlightItem | null) => void;
   setShowAllHighlights: (fn: ((prev: boolean) => boolean) | boolean) => void;
   applyHighlightPreset: (preset: HighlightPreset) => void;
 }
@@ -155,7 +154,6 @@ export function ExploreHighlightsSection({
   getCompanyLogo,
   setSummaryScope,
   setSummaryState,
-  setSelectedSource,
   setShowAllHighlights,
   applyHighlightPreset,
 }: ExploreHighlightsSectionProps) {
@@ -270,15 +268,8 @@ export function ExploreHighlightsSection({
                       <p className="mt-1 text-[12px] text-muted-foreground">Atualizado em {featuredHighlight.source.updatedAt}</p>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => setSelectedSource(featuredHighlight)}
-                        className="inline-flex items-center gap-2 text-[13px] font-medium text-brand transition hover:text-foreground"
-                      >
-                        <FileText className="h-4 w-4" />
-                        Ver fonte
-                      </button>
-                      {featuredHighlight.source.url && (
+                    {featuredHighlight.source.url && (
+                      <div className="flex flex-col gap-2">
                         <a
                           href={featuredHighlight.source.url}
                           className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
@@ -286,8 +277,8 @@ export function ExploreHighlightsSection({
                           <ExternalLink className="h-4 w-4" />
                           Documento externo
                         </a>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </aside>
               </div>
