@@ -363,8 +363,6 @@ export function MarketContextPage() {
                     movers={filteredMovers}
                     movementInsights={movementInsights}
                     showAllMovements={showAllMovements}
-                    movementSummary={movementSummary}
-                    movementDominant={movementDominant}
                     getCompanyLogo={getCompanyLogo}
                     setSelectedTab={setSelectedTab}
                     setShowAllMovements={setShowAllMovements}

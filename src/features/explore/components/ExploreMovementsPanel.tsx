@@ -4,7 +4,33 @@ import { Dot, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { MoverRow, MovementInsight, MoverType } from "../interfaces";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { SectionCategoryTag } from "./market/SectionCategoryTag";
+
+/**
+ * Copy do tooltip "Como ler esta seção" — substitui as 3 ilhas instrutivas
+ * laterais (Leitura do mercado / Pilar mais afetado / Próximo passo) que
+ * ocupavam 1/3 da tela e o usuário pulava depois do primeiro uso.
+ * Conteúdo denso mas estruturado em parágrafos curtos.
+ */
+const MOVEMENTS_SECTION_INFO = (
+  <div className="space-y-2">
+    <p>
+      <b>Altas</b>: tickers com maior variação positiva no dia.{" "}
+      <b>Baixas</b>: maior variação negativa. <b>Mais negociadas</b>: ranking
+      por atividade (volume × preço).
+    </p>
+    <p>
+      Use o movimento como <b>pista inicial</b>, não como conclusão. Abra a
+      análise da empresa e confirme se caixa, margens ou retorno realmente
+      mudaram antes de decidir.
+    </p>
+    <p className="text-muted-foreground">
+      Cada card traz o pilar mais afetado e uma leitura curta do que aquele
+      movimento pode estar sinalizando.
+    </p>
+  </div>
+);
 
 const MOVIMENTOS_CATEGORY_ID = "movimentos";
 
@@ -20,21 +46,12 @@ function sparklineStatus(points: number[] | null | undefined): "healthy" | "atte
   return "attention";
 }
 
-interface MovementInsightBlock {
-  template: string;
-  title: string;
-  body: string;
-  ctaLabel: string;
-}
-
 interface ExploreMovementsPanelProps {
   selectedTab: MoverType;
   movers: MoverRow[];
   movementInsights: Record<string, MovementInsight>;
   showAllMovements: boolean;
   compact?: boolean;
-  movementSummary?: MovementInsightBlock | null;
-  movementDominant?: MovementInsightBlock | null;
   getCompanyLogo: (ticker: string) => string | undefined;
   setSelectedTab: (tab: MoverType) => void;
   setShowAllMovements: (fn: ((prev: boolean) => boolean) | boolean) => void;
@@ -133,8 +150,6 @@ export function ExploreMovementsPanel({
   movementInsights,
   showAllMovements,
   compact = false,
-  movementSummary,
-  movementDominant,
   getCompanyLogo,
   setSelectedTab,
   setShowAllMovements,
@@ -149,7 +164,15 @@ export function ExploreMovementsPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-[12px] font-medium uppercase text-muted-foreground">Exploracao principal</p>
-          <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Movimentos que pedem contexto</h2>
+          <h2 className="mt-2 inline-flex items-center gap-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">
+            Movimentos que pedem contexto
+            <InfoTooltip
+              label="Como ler esta seção"
+              size={14}
+              content={MOVEMENTS_SECTION_INFO}
+              contentClassName="max-w-[360px] whitespace-normal leading-relaxed p-3 bg-popover text-popover-foreground border border-border shadow-lg text-[12px]"
+            />
+          </h2>
           <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-muted-foreground">
             Primeiro a interpretacao, depois o preco. A tela organiza os movimentos do dia com tres densidades para destacar o que merece abertura imediata.
           </p>
@@ -183,8 +206,12 @@ export function ExploreMovementsPanel({
         ))}
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-12">
-        <div className="space-y-4 xl:col-span-8">
+      {/* Grid de 2 colunas foi removido: a aside com 3 ilhas instrutivas
+          ("Leitura do mercado", "Pilar mais afetado", "Próximo passo")
+          virou InfoTooltip no título da seção. Skills: tooltip aprofunda,
+          não substitui hierarquia; ilhas instrutivas repetiam info que o
+          usuário já absorveu após 1 sessão. */}
+      <div className="space-y-4">
           {currentMovers.length === 0 && (
             <div className="rounded-[24px] border border-border bg-card px-6 py-5 text-[14px] leading-6 text-muted-foreground shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
               {tabEmptyStateMap[selectedTab]}
@@ -256,43 +283,6 @@ export function ExploreMovementsPanel({
               {showAllMovements ? "Ver menos movimentos" : `Ver mais ${tabLabelMap[selectedTab].toLowerCase()}`}
             </button>
           ) : null}
-        </div>
-
-        <aside className="space-y-4 xl:col-span-4 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-            <p className="text-[12px] font-medium uppercase text-blue-700 dark:text-blue-300">Leitura do mercado</p>
-            <p className="mt-3 text-[16px] font-semibold leading-6 text-foreground">
-              {movementSummary?.title || `Como ler ${tabLabelMap[selectedTab].toLowerCase()} hoje`}
-            </p>
-            <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
-              {movementSummary?.body || "Use os movimentos como pista inicial e confirme se a narrativa aparece tambem nos pilares principais."}
-            </p>
-          </div>
-
-          <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-            <p className="text-[12px] font-medium uppercase text-brand">Pilar mais afetado</p>
-            <p className="mt-3 text-[16px] font-semibold leading-6 text-foreground">
-              {movementDominant?.title || "Observe o impacto antes do ruido"}
-            </p>
-            <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
-              {movementDominant?.body || "Quando o preco chama atencao, o proximo passo e verificar se caixa, margens ou retorno realmente mudaram."}
-            </p>
-          </div>
-
-          <div className="relative overflow-hidden rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-            <p className="relative text-[12px] font-medium uppercase text-warning-text">Proximo passo</p>
-            <p className="relative mt-2 text-[17px] font-semibold leading-6 text-foreground">Abra a leitura principal e confirme com fonte</p>
-            <p className="relative mt-2.5 max-w-[92%] text-[13px] leading-5 text-muted-foreground">
-              Priorize os movimentos com tese clara, valide a origem do sinal e so depois compare empresas em conjunto.
-            </p>
-            <div className="relative mt-5 flex flex-wrap items-center gap-3 border-t border-warning-border pt-4">
-              <button className="inline-flex h-9 items-center rounded-[13px] border border-border bg-card px-4 text-[12px] font-semibold text-foreground shadow-[0_10px_24px_rgba(15,23,40,0.06)] dark:shadow-none transition hover:bg-muted">
-                Ver fonte
-              </button>
-              <p className="text-[12px] text-muted-foreground">Fonte: B3 . Atualizado em 05/02</p>
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
   );
