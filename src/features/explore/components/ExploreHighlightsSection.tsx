@@ -82,13 +82,9 @@ interface ExploreHighlightsSectionProps {
 function HighlightPriorityCard({
   item,
   getCompanyLogo,
-  setSelectedSource,
-  applyHighlightPreset,
 }: {
   item: HighlightItem;
   getCompanyLogo: (ticker: string) => string | undefined;
-  setSelectedSource: (item: HighlightItem | null) => void;
-  applyHighlightPreset: (preset: HighlightPreset) => void;
 }) {
   const tone = severityTone[item.severity];
 
@@ -142,12 +138,6 @@ function HighlightPriorityCard({
             {item.pillar} . {item.timeframeLabel}
           </p>
         </div>
-        <button
-          onClick={() => applyHighlightPreset(item.filterPreset)}
-          className="inline-flex shrink-0 rounded-full bg-card px-3.5 py-2 text-[12px] font-semibold text-brand shadow-[0_8px_22px_rgba(15,23,40,0.06)] dark:shadow-none transition hover:opacity-90"
-        >
-          Ver relacionadas
-        </button>
       </div>
     </article>
   );
@@ -263,12 +253,6 @@ export function ExploreHighlightsSection({
                     >
                       Abrir analise
                     </Link>
-                    <button
-                      onClick={() => applyHighlightPreset(featuredHighlight.filterPreset)}
-                      className="inline-flex items-center rounded-[15px] border border-border bg-card/80 px-4 py-2.5 text-[13px] font-semibold text-foreground transition hover:bg-card"
-                    >
-                      Ver empresas relacionadas
-                    </button>
                   </div>
                 </div>
 
@@ -366,8 +350,6 @@ export function ExploreHighlightsSection({
                   key={item.id}
                   item={item}
                   getCompanyLogo={getCompanyLogo}
-                  setSelectedSource={setSelectedSource}
-                  applyHighlightPreset={applyHighlightPreset}
                 />
               ))}
             </div>
@@ -380,8 +362,6 @@ export function ExploreHighlightsSection({
                   key={item.id}
                   item={item}
                   getCompanyLogo={getCompanyLogo}
-                  setSelectedSource={setSelectedSource}
-                  applyHighlightPreset={applyHighlightPreset}
                 />
               ))}
             </div>
