@@ -4,6 +4,30 @@ import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { getMarketNews, type ExploreNewsItem } from "../services";
+import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
+
+/**
+ * Copy do tooltip "Como ler as notícias" — substitui as 2 ilhas sticky
+ * laterais ("Como ler" + "Próximo passo") que ocupavam 1/3 da tela e o
+ * usuário pulava depois da primeira sessão. Mesmo padrão aplicado em
+ * ExploreMovementsPanel.
+ */
+const NEWS_SECTION_INFO = (
+  <div className="space-y-2">
+    <p>
+      <b>Notícia não é sinal de compra.</b> Use o fluxo noticioso como
+      contexto pra entender o movimento do dia, não como gatilho de decisão.
+    </p>
+    <p>
+      Cada card está associado a uma empresa — clique no ticker pra abrir a
+      análise completa e confirmar nos fundamentos antes de agir.
+    </p>
+    <p className="text-muted-foreground">
+      Ordem: manchetes recentes das empresas analisadas, por relevância e
+      data. Imagens e fontes são dos sites originais.
+    </p>
+  </div>
+);
 
 const _PLACEHOLDER = "news-story.jpg";
 
@@ -139,8 +163,14 @@ export function ExploreNewsPanel() {
       {/* Header */}
       <div>
         <p className="text-[12px] font-medium uppercase text-muted-foreground">Notícias</p>
-        <h2 className="mt-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">
+        <h2 className="mt-2 inline-flex items-center gap-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">
           Últimas notícias do mercado
+          <InfoTooltip
+            label="Como ler as notícias"
+            size={14}
+            content={NEWS_SECTION_INFO}
+            contentClassName="max-w-[360px] whitespace-normal leading-relaxed p-3 bg-popover text-popover-foreground border border-border shadow-lg text-[12px]"
+          />
         </h2>
         <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-muted-foreground">
           Notícias recentes das empresas analisadas, organizadas por relevância e data.
@@ -170,52 +200,29 @@ export function ExploreNewsPanel() {
         </div>
       )}
 
-      {/* Content */}
+      {/* Content — coluna única. A aside sticky com 2 ilhas instrutivas
+          ("Como ler" / "Próximo passo") virou InfoTooltip no h2 da seção
+          (padrão aplicado em ExploreMovementsPanel). Libera ~1/3 da tela
+          pra conteúdo dinâmico. */}
       {!loading && !error && news.length > 0 && (
-        <div className="grid gap-5 xl:grid-cols-12">
-          {/* Main column */}
-          <div className="space-y-4 xl:col-span-8">
-            {featured && <NewsCard item={featured} featured />}
+        <div className="space-y-4">
+          {featured && <NewsCard item={featured} featured />}
 
-            {grid.length > 0 && (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {grid.map((item, i) => (
-                  <NewsCard key={i} item={item} />
-                ))}
-              </div>
-            )}
-
-            {compact.length > 0 && (
-              <div className="space-y-3">
-                {compact.map((item, i) => (
-                  <NewsCardCompact key={i} item={item} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <aside className="space-y-4 xl:col-span-4 xl:sticky xl:top-24 xl:self-start">
-            <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-              <p className="text-[12px] font-medium uppercase text-blue-700 dark:text-blue-300">Como ler</p>
-              <p className="mt-3 text-[15px] font-semibold leading-6 text-foreground">
-                Notícia não é sinal de compra
-              </p>
-              <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
-                Use as notícias como contexto para entender o movimento do dia. Confirme sempre nos fundamentos antes de agir.
-              </p>
+          {grid.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {grid.map((item, i) => (
+                <NewsCard key={i} item={item} />
+              ))}
             </div>
+          )}
 
-            <div className="rounded-[22px] border border-border bg-card p-4 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
-              <p className="text-[12px] font-medium uppercase text-brand">Próximo passo</p>
-              <p className="mt-3 text-[15px] font-semibold leading-6 text-foreground">
-                Abra a análise da empresa
-              </p>
-              <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">
-                Cada notícia está associada a uma empresa. Clique no ticker para ver a leitura completa dos fundamentos.
-              </p>
+          {compact.length > 0 && (
+            <div className="space-y-3">
+              {compact.map((item, i) => (
+                <NewsCardCompact key={i} item={item} />
+              ))}
             </div>
-          </aside>
+          )}
         </div>
       )}
     </section>
