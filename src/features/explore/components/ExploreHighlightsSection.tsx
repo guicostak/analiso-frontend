@@ -203,8 +203,8 @@ export function ExploreHighlightsSection({
 
       {summaryState === "ready" && featuredHighlight && (
         <>
-          <div className={`grid gap-5 ${hideSummaryCard ? "" : "xl:grid-cols-12"}`}>
-            <article className={`relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none ${hideSummaryCard ? "" : "xl:col-span-8 xl:min-h-[312px]"}`}>
+          <div className="grid gap-5">
+            <article className="relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none">
               <div className="relative grid h-full gap-6 lg:grid-cols-[minmax(0,1.2fr)_260px]">
                 <div className="flex flex-col justify-between">
                   <div>
@@ -293,54 +293,6 @@ export function ExploreHighlightsSection({
               </div>
             </article>
 
-            {!hideSummaryCard && <aside className="relative overflow-hidden rounded-[28px] border border-border bg-card p-7 shadow-[0_18px_40px_rgba(15,23,40,0.05)] dark:shadow-none xl:col-span-4 xl:min-h-[340px]">
-
-              <div className="relative flex h-full flex-col justify-between">
-                <div>
-                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Lente da curadoria</p>
-                  <h3 className="mt-3 text-[20px] font-semibold leading-7 text-foreground">{summaryScope}</h3>
-                  <p className="mt-3 text-[15px] leading-7 text-muted-foreground">
-                    {summaryScope === "Setor"
-                      ? "Mostra destaques do setor selecionado com leitura mais concentrada."
-                      : "Mostra os sinais mais relevantes do mercado para guiar o que abrir primeiro."}
-                  </p>
-                </div>
-
-                <div className="mt-8 space-y-5">
-                  <div className="inline-flex rounded-full bg-muted p-1">
-                    {[
-                      { label: "Mercado", enabled: true },
-                      { label: "Setor", enabled: hasSectorSelected, tooltip: "Selecione um setor para ativar." },
-                      { label: "Minha watchlist", enabled: hasWatchlist, tooltip: "Adicione empresas a watchlist para ativar." },
-                    ]
-                      .filter((option) => option.label !== "Minha watchlist" || hasWatchlist)
-                      .map((option) => (
-                        <button
-                          key={option.label}
-                          onClick={() => option.enabled && setSummaryScope(option.label as SummaryScope)}
-                          title={!option.enabled ? option.tooltip : undefined}
-                          className={`rounded-full px-4 py-2 text-[12px] font-medium transition ${
-                            summaryScope === option.label
-                              ? "bg-success-surface text-brand shadow-[0_8px_18px_rgba(15,23,40,0.06)] dark:shadow-none"
-                              : option.enabled
-                                ? "text-muted-foreground hover:text-foreground"
-                                : "cursor-not-allowed text-muted-foreground"
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                  </div>
-
-                  <div className="rounded-[24px] border border-border bg-card p-5">
-                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Como ler este bloco</p>
-                    <p className="mt-3 text-[14px] leading-6 text-muted-foreground">
-                      Primeiro abra a leitura principal. Depois use a lente para expandir por setor ou por empresas relacionadas.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </aside>}
           </div>
 
           {priorityHighlights.length > 0 && (

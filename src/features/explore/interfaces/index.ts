@@ -63,6 +63,8 @@ export interface MoverRow {
   logoUrl?: string | null;
   /** Últimos ~30 pontos de PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
   sparkline?: number[] | null;
+  /** Setor B3 primeiro nível. Null quando ticker não está em company_tickers. */
+  sector?: string | null;
 }
 
 export interface MovementInsight {
@@ -116,6 +118,8 @@ export interface HighlightItem {
   filterPreset: HighlightPreset;
   /** Sparkline PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
   sparkline?: number[] | null;
+  /** Setor B3 primeiro nível — alimenta o filtro por setor da aba Movimentos. */
+  sector?: string | null;
 }
 
 export interface CompanyFinancials {

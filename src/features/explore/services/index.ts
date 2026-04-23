@@ -60,6 +60,8 @@ export interface ExploreMovementItemDto {
   changePct:    string | null;
   /** Últimos ~30 pontos de PRICE_CLOSE em ordem cronológica ASC. Null quando não há histórico. */
   sparkline?:   number[] | null;
+  /** Setor B3 primeiro nível — usado pelo filtro "Filtrar por setor" da aba Movimentos. */
+  sector?:      string | null;
 }
 
 export interface ExploreMovementGroupDto {
@@ -193,6 +195,8 @@ export interface ExploreCurationItemDto {
   catalogState?:       string | null;
   /** Últimos ~30 pontos de PRICE_CLOSE. Null quando não há histórico. */
   sparkline?:          number[] | null;
+  /** Setor B3 primeiro nível — fallback quando sectorLabel curado vem null. */
+  sector?:             string | null;
 }
 
 // ─── Market extras DTOs (Fase 2 backend) ────────────────────────────────────
@@ -517,6 +521,7 @@ export function mapMovementItemToMoverRow(item: ExploreMovementItemDto): MoverRo
     type:      'altas',
     logoUrl:   item.logoUrl ?? null,
     sparkline: Array.isArray(item.sparkline) ? item.sparkline : null,
+    sector:    typeof item.sector === 'string' && item.sector.trim() ? item.sector : null,
   };
 }
 
@@ -640,6 +645,9 @@ export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): Highlig
       scope:     'mercado',
     },
     sparkline: Array.isArray(dto.sparkline) ? dto.sparkline : null,
+    sector:    typeof dto.sector === 'string' && dto.sector.trim()
+      ? dto.sector
+      : (dto.sectorLabel ?? null),
   };
 }
 

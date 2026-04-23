@@ -24,6 +24,7 @@ import { ExploreComparisonsGrid } from "./market/ExploreComparisonsGrid";
 import { ExploreExDividendsPanel } from "./market/ExploreExDividendsPanel";
 import { ExploreSectorAlphaPanel } from "./market/ExploreSectorAlphaPanel";
 import { ExploreAllMoversList } from "./ExploreAllMoversList";
+import { ExploreSectorFilter, type SectorFilterItem } from "./ExploreSectorFilter";
 
 function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
   if (item.imageUrl) return { type: "photo", src: item.imageUrl };
@@ -113,6 +114,13 @@ export function MarketContextPage() {
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsFetched, setNewsFetched] = useState(false);
 
+  /**
+   * Filtro por setor aplicado à aba Movimentos.
+   * `null` = desligado (default); string = setor canônico B3.
+   * State local porque é UI puro: não persiste e não vai pro backend.
+   */
+  const [activeSector, setActiveSector] = useState<string | null>(null);
+
   // Lazy-load: busca só quando a aba é aberta pela primeira vez
   useEffect(() => {
     if (activeSection !== "noticias" || newsFetched) return;
@@ -160,6 +168,57 @@ export function MarketContextPage() {
     setTimeRange,
     marketExtras,
   } = useExplore();
+
+  /**
+   * Setores presentes nos movers do dia, com contagem. Derivado 1x por
+   * mudança de movers. Universo = dedupado por ticker (um ticker em múltiplos
+   * grupos conta uma vez só).
+   */
+  const sectorsForFilter = useMemo<SectorFilterItem[]>(() => {
+    if (!Array.isArray(movers)) return [];
+    const seenTickers = new Set<string>();
+    const counts = new Map<string, number>();
+    for (const m of movers) {
+      if (!m.ticker || !m.sector) continue;
+      const up = m.ticker.toUpperCase();
+      if (seenTickers.has(up)) continue;
+      seenTickers.add(up);
+      counts.set(m.sector, (counts.get(m.sector) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([sector, count]) => ({ sector, count }));
+  }, [movers]);
+
+  /** Total de tickers únicos (base do chip "Todos"). */
+  const totalMoversCount = useMemo(() => {
+    if (!Array.isArray(movers)) return 0;
+    return new Set(movers.map((m) => m.ticker.toUpperCase())).size;
+  }, [movers]);
+
+  /**
+   * Aplica filtro por setor aos destaques da curadoria.
+   * Item sem sector conhecido NÃO é mostrado quando filtro ativo
+   * (evita exibir dado incompleto como se pertencesse ao setor).
+   */
+  const filteredHighlights = useMemo(() => {
+    if (!activeSector) return sortedHighlights;
+    return sortedHighlights.filter((h) => h.sector === activeSector);
+  }, [sortedHighlights, activeSector]);
+
+  /** Aplica filtro por setor aos movers (Altas/Baixas/Negociadas + Ver todas). */
+  const filteredMovers = useMemo(() => {
+    if (!activeSector) return movers;
+    return movers.filter((m) => m.sector === activeSector);
+  }, [movers, activeSector]);
+
+  /**
+   * Quando o usuário sai da aba Movimentos, faz sentido limpar o filtro
+   * pra evitar estado "invisível" que confunde ao voltar.
+   */
+  useEffect(() => {
+    if (activeSection !== "movimentos" && activeSector !== null) {
+      setActiveSector(null);
+    }
+  }, [activeSection, activeSector]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -270,12 +329,24 @@ export function MarketContextPage() {
                   </p>
                 </div>
 
+                {/*
+                 * Filtro por setor — substitui a antiga ilha "Lente da curadoria"
+                 * (decorativa). Derivado dos movers do dia; aplica cascata em
+                 * highlights + movers + Ver todas.
+                 */}
+                <ExploreSectorFilter
+                  sectors={sectorsForFilter}
+                  activeSector={activeSector}
+                  onSelect={setActiveSector}
+                  totalCount={totalMoversCount}
+                />
+
                 <ExploreHighlightsSection
                   summaryScope={summaryScope}
                   summaryState={summaryState}
                   hasSectorSelected={hasSectorSelected}
                   hasWatchlist={hasWatchlist}
-                  sortedHighlights={sortedHighlights}
+                  sortedHighlights={filteredHighlights}
                   highlights={highlights}
                   showAllHighlights={showAllHighlights}
                   getCompanyLogo={getCompanyLogo}
@@ -289,7 +360,7 @@ export function MarketContextPage() {
                 <div className="pt-2">
                   <ExploreMovementsPanel
                     selectedTab={selectedTab}
-                    movers={movers}
+                    movers={filteredMovers}
                     movementInsights={movementInsights}
                     showAllMovements={showAllMovements}
                     movementSummary={movementSummary}
@@ -326,7 +397,7 @@ export function MarketContextPage() {
                  * quer cavar depois de ler a curadoria. Nunca compete com os
                  * destaques acima. Esconde a si quando não há movers.
                  */}
-                <ExploreAllMoversList movers={movers} />
+                <ExploreAllMoversList movers={filteredMovers} />
               </section>
               )}
 
