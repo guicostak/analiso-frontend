@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Dot, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { MoverRow, MovementInsight, MoverType } from "../interfaces";
 import { MiniSparkline } from "@/src/components/shared/MiniSparkline";
 import { InfoTooltip } from "@/src/components/shared/InfoTooltip";
 import { SectionCategoryTag } from "./market/SectionCategoryTag";
+
+/** Tamanho da página: quantos movers são mostrados ao abrir a aba. */
+const PAGE_SIZE = 10;
 
 /**
  * Copy do tooltip "Como ler esta seção" — substitui as 3 ilhas instrutivas
@@ -50,11 +54,10 @@ interface ExploreMovementsPanelProps {
   selectedTab: MoverType;
   movers: MoverRow[];
   movementInsights: Record<string, MovementInsight>;
-  showAllMovements: boolean;
+  /** Layout compacto (usado em mocks/landing) — cap fixo em 4 movers. */
   compact?: boolean;
   getCompanyLogo: (ticker: string) => string | undefined;
   setSelectedTab: (tab: MoverType) => void;
-  setShowAllMovements: (fn: ((prev: boolean) => boolean) | boolean) => void;
 }
 
 const tabLabelMap: Record<MoverType, string> = {
@@ -148,16 +151,37 @@ export function ExploreMovementsPanel({
   selectedTab,
   movers,
   movementInsights,
-  showAllMovements,
   compact = false,
   getCompanyLogo,
   setSelectedTab,
-  setShowAllMovements,
 }: ExploreMovementsPanelProps) {
+  /**
+   * Paginação local com "Carregar mais".
+   *
+   * Default: PAGE_SIZE (10) movers visíveis. Cada clique em "Carregar mais"
+   * soma mais PAGE_SIZE. Reset automático ao trocar de aba (altas/baixas/
+   * mais negociadas) — usuário começa cada aba no estado compacto.
+   *
+   * Props legadas showAllMovements / setShowAllMovements ficaram órfãs
+   * após essa migração; foram removidas da signature. Parent component
+   * (MarketContextPage) precisa parar de passá-las.
+   */
+  const [visibleCount, setVisibleCount] = useState<number>(compact ? 4 : PAGE_SIZE);
+
+  useEffect(() => {
+    // Reseta paginação ao trocar de aba pra não mostrar estado residual.
+    setVisibleCount(compact ? 4 : PAGE_SIZE);
+  }, [selectedTab, compact]);
+
   const currentMovers = movers.filter((row) => row.type === selectedTab);
   const featuredRow = currentMovers[0];
   const mediumRows = currentMovers.slice(1, 3);
-  const compactRows = currentMovers.slice(3, showAllMovements ? 6 : compact ? 4 : 5);
+  // Compacts: do 3º em diante até atingir visibleCount total. visibleCount
+  // inclui o featured+mediums, então compactRows vai de 3 até visibleCount.
+  const compactRows = currentMovers.slice(3, visibleCount);
+  const totalMovers = currentMovers.length;
+  const hiddenCount = Math.max(0, totalMovers - visibleCount);
+  const canLoadMore = hiddenCount > 0;
 
   return (
     <section className="space-y-5">
@@ -193,7 +217,7 @@ export function ExploreMovementsPanel({
             key={tab.value}
             onClick={() => {
               setSelectedTab(tab.value as MoverType);
-              setShowAllMovements(false);
+              // Reset da paginação já é feito pelo useEffect([selectedTab]).
             }}
             className={`rounded-full px-4 py-2.5 text-[12px] font-medium transition ${
               selectedTab === tab.value
@@ -275,14 +299,45 @@ export function ExploreMovementsPanel({
             </div>
           )}
 
-          {currentMovers.length > 5 ? (
-            <button
-              onClick={() => setShowAllMovements((prev) => !prev)}
-              className="inline-flex rounded-full bg-muted px-4 py-2 text-[12px] font-semibold text-foreground transition hover:bg-muted"
-            >
-              {showAllMovements ? "Ver menos movimentos" : `Ver mais ${tabLabelMap[selectedTab].toLowerCase()}`}
-            </button>
-          ) : null}
+          {/*
+            Controles de paginação. Skill 30-component-rubrics: "expandir com
+            cuidado" — mostrar contagem ajuda o usuário a decidir. 3 botões
+            progressivos:
+            - "Carregar mais 10" (+PAGE_SIZE) — default, movimento seguro
+            - "Mostrar todos (N)" — atalho pra quem quer listagem completa
+            - "Mostrar menos" — só quando expandiu além do default
+          */}
+          {!compact && totalMovers > PAGE_SIZE && (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <p className="text-[12px] text-muted-foreground">
+                Mostrando {Math.min(visibleCount, totalMovers)} de {totalMovers}
+              </p>
+              {canLoadMore && (
+                <button
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-semibold text-foreground transition hover:bg-hover"
+                >
+                  Carregar mais {Math.min(PAGE_SIZE, hiddenCount)}
+                </button>
+              )}
+              {canLoadMore && totalMovers > visibleCount + PAGE_SIZE && (
+                <button
+                  onClick={() => setVisibleCount(totalMovers)}
+                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
+                >
+                  Mostrar todos ({totalMovers})
+                </button>
+              )}
+              {visibleCount > PAGE_SIZE && (
+                <button
+                  onClick={() => setVisibleCount(PAGE_SIZE)}
+                  className="inline-flex items-center rounded-full px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
+                >
+                  Mostrar menos
+                </button>
+              )}
+            </div>
+          )}
       </div>
     </section>
   );

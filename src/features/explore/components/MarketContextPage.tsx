@@ -362,10 +362,8 @@ export function MarketContextPage() {
                     selectedTab={selectedTab}
                     movers={filteredMovers}
                     movementInsights={movementInsights}
-                    showAllMovements={showAllMovements}
                     getCompanyLogo={getCompanyLogo}
                     setSelectedTab={setSelectedTab}
-                    setShowAllMovements={setShowAllMovements}
                   />
                 </div>
 
