@@ -23,6 +23,7 @@ import { ExploreGlobalMacroGrid } from "./market/ExploreGlobalMacroGrid";
 import { ExploreComparisonsGrid } from "./market/ExploreComparisonsGrid";
 import { ExploreExDividendsPanel } from "./market/ExploreExDividendsPanel";
 import { ExploreSectorAlphaPanel } from "./market/ExploreSectorAlphaPanel";
+import { ExploreAllMoversList } from "./ExploreAllMoversList";
 
 function cardImage(item: ExploreNewsItem): { type: "photo"; src: string } | { type: "logo"; src: string } | null {
   if (item.imageUrl) return { type: "photo", src: item.imageUrl };
@@ -318,6 +319,14 @@ export function MarketContextPage() {
                     <ExploreExDividendsPanel bundle={marketExtras.exDividends} />
                   </div>
                 )}
+
+                {/*
+                 * Disclosure: "Ver todas as movimentações do dia".
+                 * Fica POR ÚLTIMO intencionalmente — é secondary, pra quem
+                 * quer cavar depois de ler a curadoria. Nunca compete com os
+                 * destaques acima. Esconde a si quando não há movers.
+                 */}
+                <ExploreAllMoversList movers={movers} />
               </section>
               )}
 
