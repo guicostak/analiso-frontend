@@ -26,6 +26,9 @@ export interface VerifyCodeRequest {
 
 export interface EmailAuthResponse {
   accessToken: string;
+  refreshToken: string;
+  /** Access token lifetime in seconds. Used by the client to schedule refresh. */
+  expiresIn: number;
   tokenType: string;
   isNewUser: boolean;
   user: {
@@ -45,6 +48,8 @@ export interface EmailAuthUser {
   name: string;
   picture: string;
   token: string;
+  refreshToken: string;
+  expiresIn: number;
   isNewUser: boolean;
 }
 

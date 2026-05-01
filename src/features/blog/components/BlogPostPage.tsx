@@ -271,7 +271,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
       <BreadcrumbJsonLd post={post} />
 
       <div className="min-h-screen bg-card text-foreground">
-        <LandingNav />
+        <LandingNav forceSolid />
 
         {/* Breadcrumb */}
         <nav

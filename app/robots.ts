@@ -32,6 +32,18 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: DISALLOW,
       },
+      {
+        userAgent: "Mediapartners-Google",
+        allow: "/",
+      },
+      {
+        userAgent: "AdsBot-Google",
+        allow: "/",
+      },
+      {
+        userAgent: "AdsBot-Google-Mobile",
+        allow: "/",
+      },
       ...AI_BOTS.map((userAgent) => ({
         userAgent,
         allow: "/",

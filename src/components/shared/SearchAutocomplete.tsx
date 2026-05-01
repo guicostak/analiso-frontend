@@ -11,6 +11,7 @@ export interface SuggestResult {
   companyName: string;
   exchange:    string;
   type:        string;
+  logoUrl?:    string | null;
 }
 
 interface Props {
@@ -115,26 +116,46 @@ export function SearchAutocomplete({ query, onSelect, onClose }: Props) {
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [onClose]);
 
-  // Navegação por teclado
+  // Navegação por teclado.
+  // Importante: ouvimos em FASE DE CAPTURA no document para rodar antes do
+  // onKeyDown do input pai (que pode navegar para uma URL de busca). Assim,
+  // quando há exatamente 1 resultado e o usuário pressiona Enter, conseguimos
+  // selecionar esse resultado E bloquear o handler do pai via stopPropagation.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!results.length) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
+        e.stopPropagation();
         setActiveIndex((i) => Math.min(i + 1, results.length - 1));
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
+        e.stopPropagation();
         setActiveIndex((i) => Math.max(i - 1, -1));
-      } else if (e.key === "Enter" && activeIndex >= 0) {
-        e.preventDefault();
-        onSelect(results[activeIndex]);
+      } else if (e.key === "Enter") {
+        // 1) Item destacado via setas → seleciona ele
+        if (activeIndex >= 0) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onSelect(results[activeIndex]);
+          return;
+        }
+        // 2) Apenas 1 resultado na lista → seleciona automaticamente
+        if (results.length === 1) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onSelect(results[0]);
+          return;
+        }
+        // Caso contrário, deixa o handler do input pai decidir.
       } else if (e.key === "Escape") {
         onClose();
       }
     }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    // capture=true → roda antes dos listeners do React no root container
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [results, activeIndex, onSelect, onClose]);
 
   if (!loading && results.length === 0) return null;
@@ -168,9 +189,17 @@ export function SearchAutocomplete({ query, onSelect, onClose }: Props) {
           }`}
         >
           {(() => {
-            const logo = getCompanyLogo(item.ticker);
+            const logo = item.logoUrl ?? getCompanyLogo(item.ticker);
             return logo ? (
-              <img src={logo} alt="" className="h-6 w-6 shrink-0 rounded-[8px] border border-border bg-muted object-cover" />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logo}
+                alt=""
+                className="h-6 w-6 shrink-0 rounded-[8px] border border-border bg-muted object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
             ) : (
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[8px] border border-border bg-muted text-[10px] font-medium text-muted-foreground">
                 {item.ticker.charAt(0)}

@@ -85,7 +85,7 @@ export function BlogListPage() {
 
   return (
     <div className="min-h-screen bg-card text-foreground">
-      <LandingNav />
+      <LandingNav forceSolid />
 
       {/* Hero */}
       <section className="mx-auto max-w-[1430px] px-8 pb-12 pt-16 max-md:px-4 max-md:pt-10">

@@ -143,7 +143,7 @@ export default function ComoFuncionaPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={breadcrumbJsonLd} />
-      <LandingNav />
+      <LandingNav forceSolid />
 
       {/* Hero */}
       <section className="px-6 pb-16 pt-20 md:px-10 md:pt-24 lg:px-8">

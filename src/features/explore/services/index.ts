@@ -25,6 +25,7 @@ import logoVale from "@/src/assets/logos/vale.png";
 import logoWeg from "@/src/assets/logos/weg.jpeg";
 
 import { apiFetch } from "@/src/lib/api";
+import { cacheable } from "@/src/lib/request-cache";
 
 import type {
   IndexCard,
@@ -58,6 +59,10 @@ export interface ExploreMovementItemDto {
   ctaLabel:     string;
   price:        string | null;
   changePct:    string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE em ordem cronológica ASC. Null quando não há histórico. */
+  sparkline?:   number[] | null;
+  /** Setor B3 primeiro nível — usado pelo filtro "Filtrar por setor" da aba Movimentos. */
+  sector?:      string | null;
 }
 
 export interface ExploreMovementGroupDto {
@@ -94,13 +99,15 @@ export interface ExploreMovementInsightsDto {
 
 // Index cards
 export interface ExploreIndexCardDto {
-  indexTicker: string;
-  indexLabel:  string;
-  lastPrice:   string;
-  changePct:   string;
-  changeAbs:   string;
-  trend:       string;
-  sparkline:   number[];
+  indexTicker:     string;
+  indexLabel:      string;
+  lastPrice:       string;
+  changePct:       string;
+  changeAbs:       string;
+  trend:           string;
+  sparkline:       number[];
+  /** Datas ISO yyyy-MM-dd paralelas a `sparkline` quando a série tem datas reais. */
+  sparklineDates?: string[] | null;
 }
 
 // Market context
@@ -116,6 +123,8 @@ export interface ExploreMarketContextDetailDto {
   subtitle:            string;
   value:               string;
   statusLabel:         string;
+  /** Texto interpretativo adicional (V29 backend). Opcional p/ compat. */
+  interpretation?:     string | null;
   description:         string;
   metaLine:            string;
   ctaLabel:            string;
@@ -185,6 +194,208 @@ export interface ExploreCurationItemDto {
   periodLabel?:        string | null;
   sourceRecencyDays?:  number | null;
   catalogState?:       string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE. Null quando não há histórico. */
+  sparkline?:          number[] | null;
+  /** Setor B3 primeiro nível — fallback quando sectorLabel curado vem null. */
+  sector?:             string | null;
+}
+
+// ─── Market extras DTOs (Fase 2 backend) ────────────────────────────────────
+
+export interface BreadthDto {
+  up:        number;
+  down:      number;
+  unchanged: number;
+  total:     number;
+  ratioUp:   number;
+}
+
+export interface VolatilityMiniDto {
+  score:       number | null;
+  statusKey:   string | null;
+  statusLabel: string | null;
+  metaLine:    string | null;
+  indexLabel:  string | null;
+}
+
+export interface FearGreedDto {
+  score:     number;
+  label:     string;
+  source:    string;
+  sourceUrl: string | null;
+  asOfDate:  string | null;
+}
+
+export interface VixMiniDto {
+  value:     string | null;
+  changePct: string | null;
+  trend:     string | null;
+}
+
+export interface DxyMiniDto {
+  value:     string | null;
+  changePct: string | null;
+  trend:     string | null;
+}
+
+export interface DiCurvePointDto {
+  tenorDays:      number;
+  tenorLabel:     string;
+  yieldPct:       number;
+  yieldFormatted: string;
+  changeBps:      number | null;
+  changeLabel:    string | null;
+  trend:          string;
+}
+
+export interface DiCurveDto {
+  curveType: string;
+  label:     string;
+  asOfDate:  string | null;
+  points:    DiCurvePointDto[];
+  source:    string | null;
+  sourceUrl: string | null;
+  summary:   string | null;
+}
+
+export interface ExploreRiskPanelDto {
+  volatility:  VolatilityMiniDto | null;
+  breadth:     BreadthDto        | null;
+  fearGreed:   FearGreedDto      | null;
+  vix:         VixMiniDto        | null;
+  dxy:         DxyMiniDto        | null;
+  /**
+   * Curva DI PRE (ETTJ Anbima). Null quando pipeline ainda não rodou
+   * — frontend renderiza estado "em breve".
+   */
+  diCurve?:    DiCurveDto        | null;
+}
+
+export interface MarketRibbonDto {
+  tickers:       ExploreIndexCardDto[];
+  marketStatus:  string | null;    // 'OPEN' | 'CLOSED' | 'PRE_MARKET'
+  lastUpdatedAt: string | null;
+}
+
+export interface MarketToneDto {
+  tone:       string;       // 'BULLISH' | 'NEUTRAL' | 'BEARISH'
+  label:      string;
+  highlights: string[];
+}
+
+export interface MacroIndicatorDto {
+  indicatorKey:    string;
+  label:           string;
+  value:           string | null;
+  changeLabel:     string | null;
+  trend:           string;
+  asOfDate:        string | null;
+  sparkline:       number[];
+  /** Datas ISO paralelas a `sparkline`. Pode vir vazio. */
+  sparklineDates?: string[] | null;
+  subtitle:        string | null;
+}
+
+export interface EconomicCycleDto {
+  phaseKey:        string;
+  phaseLabel:      string;
+  growthStatus:    string;
+  inflationStatus: string;
+  confidence:      string;
+  description:     string | null;
+  metaLine:        string | null;
+}
+
+export interface MacroIndicatorsBundleDto {
+  selic:         MacroIndicatorDto | null;
+  ipca:          MacroIndicatorDto | null;
+  ibcBr:         MacroIndicatorDto | null;
+  economicCycle: EconomicCycleDto  | null;
+}
+
+export interface SectorHeatmapItemDto {
+  sector:         string;
+  avgChangePct:   number | null;
+  companiesCount: number | null;
+  topTickers:     string[];
+}
+
+export interface SectorHeatmapDto {
+  sectors:   SectorHeatmapItemDto[];
+  asOfLabel: string | null;
+}
+
+export interface ComparisonDto {
+  key:             string;
+  label:           string;
+  value:           string | null;
+  changePct:       string | null;
+  trend:           string;
+  sparkline:       number[] | null;
+  sparklineDates?: string[] | null;
+  /** Fórmula/métrica usada — exibida próximo ao valor (ex.: "IBOV ÷ USDBRL"). */
+  formula?:        string | null;
+  /** Prefixo de unidade antes do valor ("US$", "R$"). */
+  valuePrefix?:    string | null;
+  /** Sufixo de unidade depois do valor ("pts", "×", "/oz"). */
+  valueSuffix?:    string | null;
+  description:     string | null;
+}
+
+export interface GlobalMacroBundleDto {
+  brent:   ExploreIndexCardDto | null;
+  wti:     ExploreIndexCardDto | null;
+  gold:    ExploreIndexCardDto | null;
+  ironOre: ExploreIndexCardDto | null;
+  bitcoin: ExploreIndexCardDto | null;
+}
+
+// ─── Aba Movimentos — novas ilhas (Sprint 1) ────────────────────────────────
+
+export interface ExDividendItemDto {
+  ticker:        string;
+  companyName:   string | null;
+  sector:        string | null;
+  exDate:        string;          // ISO yyyy-MM-dd (serializado pelo Jackson)
+  daysUntilEx:   number;
+  dpsTtm:        number | null;
+  dividendYield: number | null;
+  logoUrl:       string | null;
+}
+
+export interface ExDividendBundleDto {
+  today:    ExDividendItemDto[];
+  upcoming: ExDividendItemDto[];
+  asOfDate: string | null;
+}
+
+export interface SectorAlphaItemDto {
+  ticker:         string;
+  companyName:    string | null;
+  sector:         string | null;
+  stockChangePct: number;
+  sectorAvgPct:   number;
+  alphaPct:       number;
+  direction:      "positive" | "negative";
+  logoUrl:        string | null;
+}
+
+export interface SectorAlphaBundleDto {
+  positive: SectorAlphaItemDto[];
+  negative: SectorAlphaItemDto[];
+  asOfDate: string | null;
+}
+
+export interface ExploreMarketExtrasDto {
+  ribbon:        MarketRibbonDto          | null;
+  marketTone:    MarketToneDto            | null;
+  riskPanel:     ExploreRiskPanelDto      | null;
+  sectorHeatmap: SectorHeatmapDto         | null;
+  macroBr:       MacroIndicatorsBundleDto | null;
+  macroGlobal:   GlobalMacroBundleDto     | null;
+  comparisons:   ComparisonDto[]          | null;
+  exDividends:   ExDividendBundleDto      | null;
+  sectorAlpha:   SectorAlphaBundleDto     | null;
 }
 
 // Resposta completa
@@ -198,6 +409,16 @@ export interface ExploreResponse {
   movementInsights: ExploreMovementInsightsDto  | null;
   catalogItems:     ExploreCatalogItemDto[]     | null;
   heroCuration:     { items: ExploreCurationItemDto[] } | null;
+  /** Novos blocos da aba Contexto da tela /mercado (Fase 2). Opcional. */
+  marketExtras?:    ExploreMarketExtrasDto      | null;
+}
+
+/** Chaves de range aceitas pelo backend (mirrors ExploreController). */
+export type ExploreTimeRange = '1D' | '1W' | '1M' | 'YTD' | '1Y';
+
+export interface GetExploreParams {
+  date?:  string;            // ISO yyyy-MM-dd
+  range?: ExploreTimeRange;  // default '1D' no backend
 }
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────
@@ -300,6 +521,8 @@ export function mapMovementItemToMoverRow(item: ExploreMovementItemDto): MoverRo
     source:    'B3',
     type:      'altas',
     logoUrl:   item.logoUrl ?? null,
+    sparkline: Array.isArray(item.sparkline) ? item.sparkline : null,
+    sector:    typeof item.sector === 'string' && item.sector.trim() ? item.sector : null,
   };
 }
 
@@ -328,6 +551,7 @@ export function mapIndexCardDto(dto: ExploreIndexCardDto): IndexCard {
     changePct: dto.changePct,
     trend:     (dto.trend?.toLowerCase() as IndexCardTrend) ?? 'neutral',
     sparkline: dto.sparkline ?? [],
+    sparklineDates: Array.isArray(dto.sparklineDates) ? dto.sparklineDates : undefined,
   };
 }
 
@@ -421,15 +645,32 @@ export function mapCurationItemToHighlight(dto: ExploreCurationItemDto): Highlig
       timeframe: '30d',
       scope:     'mercado',
     },
+    sparkline: Array.isArray(dto.sparkline) ? dto.sparkline : null,
+    sector:    typeof dto.sector === 'string' && dto.sector.trim()
+      ? dto.sector
+      : (dto.sectorLabel ?? null),
   };
 }
 
 // ─── Chamadas HTTP ────────────────────────────────────────────────────────────
 
-export async function getExplore(_token?: string | null): Promise<ExploreResponse> {
+export async function getExplore(
+  _token?: string | null,
+  params?: GetExploreParams,
+): Promise<ExploreResponse> {
   // /api/explore é público (permitAll no backend) — não envia token para evitar
   // rejeição por JWT expirado/inválido interferindo na resposta.
-  return apiFetch<ExploreResponse>('/api/explore', {});
+  const qs = new URLSearchParams();
+  if (params?.date)  qs.set('date',  params.date);
+  if (params?.range) qs.set('range', params.range);
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  // Cache TTL curto (90s) deduplica as 5 ilhas do dashboard que chamam
+  // este mesmo endpoint (Macro/Resumo/Ciclo/Panorama/MacroGlobal) em
+  // 1 única request quando carregam juntas.
+  return cacheable(
+    `explore:${params?.date ?? ''}:${params?.range ?? '1D'}`,
+    () => apiFetch<ExploreResponse>(`/api/explore${suffix}`, {}),
+  );
 }
 
 export interface ExploreNewsItem {
@@ -444,7 +685,10 @@ export interface ExploreNewsItem {
 }
 
 export async function getMarketNews(limit = 20): Promise<ExploreNewsItem[]> {
-  return apiFetch<ExploreNewsItem[]>(`/api/explore/news?limit=${limit}`, {});
+  return cacheable(
+    `market-news:${limit}`,
+    () => apiFetch<ExploreNewsItem[]>(`/api/explore/news?limit=${limit}`, {}),
+  );
 }
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────

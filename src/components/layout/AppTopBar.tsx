@@ -5,7 +5,6 @@ import { NotificationsBell, NotificationsDropdown } from "@/src/features/notific
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EditModeToggle } from "@/src/features/dashboard-canvas/components/EditModeToggle";
 import { useAnimatedPlaceholder } from "@/src/hooks/useAnimatedPlaceholder";
 import { SearchAutocomplete, type SuggestResult } from "@/src/components/shared/SearchAutocomplete";
 import { BuscaFiltersPanel } from "@/src/features/busca/components/BuscaFiltersPanel";
@@ -68,8 +67,6 @@ export function AppTopBar(_props: AppTopBarProps) {
   const offsetClass = isCollapsed ? "left-0 xl:left-[64px]" : "left-0 xl:left-[240px]";
   const router = useRouter();
   const pathname = usePathname();
-  const showEditModeToggle = pathname === "/painel";
-
   const [query,           setQuery]       = useState("");
   const [showDropdown,    setDropdown]    = useState(false);
   const [filterOpen,      setFilterOpen]  = useState(false);
@@ -106,13 +103,20 @@ export function AppTopBar(_props: AppTopBarProps) {
     router.push(buildSearchUrl(q, searchFilters));
   }
 
+  // Selecionar uma empresa do autocomplete (clique ou Enter com 1 resultado)
+  // → leva direto para a análise daquele ticker, não para a tela de busca.
   function handleSelect(item: SuggestResult) {
+    setDropdown(false);
+    setFilterOpen(false);
     setQuery(item.ticker);
-    navigate(item.ticker);
+    router.push(`/analysis/${item.ticker.toUpperCase()}`);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && query.trim()) {
+      // Caso de 1 único resultado é tratado pelo SearchAutocomplete em fase de
+      // captura (ele chama handleSelect e bloqueia este handler). Aqui tratamos
+      // os demais casos: nenhum/múltiplos resultados → vai para a busca avançada.
       navigate(query.trim());
     }
   }
@@ -234,10 +238,6 @@ export function AppTopBar(_props: AppTopBarProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-
-          {showEditModeToggle && (
-            <EditModeToggle className="mr-2 hidden h-9 md:inline-flex" />
-          )}
 
           <div ref={notifRef} className="relative">
             <NotificationsBell

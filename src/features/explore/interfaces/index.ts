@@ -47,6 +47,8 @@ export interface IndexCard {
   changePct: string;
   trend: IndexCardTrend;
   sparkline: number[];
+  /** Datas ISO yyyy-MM-dd paralelas à sparkline (vem do backend quando disponível). */
+  sparklineDates?: string[];
 }
 
 export interface MoverRow {
@@ -59,6 +61,10 @@ export interface MoverRow {
   source: string;
   type: MoverType;
   logoUrl?: string | null;
+  /** Últimos ~30 pontos de PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
+  sparkline?: number[] | null;
+  /** Setor B3 primeiro nível. Null quando ticker não está em company_tickers. */
+  sector?: string | null;
 }
 
 export interface MovementInsight {
@@ -110,6 +116,10 @@ export interface HighlightItem {
     url?: string;
   };
   filterPreset: HighlightPreset;
+  /** Sparkline PRICE_CLOSE (ordem ASC). Null quando não há histórico. */
+  sparkline?: number[] | null;
+  /** Setor B3 primeiro nível — alimenta o filtro por setor da aba Movimentos. */
+  sector?: string | null;
 }
 
 export interface CompanyFinancials {

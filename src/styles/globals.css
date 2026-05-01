@@ -887,6 +887,19 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Tabs internas da AtividadeRecenteIsland — crossfade curto, sem stagger.
+   Em prefers-reduced-motion vira fade puro. */
+@keyframes atividade-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes atividade-fade-in {
+    from { opacity: 0; transform: none; }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
 @keyframes indeterminate {
   0% {
     transform: translateX(-100%);
@@ -1305,6 +1318,95 @@ html {
     transform: none;
   }
   .analysis-card:hover {
+    transform: none;
+  }
+}
+
+/* ── Market ticker (tela /mercado) ───────────────────────────────────────── */
+/* Ticker tape estilo Wall Street: o conteúdo é renderizado em dois sets
+   idênticos no React. Quando o primeiro set chega ao fim (-50%), o segundo
+   está exatamente no início visível — loop seamless. */
+@keyframes mercado-ticker-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.mercado-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mercado-ticker-track {
+    animation: none !important;
+  }
+}
+
+/* ─── /mercado: sistema de elevação das ilhas ─────────────────────────────
+   Padroniza o box-shadow repetido em praticamente todas as ilhas da tela.
+   Três níveis + automático dark-mode none. Refactoring UI: usar escala
+   constrangida em vez de valores arbitrários por card. */
+.mercado-elev-sm {
+  box-shadow: 0 10px 24px rgba(15, 23, 40, 0.03);
+}
+.mercado-elev-md {
+  box-shadow: 0 14px 32px rgba(15, 23, 40, 0.05);
+}
+.mercado-elev-lg {
+  box-shadow: 0 24px 50px rgba(15, 23, 40, 0.07);
+}
+.dark .mercado-elev-sm,
+.dark .mercado-elev-md,
+.dark .mercado-elev-lg {
+  box-shadow: none;
+}
+
+/* Ilhas interativas — lift + elev quando hover (pointer:fine). */
+.mercado-island-hover {
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mercado-island-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(15, 23, 40, 0.07);
+  }
+  .dark .mercado-island-hover:hover {
+    box-shadow: none;
+  }
+}
+
+/* ─── /mercado: tab indicator deslizante ──────────────────────────────────
+   Complementa a barra embaixo da tab ativa. Quando trocar tab, o indicator
+   anima com easing expo-out em vez de aparecer instantâneo. */
+@keyframes mercado-tab-indicator-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+.mercado-tab-indicator {
+  transform-origin: center;
+  animation: mercado-tab-indicator-in 320ms var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mercado-tab-indicator {
+    animation: none !important;
+  }
+}
+
+/* ─── /mercado: entrada das seções ────────────────────────────────────────
+   Fade + rise suave ao trocar de tab. Complementa o estado "carregando"
+   sem substituir skeletons. */
+.mercado-section-enter {
+  animation: analysis-fade-rise 320ms var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mercado-section-enter {
+    animation: none !important;
+    opacity: 1;
     transform: none;
   }
 }

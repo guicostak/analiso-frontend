@@ -11,6 +11,7 @@
  */
 
 import { apiFetch } from "@/src/lib/api";
+import { cacheable } from "@/src/lib/request-cache";
 import type {
   PriorityItem,
   FeedItem,
@@ -20,6 +21,10 @@ import type {
   Pillar,
   FeedSeverity,
   FeedSource,
+  WatchlistSummary,
+  SectorCatalogItem,
+  WatchlistPerformance,
+  WatchlistPerformanceRange,
 } from "../interfaces";
 
 // ─── DTOs do backend ──────────────────────────────────────────────────────────
@@ -226,6 +231,50 @@ export async function addWatchlistItemsBatch(
 
 export async function removeWatchlistItem(ticker: string, token?: string | null): Promise<void> {
   return apiFetch<void>(`/api/me/watchlist/${ticker}`, { method: "DELETE" }, token);
+}
+
+/**
+ * Aggregated snapshot of the user's watchlist — KPIs médios, alocação por
+ * setor, distribuição de fraquezas por dimensão e payload slim por ticker.
+ *
+ * O backend calcula tudo server-side (endpoint novo `/api/me/watchlist/summary`),
+ * reaproveitando o cache de `companyAnalysisV2` para evitar N+1.
+ */
+export async function getWatchlistSummary(token?: string | null): Promise<WatchlistSummary> {
+  return apiFetch<WatchlistSummary>("/api/me/watchlist/summary", {}, token);
+}
+
+/**
+ * Catálogo completo de setores indexados pela plataforma — para o usuário
+ * usar como referência ao montar a watchlist (saber quais setores existem e
+ * quantas empresas cada um tem).
+ *
+ * Endpoint público: não requer token.
+ */
+export async function getSectorCatalog(): Promise<SectorCatalogItem[]> {
+  return apiFetch<SectorCatalogItem[]>("/api/sectors/catalog");
+}
+
+/**
+ * Performance histórica equal-weight da watchlist do usuário comparada ao
+ * IBOV no intervalo solicitado. Cálculo é feito server-side e cacheado.
+ *
+ * Wrapper em `cacheable` deduplica calls in-flight pra mesma chave (ex:
+ * prefetch do dashboard + ilha PerformanceVsIbov entrando em viewport
+ * disparam apenas 1 request).
+ */
+export async function getWatchlistPerformance(
+  range: WatchlistPerformanceRange = "90d",
+  token?: string | null,
+): Promise<WatchlistPerformance> {
+  return cacheable(
+    `watchlist-performance:${range}`,
+    () => apiFetch<WatchlistPerformance>(
+      `/api/me/watchlist/performance?range=${encodeURIComponent(range)}`,
+      {},
+      token,
+    ),
+  );
 }
 
 // ─── Mapeamentos ──────────────────────────────────────────────────────────────

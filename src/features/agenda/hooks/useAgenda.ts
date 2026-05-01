@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/src/features/auth/AuthContext';
+import { useFavorites } from '@/src/features/favoritas';
 import { normalizeApiError } from '@/src/lib/errors';
 import { getAgenda } from '../services/agenda.service';
 import { mapAgendaFromGroups } from '../mappers/agenda.mapper';
@@ -16,6 +17,8 @@ export interface UseAgendaReturn {
   selectedEvent: AgendaEvent | null;
   setSelectedEvent: (event: AgendaEvent | null) => void;
   uniqueTickers: string[];
+  /** True quando o usuário tem ao menos 1 ticker na watchlist. */
+  hasWatchlist: boolean;
   navigation: AgendaNavigationReturn;
   filters: AgendaFiltersReturn;
 }
@@ -25,7 +28,12 @@ export interface UseAgendaReturn {
  * Orquestra: busca de dados, estado de seleção, filtros e navegação.
  */
 export function useAgenda(): UseAgendaReturn {
-  const { token } = useAuth();
+  // **Importante**: `isLoading` do AuthContext é true enquanto a sessão é
+  // restaurada do localStorage. Disparar `getAgenda` antes disso fazia o
+  // request sair sem token → 401 → o `apiFetch` chamava `redirectToLogin`
+  // (porque `getSession()` ainda estava vazio) e o usuário era expulso
+  // pra tela de login. O guard abaixo evita esse race.
+  const { token, isLoading: authLoading } = useAuth();
 
   const [allEvents, setAllEvents]         = useState<AgendaEvent[]>([]);
   const [loading, setLoading]             = useState(true);
@@ -34,9 +42,27 @@ export function useAgenda(): UseAgendaReturn {
 
   const navigation = useAgendaNavigation();
   const filters    = useAgendaFilters();
+  // A agenda backend retorna `groups: []` em DOIS cenários distintos:
+  //   1. Watchlist vazia (sem tickers pra consultar)
+  //   2. Watchlist cheia, mas sem eventos no período
+  // O DTO não distingue. Pegamos o estado da watchlist daqui pra o empty
+  // state escolher a mensagem correta ("Adicione empresas" vs "Sem
+  // eventos no período"). Antes era inferido errado a partir só do
+  // `hasEvents` — mostrava "adicione empresas" mesmo com watchlist cheia.
+  const favorites = useFavorites();
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
+    // Espera a restauração da sessão. Sem isso, o primeiro render dispara
+    // GET /api/agenda com token=null → 401 → redirectToLogin (race).
+    if (authLoading) return;
+    // ProtectedRoute deveria garantir token válido aqui, mas defensivo:
+    // sem token, não tenta — apenas para o spinner.
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -57,7 +83,7 @@ export function useAgenda(): UseAgendaReturn {
       });
 
     return () => { cancelled = true; };
-  }, [token]);
+  }, [token, authLoading]);
 
   // ─── Filtros ─────────────────────────────────────────────────────────────────
   const filteredEvents = useMemo(() => {
@@ -92,6 +118,7 @@ export function useAgenda(): UseAgendaReturn {
     selectedEvent,
     setSelectedEvent: handleSetSelectedEvent,
     uniqueTickers,
+    hasWatchlist: favorites.tickers.size > 0,
     navigation,
     filters,
   };

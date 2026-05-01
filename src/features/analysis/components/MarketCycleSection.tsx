@@ -1,155 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { MarketCycle, MarketCyclePhase } from '../interfaces';
 import { CYCLE_PHASE_COLORS, ALIGNMENT_CONFIG } from '../constants/colors';
+import { MarketCycleClock } from '@/src/components/shared/MarketCycleClock';
 
-// ─── Phase metadata ──────────────────────────────────────────────────────────
-
-const PHASE_META: Record<MarketCyclePhase, { label: string; hint: string }> = {
-  RECOVERY: {
-    label: 'Recupera\u00e7\u00e3o',
-    hint: 'Crescimento acima da tend\u00eancia e infla\u00e7\u00e3o caindo. Juros em queda estimulam cr\u00e9dito. Setores c\u00edclicos e financeiro lideram.',
-  },
-  OVERHEAT: {
-    label: 'Superaquecimento',
-    hint: 'Crescimento forte com infla\u00e7\u00e3o subindo. BC eleva juros. Commodities e ativos reais se valorizam.',
-  },
-  STAGFLATION: {
-    label: 'Estagfla\u00e7\u00e3o',
-    hint: 'Crescimento fraco e infla\u00e7\u00e3o alta. Cen\u00e1rio mais dif\u00edcil. Setores defensivos oferecem prote\u00e7\u00e3o.',
-  },
-  REFLATION: {
-    label: 'Refla\u00e7\u00e3o',
-    hint: 'Economia fraca, mas infla\u00e7\u00e3o cede. Espa\u00e7o para cortes de juros. Fase de transi\u00e7\u00e3o para recupera\u00e7\u00e3o.',
-  },
-};
-
-const PHASE_ORDER: MarketCyclePhase[] = ['RECOVERY', 'OVERHEAT', 'STAGFLATION', 'REFLATION'];
-
-// ─── Cycle Clock SVG ─────────────────────────────────────────────────────────
-
-function CycleClockSVG({ currentPhase }: { currentPhase: MarketCyclePhase }) {
-  const [hovered, setHovered] = useState<MarketCyclePhase | null>(null);
-
-  const width = 340;
-  const height = 280;
-  const cx = width / 2;
-  const cy = height / 2;
-  const r = 95;
-
-  // Arc angles (SVG: 0°=right, clockwise) + label position (% of container)
-  const quadrants: Record<MarketCyclePhase, {
-    startDeg: number; endDeg: number;
-    lx: number; ly: number;          // SVG label coords
-    tipX: string; tipY: string;      // CSS tooltip position (%)
-    tipAlign: 'left' | 'right';      // tooltip alignment
-  }> = {
-    RECOVERY:    { startDeg: 180, endDeg: 270, lx: cx - 47, ly: cy - 38, tipX: '2%',  tipY: '2%',  tipAlign: 'left' },
-    OVERHEAT:    { startDeg: 270, endDeg: 360, lx: cx + 47, ly: cy - 38, tipX: '52%', tipY: '2%',  tipAlign: 'right' },
-    STAGFLATION: { startDeg: 0,   endDeg: 90,  lx: cx + 47, ly: cy + 45, tipX: '52%', tipY: '55%', tipAlign: 'right' },
-    REFLATION:   { startDeg: 90,  endDeg: 180, lx: cx - 47, ly: cy + 45, tipX: '2%',  tipY: '55%', tipAlign: 'left' },
-  };
-
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-
-  return (
-    <div className="relative w-full max-w-[380px] mx-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={`Rel\u00f3gio do ciclo de mercado - fase atual: ${PHASE_META[currentPhase].label}`}>
-        {/* Quadrant fills + labels */}
-        {PHASE_ORDER.map((phase) => {
-          const isActive = phase === currentPhase;
-          const isHovered = hovered === phase;
-          const color = CYCLE_PHASE_COLORS[phase];
-          const q = quadrants[phase];
-
-          const x1 = cx + r * Math.cos(toRad(q.startDeg));
-          const y1 = cy + r * Math.sin(toRad(q.startDeg));
-          const x2 = cx + r * Math.cos(toRad(q.endDeg));
-          const y2 = cy + r * Math.sin(toRad(q.endDeg));
-
-          return (
-            <g
-              key={phase}
-              className="cursor-pointer"
-              onMouseEnter={() => setHovered(phase)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <path
-                d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`}
-                fill={isActive ? color : isHovered ? color : '#D1D5DB'}
-                opacity={isActive ? 0.45 : isHovered ? 0.25 : 0.12}
-                stroke={isActive ? color : 'transparent'}
-                strokeWidth={isActive ? 1.5 : 0}
-                strokeOpacity={isActive ? 0.4 : 0}
-                className="transition-all duration-300"
-              />
-              {(() => {
-                const label = PHASE_META[phase].label;
-                const fontSize = isActive ? 11.5 : 10;
-                const fill = isActive || isHovered ? color : '#6B7280';
-                const op = isActive ? 1 : isHovered ? 0.9 : 0.6;
-                const fw = isActive || isHovered ? 700 : 600;
-                // Break labels longer than 12 chars
-                const LABEL_BREAKS: Record<string, string[]> = {
-                  'Superaquecimento': ['Super-', 'aquecimento'],
-                };
-                const lines = LABEL_BREAKS[label] ?? [label];
-                const lineHeight = fontSize * 1.3;
-                const startY = q.ly - ((lines.length - 1) * lineHeight) / 2;
-                return (
-                  <text
-                    textAnchor="middle"
-                    style={{ fontSize, fontWeight: fw, letterSpacing: '-0.01em' }}
-                    className="transition-all duration-200 pointer-events-none"
-                    fill={fill}
-                    opacity={op}
-                  >
-                    {lines.map((line, i) => (
-                      <tspan key={i} x={q.lx} y={startY + i * lineHeight}>{line}</tspan>
-                    ))}
-                  </text>
-                );
-              })()}
-            </g>
-          );
-        })}
-
-        {/* Axis lines */}
-        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="#D1D5DB" className="pointer-events-none" strokeWidth="1.25" />
-        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#D1D5DB" className="pointer-events-none" strokeWidth="1.25" />
-
-
-        {/* Outer circle */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#D1D5DB" className="pointer-events-none" strokeWidth="1.75" />
-
-        {/* Axis labels */}
-        <text x={cx} y={18} textAnchor="middle" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: '#6B7280' }}>Crescimento ↑</text>
-        <text x={cx} y={height - 6} textAnchor="middle" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: '#6B7280' }}>Crescimento ↓</text>
-        <text x={width - 8} y={cy + 4} textAnchor="end" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: '#6B7280' }}>Inflação ↑</text>
-        <text x={8} y={cy + 4} textAnchor="start" className="pointer-events-none" style={{ fontSize: 9.5, fontWeight: 600, fill: '#6B7280' }}>Inflação ↓</text>
-      </svg>
-
-      {/* Tooltip card */}
-      {hovered && (() => {
-        const q = quadrants[hovered];
-        const color = CYCLE_PHASE_COLORS[hovered];
-        return (
-          <div
-            className="absolute z-10 w-[46%] rounded-lg border border-border bg-card shadow-lg px-3 py-2.5 pointer-events-none animate-in fade-in duration-150"
-            style={{ left: q.tipX, top: q.tipY }}
-          >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-              <span className="text-[11px] font-bold" style={{ color }}>{PHASE_META[hovered].label}</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground leading-relaxed">{PHASE_META[hovered].hint}</p>
-          </div>
-        );
-      })()}
-    </div>
-  );
-}
 
 // ─── Macro Indicator Cards ───────────────────────────────────────────────────
 
@@ -305,9 +160,11 @@ export function MarketCycleSection({ marketCycle, ticker }: { marketCycle: Marke
 
         {/* Phase badge + Clock layout */}
         <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] items-start gap-4 md:gap-8">
-          {/* Clock SVG */}
+          {/* Clock SVG — usa o componente shared (mesmo da tela /mercado).
+              Single source of truth pro Investment Clock — mudanças visuais
+              propagam pra todas as telas. */}
           <div className="mx-auto md:mx-0">
-            <CycleClockSVG currentPhase={marketCycle.phaseKey} />
+            <MarketCycleClock currentPhase={marketCycle.phaseKey} maxWidth={380} />
           </div>
 
           {/* Phase info */}

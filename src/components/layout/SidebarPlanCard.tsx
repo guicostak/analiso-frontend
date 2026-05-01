@@ -10,10 +10,26 @@ interface SidebarPlanCardProps {
 export function SidebarPlanCard({ href = "/perfil?tab=assinatura" }: SidebarPlanCardProps) {
   const { isActive, activePlan, subscription } = useSubscription();
 
+  // Plano free é vitalício — não tem `renewsAt` válido. Mesmo que o
+  // backend leak data espúria (datas legadas migradas), o front blinda.
+  const planSlug = subscription?.plan ?? "free";
+  const isFree = planSlug === "free";
+
   const planName = activePlan?.name ?? null;
-  const renewLabel = subscription?.renewsAt
+  const renewLabel = !isFree && subscription?.renewsAt
     ? new Date(subscription.renewsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
     : null;
+
+  // Texto secundário do card:
+  //   - Free: nada (sem secondary line — o badge "Free" no canto já comunica
+  //     o status, e "Sem expiração" não agregava valor — era redundante)
+  //   - Paid ativo: "Renovação em DD/MM"
+  //   - Paid cancelado/past_due: "Sem assinatura ativa"
+  const secondaryLabel = isFree
+    ? null
+    : isActive && renewLabel
+      ? `Renovação em ${renewLabel}`
+      : "Sem assinatura ativa";
 
   return (
     <Link href={href} className="mt-auto block">
@@ -21,9 +37,11 @@ export function SidebarPlanCard({ href = "/perfil?tab=assinatura" }: SidebarPlan
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[14px] font-semibold text-foreground">Plano</p>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">
-              {isActive && renewLabel ? `Renovação em ${renewLabel}` : "Sem assinatura ativa"}
-            </p>
+            {secondaryLabel && (
+              <p className="mt-0.5 text-[13px] text-muted-foreground">
+                {secondaryLabel}
+              </p>
+            )}
           </div>
           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[12px] font-semibold ${
             isActive

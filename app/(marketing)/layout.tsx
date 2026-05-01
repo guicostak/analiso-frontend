@@ -1,6 +1,7 @@
 "use client";
 
 import { ForceLightTheme } from "../../src/components/layout/ForceLightTheme";
+import { GuestRoute } from "../../src/components/layout/GuestRoute";
 
 export default function MarketingLayout({
   children,
@@ -8,9 +9,9 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <GuestRoute>
       <ForceLightTheme />
       {children}
-    </>
+    </GuestRoute>
   );
 }

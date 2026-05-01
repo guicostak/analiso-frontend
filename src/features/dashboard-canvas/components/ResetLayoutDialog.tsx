@@ -3,9 +3,11 @@
 /**
  * ResetLayoutDialog
  *
- * Confirmação de "voltar ao painel padrão". Loss Aversion: a ação destrói
- * trabalho prévio do usuário (layout customizado + configuração de cada
- * ilha), então o copy enfatiza a perda e o tom é amber — nunca red gritante.
+ * Confirmação de "voltar ao painel padrão". Loss Aversion explícita:
+ *   - copy enumera o que será perdido (nº de ilhas customizadas)
+ *   - tom amber, nunca red gritante
+ *   - depois de confirmar, quem chama deve tomar um snapshot do layout
+ *     atual e oferecer Undo via toast (ver `DashboardCanvas`)
  */
 
 import { RotateCcw, AlertTriangle } from "lucide-react";
@@ -25,12 +27,15 @@ export interface ResetLayoutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  /** Quantidade de ilhas atualmente no layout — usado pra narrar a perda. */
+  currentCount: number;
 }
 
 export function ResetLayoutDialog({
   open,
   onOpenChange,
   onConfirm,
+  currentCount,
 }: ResetLayoutDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -45,18 +50,23 @@ export function ResetLayoutDialog({
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-muted-foreground">
-            Você vai perder seu layout atual e a configuração de cada ilha.
-            Essa ação não pode ser desfeita.
+            Seu painel atual tem <strong className="text-foreground">{currentCount} ilha{currentCount === 1 ? "" : "s"}</strong>{" "}
+            organizadas do seu jeito. Restaurar volta tudo pro layout default
+            de 6 ilhas — você vai perder a ordem e a configuração de cada ilha.
+            <br />
+            <span className="mt-2 block text-[12px]">
+              Você ainda tem <strong className="text-foreground">5 segundos</strong> pra desfazer depois.
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>Manter meu painel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-amber-600 text-white hover:bg-amber-700 focus-visible:ring-amber-500 dark:bg-amber-700 dark:hover:bg-amber-600"
           >
             <RotateCcw className="mr-2 h-4 w-4" />
-            Sim, restaurar
+            Restaurar mesmo assim
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -121,7 +121,6 @@ export function CompanyExploreMock() {
             getCompanyLogo={getCompanyLogo}
             setSummaryScope={setSummaryScope}
             setSummaryState={setSummaryState}
-            setSelectedSource={setSelectedSource}
             setShowAllHighlights={setShowAllHighlights}
             applyHighlightPreset={(preset) => {
               setActivePreset(preset);

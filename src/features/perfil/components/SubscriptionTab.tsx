@@ -118,8 +118,11 @@ export function SubscriptionTab() {
           </p>
         )}
 
-        {/* Active subscription banner */}
-        {activePlan && subscription?.status === "active" && (() => {
+        {/* Active subscription banner — só aparece pra plano PAGO ativo.
+            Guard explícito de `plan !== "free"` previne render inconsistente
+            caso haja dado legado com status="active" + tier=free no BD
+            (cenário improvável, mas possível por migrations antigas). */}
+        {activePlan && subscription?.status === "active" && subscription?.plan !== "free" && (() => {
           const pricingEntry = activePlan.pricing.find(p => p.billingCycle === subscription.billingCycle);
           const price = pricingEntry?.price ?? 0;
           const displayPrice = subscription.billingCycle === "anual" ? Math.round(price / 12) : price;

@@ -54,6 +54,7 @@ import { AnalysisFlowSection } from "./AnalysisFlowSection";
 import { CompanyAnalysisSummaryMock } from "./CompanyAnalysisSummaryMock";
 import { ReadableCompanySection } from "./ReadableCompanySection";
 import { HeroDashboardMock } from "./HeroDashboardMock";
+import { Bbas3SankeyDark } from "./Bbas3SankeyDark";
 
 const navItems = ["Início", "Como funciona", "Para quem é", "FAQ"] as const;
 
@@ -128,32 +129,32 @@ const segments = [
 const steps = [
   {
     label: "Primeiro olhar",
-    title: "Entenda o essencial mais rápido",
+    title: "Decida em 1 minuto se vale aprofundar",
     items: [
-      "Veja os sinais mais importantes da empresa",
-      "Comece com uma leitura mais guiada",
-      "Entenda o básico sem excesso de indicadores",
-      "Ganhe contexto antes de aprofundar",
+      "Preço, P/L e valor justo na mesma tela",
+      "Os sinais que importam, sem 80 indicadores ao mesmo tempo",
+      "Entenda a empresa antes de abrir o release",
+      "Comece com uma leitura guiada, não com uma planilha em branco",
     ],
   },
   {
     label: "Leitura aprofundada",
-    title: "Vá além dos números soltos",
+    title: "Entenda o porquê dos números",
     items: [
-      "Explore indicadores com mais contexto",
-      "Entenda o que mudou ao longo do tempo",
-      "Identifique pontos de atenção com mais clareza",
+      "Compare cada indicador com o histórico da própria empresa",
+      "Veja o que mudou desde o último trimestre — e por quê",
+      "Identifique quedas de margem, aumento de dívida e mudanças de guidance",
       "Analise com mais confiança e menos confusão",
     ],
   },
   {
     label: "Acompanhamento",
-    title: "Retome sua análise sem ruído",
+    title: "Retome de onde parou, sem reler tudo",
     items: [
-      "Acompanhe empresas ao longo do tempo",
-      "Veja mudanças relevantes com mais contexto",
-      "Volte para o que importa mais rápido",
-      "Mantenha sua leitura organizada e verificável",
+      "Suas anotações e tese salvas empresa por empresa",
+      "Só o que mudou desde sua última visita",
+      "Volte para o que importa sem refazer a análise",
+      "Histórico auditável: veja quando você mudou de opinião e por quê",
     ],
   },
 ] as const;
@@ -1385,17 +1386,11 @@ export function SolutionSection() {
 
 function StepCards() {
   return (
-    <div className="flex h-[300px] gap-px overflow-hidden border-y border-[#f0f0f0] bg-[#f0f0f0] max-md:h-auto max-md:flex-col max-md:gap-px max-md:rounded-[16px]">
+    <div className="flex gap-5 max-md:h-auto max-md:flex-col max-md:gap-4">
       {steps.map((step, index) => (
         <div
           key={step.title}
-          className={`flex flex-1 flex-col justify-between gap-3 bg-card max-md:!rounded-none max-md:!p-6 ${
-            index === 0
-              ? "rounded-br-[20px] rounded-tr-[20px] py-6 pr-6"
-              : index === 1
-                ? "rounded-[20px] p-6"
-                : "rounded-bl-[20px] rounded-tl-[20px] p-6"
-          }`}
+          className="flex flex-1 flex-col justify-between gap-3 rounded-[20px] border border-[#f0f0f0] bg-card p-6"
         >
           <div className="flex w-fit items-center rounded-full bg-[#f7f7f7] p-2 backdrop-blur-[16.5px]">
             {index === 0 ? (
@@ -2864,6 +2859,8 @@ export function DarkCapabilities() {
             ))}
           </motion.div>
         </div>
+
+        <Bbas3SankeyDark />
       </div>
     </section>
   );
@@ -3290,10 +3287,10 @@ export function StepsSection() {
                     "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
                 }}
               >
-                Da primeira leitura ao acompanhamento.
+                Do primeiro olhar ao acompanhamento trimestre a trimestre.
               </h2>
               <p className="text-lg leading-6 text-[#7a7a7a]">
-                Veja como a Analiso guia sua análise.
+                Analise empresas sem se perder em planilhas, nem reler tudo do zero a cada resultado.
               </p>
             </div>
 
@@ -3398,33 +3395,32 @@ export function FaqSection() {
 
 export function CtaSection() {
   return (
-    <section className="px-5 pt-[130px] max-md:pt-16 max-sm:px-0">
+    <section className="pt-[130px] max-md:pt-16">
       <div
-        className="relative h-[466px] w-full overflow-hidden rounded-[20px] max-md:h-auto max-md:rounded-[16px] max-md:pb-16 max-sm:rounded-none"
+        className="relative h-[466px] w-full overflow-hidden max-md:h-auto max-md:pb-16"
         style={{
           background:
-            "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E8F8F4 70%, #B7E9DD 100%)",
+            "linear-gradient(180deg, #0a0a0a 0%, #050505 45%, #000000 100%)",
         }}
       >
         <div className="pointer-events-none absolute left-1/2 top-[calc(50%+39px)] -translate-x-1/2 -translate-y-1/2 max-md:scale-[0.65] max-sm:scale-[0.45]">
           {[980, 750, 536, 333].map((size) => (
             <div
               key={size}
-              className="footer-halo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#cfece4]"
+              className="footer-halo absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5"
               style={{
                 width: size,
                 height: size,
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.2) inset",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset",
               }}
             />
           ))}
         </div>
-        <div className="pointer-events-none absolute left-0 top-0 z-[1] h-[45%] w-full bg-gradient-to-b from-card via-card to-transparent" />
         <div className="relative z-10 flex flex-col items-center gap-6 pt-[60px] max-md:px-6 max-sm:px-8">
-          <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-foreground max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
+          <h2 className="max-w-[600px] text-center text-[56px] font-semibold leading-[56px] tracking-[-1.12px] text-white max-md:text-[36px] max-md:leading-[40px] max-md:tracking-[-0.72px] max-sm:text-[28px] max-sm:leading-[32px] max-sm:tracking-[-0.56px]">
             Pronto para transformar sua análise?
           </h2>
-          <p className="max-w-[360px] text-center text-lg leading-6 text-primary-gray-500">
+          <p className="max-w-[360px] text-center text-lg leading-6 text-white/70">
             Entre na lista de espera e receba acesso antecipado à plataforma.
           </p>
           <button
@@ -3435,7 +3431,7 @@ export function CtaSection() {
           </button>
         </div>
       </div>
-      <div className="py-6 text-center text-[13px] text-[#8f8f8f]">
+      <div className="bg-black py-6 text-center text-[13px] text-[#8f8f8f]">
         © 2026 Analiso. Todos os direitos reservados.
       </div>
     </section>
@@ -3516,10 +3512,10 @@ export function LandingSections() {
                         "linear-gradient(347deg, #202020 47.75%, #8F8F8F 90.57%)",
                     }}
                   >
-                    Da primeira leitura ao acompanhamento.
+                    Do primeiro olhar ao acompanhamento trimestre a trimestre.
                   </h2>
                   <p className="text-lg leading-6 text-[#7a7a7a]">
-                    Veja como a Analiso guia sua análise.
+                    Analise empresas sem se perder em planilhas, nem reler tudo do zero a cada resultado.
                   </p>
                 </div>
 

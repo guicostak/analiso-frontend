@@ -61,6 +61,8 @@ export function useEmailAuth({ onSuccess, onError }: UseEmailAuthOptions) {
           name: data.user.name,
           picture: data.user.avatarUrl ?? "",
           token: data.accessToken,
+          refreshToken: data.refreshToken,
+          expiresIn: data.expiresIn,
           isNewUser: data.isNewUser,
         });
       } else {
@@ -76,6 +78,8 @@ export function useEmailAuth({ onSuccess, onError }: UseEmailAuthOptions) {
           name: data.user.name,
           picture: data.user.avatarUrl ?? "",
           token: data.accessToken,
+          refreshToken: data.refreshToken,
+          expiresIn: data.expiresIn,
           isNewUser: data.isNewUser,
         };
 

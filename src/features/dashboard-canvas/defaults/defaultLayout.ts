@@ -1,33 +1,53 @@
 /**
  * Layout default do `DashboardCanvas`.
  *
- * Lista canônica das 17 ilhas, ordenadas para um usuário sem layout salvo.
- * O endowment desta lista é criado já no primeiro login (Sunk Cost) — assim
- * o usuário começa com algo "seu", não com tela vazia.
+ * Pós-MVP: o default contém TODAS as ilhas mantidas — usuário remove o que
+ * não usa via modo edição. Isso é proposital: dá parâmetro pra avaliar o
+ * que cada ilha entrega antes de decidir manter ou descartar.
+ *
+ * Versão do schema bumpada para v4 — modelo com sections (containers).
  */
 
-import type { DashboardLayout, LayoutItem, IslandKind } from "../interfaces/layout.types";
+import type {
+  DashboardLayout,
+  LayoutItem,
+  IslandKind,
+  Section,
+} from "../interfaces/layout.types";
+import {
+  DEFAULT_SECTION_ID,
+  DEFAULT_SECTION_TITLE,
+} from "../interfaces/layout.types";
 
-export const DEFAULT_LAYOUT_VERSION = 1;
+export const DEFAULT_LAYOUT_VERSION = 4;
 
+/**
+ * Ordem proposta — todas as ilhas vão pra section default (sem título).
+ * Usuário pode criar sections nomeadas e arrastar ilhas pra dentro depois.
+ */
 const DEFAULT_KINDS: IslandKind[] = [
-  "resumo_dia",
-  "maior_atencao",
-  "maior_melhora",
+  // Linha 1 (full-width): panorama global rolante — abre o dashboard com
+  // contexto macro de cara, igual ao topo da tela /mercado.
+  "panorama_global",
+  // Linha 2: contexto curto + prioridade + performance
   "prioridade_dia",
-  "watchlist_resumo",
-  "feed_mudancas",
-  "continue",
-  "agenda",
-  "sinais_watchlist",
-  "heatmap_pilar",
-  "alertas_recentes",
-  "empresas_recentes",
-  "buscas_recentes",
-  "comparacoes_recentes",
   "ciclo_mercado",
-  "qualidade_dados",
-  "editorial_dia",
+  "agenda",
+  "performance_vs_ibov",
+  // Linha 4: macro interno x macro externo (financeiro) lado a lado
+  "macro_brasil",
+  "resumo_indices",
+  // Linha 5: feed full-width
+  "feed_mudancas",
+  // Linha 6: sinais (sozinho — auto-flow:dense backfilla)
+  "sinais_watchlist",
+  // Linha 7: commodities + cripto (full-width)
+  "macro_global",
+  // Linha 8: notícias + sugeridos (paralelos, ambos 6×5/6×3)
+  "noticias_mercado",
+  "sugeridos",
+  // Linha 9: notificações
+  "notificacoes",
 ];
 
 function buildDefaultItems(): LayoutItem[] {
@@ -35,18 +55,31 @@ function buildDefaultItems(): LayoutItem[] {
     id: `default-${kind}`,
     kind,
     order: index,
+    sectionId: DEFAULT_SECTION_ID,
     config: {},
   }));
+}
+
+function buildDefaultSections(): Section[] {
+  return [
+    {
+      id: DEFAULT_SECTION_ID,
+      title: DEFAULT_SECTION_TITLE,
+      order: 0,
+    },
+  ];
 }
 
 export const defaultLayout: DashboardLayout = {
   version: DEFAULT_LAYOUT_VERSION,
   items: buildDefaultItems(),
+  sections: buildDefaultSections(),
 };
 
 export function buildDefaultLayout(): DashboardLayout {
   return {
     version: DEFAULT_LAYOUT_VERSION,
     items: buildDefaultItems(),
+    sections: buildDefaultSections(),
   };
 }

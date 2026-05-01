@@ -12,6 +12,8 @@ import type {
 
 interface BackendAuthResponse {
   accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
   tokenType: string;
   isNewUser: boolean;
   user: {
@@ -30,8 +32,12 @@ export interface GoogleAuthUser {
   name: string;
   /** Foto do perfil Google (avatarUrl no backend) */
   picture: string;
-  /** JWT emitido pelo backend */
+  /** JWT de access emitido pelo backend */
   token: string;
+  /** Opaque refresh token — enviar em /api/auth/refresh para rotacionar */
+  refreshToken: string;
+  /** Vida útil do access token em segundos */
+  expiresIn: number;
   /** true quando o usuário acabou de ser criado (primeiro login) */
   isNewUser: boolean;
 }
@@ -123,12 +129,14 @@ export const authService = {
     console.log("[auth] isNewUser recebido:", data.isNewUser, "| tipo:", typeof data.isNewUser);
 
     return {
-      id:        data.user.id,
-      email:     data.user.email,
-      name:      data.user.name,
-      picture:   data.user.avatarUrl,
-      token:     data.accessToken,
-      isNewUser: data.isNewUser,
+      id:           data.user.id,
+      email:        data.user.email,
+      name:         data.user.name,
+      picture:      data.user.avatarUrl,
+      token:        data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresIn:    data.expiresIn,
+      isNewUser:    data.isNewUser,
     };
   },
 };

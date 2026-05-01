@@ -15,8 +15,8 @@ export interface IslandSize {
   h: number;
 }
 
-/** Categoria de uma ilha — usada pelo catálogo da Fase 3. */
-export type IslandCategory = "core" | "acumulo" | "contexto" | "premium";
+/** Categoria de uma ilha — usada pelo catálogo. */
+export type IslandCategory = "core" | "acumulo" | "contexto";
 
 /**
  * Configuração runtime de uma ilha — chaves opcionais aceitas pelas ilhas
@@ -25,6 +25,8 @@ export type IslandCategory = "core" | "acumulo" | "contexto" | "premium";
 export interface IslandConfig {
   /** Quantos itens mostrar em ilhas listadas (sinais, etc). */
   itemCount?: number;
+  /** Título do divisor de seção (`section_header` kind). */
+  title?: string;
 }
 
 /** Esquema de configuração — quais chaves uma ilha aceita. */
@@ -34,6 +36,37 @@ export interface IslandConfigSchema {
     options: number[];
     default: number;
   };
+}
+
+/**
+ * Restrições de growth pra packing inteligente. Usado pelo algoritmo
+ * `packSection` que estica items "growable" pra preencher gaps na linha.
+ *
+ * Default (sem `growConstraints`): item NÃO cresce — fica em `baseSize`.
+ *
+ * **`w` (horizontal)**: estica colunas pra fechar gaps na linha atual.
+ * Algoritmo: gap residual da linha é distribuído pelos growable, último
+ * primeiro (preserva visual de "items à esquerda mantêm tamanho").
+ *
+ * **`h` (vertical)**: estica linhas pra acompanhar o item mais alto da
+ * row. Útil quando 4×2 fica ao lado de 6×3 — sem h-grow, sobra um buraco
+ * 4×1 abaixo do 4×2; com h-grow ele cresce pra 4×3 e fecha o buraco.
+ */
+export interface GrowConstraints {
+  /**
+   * Largura máxima que o item pode esticar (cols). Default = `baseSize.w`.
+   * Pra permitir crescimento, este valor precisa ser > `baseSize.w`.
+   */
+  maxW?: number;
+  /**
+   * Altura máxima que o item pode esticar (rows). Default = `baseSize.h`.
+   */
+  maxH?: number;
+  /**
+   * Eixos que o packer pode esticar. `"w"` ativa h-pack, `"h"` ativa
+   * v-pack. Os dois podem coexistir — independentes.
+   */
+  growable?: Array<"w" | "h">;
 }
 
 /**
@@ -53,12 +86,19 @@ export interface IslandMeta {
   baseSize: IslandSize;
   /** Categoria da ilha — agrupamento no catálogo. */
   category: IslandCategory;
-  /** Plano necessário para usar a ilha (gate visual; backend é o gate real). */
-  requiresPlan?: "premium";
   /** Esquema de configuração desta ilha. */
   configSchema?: IslandConfigSchema;
   /** Computa o tamanho efetivo dada a configuração runtime. */
   computeSize?: (config: IslandConfig) => IslandSize;
+  /**
+   * Permite que o packer estique o item horizontalmente pra preencher
+   * gaps na linha. Sem isto, o item fica em `baseSize` fixo.
+   *
+   * Pré-requisito: o componente da ilha precisa ser visualmente OK em
+   * larguras `[baseSize.w .. growConstraints.maxW]`. Itens com gráficos
+   * de aspect-ratio sensível devem ser conservadores.
+   */
+  growConstraints?: GrowConstraints;
 }
 
 /**

@@ -644,7 +644,6 @@ export function ExploreCompanyCatalog({
                 updatedAt={company.updatedAt}
                 isComparing={compareTickers.includes(company.ticker)}
                 isFavorite={favoriteTickers.has(company.ticker)}
-                compareIsFirstAction={compareTickers.length === 0}
                 onToggleCompare={() => toggleCompare(company.ticker)}
                 onToggleFavorite={() => onToggleFavorite(company.ticker)}
                 onAlert={() => {}}
