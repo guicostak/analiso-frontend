@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { LandingPage } from "@/src/features/landing/components";
 
 export const metadata: Metadata = {
-  title: "Análise fundamentalista guiada de ações da B3",
+  title: "Analiso — Análise fundamentalista guiada da B3 | Lançamento 01/05",
   description:
-    "Transforme dados financeiros em leitura clara: 5 pilares, contexto histórico e pontos de atenção identificados automaticamente. Comece grátis.",
+    "Entre na lista de espera e seja um dos primeiros a usar o Analiso: análise fundamentalista guiada das ações da B3. Vagas limitadas para fundadores com benefícios exclusivos.",
   alternates: { canonical: "/" },
   openGraph: { url: "/", type: "website" },
 };

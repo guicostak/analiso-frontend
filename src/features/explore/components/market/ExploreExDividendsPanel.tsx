@@ -71,11 +71,12 @@ function ExDividendRow({ item, highlight = false }: { item: ExDividendItem; high
     <Link
       href={`/analysis/${item.ticker}`}
       className={`
-        group flex items-center gap-3 rounded-xl border bg-card p-3
-        transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
+        mercado-island-hover group relative flex items-center gap-3 rounded-2xl border bg-card p-3
         ${highlight ? "border-brand/40" : "border-border"}
       `}
     >
+      {/* Tag silenciosa — seção já identificada */}
+      <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} silent />
       {item.logoUrl ? (
         <Image
           src={item.logoUrl}
@@ -90,8 +91,7 @@ function ExDividendRow({ item, highlight = false }: { item: ExDividendItem; high
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
-          <span className="truncate text-[13px] font-semibold text-foreground">{item.ticker}</span>
+          <span className="truncate text-sm font-semibold text-foreground">{item.ticker}</span>
           <span className="truncate text-[11px] text-muted-foreground">{item.companyName ?? "—"}</span>
         </div>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -115,18 +115,21 @@ export function ExploreExDividendsPanel({ bundle }: ExploreExDividendsPanelProps
 
   return (
     <section className="space-y-4" aria-label="Ex-dividendos">
-      <header>
-        <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Proventos na agenda
-          <InfoTooltip label="Ex-dividendos" content={EX_DIV_INFO} />
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Ex-dividendos
-        </h3>
-        <p className="mt-1 max-w-[680px] text-[12px] leading-relaxed text-muted-foreground">
-          Empresas que passam a negociar sem direito ao próximo provento.
-          Quedas nessas ações hoje costumam ser ajuste técnico, não ruptura.
-        </p>
+      <header className="flex items-start gap-2">
+        <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} className="mt-1" />
+        <div>
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Proventos na agenda
+            <InfoTooltip label="Ex-dividendos" content={EX_DIV_INFO} />
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Ex-dividendos
+          </h3>
+          <p className="mt-1 max-w-[680px] text-xs leading-relaxed text-muted-foreground">
+            Empresas que passam a negociar sem direito ao próximo provento.
+            Quedas nessas ações hoje costumam ser ajuste técnico, não ruptura.
+          </p>
+        </div>
       </header>
 
       {hasToday && (

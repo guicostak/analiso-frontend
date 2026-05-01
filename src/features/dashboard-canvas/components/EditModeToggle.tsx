@@ -23,7 +23,9 @@ export function EditModeToggle({ className }: { className?: string }) {
       type="button"
       onClick={toggle}
       className={cn(
-        "inline-flex h-9 items-center gap-2 rounded-full border border-border px-4 text-[13px] font-semibold transition",
+        // Mobile: escondido. O painel mobile segue layout fixo e DnD não roda < 1280px.
+        "hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-[13px] font-semibold xl:inline-flex",
+        "transition-[background-color,color,box-shadow] duration-150 ease-out",
         isEditing
           ? "bg-brand text-white shadow-sm hover:bg-brand-hover"
           : "bg-card text-foreground hover:bg-hover",

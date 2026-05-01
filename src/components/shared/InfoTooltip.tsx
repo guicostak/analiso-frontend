@@ -12,12 +12,13 @@
  *   <InfoTooltip label="VIX" content="Volatilidade implícita de 30d do S&P..." />
  */
 
+import type { ReactNode } from "react";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/src/components/ui/tooltip";
 
 interface InfoTooltipProps {
-  /** Texto exibido no tooltip. */
-  content: string;
+  /** Texto ou JSX exibido no tooltip. */
+  content: ReactNode;
   /** aria-label do botão — default "Mais informações". Use label do dado p/ contexto. */
   label?: string;
   /** Tamanho do ícone (default 12). */
@@ -26,6 +27,8 @@ interface InfoTooltipProps {
   className?: string;
   /** Lado do tooltip (default 'top'). */
   side?: "top" | "right" | "bottom" | "left";
+  /** Classe aplicada ao TooltipContent — útil pra sobrescrever max-width em conteúdos ricos. */
+  contentClassName?: string;
 }
 
 export function InfoTooltip({
@@ -34,6 +37,7 @@ export function InfoTooltip({
   size = 12,
   className = "",
   side = "top",
+  contentClassName = "max-w-[260px] whitespace-normal text-balance leading-relaxed",
 }: InfoTooltipProps) {
   return (
     <Tooltip>
@@ -53,10 +57,7 @@ export function InfoTooltip({
           <Info size={size} />
         </button>
       </TooltipTrigger>
-      <TooltipContent
-        side={side}
-        className="max-w-[260px] whitespace-normal text-balance leading-relaxed"
-      >
+      <TooltipContent side={side} className={contentClassName}>
         {content}
       </TooltipContent>
     </Tooltip>

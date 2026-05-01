@@ -59,7 +59,7 @@ export function ExploreSectorFilter({
   return (
     <section
       aria-label="Filtrar por setor"
-      className="rounded-[22px] border border-border bg-card p-5 shadow-[0_12px_28px_rgba(15,23,40,0.04)] dark:shadow-none"
+      className="mercado-elev-sm rounded-3xl border border-border bg-card p-5"
     >
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -67,10 +67,10 @@ export function ExploreSectorFilter({
             <Filter className="h-3 w-3" aria-hidden="true" />
             Filtrar por setor
           </p>
-          <h3 className="mt-1 text-[16px] font-semibold leading-6 text-foreground">
+          <h3 className="mt-1 text-base font-semibold leading-6 text-foreground">
             {activeLabel}
           </h3>
-          <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
             {isAll
               ? "Mostrando todas as movimentações cobertas pela Analiso."
               : "Só movimentações do setor — curadoria, movers e lista completa."}
@@ -83,7 +83,7 @@ export function ExploreSectorFilter({
             className="
               inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card
               px-2.5 py-1 text-[11px] font-medium text-muted-foreground
-              transition-colors duration-150 hover:text-foreground
+              transition-colors duration-200 hover:text-foreground hover:bg-accent
             "
             aria-label="Limpar filtro de setor"
           >
@@ -129,11 +129,11 @@ function SectorChip({ label, count, active, onClick }: SectorChipProps) {
       onClick={onClick}
       aria-pressed={active}
       className={`
-        inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium
-        transition-colors duration-150
+        inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium
+        transition-colors duration-200
         ${active
           ? "border-foreground bg-foreground text-primary-foreground"
-          : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-hover"}
+          : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-accent"}
       `}
     >
       <span>{label}</span>

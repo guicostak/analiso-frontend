@@ -31,17 +31,12 @@ function ComparisonCard({ comp, range }: { comp: Comparison; range?: MarketTimeR
     comp.trend === "up" ? "healthy" : comp.trend === "down" ? "risk" : "attention";
 
   return (
-    <article
-      className="
-        flex min-h-[140px] flex-col gap-2 rounded-2xl border border-border bg-card p-5
-        shadow-sm dark:shadow-none
-        transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
-      "
-    >
+    <article className="mercado-elev-sm mercado-island-hover relative flex min-h-[140px] flex-col gap-2 rounded-2xl border border-border bg-card p-5">
+      {/* Tag silenciosa — seção Contexto já identificada no header da ilha de Comparações */}
+      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" silent />
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
             {comp.label}
             {COMPARISON_INFO[comp.key] && (
               <InfoTooltip label={comp.label} content={COMPARISON_INFO[comp.key]} />
@@ -111,13 +106,16 @@ export function ExploreComparisonsGrid({ comparisons, range }: ExploreComparison
   if (!comparisons.length) return null;
   return (
     <section className="space-y-4" aria-label="Comparações derivadas">
-      <header>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Visões comparativas
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Comparações derivadas
-        </h3>
+      <header className="flex items-center gap-2">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Visões comparativas
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Comparações derivadas
+          </h3>
+        </div>
       </header>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {comparisons.map((c) => (

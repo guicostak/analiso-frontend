@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, Globe, Newspaper, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/src/components/layout/Sidebar";
@@ -191,6 +191,28 @@ export function MarketContextPage() {
     }
   }, [activeSection, activeSector]);
 
+  /**
+   * Keyboard nav nas tabs (WAI-ARIA tablist): seta esquerda/direita navegam
+   * circularmente, Home/End pulam pra primeira/última. Complementa o padrão
+   * visual com semântica correta pra screen readers e navegação por teclado.
+   */
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  function handleTabKeyDown(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    const count = marketSections.length;
+    let next = idx;
+    if (e.key === "ArrowRight") next = (idx + 1) % count;
+    else if (e.key === "ArrowLeft") next = (idx - 1 + count) % count;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = count - 1;
+    else return;
+    e.preventDefault();
+    const target = tabRefs.current[next];
+    if (target) {
+      target.focus();
+      setActiveSection(marketSections[next].id);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar currentPage="mercado" />
@@ -205,39 +227,57 @@ export function MarketContextPage() {
 
         <div className="relative px-6 pb-20 pt-5">
           <div className="mx-auto max-w-[1380px]">
-            <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div className="max-w-[680px] space-y-2">
-                <p className="text-[12px] font-medium uppercase text-muted-foreground">Leitura de ambiente</p>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-[30px] font-semibold leading-[34px] tracking-[-0.04em] text-foreground">Mercado</h1>
-                    <ExploreMarketTonePill tone={marketExtras?.marketTone ?? null} />
-                  </div>
-                  <p className="text-[13px] leading-6 text-muted-foreground">
-                    Acompanhe o panorama macro, os movimentos das empresas e as principais notícias do dia em um só lugar.
-                  </p>
+            <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-[680px] space-y-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Leitura de ambiente</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-4xl font-semibold leading-[1.05] tracking-[-0.035em] text-foreground md:text-[44px] md:leading-[48px]">
+                    Mercado
+                  </h1>
+                  <ExploreMarketTonePill tone={marketExtras?.marketTone ?? null} />
                 </div>
+                <p className="max-w-[620px] text-sm leading-6 text-muted-foreground">
+                  Acompanhe o panorama macro, os movimentos das empresas e as principais notícias do dia em um só lugar.
+                </p>
               </div>
             </header>
 
-            {/* === Navegação por seção === */}
-            <div className="mb-8 border-b border-border">
-              <div className="flex flex-wrap gap-1.5">
-                {marketSections.map((sec) => {
+            {/* === Navegação por seção (WAI-ARIA tablist) === */}
+            <div className="mb-10 border-b border-border">
+              <div
+                role="tablist"
+                aria-label="Seções da tela de mercado"
+                className="flex flex-wrap gap-1.5"
+              >
+                {marketSections.map((sec, idx) => {
                   const Icon = sec.icon;
                   const isActive = sec.id === activeSection;
                   return (
                     <button
                       key={sec.id}
+                      ref={(el) => {
+                        tabRefs.current[idx] = el;
+                      }}
+                      role="tab"
+                      id={`mercado-tab-${sec.id}`}
+                      aria-selected={isActive}
+                      aria-controls={`mercado-panel-${sec.id}`}
+                      tabIndex={isActive ? 0 : -1}
+                      onKeyDown={(e) => handleTabKeyDown(e, idx)}
                       onClick={() => setActiveSection(sec.id)}
-                      className={`relative inline-flex items-center gap-1.5 px-3 py-3.5 text-[14px] transition ${
-                        isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground hover:text-foreground"
+                      className={`relative inline-flex items-center gap-2 px-3.5 py-3.5 text-sm transition-colors duration-200 outline-none focus-visible:text-foreground ${
+                        isActive
+                          ? "font-semibold text-foreground"
+                          : "font-medium text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <Icon className="h-[14px] w-[14px]" />
+                      <Icon className="h-[15px] w-[15px]" aria-hidden="true" />
                       {sec.label}
                       {isActive && (
-                        <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-brand" />
+                        <span
+                          aria-hidden="true"
+                          className="mercado-tab-indicator absolute bottom-0 left-2 right-2 h-[3px] rounded-full bg-brand"
+                        />
                       )}
                     </button>
                   );
@@ -248,12 +288,20 @@ export function MarketContextPage() {
             <div className="space-y-12">
               {/* === Contexto de mercado === */}
               {activeSection === "contexto" && (
-              <section className="space-y-4">
+              <section
+                role="tabpanel"
+                id="mercado-panel-contexto"
+                aria-labelledby="mercado-tab-contexto"
+                tabIndex={0}
+                className="mercado-section-enter space-y-6 outline-none"
+              >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div className="max-w-[720px] space-y-2">
-                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Visão geral</p>
-                    <h2 className="text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Contexto de mercado</h2>
-                    <p className="text-[13px] leading-6 text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Visão geral</p>
+                    <h2 className="text-2xl font-semibold leading-tight tracking-[-0.025em] text-foreground">
+                      Contexto de mercado
+                    </h2>
+                    <p className="text-sm leading-6 text-muted-foreground">
                       Panorama macro, índices globais e volatilidade para entender o ambiente antes de olhar empresa a empresa.
                     </p>
                   </div>
@@ -278,7 +326,7 @@ export function MarketContextPage() {
 
                 {/* === Novos blocos da aba Contexto (Fase 2) === */}
                 {marketExtras && (
-                  <div className="mt-8 space-y-10">
+                  <div className="mt-8 space-y-12">
                     <ExploreRiskPanel       riskPanel={marketExtras.riskPanel} />
                     <ExploreSectorHeatmap   heatmap={marketExtras.sectorHeatmap} />
                     <ExploreMacroBrGrid     bundle={marketExtras.macroBr} />
@@ -291,11 +339,19 @@ export function MarketContextPage() {
 
               {/* === Movimentos === */}
               {activeSection === "movimentos" && (
-              <section className="space-y-5">
+              <section
+                role="tabpanel"
+                id="mercado-panel-movimentos"
+                aria-labelledby="mercado-tab-movimentos"
+                tabIndex={0}
+                className="mercado-section-enter space-y-6 outline-none"
+              >
                 <div className="max-w-[720px] space-y-2">
-                  <p className="text-[12px] font-medium uppercase text-muted-foreground">Empresas em destaque</p>
-                  <h2 className="text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">Movimentos</h2>
-                  <p className="text-[13px] leading-6 text-muted-foreground">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Empresas em destaque</p>
+                  <h2 className="text-2xl font-semibold leading-tight tracking-[-0.025em] text-foreground">
+                    Movimentos
+                  </h2>
+                  <p className="text-sm leading-6 text-muted-foreground">
                     Empresas específicas em foco — altas, baixas e curadoria de prioridades para abrir primeiro.
                   </p>
                 </div>
@@ -369,7 +425,15 @@ export function MarketContextPage() {
 
               {/* === Notícias === */}
               {activeSection === "noticias" && (
-                <ExploreMarketNewsSection news={news} loading={newsLoading} />
+                <section
+                  role="tabpanel"
+                  id="mercado-panel-noticias"
+                  aria-labelledby="mercado-tab-noticias"
+                  tabIndex={0}
+                  className="mercado-section-enter outline-none"
+                >
+                  <ExploreMarketNewsSection news={news} loading={newsLoading} />
+                </section>
               )}
             </div>
           </div>
@@ -381,21 +445,26 @@ export function MarketContextPage() {
         {selectedSource && (
           <div className="space-y-4 text-sm text-foreground/80">
             <div>
-              <p className="text-xs text-muted-foreground">Fonte</p>
-              <p className="font-medium text-foreground">{selectedSource.source.name}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Fonte</p>
+              <p className="mt-1 font-medium text-foreground">{selectedSource.source.name}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Documento</p>
-              <p className="font-medium text-foreground">{selectedSource.source.docLabel}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Documento</p>
+              <p className="mt-1 font-medium text-foreground">{selectedSource.source.docLabel}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Data de referência</p>
-              <p className="font-medium text-foreground">{selectedSource.source.updatedAt}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Data de referência</p>
+              <p className="mt-1 font-medium text-foreground">{selectedSource.source.updatedAt}</p>
             </div>
             {selectedSource.source.url && (
-              <a href={selectedSource.source.url} className="inline-flex items-center gap-2 text-xs text-brand hover:text-foreground">
+              <a
+                href={selectedSource.source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-brand transition-colors duration-200 hover:text-foreground"
+              >
                 Ver documento externo
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}
           </div>
@@ -404,14 +473,16 @@ export function MarketContextPage() {
 
       {/* Volatility drawer */}
       <ExploreDrawer open={showVolatilityDetails} onClose={() => setShowVolatilityDetails(false)} title="Detalhes da volatilidade">
-        <div className="space-y-4 text-sm text-foreground/80">
+        <div className="space-y-4 text-sm leading-6 text-foreground/80">
           <p>Volatilidade é a medida de quanto os preços oscilam em um período. Níveis mais altos indicam variações maiores no curto prazo.</p>
           <p>O score combina amplitude média de movimentos e dispersão diária, com referência à mediana dos últimos 12 meses.</p>
           <div>
-            <p className="text-xs text-muted-foreground">Fontes e atualização</p>
-            <p className="font-medium text-foreground">B3 . Atualização diária (D+1)</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Fontes e atualização</p>
+            <p className="mt-1 font-medium text-foreground">B3 · Atualização diária (D+1)</p>
           </div>
-          <p className="text-xs text-muted-foreground">Este indicador é educacional e não representa recomendação de compra ou venda.</p>
+          <p className="text-xs leading-5 text-muted-foreground">
+            Este indicador é educacional e não representa recomendação de compra ou venda.
+          </p>
         </div>
       </ExploreDrawer>
     </div>

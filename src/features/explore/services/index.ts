@@ -25,6 +25,7 @@ import logoVale from "@/src/assets/logos/vale.png";
 import logoWeg from "@/src/assets/logos/weg.jpeg";
 
 import { apiFetch } from "@/src/lib/api";
+import { cacheable } from "@/src/lib/request-cache";
 
 import type {
   IndexCard,
@@ -663,7 +664,13 @@ export async function getExplore(
   if (params?.date)  qs.set('date',  params.date);
   if (params?.range) qs.set('range', params.range);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
-  return apiFetch<ExploreResponse>(`/api/explore${suffix}`, {});
+  // Cache TTL curto (90s) deduplica as 5 ilhas do dashboard que chamam
+  // este mesmo endpoint (Macro/Resumo/Ciclo/Panorama/MacroGlobal) em
+  // 1 única request quando carregam juntas.
+  return cacheable(
+    `explore:${params?.date ?? ''}:${params?.range ?? '1D'}`,
+    () => apiFetch<ExploreResponse>(`/api/explore${suffix}`, {}),
+  );
 }
 
 export interface ExploreNewsItem {
@@ -678,7 +685,10 @@ export interface ExploreNewsItem {
 }
 
 export async function getMarketNews(limit = 20): Promise<ExploreNewsItem[]> {
-  return apiFetch<ExploreNewsItem[]>(`/api/explore/news?limit=${limit}`, {});
+  return cacheable(
+    `market-news:${limit}`,
+    () => apiFetch<ExploreNewsItem[]>(`/api/explore/news?limit=${limit}`, {}),
+  );
 }
 
 // ─── Dados mock ───────────────────────────────────────────────────────────────

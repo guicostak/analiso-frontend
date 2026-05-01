@@ -55,10 +55,11 @@ function AlphaCard({ item }: { item: SectorAlphaItem }) {
     <Link
       href={`/analysis/${item.ticker}`}
       className={`
-        group flex items-start gap-3 rounded-xl border ${toneBorder} ${toneBg} p-3.5
-        transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
+        mercado-island-hover group relative flex items-start gap-3 rounded-2xl border ${toneBorder} ${toneBg} p-3.5
       `}
     >
+      {/* Tag silenciosa — categoria já explícita no header do painel */}
+      <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} silent />
       {item.logoUrl ? (
         <Image
           src={item.logoUrl}
@@ -73,8 +74,7 @@ function AlphaCard({ item }: { item: SectorAlphaItem }) {
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
-          <span className="truncate text-[13px] font-semibold text-foreground">{item.ticker}</span>
+          <span className="truncate text-sm font-semibold text-foreground">{item.ticker}</span>
           <Icon className={`h-3.5 w-3.5 ${toneText}`} aria-hidden="true" />
         </div>
         <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
@@ -105,18 +105,21 @@ export function ExploreSectorAlphaPanel({ bundle }: ExploreSectorAlphaPanelProps
 
   return (
     <section className="space-y-4" aria-label="Alfa setorial">
-      <header>
-        <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Fora da curva do setor
-          <InfoTooltip label="Alfa setorial" content={ALPHA_INFO} />
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Alfa setorial do dia
-        </h3>
-        <p className="mt-1 max-w-[680px] text-[12px] leading-relaxed text-muted-foreground">
-          Ações que destoaram do setor — quem subiu ou caiu bem mais do que a média.
-          Movimento idiossincrático é sinal pra abrir a leitura.
-        </p>
+      <header className="flex items-start gap-2">
+        <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} className="mt-1" />
+        <div>
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Fora da curva do setor
+            <InfoTooltip label="Alfa setorial" content={ALPHA_INFO} />
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Alfa setorial do dia
+          </h3>
+          <p className="mt-1 max-w-[680px] text-xs leading-relaxed text-muted-foreground">
+            Ações que destoaram do setor — quem subiu ou caiu bem mais do que a média.
+            Movimento idiossincrático é sinal pra abrir a leitura.
+          </p>
+        </div>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">

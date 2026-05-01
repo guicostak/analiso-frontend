@@ -33,6 +33,16 @@ interface SectionCategoryTagProps {
   categoryId: string;
   /** Classe adicional pra ajuste fino de margin/spacing no caller. */
   className?: string;
+  /**
+   * Modo "silent": preserva `data-section-category` pra rastreamento/analytics
+   * sem renderizar visual ou expor texto pra leitor de tela. Usado em sub-células
+   * onde o marcador já está presente no header da ilha, evitando ruído visual
+   * (e repetição do label em screen readers).
+   *
+   * UX heuristics: "Signal-to-noise ratio determines usability — when everything
+   * screams for attention, nothing stands out". Um tag por seção basta.
+   */
+  silent?: boolean;
 }
 
 export function SectionCategoryTag({
@@ -40,7 +50,17 @@ export function SectionCategoryTag({
   label,
   categoryId,
   className = "",
+  silent = false,
 }: SectionCategoryTagProps) {
+  if (silent) {
+    return (
+      <span
+        data-section-category={categoryId}
+        aria-hidden="true"
+        className="hidden"
+      />
+    );
+  }
   return (
     <span
       data-section-category={categoryId}

@@ -31,9 +31,9 @@ interface GlobalCardProps {
 function GlobalCard({ label, card, range, info }: GlobalCardProps) {
   if (!card) {
     return (
-      <article className="flex min-h-[120px] flex-col justify-between rounded-2xl border border-dashed border-border bg-card p-4">
+      <article className="relative flex min-h-[120px] flex-col justify-between rounded-2xl border border-dashed border-border bg-card p-4">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" silent />
         <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           {label}
           {info && <InfoTooltip label={label} content={info} />}
         </p>
@@ -55,17 +55,12 @@ function GlobalCard({ label, card, range, info }: GlobalCardProps) {
   const unit = unitFor(card.symbol);
 
   return (
-    <article
-      className="
-        flex min-h-[120px] flex-col gap-2 rounded-2xl border border-border bg-card p-4
-        shadow-sm dark:shadow-none
-        transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
-      "
-    >
+    <article className="mercado-elev-sm mercado-island-hover relative flex min-h-[120px] flex-col gap-2 rounded-2xl border border-border bg-card p-4">
+      {/* Tag silenciosa — seção Contexto já identificada no header do grid */}
+      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" silent />
       {/* Header: label + badge (sparkline fica na base, com mais respiro) */}
       <div className="flex items-start justify-between gap-2">
         <p className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           <span className="truncate">{label}</span>
           {info && <InfoTooltip label={label} content={info} />}
         </p>
@@ -115,13 +110,16 @@ export function ExploreGlobalMacroGrid({ bundle, range }: ExploreGlobalMacroGrid
   if (!bundle) return null;
   return (
     <section className="space-y-4" aria-label="Macro global">
-      <header>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Commodities e cripto
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Macro global
-        </h3>
+      <header className="flex items-center gap-2">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Commodities e cripto
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Macro global
+          </h3>
+        </div>
       </header>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <GlobalCard label="Brent"   card={bundle.brent}   range={range} info={GLOBAL_MACRO_INFO.brent}   />

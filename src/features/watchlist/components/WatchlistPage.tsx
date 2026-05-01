@@ -11,6 +11,7 @@ import { useFavoriteCompanies } from "../hooks/useFavoriteCompanies";
 import { getCompanyLogo } from "@/src/features/explore/services";
 import { WatchlistHeader } from "./WatchlistHeader";
 import { AddCompanyModal } from "./AddCompanyModal";
+import { WatchlistSummarySection } from "./WatchlistSummarySection";
 import { CompanyCard } from "@/src/components/shared/CompanyCard";
 
 export function WatchlistPage() {
@@ -113,7 +114,12 @@ export function WatchlistPage() {
                   </div>
                 ) : uiState === "empty" && hasFavorites ? (
                   /* Pipeline vazio mas o user tem favoritos — cards padronizados */
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    <WatchlistSummarySection
+                      hasFavorites={hasFavorites}
+                      watchlistTickers={favorites.tickers}
+                    />
+
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
                         {favorites.tickers.size} {favorites.tickers.size === 1 ? "ação na watchlist" : "ações na watchlist"}

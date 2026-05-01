@@ -31,7 +31,7 @@ const severityTone: Record<
     glow: "bg-transparent",
     topBand: "bg-transparent",
     topShape: "hidden",
-    cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)] dark:shadow-none",
+    cardShadow: "mercado-elev-sm",
   },
   Moderada: {
     shell: "bg-card border-warning-border",
@@ -40,7 +40,7 @@ const severityTone: Record<
     glow: "bg-transparent",
     topBand: "bg-transparent",
     topShape: "hidden",
-    cardShadow: "shadow-[0_12px_28px_rgba(15,23,40,0.04)] dark:shadow-none",
+    cardShadow: "mercado-elev-sm",
   },
   Forte: {
     shell: "bg-card border-danger-border",
@@ -49,7 +49,7 @@ const severityTone: Record<
     glow: "bg-transparent",
     topBand: "bg-transparent",
     topShape: "hidden",
-    cardShadow: "shadow-[0_14px_30px_rgba(15,23,40,0.05)] dark:shadow-none",
+    cardShadow: "mercado-elev-md",
   },
 };
 
@@ -88,7 +88,11 @@ function HighlightPriorityCard({
   const tone = severityTone[item.severity];
 
   return (
-    <article className={`relative flex h-full min-h-[132px] flex-col justify-between overflow-hidden rounded-[22px] border p-4 ${tone.shell} ${tone.cardShadow}`}>
+    <article
+      className={`mercado-island-hover relative flex h-full min-h-[132px] flex-col justify-between overflow-hidden rounded-3xl border p-5 ${tone.shell} ${tone.cardShadow}`}
+    >
+      {/* Tag silenciosa — seção Movimentos já identificada no header */}
+      <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} silent />
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-12 ${tone.topBand}`} />
       <div className={`pointer-events-none absolute left-4 top-3 h-8 w-20 ${tone.topShape}`} />
       <div className={`pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full ${tone.glow}`} />
@@ -99,20 +103,17 @@ function HighlightPriorityCard({
             <img
               src={(item.logoUrl ?? getCompanyLogo(item.ticker))!}
               alt={`Logo ${item.ticker}`}
-              className="h-11 w-11 rounded-[16px] border border-border bg-card object-cover p-1 shadow-[0_10px_30px_rgba(15,23,40,0.06)] dark:shadow-none"
+              className="mercado-elev-sm h-11 w-11 rounded-2xl border border-border bg-card object-cover p-1"
             />
           )}
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
-              <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${tone.pill}`}>
-                {priorityLabelMap[item.severity]}
-              </span>
-            </div>
-            <p className="mt-2.5 text-[16px] font-semibold leading-6 text-foreground">
+            <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${tone.pill}`}>
+              {priorityLabelMap[item.severity]}
+            </span>
+            <p className="mt-2.5 text-base font-semibold leading-6 text-foreground">
               {item.companyName} <span className="text-muted-foreground">{item.ticker}</span>
             </p>
-            <p className="mt-1.5 text-[13px] leading-5 text-muted-foreground">{item.changeTitle}</p>
+            <p className="mt-1.5 text-sm leading-5 text-muted-foreground">{item.changeTitle}</p>
           </div>
         </div>
 
@@ -131,10 +132,10 @@ function HighlightPriorityCard({
 
       <div className="relative mt-4 flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[12px] font-medium uppercase text-muted-foreground">Impacto e pilar</p>
-          <p className="mt-1 text-[13px] leading-5 text-foreground">{item.whyItMatters}</p>
-          <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-            {item.pillar} . {item.timeframeLabel}
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Impacto e pilar</p>
+          <p className="mt-1 text-sm leading-5 text-foreground">{item.whyItMatters}</p>
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
+            {item.pillar} · {item.timeframeLabel}
           </p>
         </div>
       </div>
@@ -165,20 +166,20 @@ export function ExploreHighlightsSection({
     <section className="space-y-5">
       {summaryState === "loading" && (
         <div className="grid gap-6 xl:grid-cols-12">
-          <div className="xl:col-span-8 h-[340px] rounded-[28px] bg-muted" />
-          <div className="xl:col-span-4 h-[340px] rounded-[28px] bg-card" />
+          <div className="xl:col-span-8 h-[340px] animate-pulse rounded-3xl bg-muted" />
+          <div className="xl:col-span-4 h-[340px] animate-pulse rounded-3xl bg-card" />
           {[1, 2, 3].map((item) => (
-            <div key={item} className="h-[148px] rounded-[24px] bg-card xl:col-span-4" />
+            <div key={item} className="h-[148px] animate-pulse rounded-3xl bg-card xl:col-span-4" />
           ))}
         </div>
       )}
 
       {summaryState === "error" && (
-        <div className="rounded-[28px] border border-border bg-card p-8 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
-          <p className="text-[15px] leading-6 text-muted-foreground">Nao foi possivel carregar os destaques agora.</p>
+        <div className="mercado-elev-md rounded-3xl border border-border bg-card p-8">
+          <p className="text-base leading-6 text-muted-foreground">Não foi possível carregar os destaques agora.</p>
           <button
             onClick={() => setSummaryState("ready")}
-            className="mt-4 inline-flex rounded-[16px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-white"
+            className="mt-4 inline-flex rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90"
           >
             Tentar novamente
           </button>
@@ -186,13 +187,13 @@ export function ExploreHighlightsSection({
       )}
 
       {summaryState === "empty" && (
-        <div className="rounded-[28px] border border-border bg-card p-8 shadow-[0_18px_40px_rgba(15,23,40,0.04)] dark:shadow-none">
-          <p className="text-[15px] leading-6 text-muted-foreground">Ainda nao temos destaques para exibir hoje.</p>
+        <div className="mercado-elev-md rounded-3xl border border-border bg-card p-8">
+          <p className="text-base leading-6 text-muted-foreground">Ainda não temos destaques para exibir hoje.</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button className="rounded-[16px] border border-border bg-muted px-4 py-2.5 text-[14px] font-medium text-foreground">
+            <button className="rounded-xl border border-border bg-muted px-4 py-2.5 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-accent">
               Explorar por tese
             </button>
-            <button className="rounded-[16px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-white">
+            <button className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90">
               Ver empresas para analisar
             </button>
           </div>
@@ -202,32 +203,32 @@ export function ExploreHighlightsSection({
       {summaryState === "ready" && featuredHighlight && (
         <>
           <div className="grid gap-5">
-            <article className="relative overflow-hidden rounded-[26px] border border-border bg-card p-6 shadow-[0_24px_50px_rgba(15,23,40,0.07)] dark:shadow-none">
+            <article className="mercado-elev-lg relative overflow-hidden rounded-3xl border border-border bg-card p-6 md:p-7">
               <div className="relative grid h-full gap-6 lg:grid-cols-[minmax(0,1.2fr)_260px]">
                 <div className="flex flex-col justify-between">
                   <div>
-                    <span className="inline-flex rounded-full bg-card/80 px-3 py-1 text-[11px] font-medium uppercase text-blue-700 dark:text-blue-300">
+                    <span className="inline-flex rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-blue-700 dark:text-blue-300">
                       Curadoria principal
                     </span>
-                    <h2 className="mt-4 max-w-[680px] text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
+                    <h2 className="mt-4 max-w-[680px] text-2xl font-semibold leading-[1.15] tracking-[-0.025em] text-foreground md:text-[28px] md:leading-9">
                       {featuredHighlight.changeTitle}
                     </h2>
-                    <p className="mt-3 max-w-[620px] text-[14px] leading-6 text-muted-foreground">{featuredHighlight.whyItMatters}</p>
+                    <p className="mt-3 max-w-[620px] text-sm leading-6 text-muted-foreground">{featuredHighlight.whyItMatters}</p>
 
-                    <div className="relative mt-6 rounded-[22px] border border-border bg-card p-4 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none">
+                    <div className="mercado-elev-md relative mt-6 rounded-2xl border border-border bg-card p-4">
                       <div className="flex items-start gap-4">
                         {(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker)) && (
                           <img
                             src={(featuredHighlight.logoUrl ?? getCompanyLogo(featuredHighlight.ticker))!}
                             alt={`Logo ${featuredHighlight.ticker}`}
-                            className="h-12 w-12 rounded-[18px] border border-border bg-card object-cover p-1 shadow-[0_12px_30px_rgba(15,23,40,0.08)] dark:shadow-none"
+                            className="mercado-elev-sm h-12 w-12 rounded-2xl border border-border bg-card object-cover p-1"
                           />
                         )}
                         <div className="min-w-0">
-                          <p className="text-[18px] font-semibold leading-6 text-foreground">
+                          <p className="text-lg font-semibold leading-6 text-foreground">
                             {featuredHighlight.companyName} <span className="text-muted-foreground">{featuredHighlight.ticker}</span>
                           </p>
-                          <p className="mt-1 text-[13px] leading-5 text-muted-foreground">Entrou hoje porque {featuredHighlight.changeTitle.toLowerCase()}.</p>
+                          <p className="mt-1 text-sm leading-5 text-muted-foreground">Entrou hoje porque {featuredHighlight.changeTitle.toLowerCase()}.</p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-medium ${severityTone[featuredHighlight.severity].pill}`}>
                               {priorityLabelMap[featuredHighlight.severity]}
@@ -247,32 +248,34 @@ export function ExploreHighlightsSection({
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Link
                       href={`/analysis/${featuredHighlight.ticker}`}
-                      className="inline-flex items-center rounded-[15px] bg-brand px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
+                      className="mercado-elev-sm inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90"
                     >
-                      Abrir analise
+                      Abrir análise
                     </Link>
                   </div>
                 </div>
 
-                <aside className="relative flex flex-col justify-between rounded-[22px] border border-border bg-card p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-none">
+                <aside className="relative flex flex-col justify-between rounded-2xl border border-border bg-muted/30 p-4">
                   <div>
-                    <p className="text-[12px] font-medium uppercase text-muted-foreground">Por que abrir agora</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Por que abrir agora</p>
                     <p className="mt-3 text-[15px] leading-7 text-foreground">{featuredHighlight.whyItMatters}</p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="rounded-[20px] border border-border bg-card p-4">
-                      <p className="text-[12px] font-medium uppercase text-muted-foreground">Fonte e rastreabilidade</p>
-                      <p className="mt-2 text-[14px] font-semibold text-foreground">{featuredHighlight.source.name}</p>
-                      <p className="mt-1 text-[13px] leading-6 text-muted-foreground">{featuredHighlight.source.docLabel}</p>
-                      <p className="mt-1 text-[12px] text-muted-foreground">Atualizado em {featuredHighlight.source.updatedAt}</p>
+                  <div className="mt-4 space-y-4">
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Fonte e rastreabilidade</p>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{featuredHighlight.source.name}</p>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">{featuredHighlight.source.docLabel}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Atualizado em {featuredHighlight.source.updatedAt}</p>
                     </div>
 
                     {featuredHighlight.source.url && (
                       <div className="flex flex-col gap-2">
                         <a
                           href={featuredHighlight.source.url}
-                          className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
                         >
                           <ExternalLink className="h-4 w-4" />
                           Documento externo
@@ -307,6 +310,28 @@ export function ExploreHighlightsSection({
                   getCompanyLogo={getCompanyLogo}
                 />
               ))}
+            </div>
+          )}
+
+          {/*
+            Disclosure "Ver mais destaques" — antes o estado existia mas o
+            botão que disparava `setShowAllHighlights` não estava renderizado
+            (prop órfã). Skill: progressive disclosure — o default exibe o
+            protagonista + 3 destaques; se houver mais, o usuário pode expandir
+            sob demanda sem competir com os principais.
+          */}
+          {overflowHighlights.length > 0 && (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAllHighlights((prev) => !prev)}
+                aria-expanded={showAllHighlights}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
+              >
+                {showAllHighlights
+                  ? "Mostrar menos destaques"
+                  : `Ver mais ${overflowHighlights.length} destaques`}
+              </button>
             </div>
           )}
 

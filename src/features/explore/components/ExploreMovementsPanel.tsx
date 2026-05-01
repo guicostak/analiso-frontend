@@ -88,10 +88,12 @@ function MovementCard({
 
   return (
     <article
-      className={`rounded-[22px] border border-border ${
-        featured ? "bg-card p-5 shadow-[0_18px_40px_rgba(15,23,40,0.06)] dark:shadow-none" : "bg-card p-4.5 shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none"
+      className={`relative rounded-3xl border border-border bg-card ${
+        featured ? "mercado-elev-md p-5 md:p-6" : "mercado-elev-sm p-4 md:p-5"
       }`}
     >
+      {/* Tag silenciosa — seção "Movimentos" já identificada no header da página */}
+      <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} silent />
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
@@ -99,23 +101,22 @@ function MovementCard({
               <img
                 src={row.logoUrl ?? getCompanyLogo(row.ticker)}
                 alt={`Logo ${row.ticker}`}
-                className={`${featured ? "h-11 w-11 rounded-[16px]" : "h-9 w-9 rounded-[14px]"} border border-border bg-card object-cover p-1`}
+                className={`${featured ? "h-11 w-11 rounded-2xl" : "h-9 w-9 rounded-xl"} border border-border bg-card object-cover p-1`}
               />
             )}
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
-                <p className={`${featured ? "text-[18px] leading-6" : "text-[15px] leading-6"} truncate font-semibold text-foreground`}>
-                  {row.name} <span className="text-muted-foreground">{row.ticker}</span>
-                </p>
-              </div>
-              <p className="text-[12px] font-medium text-muted-foreground">Preco {row.price} . {row.changePct}</p>
+              <p className={`${featured ? "text-lg" : "text-base"} truncate font-semibold leading-6 text-foreground`}>
+                {row.name} <span className="text-muted-foreground">{row.ticker}</span>
+              </p>
+              <p className="text-xs font-medium text-muted-foreground tabular-nums">
+                Preço {row.price} · {row.changePct}
+              </p>
             </div>
           </div>
 
-          <p className={`mt-3 ${featured ? "text-[16px] leading-6" : "text-[14px] leading-6"} font-medium text-foreground`}>{row.note}</p>
-          <p className="mt-2.5 text-[13px] leading-5 text-muted-foreground">Por que merece leitura: {whyOpenNow}</p>
-          <p className="mt-2 text-[12px] font-medium text-muted-foreground">Pilares afetados: {impactPillars}</p>
+          <p className={`mt-3 ${featured ? "text-base" : "text-sm"} font-medium leading-6 text-foreground`}>{row.note}</p>
+          <p className="mt-2.5 text-sm leading-5 text-muted-foreground">Por que merece leitura: {whyOpenNow}</p>
+          <p className="mt-2 text-xs font-medium text-muted-foreground">Pilares afetados: {impactPillars}</p>
         </div>
 
         {row.sparkline && row.sparkline.length >= 2 && (
@@ -134,14 +135,14 @@ function MovementCard({
       <div className={featured ? "mt-5 flex flex-wrap items-center gap-3" : "mt-4 flex flex-wrap items-center gap-3"}>
         <Link
           href={`/analysis/${row.ticker}`}
-          className="inline-flex h-10 items-center rounded-[14px] bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(14,147,132,0.18)] transition hover:opacity-90"
+          className="mercado-elev-sm inline-flex h-10 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90"
         >
-          Abrir analise
+          Abrir análise
         </Link>
       </div>
 
-      <div className="mt-4 text-[12px] text-muted-foreground">
-        Fonte: {row.source} . Atualizado em {row.updatedAt}
+      <div className="mt-4 text-xs text-muted-foreground">
+        Fonte: {row.source} · Atualizado em {row.updatedAt}
       </div>
     </article>
   );
@@ -187,47 +188,62 @@ export function ExploreMovementsPanel({
     <section className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[12px] font-medium uppercase text-muted-foreground">Exploracao principal</p>
-          <h2 className="mt-2 inline-flex items-center gap-2 text-[24px] font-semibold leading-7 tracking-[-0.03em] text-foreground">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Exploração principal</p>
+          <h2 className="mt-2 inline-flex items-center gap-2 text-2xl font-semibold leading-tight tracking-[-0.025em] text-foreground">
             Movimentos que pedem contexto
             <InfoTooltip
               label="Como ler esta seção"
               size={14}
               content={MOVEMENTS_SECTION_INFO}
-              contentClassName="max-w-[360px] whitespace-normal leading-relaxed p-3 bg-popover text-popover-foreground border border-border shadow-lg text-[12px]"
+              contentClassName="max-w-[360px] whitespace-normal leading-relaxed p-3 bg-popover text-popover-foreground border border-border shadow-lg text-xs"
             />
           </h2>
-          <p className="mt-2.5 max-w-[720px] text-[14px] leading-6 text-muted-foreground">
-            Primeiro a interpretacao, depois o preco. A tela organiza os movimentos do dia com tres densidades para destacar o que merece abertura imediata.
+          <p className="mt-2.5 max-w-[720px] text-sm leading-6 text-muted-foreground">
+            Primeiro a interpretação, depois o preço. A tela organiza os movimentos do dia com três densidades para destacar o que merece abertura imediata.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-card px-4 py-2 text-[11px] font-medium text-muted-foreground shadow-[0_10px_28px_rgba(15,23,40,0.05)] dark:shadow-none">
-          <Dot className="h-4 w-4 text-warning-text" />
+        <div className="mercado-elev-sm inline-flex items-center gap-1.5 self-start rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
+          <Dot className="h-4 w-4 text-warning-text" aria-hidden="true" />
           Interpretado pela Analiso
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/*
+        Segmented control (Altas / Baixas / Mais negociadas) — visualmente
+        distinto dos chips de setor (filtro): fundo único compartilhado +
+        pill deslizante. Evita confusão perceptiva entre "qual é tab" e
+        "qual é filtro de setor".
+      */}
+      <div
+        role="tablist"
+        aria-label="Tipo de movimento"
+        className="inline-flex w-fit items-center gap-1 rounded-full border border-border bg-muted/60 p-1"
+      >
         {[
           { label: "Altas", value: "altas" },
           { label: "Baixas", value: "baixas" },
           { label: "Mais negociadas", value: "negociadas" },
-        ].map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => {
-              setSelectedTab(tab.value as MoverType);
-              // Reset da paginação já é feito pelo useEffect([selectedTab]).
-            }}
-            className={`rounded-full px-4 py-2.5 text-[12px] font-medium transition ${
-              selectedTab === tab.value
-                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-[0_10px_24px_rgba(15,23,40,0.05)] dark:shadow-none"
-                : "bg-card text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        ].map((tab) => {
+          const isActive = selectedTab === tab.value;
+          return (
+            <button
+              key={tab.value}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => {
+                setSelectedTab(tab.value as MoverType);
+                // Reset da paginação já é feito pelo useEffect([selectedTab]).
+              }}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors duration-200 ${
+                isActive
+                  ? "mercado-elev-sm bg-card text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Grid de 2 colunas foi removido: a aside com 3 ilhas instrutivas
@@ -237,7 +253,7 @@ export function ExploreMovementsPanel({
           usuário já absorveu após 1 sessão. */}
       <div className="space-y-4">
           {currentMovers.length === 0 && (
-            <div className="rounded-[24px] border border-border bg-card px-6 py-5 text-[14px] leading-6 text-muted-foreground shadow-[0_14px_34px_rgba(15,23,40,0.04)] dark:shadow-none">
+            <div className="mercado-elev-sm rounded-3xl border border-border bg-card px-6 py-5 text-sm leading-6 text-muted-foreground">
               {tabEmptyStateMap[selectedTab]}
             </div>
           )}
@@ -259,19 +275,18 @@ export function ExploreMovementsPanel({
               {compactRows.map((row) => (
                 <article
                   key={`${row.ticker}-${row.type}`}
-                  className="rounded-[18px] border border-border bg-card px-4 py-3.5 shadow-[0_12px_28px_rgba(15,23,40,0.03)] dark:shadow-none"
+                  className="mercado-elev-sm mercado-island-hover relative rounded-2xl border border-border bg-card px-4 py-3.5"
                 >
+                  {/* Tag silenciosa — seção Movimentos já identificada acima */}
+                  <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} silent />
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <SectionCategoryTag icon={TrendingUp} label="Movimentos" categoryId={MOVIMENTOS_CATEGORY_ID} />
-                        <p className="text-[15px] font-semibold leading-6 text-foreground">
-                          {row.name} <span className="text-muted-foreground">{row.ticker}</span>
-                        </p>
-                      </div>
-                      <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{row.note}</p>
-                      <p className="mt-2 text-[12px] font-medium text-muted-foreground">
-                        {movementInsights[row.ticker]?.impactPillars ?? "Caixa e Margens"} . {row.price} . {row.changePct}
+                      <p className="text-[15px] font-semibold leading-6 text-foreground">
+                        {row.name} <span className="text-muted-foreground">{row.ticker}</span>
+                      </p>
+                      <p className="mt-1 text-sm leading-5 text-muted-foreground">{row.note}</p>
+                      <p className="mt-2 text-xs font-medium text-muted-foreground tabular-nums">
+                        {movementInsights[row.ticker]?.impactPillars ?? "Caixa e Margens"} · {row.price} · {row.changePct}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
@@ -288,9 +303,9 @@ export function ExploreMovementsPanel({
                       )}
                       <Link
                         href={`/analysis/${row.ticker}`}
-                        className="inline-flex h-9 items-center rounded-[13px] bg-brand px-4 text-[12px] font-semibold text-white"
+                        className="inline-flex h-9 items-center rounded-xl bg-brand px-4 text-xs font-semibold text-white transition-opacity duration-200 hover:opacity-90"
                       >
-                        Abrir analise
+                        Abrir análise
                       </Link>
                     </div>
                   </div>
@@ -309,13 +324,13 @@ export function ExploreMovementsPanel({
           */}
           {!compact && totalMovers > PAGE_SIZE && (
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <p className="text-[12px] text-muted-foreground">
+              <p className="text-xs tabular-nums text-muted-foreground">
                 Mostrando {Math.min(visibleCount, totalMovers)} de {totalMovers}
               </p>
               {canLoadMore && (
                 <button
                   onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
-                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-semibold text-foreground transition hover:bg-hover"
+                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors duration-200 hover:bg-accent"
                 >
                   Carregar mais {Math.min(PAGE_SIZE, hiddenCount)}
                 </button>
@@ -323,7 +338,7 @@ export function ExploreMovementsPanel({
               {canLoadMore && totalMovers > visibleCount + PAGE_SIZE && (
                 <button
                   onClick={() => setVisibleCount(totalMovers)}
-                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
                 >
                   Mostrar todos ({totalMovers})
                 </button>
@@ -331,7 +346,7 @@ export function ExploreMovementsPanel({
               {visibleCount > PAGE_SIZE && (
                 <button
                   onClick={() => setVisibleCount(PAGE_SIZE)}
-                  className="inline-flex items-center rounded-full px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
                 >
                   Mostrar menos
                 </button>

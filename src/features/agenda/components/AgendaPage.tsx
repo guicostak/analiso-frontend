@@ -21,6 +21,7 @@ export function AgendaPage() {
     selectedEvent,
     setSelectedEvent,
     uniqueTickers,
+    hasWatchlist,
     navigation,
     filters,
   } = useAgenda();
@@ -78,7 +79,11 @@ export function AgendaPage() {
               {/* Conteúdo principal */}
               <div className="flex flex-1 flex-col overflow-hidden min-w-0">
                 {!eventsInCurrentView ? (
-                  <AgendaEmptyState reason={hasEvents ? 'no-events' : 'no-watchlist'} />
+                  // Empty state distingue:
+                  //   - watchlist vazia → "adicione empresas à watchlist"
+                  //   - watchlist cheia mas sem evento no período → "sem
+                  //     eventos no período"
+                  <AgendaEmptyState reason={hasWatchlist ? 'no-events' : 'no-watchlist'} />
                 ) : navigation.viewMode === 'semana' ? (
                   <AgendaWeekView
                     weekDates={navigation.weekDates}

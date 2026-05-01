@@ -27,13 +27,16 @@ export function ExploreMacroBrGrid({ bundle }: ExploreMacroBrGridProps) {
 
   return (
     <section className="space-y-4" aria-label="Macro Brasil">
-      <header>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Contexto macroeconômico
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Macro Brasil
-        </h3>
+      <header className="flex items-center gap-2">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Contexto macroeconômico
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Macro Brasil
+          </h3>
+        </div>
       </header>
 
       {/* 3 indicadores no topo */}

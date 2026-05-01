@@ -63,20 +63,17 @@ function SectorCell({ item }: { item: SectorHeatmapItem }) {
   return (
     <article
       className={`
-        group relative flex flex-col justify-between gap-2 rounded-xl border p-3
-        transition-all duration-200
-        hover:shadow-md dark:hover:shadow-none
+        mercado-island-hover group relative flex flex-col justify-between gap-2 rounded-2xl border p-3.5
         ${cls.bg} ${cls.border}
       `}
       aria-label={`Setor ${item.sector}: variação média ${pctLabel}, ${item.companiesCount ?? 0} empresas`}
     >
+      {/* Tag silenciosa — categoria já explícita no header do heatmap */}
+      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" silent />
       <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-start gap-1.5">
-          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" className="mt-0.5" />
-          <h4 className="text-[12px] font-semibold leading-tight text-foreground">
-            {item.sector}
-          </h4>
-        </div>
+        <h4 className="min-w-0 text-xs font-semibold leading-tight text-foreground">
+          {item.sector}
+        </h4>
         <span className={`text-sm font-semibold tabular-nums ${cls.text}`}>
           {pctLabel}
         </span>
@@ -98,15 +95,18 @@ export function ExploreSectorHeatmap({ heatmap }: ExploreSectorHeatmapProps) {
 
   return (
     <section className="space-y-4" aria-label="Heatmap setorial">
-      <header className="flex items-end justify-between">
-        <div>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Performance por setor
-            <InfoTooltip label="Heatmap setorial" content={SECTOR_HEATMAP_INFO} />
-          </p>
-          <h3 className="text-lg font-semibold tracking-tight text-foreground">
-            Heatmap setorial
-          </h3>
+      <header className="flex items-end justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Performance por setor
+              <InfoTooltip label="Heatmap setorial" content={SECTOR_HEATMAP_INFO} />
+            </p>
+            <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+              Heatmap setorial
+            </h3>
+          </div>
         </div>
         {heatmap?.asOfLabel && (
           <span className="text-[11px] text-muted-foreground">
@@ -116,7 +116,7 @@ export function ExploreSectorHeatmap({ heatmap }: ExploreSectorHeatmapProps) {
       </header>
 
       {sectors.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
           Sem dados setoriais agregados para esta data.
         </div>
       ) : (

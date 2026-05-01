@@ -31,7 +31,12 @@ const STATUS_CONFIG: Record<string, { label: string; tone: string }> = {
   PRE_MARKET: { label: "Pré-abertura",     tone: "warning" },
 };
 
-function StatusPill({ status }: { status: string | null }) {
+/**
+ * Pill de status do mercado (aberto/fechado/pré-abertura). Exportado
+ * pra ser reusado fora do ribbon — ex: ilha "Panorama global" no
+ * dashboard, que monta o mesmo conteúdo num shell diferente.
+ */
+export function MarketStatusPill({ status }: { status: string | null }) {
   const cfg = (status && STATUS_CONFIG[status]) || STATUS_CONFIG.CLOSED;
   const toneClass =
     cfg.tone === "success"
@@ -117,8 +122,18 @@ function Skeleton() {
   );
 }
 
-export function ExploreMarketRibbon({ ribbon, isLoading }: ExploreMarketRibbonProps) {
-  const tickers = ribbon?.tickers ?? [];
+/**
+ * Tape interna do ribbon — apenas a faixa de marquee + skeleton/empty state.
+ * Sem card, sem header. Exportado pra ser embutido em outras telas (ex:
+ * ilha "Panorama global" no dashboard) sem produzir cards aninhados.
+ */
+export function MarketTickerTape({
+  tickers,
+  isLoading,
+}: {
+  tickers: IndexCard[];
+  isLoading?: boolean;
+}) {
   const hasTickers = tickers.length > 0;
 
   // Duração proporcional à quantidade: ~5s por ticker. Garante legibilidade
@@ -126,55 +141,62 @@ export function ExploreMarketRibbon({ ribbon, isLoading }: ExploreMarketRibbonPr
   const durationSec = Math.max(30, tickers.length * 5);
 
   return (
-    <div className="rounded-[20px] border border-border bg-card shadow-sm dark:shadow-none overflow-hidden">
+    <div
+      className="
+        relative overflow-hidden
+        [mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]
+        [-webkit-mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]
+      "
+      aria-label="Tickers globais em scroll contínuo"
+    >
+      {isLoading && !hasTickers ? (
+        <Skeleton />
+      ) : hasTickers ? (
+        <div
+          className="
+            mercado-ticker-track flex w-max
+            group-hover:[animation-play-state:paused] hover:[animation-play-state:paused]
+            motion-reduce:animate-none
+          "
+          style={{ animation: `mercado-ticker-scroll ${durationSec}s linear infinite` }}
+        >
+          {/* Dois sets idênticos — quando o primeiro sai de cena,
+              o segundo já está exatamente no lugar → loop invisível. */}
+          {tickers.map((t) => (
+            <RibbonCell key={`a-${t.symbol}`} ticker={t} />
+          ))}
+          {tickers.map((t) => (
+            <RibbonCell key={`b-${t.symbol}`} ticker={t} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex min-h-[58px] w-full items-center justify-center px-4 py-2 text-xs text-muted-foreground">
+          Dados em ingestão — confira novamente em breve.
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ExploreMarketRibbon({ ribbon, isLoading }: ExploreMarketRibbonProps) {
+  const tickers = ribbon?.tickers ?? [];
+
+  return (
+    <div className="mercado-elev-sm overflow-hidden rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           Panorama global
           <InfoTooltip label="Panorama global" content={RIBBON_INFO.panorama} />
         </span>
         <div className="flex items-center gap-1.5">
-          <StatusPill status={ribbon?.marketStatus ?? null} />
+          <MarketStatusPill status={ribbon?.marketStatus ?? null} />
           <InfoTooltip label="Status do mercado" content={RIBBON_INFO.marketStatus} />
         </div>
       {/* Fim do header */}
       </div>
 
-      {/* Ticker tape */}
-      <div
-        className="
-          relative overflow-hidden
-          [mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]
-          [-webkit-mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]
-        "
-        aria-label="Tickers globais em scroll contínuo"
-      >
-        {isLoading && !hasTickers ? (
-          <Skeleton />
-        ) : hasTickers ? (
-          <div
-            className="
-              mercado-ticker-track flex w-max
-              group-hover:[animation-play-state:paused] hover:[animation-play-state:paused]
-              motion-reduce:animate-none
-            "
-            style={{ animation: `mercado-ticker-scroll ${durationSec}s linear infinite` }}
-          >
-            {/* Dois sets idênticos — quando o primeiro sai de cena,
-                o segundo já está exatamente no lugar → loop invisível. */}
-            {tickers.map((t) => (
-              <RibbonCell key={`a-${t.symbol}`} ticker={t} />
-            ))}
-            {tickers.map((t) => (
-              <RibbonCell key={`b-${t.symbol}`} ticker={t} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex min-h-[58px] w-full items-center justify-center px-4 py-2 text-xs text-muted-foreground">
-            Dados em ingestão — confira novamente em breve.
-          </div>
-        )}
-      </div>
+      <MarketTickerTape tickers={tickers} isLoading={isLoading} />
     </div>
   );
 }

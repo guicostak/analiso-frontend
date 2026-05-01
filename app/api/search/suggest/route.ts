@@ -7,11 +7,13 @@ interface SuggestResult {
   companyName: string;
   exchange:    string;
   type:        string;
+  logoUrl?:    string | null;
 }
 
 interface BackendItem {
   ticker:      string;
   companyName: string;
+  logoUrl?:    string | null;
 }
 
 interface BackendSearchResponse {
@@ -76,16 +78,18 @@ export async function GET(request: NextRequest) {
         companyName: item.companyName,
         exchange:    "BOVESPA",
         type:        "stock",
+        logoUrl:     item.logoUrl ?? null,
         _score:      scoreResult(item.ticker, item.companyName, q.trim()),
       }))
       .filter((item) => item._score > 0)
       .sort((a, b) => b._score - a._score)
       .slice(0, safeLimit)
-      .map(({ ticker, companyName, exchange, type }) => ({
+      .map(({ ticker, companyName, exchange, type, logoUrl }) => ({
         ticker,
         companyName,
         exchange,
         type,
+        logoUrl,
       }));
 
     return NextResponse.json({ results, query: q, total: results.length });

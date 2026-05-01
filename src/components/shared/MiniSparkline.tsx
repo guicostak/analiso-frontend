@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AreaChart, Area, YAxis, ReferenceLine, ReferenceDot } from 'recharts';
 
@@ -70,6 +70,35 @@ export function MiniSparkline({
 
   // ID estável por instância para o gradient do fill.
   const gradientId = useMemo(() => nextGradientId(), []);
+
+  /**
+   * Dismissal defensivo do tooltip.
+   *
+   * `onMouseLeave` só dispara se o mouse SE MOVER pra fora do elemento. Mas se o
+   * usuário rola a página (scroll/wheel), redimensiona a janela ou troca de aba
+   * sem mexer o mouse, o sparkline desliza pra fora do cursor SEM disparar o
+   * leave — e o tooltip `position: fixed` fica preso flutuando na tela.
+   *
+   * Solução: enquanto houver tooltip ativo, escutamos qualquer evento que
+   * invalide a posição do sparkline em relação ao cursor e limpamos.
+   */
+  useEffect(() => {
+    if (!tooltip) return;
+    const dismiss = () => setTooltip(null);
+    // capture=true garante que capturamos scroll de QUALQUER ancestral rolável.
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('wheel', dismiss, { passive: true });
+    window.addEventListener('resize', dismiss);
+    window.addEventListener('blur', dismiss);
+    document.addEventListener('visibilitychange', dismiss);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('wheel', dismiss);
+      window.removeEventListener('resize', dismiss);
+      window.removeEventListener('blur', dismiss);
+      document.removeEventListener('visibilitychange', dismiss);
+    };
+  }, [tooltip]);
 
   const labelsUsable = Array.isArray(labels) && labels.length === data.length;
   const hasEnoughData = data.length >= 2;

@@ -10,13 +10,14 @@ import {
   HeroMarqueeSection,
   HeroSection,
   ScrollReveal,
-  SolutionSection,
   StepsSection,
 } from "./LandingSections";
 import { AnalysisFlowSection } from "./AnalysisFlowSection";
+import { Bbas3AnalysisShowcase } from "./Bbas3AnalysisShowcase";
 import { ReadableCompanySection } from "./ReadableCompanySection";
 import { useAuth } from "@/src/features/auth/AuthContext";
 import { LandingNav } from "@/src/components/layout/LandingNav";
+import { WaitlistHero } from "@/src/features/waitlist/WaitlistHero";
 
 export function LandingPage() {
   const router = useRouter();
@@ -36,15 +37,14 @@ export function LandingPage() {
     <div className="min-h-screen bg-card text-foreground" style={{ fontSize: '16px' }}>
       <LandingNav />
       <main>
+        <WaitlistHero exploreTargetId="conheca-a-ferramenta" />
+        <div id="conheca-a-ferramenta" />
         <HeroSection />
         <ScrollReveal delay={0.02}>
           <HeroMarqueeSection />
         </ScrollReveal>
         <ScrollReveal delay={0.03}>
           <AnalysisMomentsSection />
-        </ScrollReveal>
-        <ScrollReveal delay={0.04}>
-          <SolutionSection />
         </ScrollReveal>
         <ScrollReveal delay={0.05}>
           <StepsSection />
@@ -54,6 +54,9 @@ export function LandingPage() {
         </ScrollReveal>
         <ScrollReveal delay={0.04}>
           <AnalysisFlowSection />
+        </ScrollReveal>
+        <ScrollReveal delay={0.04}>
+          <Bbas3AnalysisShowcase />
         </ScrollReveal>
         <ScrollReveal delay={0.05}>
           <DarkCapabilities />

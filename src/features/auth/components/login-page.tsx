@@ -1,28 +1,32 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { GoogleButton, type GoogleAuthUser } from "./GoogleButton";
 import { EmailAuthForm } from "./EmailAuthForm";
 import { HeroShowcase } from "./HeroShowcase";
 import { LandingNav } from "@/src/components/layout/LandingNav";
 import { useAuth } from "@/src/features/auth/AuthContext";
+import { readReturnTo, clearReturnTo } from "@/src/features/auth/returnTo";
 import type { EmailAuthUser } from "../interfaces/auth.interfaces";
 
 const ONBOARDING_COMPLETE_KEY = "analiso_onboarding_completed";
 
 export function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading } = useAuth();
 
   const justLoggedIn = useRef(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && !justLoggedIn.current) {
-      router.replace("/painel");
+      const dest = readReturnTo(searchParams) ?? "/painel";
+      clearReturnTo();
+      router.replace(dest);
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, searchParams]);
 
   // While restoring session, show nothing to avoid login form flash
   if (isLoading || (!isLoading && isAuthenticated && !justLoggedIn.current)) {
@@ -46,9 +50,15 @@ export function LoginPage() {
         provider,
       },
       data.token,
+      data.refreshToken ?? null,
+      data.expiresIn ?? null,
     );
 
-    router.replace(data.isNewUser ? "/onboarding" : "/painel");
+    // Novos usuários sempre vão para onboarding; usuários existentes voltam
+    // para a tela que tentaram acessar (se houver), ou para /painel.
+    const dest = data.isNewUser ? "/onboarding" : (readReturnTo(searchParams) ?? "/painel");
+    clearReturnTo();
+    router.replace(dest);
   };
 
   const handleError = () => {

@@ -37,16 +37,11 @@ interface MiniCardProps {
 
 function MiniCard({ icon, label, children, hint, info }: MiniCardProps) {
   return (
-    <article
-      className="
-        flex min-h-[120px] flex-col gap-2 rounded-2xl border border-border bg-card p-4
-        shadow-sm dark:shadow-none
-        transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none
-      "
-    >
+    <article className="mercado-elev-sm mercado-island-hover flex min-h-[120px] flex-col gap-2 rounded-2xl border border-border bg-card p-4">
+      {/* Tag silenciosa — mantém data-attr p/ analytics, sem duplicar no visual (o header do Risk Panel já sinaliza a seção) */}
+      <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" silent />
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
           {label}
           {info && <InfoTooltip label={label} content={info} />}
         </span>
@@ -366,13 +361,16 @@ export function ExploreRiskPanel({ riskPanel }: ExploreRiskPanelProps) {
 
   return (
     <section className="space-y-4" aria-label="Painel de risco e humor">
-      <header>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Risco e humor
-        </p>
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
-          Painel de risco
-        </h3>
+      <header className="flex items-center gap-2">
+        <SectionCategoryTag icon={Globe} label="Contexto" categoryId="contexto-mercado" />
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Risco e humor
+          </p>
+          <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground">
+            Painel de risco
+          </h3>
+        </div>
       </header>
       <div
         className="

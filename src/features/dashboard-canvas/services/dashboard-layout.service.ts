@@ -13,6 +13,7 @@
  */
 
 import { apiFetch, ApiError } from "@/src/lib/api";
+import { API_BASE_URL } from "@/src/lib/api-base";
 import { defaultLayout } from "../defaults/defaultLayout";
 import type { DashboardLayout } from "../interfaces/layout.types";
 import { dtoToLayout, layoutToDto, type LayoutDTO } from "../mappers/layout.mapper";
@@ -54,6 +55,46 @@ export async function putLayout(
     token,
   );
   return dtoToLayout(saved);
+}
+
+/**
+ * Variante fire-and-forget do PUT pra usar em `pagehide`/`beforeunload`.
+ *
+ * `keepalive: true` instrui o browser a manter o request vivo MESMO depois
+ * que a página descarrega — fix pro bug "adicionei ilha, dei F5, mudança
+ * sumiu" (o PUT debounced era cancelado no unmount antes de sair).
+ *
+ * Limitações do keepalive:
+ *  - Body máximo: 64KB (nosso layout JSON tem ~5KB, OK)
+ *  - Sem retry, sem refresh de token 401 — best-effort puro
+ *  - Não retorna Promise utilizável (a página tá indo embora)
+ *
+ * Browsers: Chrome 66+, Firefox 65+, Safari 11.1+. Safari pré-11.1 ignora
+ * a flag — request pode ser cancelado, mas o cleanup do unmount cobre o
+ * caso de SPA nav (que é o mais comum).
+ */
+export function putLayoutKeepalive(
+  token: string | null,
+  layout: DashboardLayout,
+): void {
+  const dto = layoutToDto(layout);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    fetch(`${API_BASE_URL}${ENDPOINT}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(dto),
+      keepalive: true,
+    }).catch(() => {
+      // página tá descarregando, sem onde mostrar erro
+    });
+  } catch {
+    // browser velho que não suporta keepalive — ignora
+  }
 }
 
 /** Restaura o layout default — Fase 3 expõe via `resetLayout()`. */
