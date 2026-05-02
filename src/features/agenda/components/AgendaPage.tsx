@@ -11,7 +11,6 @@ import { AgendaListView } from './AgendaListView';
 import { AgendaEventDetail } from './AgendaEventDetail';
 import { AgendaSkeleton } from './AgendaSkeleton';
 import { AgendaEmptyState } from './AgendaEmptyState';
-import { getEventsForDate } from '../utils/agenda.utils';
 
 export function AgendaPage() {
   const {
@@ -28,22 +27,28 @@ export function AgendaPage() {
 
   const hasEvents = filteredEvents.length > 0;
 
-  // Verifica se há eventos visíveis na janela atual de navegação
-  const eventsInCurrentView = (() => {
-    if (navigation.viewMode === 'lista') return hasEvents;
-    if (navigation.viewMode === 'semana') {
-      return navigation.weekDates.some(
-        (d) => getEventsForDate(filteredEvents, d).length > 0,
-      );
-    }
-    return filteredEvents.some((e) => {
-      const [y, m] = e.date.split('-').map(Number);
-      return (
-        y === navigation.referenceDate.getFullYear() &&
-        m - 1 === navigation.referenceDate.getMonth()
-      );
-    });
-  })();
+  /**
+   * Decide se mostra o empty state em vez do grid/lista.
+   *
+   * **Lógica:**
+   *   - Sem watchlist → empty state "adicione empresas" (qualquer view)
+   *   - Modo lista vazia → empty state "sem eventos no período"
+   *   - Modos `semana` e `mês` → SEMPRE mostra o grid, mesmo sem eventos
+   *
+   * **Por que sempre mostrar o grid em semana/mês:** o calendário em si é
+   * o instrumento de navegação. Quando o mês atual está vazio, o usuário
+   * PRECISA ver o grid pra (a) entender qual mês está ativo, (b) navegar
+   * pra outros meses procurando eventos, (c) ler os dias vazios como
+   * informação válida ("não tem evento aqui mesmo"). Antes a página
+   * fazia render do empty state cobrindo o grid, e o usuário ficava sem
+   * saber como sair daquela tela.
+   */
+  const showEmptyState =
+    !hasWatchlist ||
+    (navigation.viewMode === 'lista' && !hasEvents);
+
+  const emptyStateReason: 'no-watchlist' | 'no-events' =
+    !hasWatchlist ? 'no-watchlist' : 'no-events';
 
   return (
     <div className="min-h-screen bg-background">
@@ -78,12 +83,8 @@ export function AgendaPage() {
 
               {/* Conteúdo principal */}
               <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-                {!eventsInCurrentView ? (
-                  // Empty state distingue:
-                  //   - watchlist vazia → "adicione empresas à watchlist"
-                  //   - watchlist cheia mas sem evento no período → "sem
-                  //     eventos no período"
-                  <AgendaEmptyState reason={hasWatchlist ? 'no-events' : 'no-watchlist'} />
+                {showEmptyState ? (
+                  <AgendaEmptyState reason={emptyStateReason} />
                 ) : navigation.viewMode === 'semana' ? (
                   <AgendaWeekView
                     weekDates={navigation.weekDates}
