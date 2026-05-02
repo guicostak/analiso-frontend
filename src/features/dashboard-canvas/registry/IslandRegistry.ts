@@ -7,11 +7,25 @@
  *   - os metadados estáticos (`IslandMeta`) — label, descrição, ícone,
  *     categoria, baseSize no grid de 12 colunas e configSchema.
  *
+ * **Lazy-loading via `next/dynamic`**: cada ilha é seu próprio chunk JS,
+ * baixado on-demand. Reduz drasticamente o bundle inicial de `/painel`
+ * (antes carregava os 25 componentes mesmo pra usuários que não usam).
+ *
+ * **Pré-warm coordenado**: o `useDashboardPrefetch` chama `preload()` em
+ * cada ilha presente no layout durante a tela de loading — paralelo aos
+ * data fetches. Quando a ilha renderiza, o chunk já está em memória.
+ *
+ * Fallback durante download: `IslandSkeleton` (placeholder pulse que ocupa
+ * a célula inteira pra manter o grid estável — zero CLS).
+ *
  * Tamanhos canônicos pós-MVP:
- *   - 4×2  (compacto, 1/3 width)
- *   - 6×3  (médio, 1/2 width)
- *   - 12×3 (full width)
+ *   - 4×1 / 4×2  (compactos)
+ *   - 6×3        (médios, 1/2 width)
+ *   - 12×1 / 12×3 (full width)
  */
+
+import { createElement, type ComponentType } from "react";
+import dynamic from "next/dynamic";
 
 import type {
   IslandComponent,
@@ -21,31 +35,61 @@ import type {
 } from "../interfaces/island.types";
 import type { IslandKind } from "../interfaces/layout.types";
 
-import { PrioridadeDoDiaIsland }     from "../components/islands/PrioridadeDoDiaIsland";
-import { FeedMudancasIsland }        from "../components/islands/FeedMudancasIsland";
-import { AgendaIsland }              from "../components/islands/AgendaIsland";
-import { SinaisWatchlistIsland }     from "../components/islands/SinaisWatchlistIsland";
-import { CicloMercadoIsland }        from "../components/islands/CicloMercadoIsland";
-import { SugeridosIsland }           from "../components/islands/SugeridosIsland";
-import { NotificacoesIsland }        from "../components/islands/NotificacoesIsland";
-import { PerformanceVsIbovIsland }   from "../components/islands/PerformanceVsIbovIsland";
-import { NoticiasMercadoIsland }     from "../components/islands/NoticiasMercadoIsland";
-import { PanoramaGlobalIsland }      from "../components/islands/PanoramaGlobalIsland";
-import { ResumoIndicesIsland }       from "../components/islands/ResumoIndicesIsland";
-import { MacroGlobalIsland }         from "../components/islands/MacroGlobalIsland";
-import { MacroBrasilIsland }         from "../components/islands/MacroBrasilIsland";
-import { AtalhoWatchlistIsland }     from "../components/islands/AtalhoWatchlistIsland";
-import { HeatmapSetorialIsland }     from "../components/islands/HeatmapSetorialIsland";
-import { VolatilidadeIsland }        from "../components/islands/VolatilidadeIsland";
-import { MoodMercadoIsland }         from "../components/islands/MoodMercadoIsland";
-import { FearGreedIsland }           from "../components/islands/FearGreedIsland";
-import { BreadthMercadoIsland }      from "../components/islands/BreadthMercadoIsland";
-import { VixDxyIsland }              from "../components/islands/VixDxyIsland";
-import { CurvaDiIsland }             from "../components/islands/CurvaDiIsland";
-import { ComparacoesMacroIsland }    from "../components/islands/ComparacoesMacroIsland";
-import { AlfaSetorialIsland }        from "../components/islands/AlfaSetorialIsland";
-import { ExDividendosIsland }        from "../components/islands/ExDividendosIsland";
-import { SectionHeaderIsland }       from "../components/islands/SectionHeaderIsland";
+import { IslandSkeleton } from "../components/shared/IslandSkeleton";
+
+// ─── Helper de lazy import ───────────────────────────────────────────────────
+// Wrapper sobre `next/dynamic` configurado pra ilhas:
+//   - `loading`: skeleton ocupando a célula inteira (mantém grid estável,
+//     zero CLS quando a ilha real renderiza).
+//   - `ssr: false`: ilhas usam localStorage / IntersectionObserver /
+//     ResizeObserver — inúteis no servidor, e SSR delas geraria warnings
+//     de hydration mismatch.
+//
+// Componentes retornados expõem `preload()` (do next/dynamic) — usado pelo
+// `useDashboardPrefetch` durante a tela de loading pra baixar JS sem
+// montar componente. Tempo total da loading vira `max(dados, JS)` em vez
+// de `dados + JS`.
+
+function lazyIsland(
+  importer: () => Promise<Record<string, unknown>>,
+  exportName: string,
+): IslandComponent {
+  return dynamic(
+    () => importer().then((mod) => mod[exportName] as ComponentType<unknown>),
+    {
+      loading: () => createElement(IslandSkeleton),
+      ssr: false,
+    },
+  ) as unknown as IslandComponent;
+}
+
+// Cada ilha vira chunk próprio. Bundle inicial agora carrega só este
+// registry (metadados leves) + IslandSkeleton.
+const PrioridadeDoDiaIsland     = lazyIsland(() => import("../components/islands/PrioridadeDoDiaIsland"),     "PrioridadeDoDiaIsland");
+const FeedMudancasIsland        = lazyIsland(() => import("../components/islands/FeedMudancasIsland"),        "FeedMudancasIsland");
+const AgendaIsland              = lazyIsland(() => import("../components/islands/AgendaIsland"),              "AgendaIsland");
+const SinaisWatchlistIsland     = lazyIsland(() => import("../components/islands/SinaisWatchlistIsland"),     "SinaisWatchlistIsland");
+const CicloMercadoIsland        = lazyIsland(() => import("../components/islands/CicloMercadoIsland"),        "CicloMercadoIsland");
+const SugeridosIsland           = lazyIsland(() => import("../components/islands/SugeridosIsland"),           "SugeridosIsland");
+const NotificacoesIsland        = lazyIsland(() => import("../components/islands/NotificacoesIsland"),        "NotificacoesIsland");
+const PerformanceVsIbovIsland   = lazyIsland(() => import("../components/islands/PerformanceVsIbovIsland"),   "PerformanceVsIbovIsland");
+const NoticiasMercadoIsland     = lazyIsland(() => import("../components/islands/NoticiasMercadoIsland"),     "NoticiasMercadoIsland");
+const PanoramaGlobalIsland      = lazyIsland(() => import("../components/islands/PanoramaGlobalIsland"),      "PanoramaGlobalIsland");
+const ResumoIndicesIsland       = lazyIsland(() => import("../components/islands/ResumoIndicesIsland"),       "ResumoIndicesIsland");
+const MacroGlobalIsland         = lazyIsland(() => import("../components/islands/MacroGlobalIsland"),         "MacroGlobalIsland");
+const MacroBrasilIsland         = lazyIsland(() => import("../components/islands/MacroBrasilIsland"),         "MacroBrasilIsland");
+const AtalhoWatchlistIsland     = lazyIsland(() => import("../components/islands/AtalhoWatchlistIsland"),     "AtalhoWatchlistIsland");
+const HeatmapSetorialIsland     = lazyIsland(() => import("../components/islands/HeatmapSetorialIsland"),     "HeatmapSetorialIsland");
+const VolatilidadeIsland        = lazyIsland(() => import("../components/islands/VolatilidadeIsland"),        "VolatilidadeIsland");
+const MoodMercadoIsland         = lazyIsland(() => import("../components/islands/MoodMercadoIsland"),         "MoodMercadoIsland");
+const FearGreedIsland           = lazyIsland(() => import("../components/islands/FearGreedIsland"),           "FearGreedIsland");
+const BreadthMercadoIsland      = lazyIsland(() => import("../components/islands/BreadthMercadoIsland"),      "BreadthMercadoIsland");
+const VixDxyIsland              = lazyIsland(() => import("../components/islands/VixDxyIsland"),              "VixDxyIsland");
+const CurvaDiIsland             = lazyIsland(() => import("../components/islands/CurvaDiIsland"),             "CurvaDiIsland");
+const ComparacoesMacroIsland    = lazyIsland(() => import("../components/islands/ComparacoesMacroIsland"),    "ComparacoesMacroIsland");
+const AlfaSetorialIsland        = lazyIsland(() => import("../components/islands/AlfaSetorialIsland"),        "AlfaSetorialIsland");
+const ExDividendosIsland        = lazyIsland(() => import("../components/islands/ExDividendosIsland"),        "ExDividendosIsland");
+const SectionHeaderIsland       = lazyIsland(() => import("../components/islands/SectionHeaderIsland"),       "SectionHeaderIsland");
 
 export interface IslandRegistryEntry {
   meta:      IslandMeta;

@@ -14,11 +14,19 @@
 
 import { apiFetch, ApiError } from "@/src/lib/api";
 import { API_BASE_URL } from "@/src/lib/api-base";
+import { cacheable, invalidate } from "@/src/lib/request-cache";
 import { defaultLayout } from "../defaults/defaultLayout";
 import type { DashboardLayout } from "../interfaces/layout.types";
 import { dtoToLayout, layoutToDto, type LayoutDTO } from "../mappers/layout.mapper";
 
 const ENDPOINT = "/api/me/dashboard-layout";
+
+/**
+ * Chave de cache do layout. Sem userId no key porque o token é injetado
+ * no header pelo apiFetch — o cache vive na sessão do browser, não há
+ * cross-user contamination.
+ */
+const LAYOUT_CACHE_KEY = "dashboard-layout";
 
 export class LayoutNotFoundError extends Error {
   constructor() {
@@ -30,17 +38,24 @@ export class LayoutNotFoundError extends Error {
 /**
  * Busca o layout salvo do usuário. Lança `LayoutNotFoundError` quando o
  * backend devolver 404 — caller deve fallback para `defaultLayout`.
+ *
+ * Wrapper em `cacheable`: o `useDashboardPrefetch` dispara essa call
+ * durante a tela de loading, e quando o `useDashboardLayout` monta logo
+ * em seguida, hita o cache em vez de fazer 2 requests. TTL curto (90s)
+ * mantém freshness pra navegação SPA.
  */
 export async function getLayout(token: string | null): Promise<DashboardLayout> {
-  try {
-    const dto = await apiFetch<LayoutDTO>(ENDPOINT, { method: "GET" }, token);
-    return dtoToLayout(dto);
-  } catch (err: unknown) {
-    if (err instanceof ApiError && err.status === 404) {
-      throw new LayoutNotFoundError();
+  return cacheable(LAYOUT_CACHE_KEY, async () => {
+    try {
+      const dto = await apiFetch<LayoutDTO>(ENDPOINT, { method: "GET" }, token);
+      return dtoToLayout(dto);
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status === 404) {
+        throw new LayoutNotFoundError();
+      }
+      throw err;
     }
-    throw err;
-  }
+  });
 }
 
 /** Persiste o layout do usuário (overwrite completo). */
@@ -54,6 +69,10 @@ export async function putLayout(
     { method: "PUT", body: JSON.stringify(dto) },
     token,
   );
+  // Invalida cache pra que próximo getLayout pegue o estado atualizado
+  // (em outra aba/sessão SPA). O componente atual já atualiza o state
+  // localmente, então não precisa re-fetchar imediatamente.
+  invalidate(LAYOUT_CACHE_KEY);
   return dtoToLayout(saved);
 }
 
@@ -107,5 +126,6 @@ export async function resetLayout(token: string | null): Promise<DashboardLayout
       throw err;
     }
   }
+  invalidate(LAYOUT_CACHE_KEY);
   return defaultLayout;
 }
