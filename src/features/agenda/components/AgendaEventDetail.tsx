@@ -4,6 +4,7 @@ import { X, ExternalLink, ArrowRight, Building2, Tag, BarChart2, FileText, Bankn
 import { useRouter } from 'next/navigation';
 import { AgendaEventBadge } from './AgendaEventBadge';
 import { PILLAR_LABELS } from '../constants/agenda.constants';
+import { formatCountdown } from '../utils/agenda.utils';
 import type { AgendaEvent } from '../interfaces/agenda.interfaces';
 
 interface AgendaEventDetailProps {
@@ -63,10 +64,13 @@ export function AgendaEventDetail({ event, onClose }: AgendaEventDetailProps) {
           />
         )}
 
+        {/* Data + countdown unificado — formatCountdown lida com Hoje/
+            Amanhã/Ontem/passado/futuro. Antes a string omitia info pra
+            eventos passados ("daysUntil !== null" filtrava). */}
         <DetailRow
           icon={<Tag size={14} />}
           label="Data"
-          value={`${event.formattedDate}${event.isToday ? ' — Hoje' : event.daysUntil === 1 ? ' — Amanhã' : event.daysUntil !== null ? ` — Em ${event.daysUntil} dias` : ''}`}
+          value={`${event.formattedDate} — ${formatCountdown(event.date)}`}
         />
 
         {pillarLabel && (

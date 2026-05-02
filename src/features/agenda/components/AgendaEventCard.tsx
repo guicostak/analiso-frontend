@@ -2,6 +2,7 @@
 
 import { AgendaEventBadge } from './AgendaEventBadge';
 import { AGENDA_EVENT_CONFIG } from '../constants/agenda.constants';
+import { formatCountdown } from '../utils/agenda.utils';
 import type { AgendaEvent } from '../interfaces/agenda.interfaces';
 
 interface AgendaEventCardProps {
@@ -63,17 +64,14 @@ export function AgendaEventCard({ event, isSelected, onClick, compact = false }:
         </p>
       )}
 
-      {/* Countdown */}
+      {/* Countdown — formatCountdown lida com TODOS os casos:
+          Hoje / Amanhã / Ontem / "Em N dias" / "Há N dias".
+          Antes a lógica inline mostrava só `formattedDate` pra eventos
+          passados, perdendo o contexto temporal ("aconteceu há quantos
+          dias?"). Agora unificada e funciona pro range expandido. */}
       {!compact && (
         <p className={`mt-0.5 text-[10px] ${event.isPast ? 'text-muted-foreground' : 'text-brand-text font-medium'}`}>
-          {event.isPast
-            ? event.formattedDate
-            : event.isToday
-              ? 'Hoje'
-              : event.daysUntil === 1
-                ? 'Amanhã'
-                : `Em ${event.daysUntil} dias`
-          }
+          {formatCountdown(event.date)}
         </p>
       )}
     </button>
