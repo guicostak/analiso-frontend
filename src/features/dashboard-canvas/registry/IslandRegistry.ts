@@ -37,6 +37,14 @@ import { MacroBrasilIsland }         from "../components/islands/MacroBrasilIsla
 import { AtalhoWatchlistIsland }     from "../components/islands/AtalhoWatchlistIsland";
 import { HeatmapSetorialIsland }     from "../components/islands/HeatmapSetorialIsland";
 import { VolatilidadeIsland }        from "../components/islands/VolatilidadeIsland";
+import { MoodMercadoIsland }         from "../components/islands/MoodMercadoIsland";
+import { FearGreedIsland }           from "../components/islands/FearGreedIsland";
+import { BreadthMercadoIsland }      from "../components/islands/BreadthMercadoIsland";
+import { VixDxyIsland }              from "../components/islands/VixDxyIsland";
+import { CurvaDiIsland }             from "../components/islands/CurvaDiIsland";
+import { ComparacoesMacroIsland }    from "../components/islands/ComparacoesMacroIsland";
+import { AlfaSetorialIsland }        from "../components/islands/AlfaSetorialIsland";
+import { ExDividendosIsland }        from "../components/islands/ExDividendosIsland";
 import { SectionHeaderIsland }       from "../components/islands/SectionHeaderIsland";
 
 export interface IslandRegistryEntry {
@@ -289,6 +297,105 @@ const ENTRIES: IslandRegistryEntry[] = [
       growConstraints: { maxW: 6, maxH: 3, growable: ["w", "h"] },
     },
     component: VolatilidadeIsland,
+  },
+  {
+    meta: {
+      kind: "mood_mercado",
+      label: "Tom do mercado",
+      description: "Pill BULLISH/NEUTRAL/BEARISH com 1 highlight do dia. Sinal-chave em 1 linha.",
+      icon: "Gauge",
+      // 4×1 ultra compacta — pill horizontal + texto. Filler ideal.
+      baseSize: fixedSize(4, 1),
+      category: "contexto",
+      growConstraints: { maxW: 6, maxH: 2, growable: ["w", "h"] },
+    },
+    component: MoodMercadoIsland,
+  },
+  {
+    meta: {
+      kind: "fear_greed",
+      label: "Fear & Greed",
+      description: "Score CNN de sentimento USA (0-100). Complementa volatilidade — preço × sentiment.",
+      icon: "Gauge",
+      baseSize: fixedSize(4, 2),
+      category: "contexto",
+      growConstraints: { maxW: 6, maxH: 3, growable: ["w", "h"] },
+    },
+    component: FearGreedIsland,
+  },
+  {
+    meta: {
+      kind: "breadth_mercado",
+      label: "Breadth",
+      description: "% de empresas em alta vs baixa hoje. Detecta rali saudável vs concentrado.",
+      icon: "Scale",
+      baseSize: fixedSize(4, 2),
+      category: "contexto",
+      growConstraints: { maxW: 6, maxH: 3, growable: ["w", "h"] },
+    },
+    component: BreadthMercadoIsland,
+  },
+  {
+    meta: {
+      kind: "vix_dxy",
+      label: "VIX & DXY",
+      description: "Volatilidade implícita S&P 500 + índice do dólar. Drivers de fluxo estrangeiro.",
+      icon: "Activity",
+      // 4×2: 2 mini-cards lado-a-lado (VIX | DXY). Compacto pra row de 4+4+4.
+      baseSize: fixedSize(4, 2),
+      category: "contexto",
+      growConstraints: { maxW: 8, maxH: 3, growable: ["w", "h"] },
+    },
+    component: VixDxyIsland,
+  },
+  {
+    meta: {
+      kind: "curva_di",
+      label: "Curva DI",
+      description: "ETTJ Anbima — pricing dos juros futuros por vencimento (Inclinada/Achatada/Invertida).",
+      icon: "LineChart",
+      // 6×3: chip + mini-chart + tenor labels + nota. Cabe confortável.
+      baseSize: fixedSize(6, 3),
+      category: "contexto",
+      growConstraints: { maxW: 12, maxH: 4, growable: ["w", "h"] },
+    },
+    component: CurvaDiIsland,
+  },
+  {
+    meta: {
+      kind: "comparacoes_macro",
+      label: "Comparações",
+      description: "Cruzamentos clássicos: IBOV em USD, IBOV vs S&P, ouro/petróleo. Detecta rotação.",
+      icon: "GitCompare",
+      baseSize: fixedSize(6, 3),
+      category: "contexto",
+      growConstraints: { maxW: 12, growable: ["w"] },
+    },
+    component: ComparacoesMacroIsland,
+  },
+  {
+    meta: {
+      kind: "alfa_setorial",
+      label: "Alfa setorial",
+      description: "Ações que destoaram do próprio setor — sinaliza tese idiossincrática (não maré).",
+      icon: "TrendingUp",
+      baseSize: fixedSize(6, 3),
+      category: "contexto",
+      growConstraints: { maxW: 12, maxH: 4, growable: ["w", "h"] },
+    },
+    component: AlfaSetorialIsland,
+  },
+  {
+    meta: {
+      kind: "ex_dividendos",
+      label: "Ex-dividendos",
+      description: "Calendário de ações que passam a negociar sem direito ao próximo provento.",
+      icon: "Calendar",
+      baseSize: fixedSize(6, 3),
+      category: "contexto",
+      growConstraints: { maxW: 12, maxH: 4, growable: ["w", "h"] },
+    },
+    component: ExDividendosIsland,
   },
   // Layout primitive — não vai no catálogo "Adicionar ilha" (filtramos
   // por categoria), só é adicionada via "+ Nova seção" da navbar.

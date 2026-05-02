@@ -78,6 +78,22 @@ export type IslandKind =
   // Score de volatilidade 0-100 com label (Baixa/Moderada/Alta).
   // Versão compacta do bloco "Leitura de volatilidade" do /mercado.
   | "volatilidade"
+  // Tom de mercado (BULLISH/NEUTRAL/BEARISH) — pill compacto 4×1.
+  | "mood_mercado"
+  // Score CNN Fear & Greed (0-100) com label e gauge.
+  | "fear_greed"
+  // Breadth: % de empresas em alta vs em baixa hoje.
+  | "breadth_mercado"
+  // VIX + DXY combinados — drivers de fluxo estrangeiro.
+  | "vix_dxy"
+  // Curva DI Pre Anbima (ETTJ) com mini-chart.
+  | "curva_di"
+  // Comparações derivadas: IBOV em USD, IBOV vs S&P, etc.
+  | "comparacoes_macro"
+  // Alfa setorial: ações que destoaram do próprio setor.
+  | "alfa_setorial"
+  // Ex-dividendos próximos — calendário de ajustes técnicos.
+  | "ex_dividendos"
   // **DEPRECATED**: kind antigo que era um divisor inline. Migrado pelo
   // mapper (`dtoToLayout`) pra entries do `sections[]` no novo modelo.
   // Mantido no union pra TypeScript permitir o filter de retrocompat,
