@@ -72,6 +72,12 @@ export type IslandKind =
   // Tile compacto 4×1 — o ÚNICO desse tamanho. Útil pro packer
   // preencher gaps de 4 cols em rows com 6+4+ ou 4+4 incompletas.
   | "atalho_watchlist"
+  // Heatmap de setores B3 colorizado pela variação média do dia.
+  // Espelho do bloco /mercado — leitura rápida de fluxo setorial.
+  | "heatmap_setorial"
+  // Score de volatilidade 0-100 com label (Baixa/Moderada/Alta).
+  // Versão compacta do bloco "Leitura de volatilidade" do /mercado.
+  | "volatilidade"
   // **DEPRECATED**: kind antigo que era um divisor inline. Migrado pelo
   // mapper (`dtoToLayout`) pra entries do `sections[]` no novo modelo.
   // Mantido no union pra TypeScript permitir o filter de retrocompat,

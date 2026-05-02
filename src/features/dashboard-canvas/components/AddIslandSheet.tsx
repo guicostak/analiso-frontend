@@ -28,6 +28,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
+  BarChart3,
   Bell,
   Building2,
   Calendar,
@@ -83,6 +84,7 @@ const ICONS: Record<string, LucideIcon> = {
   TrendingUp,
   Heart,
   Activity,
+  BarChart3,
   PlayCircle,
   Building2,
   Search,

@@ -35,6 +35,8 @@ import { ResumoIndicesIsland }       from "../components/islands/ResumoIndicesIs
 import { MacroGlobalIsland }         from "../components/islands/MacroGlobalIsland";
 import { MacroBrasilIsland }         from "../components/islands/MacroBrasilIsland";
 import { AtalhoWatchlistIsland }     from "../components/islands/AtalhoWatchlistIsland";
+import { HeatmapSetorialIsland }     from "../components/islands/HeatmapSetorialIsland";
+import { VolatilidadeIsland }        from "../components/islands/VolatilidadeIsland";
 import { SectionHeaderIsland }       from "../components/islands/SectionHeaderIsland";
 
 export interface IslandRegistryEntry {
@@ -258,6 +260,35 @@ const ENTRIES: IslandRegistryEntry[] = [
       growConstraints: { maxW: 6, maxH: 2, growable: ["w", "h"] },
     },
     component: AtalhoWatchlistIsland,
+  },
+  {
+    meta: {
+      kind: "heatmap_setorial",
+      label: "Heatmap setorial",
+      description: "Variação média por setor B3 colorida — vê fluxo setorial do dia de relance.",
+      icon: "BarChart3",
+      // 6×3 cabe ~6 setores em grid 3×2 (auto-fill min 140px).
+      // Esticada pra 12×3 acomoda os 11 setores B3 sem scroll.
+      // h=4 dá mais espaço quando estica vertical (mais info por célula).
+      baseSize: fixedSize(6, 3),
+      category: "contexto",
+      growConstraints: { maxW: 12, maxH: 4, growable: ["w", "h"] },
+    },
+    component: HeatmapSetorialIsland,
+  },
+  {
+    meta: {
+      kind: "volatilidade",
+      label: "Volatilidade",
+      description: "Score 0-100 com label (Baixa/Moderada/Alta) — ajusta postura de leitura do dia.",
+      icon: "Activity",
+      // 4×2 compacto: número grande + badge + meta line. Ideal filler
+      // pra rows com gap de 4 cols. h=3 alinha com vizinhos 6×3.
+      baseSize: fixedSize(4, 2),
+      category: "contexto",
+      growConstraints: { maxW: 6, maxH: 3, growable: ["w", "h"] },
+    },
+    component: VolatilidadeIsland,
   },
   // Layout primitive — não vai no catálogo "Adicionar ilha" (filtramos
   // por categoria), só é adicionada via "+ Nova seção" da navbar.
